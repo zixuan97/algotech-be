@@ -20,7 +20,7 @@ router.route("/add").post((req, res) => {
 });
 
 //Get by username
-router.route("/:username").post((req, res) => {
+router.route("/:username").get((req, res) => {
   const username = req.params.username;
   User.findOne({ username: username })
     .then((user) => res.json(user))
