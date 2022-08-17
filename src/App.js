@@ -2,11 +2,12 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import Navbar from "./frontend/NavBar";
-import UserList from "./frontend/users/userList";
+import Navbar from "./frontend/NavBar"
+import UserList from "./frontend/users/userList"
+import CreateUser from "./frontend/users/createUser"
 // import CreateGrade from "./components/edit-exercise.component"
 // import EditUser from "./components/create-exercise.component"
-// import CreateUser from "./components/create-user.component"
+
 
 function App() {
   return (
@@ -16,12 +17,11 @@ function App() {
           <Navbar />
           <br />
           <Routes>
-            {/* <Route path="/" exact component={UserList} /> */}
             <Route path="/" element={<UserList />} />
+            <Route path="/createUser" element={<CreateUser />} />
           </Routes>
 
           {/* <Route path="/edit/:username" component={EditUser} />
-          <Route path="/createUser" component={CreateUser} />
           <Route path="/createGrade" component={CreateGrade} /> */}
         </div>
       </Router>
