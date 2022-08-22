@@ -1,37 +1,36 @@
-// const { MongoClient, ServerApiVersion } = require('mongodb')
 require('dotenv').config()
-const mongoose = require('mongoose')
-const express = require("express")
-const cors = require("cors")
+const { Client } = require('pg')
+const express = require('express')
+const cors = require('cors')
 const app = express()
 
 const userRouter = require('./routes/user')
 const gradesRouter = require('./routes/grades')
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 4000
 app.use(cors())
 app.use(express.json())
 
-// const uri = process.env.ATLAS_URI
-// const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 })
-// client.connect(err => {
-//   const collection = client.db("test").collection("devices")
+const client = new Client({
+  user: process.env.RDS_USERNAME,
+  host: process.env.RDS_HOSTNAME,
+  database: 'postgres',
+  password: process.env.RDS_PASSWORD,
+  port: 5432
+})
 
-//   console.log('Connected to MongoDB')
-//   // perform actions on the collection object
-//   client.close()
-// })
+client.connect(function (err) {
+  if (err) {
+    console.error('Database connection failed: ' + err.stack)
+    return
+  }
 
-const uri = process.env.ATLAS_URI
-mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
-const connection = mongoose.connection
-connection.once('open', ()=> {
-    console.log('Connected to MongoDB successfully')
+  console.log('Connected to database.')
 })
 
 app.use('/users', userRouter)
-app.use('/grades', gradesRouter)
+// app.use('/grades', gradesRouter);
 
 app.listen(port, () => {
-  console.log("Server running on port " + port)
+  console.log('Server running on port ' + port)
 })
