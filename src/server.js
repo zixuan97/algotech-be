@@ -6,7 +6,6 @@ const app = express();
 const { v4 } = require('uuid');
 
 const userRouter = require('./routes/user');
-const gradesRouter = require('./routes/grades');
 
 const port = process.env.PORT || 4000;
 app.use(cors());
@@ -25,7 +24,6 @@ client.connect(function (err) {
     console.error('Database connection failed: ' + err.stack);
     return;
   }
-
   console.log('Connected to database.');
 });
 
