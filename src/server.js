@@ -3,7 +3,7 @@ const { Client } = require('pg');
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const { v4 } = require('uuid');
+const path = require('path');
 
 const userRouter = require('./routes/user');
 
@@ -28,16 +28,14 @@ client.connect(function (err) {
 });
 
 app.use('/users', userRouter);
+app.use(express.static('public'));
+
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: path.join(__dirname, 'public') });
+});
 
 app.listen(port, () => {
   console.log('Server running on port ' + port);
-});
-
-app.get('/api', (req, res) => {
-  const path = `/api/item/${v4()}`;
-  res.setHeader('Content-Type', 'text/html');
-  res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
-  res.end(`Hello! Go to item: <a href="${path}">${path}</a>`);
 });
 
 module.exports = app;

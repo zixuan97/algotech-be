@@ -1,6 +1,14 @@
 {
-  "version": 2,
-  "name": "algotech-be",
-  "builds": [{ "src": "./src/server.js", "use": "@vercel/node" }],
-  "routes": [{ "src": "/(.*)", "dest": "./src/server.js" }]
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "index.js"
+    }
+  ]
 }
