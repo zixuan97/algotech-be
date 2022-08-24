@@ -2,5 +2,5 @@
   "version": 2,
   "name": "algotech-be",
   "builds": [{ "src": "./src/server.js", "use": "@vercel/node" }],
-  "routes": [{ "src": "./src/routes/(.*)", "dest": "./src/server.js" }]
+  "routes": [{ "src": "/(.*)", "dest": "./src/server.js" }]
 }
