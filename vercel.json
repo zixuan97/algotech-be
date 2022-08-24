@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
+  "version": 2,
+  "name": "algotech-be",
+  "builds": [{ "src": "./src/server.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "./src/server.js" }]
 }
