@@ -31,7 +31,7 @@ app.use('/users', userRouter);
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-  res.sendFile('index.html', { root: path.join(__dirname, 'src') });
+  res.send('200 OK');
 });
 
 app.listen(port, () => {
