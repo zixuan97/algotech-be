@@ -6,12 +6,14 @@ class UserModel {
   static async create(req) {
     const { email, password } = req
 
-    prisma.User.create({
+    const res = await prisma.User.create({
       data: {
         email,
         password
       }
     })
+
+    console.log(res)
   }
 }
 
