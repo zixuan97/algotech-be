@@ -1,20 +1,18 @@
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-class UserModel {
-  static async create(req) {
-    const { email, password } = req
+const create = async (req) => {
+  const { email, password } = req;
 
-    const res = await prisma.User.create({
-      data: {
-        email,
-        password
-      }
-    })
+  const res = await prisma.User.create({
+    data: {
+      email,
+      password
+    }
+  });
 
-    return res
-  }
-}
+  return res;
+};
 
-module.exports = UserModel
+exports.create = create;
