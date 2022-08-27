@@ -13,7 +13,7 @@ class UserModel {
       }
     })
 
-    console.log(res)
+    return res
   }
 }
 

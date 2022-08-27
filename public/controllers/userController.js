@@ -4,11 +4,11 @@ class UserController {
   static async create(req, res) {
     const { email, password } = req.body
 
-    userModel.create({
+    const response = await userModel.create({
       email,
       password
     })
-    return res.json({ message: 'User created' })
+    return res.json({ message: 'User created', response })
   }
 }
 
