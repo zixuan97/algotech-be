@@ -5,32 +5,42 @@ const common = require('@kelchy/common');
 const prisma = new PrismaClient();
 
 const create = async (req) => {
-  const { email, password } = req;
-  encryptedPassword = await bcrypt.hash(password, 10);
+    const { email, password } = req;
+    encryptedPassword = await bcrypt.hash(password, 10);
 
-  const { error } = await common.awaitWrap(
-    prisma.User.create({
-      data: {
-        email,
-        password: encryptedPassword
-      }
-    })
-  );
-  if (error) {
-    throw error;
-  }
+    const { error } = await common.awaitWrap(
+        prisma.User.create({
+            data: {
+                email,
+                password: encryptedPassword
+            }
+        })
+    );
+    if (error) {
+        throw error;
+    }
+};
+
+const findUserById = async (req) => {
+    const { id } = req;
+    const user = await prisma.User.findUnique({
+        where: {
+            id: id
+        }
+    });
+    return user;
 };
 
 const findUserByEmail = async (req) => {
-  const { email } = req;
-  const user = await prisma.User.findUnique({
-    where: {
-      email
-    }
-  });
-
-  return user;
+    const { email } = req;
+    const user = await prisma.User.findUnique({
+        where: {
+            email: email
+        }
+    });
+    return user;
 };
 
 exports.create = create;
+exports.findUserById = findUserById;
 exports.findUserByEmail = findUserByEmail;
