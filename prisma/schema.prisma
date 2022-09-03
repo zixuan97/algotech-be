@@ -11,4 +11,19 @@ model User {
   id       Int    @id @default(autoincrement())
   email    String @unique
   password String
+  role UserRole @default(ADMIN)
+  status UserStatus @default(ACTIVE)
+}
+
+enum UserRole {
+  ADMIN
+  INTERN
+  PARTTIME
+  FULLTIME
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
 }
