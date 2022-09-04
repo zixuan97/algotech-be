@@ -13,9 +13,9 @@ const create = async (req) => {
   });
 };
 
-const getAllcategorys = async () => {
-  const categorys = await prisma.Category.findMany({});
-  return categorys;
+const getAllCategories = async () => {
+  const categories = await prisma.Category.findMany({});
+  return categories;
 };
 
 const updateCategory = async (req) => {
@@ -39,6 +39,6 @@ const deleteCategory = async (req) => {
 };
 
 exports.create = create;
-exports.getAllcategorys = getAllcategorys;
+exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
