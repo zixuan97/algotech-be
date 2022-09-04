@@ -31,12 +31,30 @@ const getAllcategorys = async (req, res) => {
 };
 
 const updateCategory = async (req, res) => {
-  const { name, description } = req.body;
+  const { id, name, description } = req.body;
   const { data, error } = await common.awaitWrap(
-    categoryModel.updateCategory({ name, description })
+    categoryModel.updateCategory({ id, name, description })
   );
+  if (error) {
+    res.json(Error.http(error));
+  } else {
+    res.json({ data, message: 'Retrieved all categorys' });
+  }
+};
+
+const deleteCategory = async (req, res) => {
+  const { id } = req.body;
+  const { data, error } = await common.awaitWrap(
+    categoryModel.deleteCategory({ id })
+  );
+  if (error) {
+    res.json(Error.http(error));
+  } else {
+    res.json({ message: `Deleted category with id ${id}` });
+  }
 };
 
 exports.create = create;
 exports.getAllcategorys = getAllcategorys;
 exports.updateCategory = updateCategory;
+exports.deleteCategory = deleteCategory;
