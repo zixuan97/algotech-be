@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 const { UserStatus, UserRole } = require('@prisma/client');
 
-const create = async (req) => {
+const createUser = async (req) => {
   const { email, password } = req;
   encryptedPassword = await bcrypt.hash(password, 10);
 
@@ -119,7 +119,7 @@ const changeUserRole = async (req) => {
   return user;
 };
 
-exports.create = create;
+exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
 exports.findUserByEmail = findUserByEmail;

@@ -23,15 +23,33 @@ model Category {
 }
 
 model Product {
-  id               Int      @id @default(autoincrement())
-  name             String   @unique
+  id               Int             @id @default(autoincrement())
+  name             String          @unique
   available_stocks Int
   description      String?
   image            String?
-  price            Float
-  quantity_sold    Int?
   category_id      Int
-  category         Category @relation(fields: [category_id], references: [id])
+  category         Category        @relation(fields: [category_id], references: [id])
+  StockQuantity    StockQuantity[]
+}
+
+model Location {
+  name          String          @id
+  details       String
+  StockQuantity StockQuantity[]
+}
+
+model StockQuantity {
+  product_id    Int
+  product       Product  @relation(fields: [product_id], references: [id])
+  location_name String
+  location      Location @relation(fields: [location_name], references: [name])
+  quantity      Int
+  price         Float
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  @@id([product_id, location_name])
 }
 
 enum UserRole {
