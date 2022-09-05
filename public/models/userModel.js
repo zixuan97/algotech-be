@@ -1,49 +1,43 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
-const common = require('@kelchy/common');
 const prisma = new PrismaClient(); 
 const { UserStatus, UserRole } = require('@prisma/client');
 
 const create = async (req) => {
-    const { email, password } = req;
-    encryptedPassword = await bcrypt.hash(password, 10);
+  const { email, password } = req;
+  encryptedPassword = await bcrypt.hash(password, 10);
 
-    const { error } = await common.awaitWrap(
-        prisma.User.create({
-            data: {
-                email,
-                password: encryptedPassword
-            }
-        })
-    );
-    if (error) {
-        throw error;
+  await prisma.User.create({
+    data: {
+      email,
+      password: encryptedPassword
     }
+  });
 };
 
 const getUsers = async () => {
-    const users = await prisma.User.findMany({});
-    return users;
+  const users = await prisma.User.findMany({});
+  return users;
 };
 
 const findUserById = async (req) => {
-    const { id } = req;
-    const user = await prisma.User.findUnique({
-        where: {
-            id: id
-        }
-    });
-    return user;
+  const { id } = req;
+  const user = await prisma.User.findUnique({
+    where: {
+      id: id
+    }
+  });
+  return user;
 };
 
 const findUserByEmail = async (req) => {
-    const { email } = req;
-    const user = await prisma.User.findUnique({
-        where: {
-            email: email
-        }
-    });
-    return user;
+  const { email } = req;
+  const user = await prisma.User.findUnique({
+    where: {
+      email: email
+    }
+  });
+  return user;
 };
 
 const getUserDetails = async (req) => {
