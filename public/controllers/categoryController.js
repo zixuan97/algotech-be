@@ -44,7 +44,6 @@ const updateCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
   const { id } = req.body;
-  console.log('hello');
   const { error } = await common.awaitWrap(
     categoryModel.deleteCategory({ id })
   );
