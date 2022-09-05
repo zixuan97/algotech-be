@@ -20,7 +20,7 @@ const create = async (req, res) => {
 
 const getAllCategories = async (req, res) => {
   const { data, error } = await common.awaitWrap(
-    categoryModel.getAllcategories({})
+    categoryModel.getAllCategories({})
   );
 
   if (error) {
