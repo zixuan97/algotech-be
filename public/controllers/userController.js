@@ -17,7 +17,7 @@ const createUser = async (req, res) => {
   if (error) {
     res.json(Error.http(error));
   } else {
-    res.json({ message: 'User created' });
+    res.status(200).json({ message: 'User created' });
   }
 };
 

@@ -19,18 +19,17 @@ model Category {
   id          Int       @id @default(autoincrement())
   name        String    @unique
   description String?
-  Product     Product[]
+  products    Product[]
 }
 
 model Product {
-  id               Int             @id @default(autoincrement())
-  name             String          @unique
-  available_stocks Int
-  description      String?
-  image            String?
-  category_id      Int
-  category         Category        @relation(fields: [category_id], references: [id])
-  StockQuantity    StockQuantity[]
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  description   String?
+  image         String?
+  category_id   Int
+  category      Category        @relation(fields: [category_id], references: [id])
+  stockQuantity StockQuantity[]
 }
 
 model Location {
