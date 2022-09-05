@@ -1,8 +1,7 @@
-const common = require('@kelchy/common');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const create = async (req) => {
+const createCategory = async (req) => {
   const { name, description } = req;
 
   await prisma.Category.create({
@@ -40,7 +39,7 @@ const deleteCategory = async (req) => {
   });
 };
 
-exports.create = create;
+exports.createCategory = createCategory;
 exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
