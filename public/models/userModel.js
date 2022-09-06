@@ -121,28 +121,28 @@ const changeUserRole = async (req) => {
 };
 
 const sendEmail = async (req) => {
-    const { email } = req;
-    const transporter = nodemailer.createTransport({
-        host: "outlook.office365.com", // change host according to email type (outlook/ gmail) of sender
-        port: 587,
-        secure: false,
-        auth: {
-          user: 'e0421281@u.nus.edu', // change email accordingly
-          pass: process.env.PASSWORD, // set password in .env
-        },
-        tls: {
-            rejectUnauthorized: false
-        }
-    });
-    const info = await transporter.sendMail({
-        from: '"Meryl" <e0421281@u.nus.edu>', // change email accordingly
-        to: email,
-        subject: "Hello ✔",
-        text: "Hello world?",
-        html: "<b>Send a link here which directs user to a form that lets them change pw, then use edit endpoint to update</b>",
-    });
-    console.log("Message sent");    
-}
+  const { email } = req;
+  const transporter = nodemailer.createTransport({
+    host: 'outlook.office365.com', // change host according to email type (outlook/ gmail) of sender
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'exleolee@gmail.com', // change email accordingly
+      pass: process.env.PASSWORD // set password in .env
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+  const info = await transporter.sendMail({
+    from: '"Meryl" <e0421281@u.nus.edu>', // change email accordingly
+    to: email,
+    subject: 'Hello ✔',
+    text: 'Hello world?',
+    html: '<b>Send a link here which directs user to a form that lets them change pw, then use edit endpoint to update</b>'
+  });
+  console.log('Message sent');
+};
 
 exports.createUser = createUser;
 exports.getUsers = getUsers;
