@@ -5,7 +5,7 @@ const http = (err) => {
     case err instanceof Prisma.PrismaClientKnownRequestError:
       return { code: err.code, message: err.message };
     default:
-      return { code: 400, message: 'Server error' };
+      return { code: 400, message: err.message };
   }
 };
 

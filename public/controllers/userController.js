@@ -4,10 +4,10 @@ const jwt = require('jsonwebtoken');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 
-const create = async (req, res) => {
+const createUser = async (req, res) => {
   const { email, password } = req.body;
   const { error } = await common.awaitWrap(
-    userModel.create({
+    userModel.createUser({
       email,
       password
     })
@@ -16,7 +16,7 @@ const create = async (req, res) => {
   if (error) {
     res.json(Error.http(error));
   } else {
-    res.json({ message: 'User created' });
+    res.status(200).json({ message: 'User created' });
   }
 };
 
@@ -172,7 +172,7 @@ const sendForgetEmailPassword = async (req, res) => {
   };
 }
 
-exports.create = create;
+exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
 exports.auth = auth;
