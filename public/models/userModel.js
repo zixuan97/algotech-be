@@ -123,9 +123,9 @@ const changeUserRole = async (req) => {
 const sendEmail = async (req) => {
   const { email } = req;
   const transporter = nodemailer.createTransport({
-    host: 'outlook.office365.com', // change host according to email type (outlook/ gmail) of sender
-    port: 587,
-    secure: false,
+    host: 'smtp.gmail.com', // change host according to email type (outlook/ gmail) of sender
+    port: 465,
+    secure: true, //set to true for gmail
     auth: {
       user: 'exleolee@gmail.com', // change email accordingly
       pass: process.env.PASSWORD // set password in .env
@@ -135,7 +135,7 @@ const sendEmail = async (req) => {
     }
   });
   const info = await transporter.sendMail({
-    from: '"Meryl" <e0421281@u.nus.edu>', // change email accordingly
+    from: '"Meryl" <exleolee@gmail.com>', // change email accordingly
     to: email,
     subject: 'Hello ✔',
     text: 'Hello world?',

@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
+const { log } = require('../helpers/logger');
 
 const createUser = async (req, res) => {
   const { email, password } = req.body;
@@ -12,10 +13,11 @@ const createUser = async (req, res) => {
       password
     })
   );
-
   if (error) {
+    log.error('ERR_USER_CREATE-USER', error.message);
     res.json(Error.http(error));
   } else {
+    log.out('OK_USER_CREATE-USER');
     res.status(200).json({ message: 'User created' });
   }
 };
@@ -27,9 +29,10 @@ const getUser = async (req, res) => {
   try {
     const user = await userModel.findUserById({ id: req.user.user_id });
     delete user.password;
+    log.out('OK_USER_GET-USER');
     res.json(user);
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_GET-USER', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -38,9 +41,10 @@ const getUserDetails = async (req, res) => {
   try {
     const { id } = req.query;
     const user = await userModel.getUserDetails({ id: id });
+    log.out('OK_USER_GET-USER-DETAILS');
     res.json(user);
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_GET-USER-DETAILS', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -66,7 +70,10 @@ const auth = async (req, res) => {
         expiresIn: '2h'
       },
       (err, token) => {
-        if (err) res.status(500).send('Server Error');
+        if (err) {
+          log.error('ERR_AUTH_LOGIN', err.message);
+          res.status(500).send('Server Error');
+        }
         user.token = token;
         res.json({ token });
       }
@@ -156,21 +163,21 @@ const changeUserRole = async (req, res) => {
 const sendForgetEmailPassword = async (req, res) => {
   try {
     const { email } = req.query;
-    const user = await userModel.findUserByEmail({email});
+    const user = await userModel.findUserByEmail({ email });
     if (user != null) {
-      await userModel.sendEmail({email: email});
+      await userModel.sendEmail({ email: email });
       res.json({
-        message: 'Email sent',
+        message: 'Email sent'
       });
     } else {
-      console.error("User is null");
+      console.error('User is null');
       res.status(500).send('Server Error');
     }
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server Error');
-  };
-}
+  }
+};
 
 exports.createUser = createUser;
 exports.getUser = getUser;
