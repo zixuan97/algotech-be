@@ -39,7 +39,7 @@ const getUser = async (req, res) => {
 
 const getUserDetails = async (req, res) => {
   try {
-    const { id } = req.query;
+    const { id } = req.params;
     const user = await userModel.getUserDetails({ id: id });
     log.out('OK_USER_GET-USER-DETAILS');
     res.json(user);
@@ -108,7 +108,7 @@ const editUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    const { id } = req.query;
+    const { id } = req.params;
     const user = await userModel.deleteUserById({ id: id });
     res.json({ message: 'User deleted' });
   } catch (error) {
@@ -119,7 +119,7 @@ const deleteUser = async (req, res) => {
 
 const enableUser = async (req, res) => {
   try {
-    const { id } = req.query;
+    const { id } = req.params;
     const user = await userModel.enableUser({ id: id });
     res.json({
       message: 'User enabled',
@@ -133,7 +133,7 @@ const enableUser = async (req, res) => {
 
 const disableUser = async (req, res) => {
   try {
-    const { id } = req.query;
+    const { id } = req.params;
     const user = await userModel.disableUser({ id: id });
     res.json({
       message: 'User disabled',
@@ -148,7 +148,7 @@ const disableUser = async (req, res) => {
 // have to make sure only admin can do this
 const changeUserRole = async (req, res) => {
   try {
-    const { id, action } = req.query;
+    const { id, action } = req.params;
     const user = await userModel.changeUserRole({ id: id, action: action });
     res.json({
       message: 'User role updated',
@@ -162,7 +162,7 @@ const changeUserRole = async (req, res) => {
 
 const sendForgetEmailPassword = async (req, res) => {
   try {
-    const { email } = req.query;
+    const { email } = req.params;
     const user = await userModel.findUserByEmail({ email });
     if (user != null) {
       await userModel.sendEmail({ email: email });

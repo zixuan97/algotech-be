@@ -45,8 +45,8 @@ const updateProduct = async (req, res) => {
 };
 
 const deleteProduct = async (req, res) => {
-  const { id } = req.body;
-  const { error } = await common.awaitWrap(productModel.deleteProduct({ id }));
+  const { id } = req.params;
+  const { error } = await common.awaitWrap(productModel.deleteProduct({ id: id }));
   if (error) {
     res.json(Error.http(error));
   } else {
