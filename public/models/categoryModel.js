@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 const createCategory = async (req) => {
   const { name, description } = req;
 
-  await prisma.Category.create({
+  await prisma.category.create({
     data: {
       name,
       description
@@ -13,14 +13,14 @@ const createCategory = async (req) => {
 };
 
 const getAllCategories = async () => {
-  const categories = await prisma.Category.findMany({});
+  const categories = await prisma.category.findMany({});
   return categories;
 };
 
 const updateCategory = async (req) => {
   const { id, name, description } = req;
 
-  category = await prisma.Category.update({
+  category = await prisma.category.update({
     where: { id },
     data: {
       name,
@@ -34,7 +34,7 @@ const deleteCategory = async (req) => {
   const { id } = req;
   await prisma.category.delete({
     where: {
-      id
+      id: Number(id)
     }
   });
 };

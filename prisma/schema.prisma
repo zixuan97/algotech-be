@@ -11,8 +11,8 @@ model User {
   id       Int        @id @default(autoincrement())
   email    String     @unique
   password String
-  role UserRole @default(ADMIN)
-  status UserStatus @default(ACTIVE)
+  role     UserRole   @default(ADMIN)
+  status   UserStatus @default(ACTIVE)
 }
 
 model Category {
@@ -40,13 +40,13 @@ model Location {
 
 model StockQuantity {
   product_id    Int
-  product       Product  @relation(fields: [product_id], references: [id])
   location_name String
-  location      Location @relation(fields: [location_name], references: [name])
   quantity      Int
   price         Float
-  updatedAt     DateTime @updatedAt
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  location      Location @relation(fields: [location_name], references: [name])
+  product       Product  @relation(fields: [product_id], references: [id])
 
   @@id([product_id, location_name])
 }

@@ -4,14 +4,14 @@ const { verifyToken } = require('../middleware/auth');
 
 router.post('/', UserController.createUser);
 router.get('/', verifyToken, UserController.getUser);
-router.get('/details', UserController.getUserDetails);
+router.get('/details/:id', UserController.getUserDetails);
 router.post('/auth', UserController.auth);
 router.get('/all', UserController.getUsers);
-router.delete('/', UserController.deleteUser);
+router.delete('/:id', UserController.deleteUser);
 router.put('/', UserController.editUser);
-router.put('/enable', UserController.enableUser);
-router.put('/disable', UserController.disableUser);
-router.put('/role', UserController.changeUserRole);
-router.post('/forgetpw', UserController.sendForgetEmailPassword);
+router.put('/enable/:id', UserController.enableUser);
+router.put('/disable/:id', UserController.disableUser);
+router.put('/role/:id/:action', UserController.changeUserRole);
+router.post('/forgetpw/:email', UserController.sendForgetEmailPassword);
 
 module.exports = router;
