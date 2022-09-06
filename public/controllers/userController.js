@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
-const { UserRole } = require('@prisma/client');
 
 const createUser = async (req, res) => {
   const { email, password } = req.body;
@@ -51,7 +50,6 @@ const getUserDetails = async (req, res) => {
  */
 const auth = async (req, res) => {
   const { email, password } = req.body;
-
   const user = await userModel.findUserByEmail({
     email
   });
@@ -155,6 +153,25 @@ const changeUserRole = async (req, res) => {
   }
 };
 
+const sendForgetEmailPassword = async (req, res) => {
+  try {
+    const { email } = req.query;
+    const user = await userModel.findUserByEmail({email});
+    if (user != null) {
+      await userModel.sendEmail({email: email});
+      res.json({
+        message: 'Email sent',
+      });
+    } else {
+      console.error("User is null");
+      res.status(500).send('Server Error');
+    }
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server Error');
+  };
+}
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -165,3 +182,4 @@ exports.deleteUser = deleteUser;
 exports.enableUser = enableUser;
 exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
+exports.sendForgetEmailPassword = sendForgetEmailPassword;
