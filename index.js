@@ -11,6 +11,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/user', require('./public/routes/userRoutes'));
+app.use('/category', require('./public/routes/categoryRoutes'));
+app.use('/product', require('./public/routes/productRoutes'));
 
 const port = process.env.PORT || 4000;
 

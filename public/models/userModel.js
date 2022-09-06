@@ -1,46 +1,131 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
-const common = require('@kelchy/common');
-
 const prisma = new PrismaClient();
+const { UserStatus, UserRole } = require('@prisma/client');
 
-const create = async (req) => {
-    const { email, password } = req;
-    encryptedPassword = await bcrypt.hash(password, 10);
+const createUser = async (req) => {
+  const { email, password } = req;
+  encryptedPassword = await bcrypt.hash(password, 10);
 
-    const { error } = await common.awaitWrap(
-        prisma.User.create({
-            data: {
-                email,
-                password: encryptedPassword
-            }
-        })
-    );
-    if (error) {
-        throw error;
+  await prisma.User.create({
+    data: {
+      email,
+      password: encryptedPassword
     }
+  });
+};
+
+const getUsers = async () => {
+  const users = await prisma.User.findMany({});
+  return users;
 };
 
 const findUserById = async (req) => {
-    const { id } = req;
-    const user = await prisma.User.findUnique({
-        where: {
-            id: id
-        }
-    });
-    return user;
+  const { id } = req;
+  const user = await prisma.User.findUnique({
+    where: {
+      id: id
+    }
+  });
+  return user;
 };
 
 const findUserByEmail = async (req) => {
-    const { email } = req;
-    const user = await prisma.User.findUnique({
-        where: {
-            email: email
-        }
-    });
-    return user;
+  const { email } = req;
+  const user = await prisma.User.findUnique({
+    where: {
+      email: email
+    }
+  });
+  return user;
 };
 
-exports.create = create;
+const getUserDetails = async (req) => {
+  const { id } = req;
+  const user = await prisma.User.findUnique({
+    where: {
+      id: Number(id)
+    }
+  });
+  return user;
+};
+
+const editUser = async (req) => {
+  const { updatedUser } = req;
+  const id = updatedUser.id;
+  user = await prisma.User.update({
+    where: { id: Number(id) },
+    data: {
+      email: updatedUser.email,
+      password: updatedUser.password,
+      role: updatedUser.role,
+      status: updatedUser.status
+    }
+  });
+  return user;
+};
+
+const deleteUserById = async (req) => {
+  const { id } = req;
+  const user = await prisma.User.delete({
+    where: {
+      id: Number(id)
+    }
+  });
+  return id;
+};
+
+const enableUser = async (req) => {
+  const { id } = req;
+  const user = await prisma.User.update({
+    where: { id: Number(id) },
+    data: {
+      status: UserStatus.ACTIVE
+    }
+  });
+  return user;
+};
+
+const disableUser = async (req) => {
+  const { id } = req;
+  const user = await prisma.User.update({
+    where: { id: Number(id) },
+    data: {
+      status: UserStatus.DISABLED
+    }
+  });
+  return user;
+};
+
+const changeUserRole = async (req) => {
+  const { id, action } = req;
+  if (action == 'intern') {
+    newRole = UserRole.INTERN;
+  } else if (action === 'pt') {
+    newRole = UserRole.PARTTIME;
+  } else if (action === 'ft') {
+    newRole = UserRole.FULLTIME;
+  } else if (action === 'customer') {
+    newRole = UserRole.CUSTOMER;
+  } else if (action === 'admin') {
+    newRole = UserRole.ADMIN;
+  }
+  const user = await prisma.User.update({
+    where: { id: Number(id) },
+    data: {
+      role: newRole
+    }
+  });
+  return user;
+};
+
+exports.createUser = createUser;
+exports.getUsers = getUsers;
 exports.findUserById = findUserById;
 exports.findUserByEmail = findUserByEmail;
+exports.getUserDetails = getUserDetails;
+exports.editUser = editUser;
+exports.deleteUserById = deleteUserById;
+exports.enableUser = enableUser;
+exports.disableUser = disableUser;
+exports.changeUserRole = changeUserRole;
