@@ -135,7 +135,7 @@ const sendEmail = async (req) => {
     }
   });
   const info = await transporter.sendMail({
-    from: '"Meryl" <exleolee@gmail.com>', // change email accordingly
+    from: '"Meryl" <e0421281@u.nus.edu>', // change email accordingly
     to: email,
     subject: 'Hello ✔',
     text: 'Hello world?',
