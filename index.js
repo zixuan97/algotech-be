@@ -21,7 +21,7 @@ app.use(
       }
     },
     credentials: true,
-    origin: true
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE'
   })
 );
 
