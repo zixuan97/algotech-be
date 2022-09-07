@@ -20,7 +20,8 @@ app.use(
         callback(null);
       }
     },
-    credentials: true
+    credentials: true,
+    origin: true
   })
 );
 
