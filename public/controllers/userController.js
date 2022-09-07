@@ -83,7 +83,7 @@ const auth = async (req, res) => {
             domain:
               process.env.NODE_ENV === 'development'
                 ? 'localhost'
-                : 'https://www.legendkong.com'
+                : '.legendkong.com'
           })
           .json({
             data: user,
