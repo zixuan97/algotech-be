@@ -79,7 +79,7 @@ const auth = async (req, res) => {
         console.log(process.env.NODE_ENV);
         res
           .cookie('token', token, {
-            httpOnly: true,
+            httpOnly: false,
             domain:
               process.env.NODE_ENV === 'development'
                 ? 'localhost'
