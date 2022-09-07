@@ -74,11 +74,13 @@ const auth = async (req, res) => {
           log.error('ERR_AUTH_LOGIN', err.message);
           res.status(500).send('Server Error');
         }
+        log.out('OK_AUTH_LOGIN');
         user.token = token;
         res.json({ token });
       }
     );
   } else {
+    log.error('ERR_AUTH_LOGIN', 'Invalid Credentials');
     res.status(400).send('Invalid Credentials');
   }
 };
@@ -86,9 +88,10 @@ const auth = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const users = await userModel.getUsers({});
+    log.out('OK_USER_GET-USERS');
     res.json(users);
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_GET-USERS', err.message);
     res.status(500).send('Server Error');
   }
 };
@@ -96,12 +99,13 @@ const getUsers = async (req, res) => {
 const editUser = async (req, res) => {
   try {
     const user = await userModel.editUser({ updatedUser: req.body });
+    log.out('OK_USER_EDIT-USER');
     res.json({
       message: 'User edited',
       payload: user
     });
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_EDIT-USER', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -110,9 +114,10 @@ const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await userModel.deleteUserById({ id: id });
+    log.out('OK_USER_DELETE-USER');
     res.json({ message: 'User deleted' });
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_DELETE-USER', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -121,12 +126,13 @@ const enableUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await userModel.enableUser({ id: id });
+    log.out('OK_USER_ENABLE-USER');
     res.json({
       message: 'User enabled',
       payload: user
     });
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_ENABLE-USER', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -135,12 +141,13 @@ const disableUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await userModel.disableUser({ id: id });
+    log.out('OK_USER_DISABLE-USER');
     res.json({
       message: 'User disabled',
       payload: user
     });
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_DISABLE-USER', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -150,12 +157,13 @@ const changeUserRole = async (req, res) => {
   try {
     const { id, action } = req.params;
     const user = await userModel.changeUserRole({ id: id, action: action });
+    log.out('OK_USER_CHANGE-USER-ROLE');
     res.json({
       message: 'User role updated',
       payload: user
     });
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_CHANGE-USER-ROLE', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -166,15 +174,16 @@ const sendForgetEmailPassword = async (req, res) => {
     const user = await userModel.findUserByEmail({ email });
     if (user != null) {
       await userModel.sendEmail({ email: email });
+      log.out('OK_USER_SENT-EMAIL');
       res.json({
         message: 'Email sent'
       });
     } else {
-      console.error('User is null');
-      res.status(500).send('Server Error');
+      log.error('ERR_USER_SEND', error.message);
+      res.status(500).send('Failed to send email');
     }
   } catch (error) {
-    console.error(error.message);
+    log.error('ERR_USER_SEND', error.message);
     res.status(500).send('Server Error');
   }
 };
