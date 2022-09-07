@@ -2,8 +2,28 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
-app.use(cors());
+const corsWhitelist = [
+  'http://localhost:3000',
+  'https://algotech-fe.vercel.app/',
+  'https://algotech-fe-prod.vercel.app/'
+];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (corsWhitelist.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        // log('out', 'Domain not allowed by CORS', origin) // replace to fix logging spam
+        callback(null);
+      }
+    },
+    credentials: true
+  })
+);
+
+app.use(cookieParser());
 app.use(express.static('public'));
 app.use(express.json());
 app.get('/', (req, res) => {

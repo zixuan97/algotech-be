@@ -62,9 +62,10 @@ const auth = async (req, res) => {
     (await bcrypt.compare(password, user.password)) &&
     user.status === 'ACTIVE'
   ) {
+    console.log('enter if');
     // Create token
     jwt.sign(
-      { user_id: user.id, email },
+      { user_id: user.id, email, role: user.role },
       process.env.TOKEN_KEY,
       {
         expiresIn: '2h'
@@ -75,11 +76,15 @@ const auth = async (req, res) => {
           res.status(500).send('Server Error');
         }
         log.out('OK_AUTH_LOGIN');
-        user.token = token;
-        res.json({ token });
+
+        res.cookie('token', token, { httpOnly: true }).json({
+          data: user,
+          message: 'User authenticated'
+        });
       }
     );
   } else {
+    console.log('enter else');
     log.error('ERR_AUTH_LOGIN', 'Invalid Credentials');
     res.status(400).send('Invalid Credentials');
   }
