@@ -83,7 +83,7 @@ const auth = async (req, res) => {
             domain:
               process.env.NODE_ENV === 'development'
                 ? 'localhost'
-                : 'https://algotech-fe.vercel.app'
+                : '.algotech-fe.vercel.app'
           })
           .json({
             data: user,
