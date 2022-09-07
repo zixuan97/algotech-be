@@ -8,7 +8,7 @@ const corsWhitelist = [
   'http://localhost:3000',
   'https://algotech-fe.vercel.app',
   'https://algotech-fe-prod.vercel.app',
-  'http://www.legendkong.com'
+  'https://www.legendkong.com'
 ];
 app.use(
   cors({
