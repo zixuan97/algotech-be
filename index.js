@@ -6,8 +6,8 @@ const cookieParser = require('cookie-parser');
 
 const corsWhitelist = [
   'http://localhost:3000',
-  'https://algotech-fe.vercel.app/',
-  'https://algotech-fe-prod.vercel.app/'
+  'https://algotech-fe.vercel.app',
+  'https://algotech-fe-prod.vercel.app'
 ];
 app.use(
   cors({
