@@ -7,7 +7,8 @@ const cookieParser = require('cookie-parser');
 const corsWhitelist = [
   'http://localhost:3000',
   'https://algotech-fe.vercel.app',
-  'https://algotech-fe-prod.vercel.app'
+  'https://algotech-fe-prod.vercel.app',
+  'https://www.legendkong.com'
 ];
 app.use(
   cors({
@@ -22,18 +23,7 @@ app.use(
     credentials: true
   })
 );
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET,PUT,POST,DELETE,UPDATE,OPTIONS'
-  );
-  res.header(
-    'Access-Control-Allow-Headers',
-    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
-  );
-  next();
-});
+
 app.use(cookieParser());
 app.use(express.static('public'));
 app.use(express.json());
