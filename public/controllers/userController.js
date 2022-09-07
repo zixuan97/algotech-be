@@ -76,11 +76,19 @@ const auth = async (req, res) => {
           res.status(500).send('Server Error');
         }
         log.out('OK_AUTH_LOGIN');
-
-        res.cookie('token', token, { httpOnly: true }).json({
-          data: user,
-          message: 'User authenticated'
-        });
+        console.log(process.env.NODE_ENV);
+        res
+          .cookie('token', token, {
+            httpOnly: true,
+            domain:
+              process.env.NODE_ENV === 'development'
+                ? 'localhost'
+                : 'https://algotech-fe.vercel.app'
+          })
+          .json({
+            data: user,
+            message: 'User authenticated'
+          });
       }
     );
   } else {
