@@ -4,11 +4,10 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createCategory = async (req, res) => {
-  const { name, description } = req.body;
+  const { name } = req.body;
   const { error } = await common.awaitWrap(
     categoryModel.createCategory({
-      name,
-      description
+      name
     })
   );
 
@@ -35,14 +34,13 @@ const getAllCategories = async (req, res) => {
   }
 };
 
-
 /**
  * Gets Category
  */
- const getCategory = async (req, res) => {
+const getCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const category = await categoryModel.findCategoryById({id:id});
+    const category = await categoryModel.findCategoryById({ id });
     res.json(category);
   } catch (error) {
     log.error('ERR_CATEGORY_GET-CATEGORY', error.message);
@@ -50,12 +48,10 @@ const getAllCategories = async (req, res) => {
   }
 };
 
-
-
 const updateCategory = async (req, res) => {
-  const { id, name, description } = req.body;
+  const { id, name } = req.body;
   const { error } = await common.awaitWrap(
-    categoryModel.updateCategory({ id, name, description })
+    categoryModel.updateCategory({ id, name })
   );
   if (error) {
     log.error('ERR_CATEGORY_UPDATE_CATEGORY', error.message);
@@ -69,7 +65,7 @@ const updateCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
   const { id } = req.params;
   const { error } = await common.awaitWrap(
-    categoryModel.deleteCategory({ id: id })
+    categoryModel.deleteCategory({ id })
   );
   if (error) {
     log.error('ERR_CATEGORY_DELETE_CATEGORY', error.message);

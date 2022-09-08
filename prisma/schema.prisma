@@ -16,39 +16,56 @@ model User {
 }
 
 model Category {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
-  description String?
-  products    Product[]
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  ProductCategory ProductCategory[]
+}
+
+model Brand {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  //  Product Product[]
+}
+
+model ProductCategory {
+  product_id  String
+  product     Product  @relation(fields: [product_id], references: [sku])
+  category_id String
+  category    Category @relation(fields: [category_id], references: [name])
+
+  @@id([product_id, category_id])
 }
 
 model Product {
-  id            Int             @id @default(autoincrement())
-  name          String          @unique
-  description   String?
-  image         String?
-  category_id   Int
-  category      Category        @relation(fields: [category_id], references: [id])
-  stockQuantity StockQuantity[]
+  id              Int               @id @default(autoincrement())
+  sku             String            @unique
+  name            String            @unique
+  description     String?
+  image           String?
+  // brand_id        Int
+  // brand           Brand             @relation(fields: [brand_id], references: [id])
+  stockQuantity   StockQuantity[]
+  ProductCategory ProductCategory[]
 }
 
 model Location {
-  name          String          @id
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
   details       String
   StockQuantity StockQuantity[]
 }
 
 model StockQuantity {
-  product_id    Int
-  location_name String
-  quantity      Int
-  price         Float
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  location      Location @relation(fields: [location_name], references: [name])
-  product       Product  @relation(fields: [product_id], references: [id])
+  product_id  Int
+  location_id Int
+  quantity    Int
+  price       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  location    Location @relation(fields: [location_id], references: [id])
+  product     Product  @relation(fields: [product_id], references: [id])
 
-  @@id([product_id, location_name])
+  @@id([product_id, location_id])
 }
 
 enum UserRole {

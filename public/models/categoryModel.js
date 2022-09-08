@@ -2,12 +2,11 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createCategory = async (req) => {
-  const { name, description } = req;
+  const { name } = req;
 
   await prisma.category.create({
     data: {
-      name,
-      description
+      name
     }
   });
 };
@@ -18,13 +17,12 @@ const getAllCategories = async () => {
 };
 
 const updateCategory = async (req) => {
-  const { id, name, description } = req;
+  const { id, name } = req;
 
   category = await prisma.category.update({
     where: { id },
     data: {
-      name,
-      description
+      name
     }
   });
   return category;
@@ -39,6 +37,21 @@ const deleteCategory = async (req) => {
   });
 };
 
+const connectOrCreateCategory = async (req) => {
+  const { categories } = req;
+  categories.map(async (c) => {
+    await prisma.category.upsert({
+      where: {
+        name: c.name
+      },
+      update: {},
+      create: {
+        name: c.name
+      }
+    });
+  });
+};
+
 const findCategoryById = async (req) => {
   const { id } = req;
   const category = await prisma.category.findUnique({
@@ -49,9 +62,9 @@ const findCategoryById = async (req) => {
   return category;
 };
 
-
 exports.createCategory = createCategory;
 exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
 exports.findCategoryById = findCategoryById;
+exports.connectOrCreateCategory = connectOrCreateCategory;

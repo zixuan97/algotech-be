@@ -40,7 +40,7 @@ const getUser = async (req, res) => {
 const getUserDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await userModel.getUserDetails({ id: id });
+    const user = await userModel.getUserDetails({ id });
     log.out('OK_USER_GET-USER-DETAILS');
     res.json(user);
   } catch (error) {
@@ -62,7 +62,6 @@ const auth = async (req, res) => {
     (await bcrypt.compare(password, user.password)) &&
     user.status === 'ACTIVE'
   ) {
-    console.log('enter if');
     // Create token
     jwt.sign(
       { user_id: user.id, email, role: user.role },
@@ -114,7 +113,7 @@ const editUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await userModel.deleteUserById({ id: id });
+    const user = await userModel.deleteUserById({ id });
     log.out('OK_USER_DELETE-USER');
     res.json({ message: 'User deleted' });
   } catch (error) {
@@ -126,7 +125,7 @@ const deleteUser = async (req, res) => {
 const enableUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await userModel.enableUser({ id: id });
+    const user = await userModel.enableUser({ id });
     log.out('OK_USER_ENABLE-USER');
     res.json({
       message: 'User enabled',
@@ -141,7 +140,7 @@ const enableUser = async (req, res) => {
 const disableUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await userModel.disableUser({ id: id });
+    const user = await userModel.disableUser({ id });
     log.out('OK_USER_DISABLE-USER');
     res.json({
       message: 'User disabled',
@@ -157,7 +156,7 @@ const disableUser = async (req, res) => {
 const changeUserRole = async (req, res) => {
   try {
     const { id, action } = req.params;
-    const user = await userModel.changeUserRole({ id: id, action: action });
+    const user = await userModel.changeUserRole({ id, action });
     log.out('OK_USER_CHANGE-USER-ROLE');
     res.json({
       message: 'User role updated',
