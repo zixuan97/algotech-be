@@ -79,11 +79,11 @@ const auth = async (req, res) => {
         console.log(process.env.NODE_ENV);
         res
           .cookie('token', token, {
-            httpOnly: false,
+            httpOnly: true,
             domain:
               process.env.NODE_ENV === 'development'
                 ? 'localhost'
-                : '.vercel.app'
+                : '.legendkong.com'
           })
           .json({
             data: user,
