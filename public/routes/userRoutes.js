@@ -12,6 +12,6 @@ router.put('/', UserController.editUser);
 router.put('/enable/:id', UserController.enableUser);
 router.put('/disable/:id', UserController.disableUser);
 router.put('/role/:id/:action', UserController.changeUserRole);
-router.post('/forgetpw/:email', UserController.sendForgetEmailPassword);
+router.post('/forgetpw', UserController.sendForgetEmailPassword);
 
 module.exports = router;
