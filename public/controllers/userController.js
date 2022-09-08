@@ -76,23 +76,11 @@ const auth = async (req, res) => {
           res.status(500).send('Server Error');
         }
         log.out('OK_AUTH_LOGIN');
-        console.log(process.env.NODE_ENV);
-        res
-          .cookie('token', token, {
-            httpOnly: true,
-            domain:
-              process.env.NODE_ENV === 'development'
-                ? 'localhost'
-                : '.legendkong.com'
-          })
-          .json({
-            data: user,
-            message: 'User authenticated'
-          });
+        user.token = token;
+        res.json({ token });
       }
     );
   } else {
-    console.log('enter else');
     log.error('ERR_AUTH_LOGIN', 'Invalid Credentials');
     res.status(400).send('Invalid Credentials');
   }

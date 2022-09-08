@@ -3,12 +3,14 @@ const { log } = require('../helpers/logger');
 const config = process.env;
 
 const verifyToken = (req, res, next) => {
-  if (!req.cookies || !req.cookies.token) {
+  console.log(req.headers['x-access-token']);
+  const token = req.headers['x-access-token'];
+  if (!token) {
     log.error('ERR_AUTH_VERIFY', 'no token');
     return res.status(403).send('A token is required for authentication');
   }
   try {
-    const decoded = jwt.verify(req.cookies.token, config.TOKEN_KEY);
+    const decoded = jwt.verify(token, config.TOKEN_KEY);
     req.user = decoded;
     log.out('OK_AUTH_VERIFY');
   } catch (err) {
