@@ -19,6 +19,17 @@ const getAllProducts = async () => {
   return products;
 };
 
+const findProductById = async (req) => {
+  const { id } = req;
+  const product = await prisma.product.findUnique({
+    where: {
+      id: Number(id)
+    }
+  });
+  return product;
+};
+
+
 const updateProduct = async (req) => {
   const { id, name, description, image, category_id } = req;
 
@@ -47,3 +58,4 @@ exports.createProduct = createProduct;
 exports.getAllProducts = getAllProducts;
 exports.updateProduct = updateProduct;
 exports.deleteProduct = deleteProduct;
+exports.findProductById = findProductById;

@@ -39,7 +39,19 @@ const deleteCategory = async (req) => {
   });
 };
 
+const findCategoryById = async (req) => {
+  const { id } = req;
+  const category = await prisma.category.findUnique({
+    where: {
+      id: Number(id)
+    }
+  });
+  return category;
+};
+
+
 exports.createCategory = createCategory;
 exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
+exports.findCategoryById = findCategoryById;

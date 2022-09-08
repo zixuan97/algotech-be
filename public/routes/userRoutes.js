@@ -3,7 +3,7 @@ const UserController = require('../controllers/userController');
 const { verifyToken } = require('../middleware/auth');
 
 router.post('/', UserController.createUser);
-router.get('/', verifyToken, UserController.getUser);
+router.get('/', UserController.getUser);
 router.get('/details/:id', UserController.getUserDetails);
 router.post('/auth', UserController.auth);
 router.get('/all', UserController.getUsers);

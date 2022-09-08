@@ -1,6 +1,7 @@
 const productModel = require('../models/productModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
+const { log } = require('../helpers/logger');
 
 const createProduct = async (req, res) => {
   const { name, description, image, category_id } = req.body;
@@ -36,6 +37,21 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+/**
+ * Gets product
+ */
+const getProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await productModel.findProductById({id:id});
+    res.json(product);
+  } catch (error) {
+    log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+
 const updateProduct = async (req, res) => {
   const { id, name, description, image, category_id } = req.body;
   const { error } = await common.awaitWrap(
@@ -68,3 +84,4 @@ exports.createProduct = createProduct;
 exports.getAllProducts = getAllProducts;
 exports.updateProduct = updateProduct;
 exports.deleteProduct = deleteProduct;
+exports.getProduct = getProduct;
