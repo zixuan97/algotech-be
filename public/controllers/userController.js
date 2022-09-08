@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const emailHelper = require('../helpers/email');
 
 const createUser = async (req, res) => {
   const { email, password } = req.body;
@@ -171,10 +172,10 @@ const changeUserRole = async (req, res) => {
 
 const sendForgetEmailPassword = async (req, res) => {
   try {
-    const { email } = req.params;
+    const { email, subject, content } = req.body;
     const user = await userModel.findUserByEmail({ email });
     if (user != null) {
-      await userModel.sendEmail({ email: email });
+      await emailHelper.sendEmail({ email, subject, content });
       log.out('OK_USER_SENT-EMAIL');
       res.json({
         message: 'Email sent'

@@ -2,7 +2,6 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const prisma = new PrismaClient(); 
 const { UserStatus, UserRole } = require('@prisma/client');
-const nodemailer = require('nodemailer');
 
 const createUser = async (req) => {
   const { email, password } = req;
@@ -121,30 +120,6 @@ const changeUserRole = async (req) => {
   return user;
 };
 
-const sendEmail = async (req) => {
-  const { email } = req;
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com', // change host according to email type (outlook/ gmail) of sender
-    port: 465,
-    secure: true, //set to true for gmail
-    auth: {
-      user: 'exleolee@gmail.com', // change email accordingly
-      pass: process.env.PASSWORD // set password in .env
-    },
-    tls: {
-      rejectUnauthorized: false
-    }
-  });
-  const info = await transporter.sendMail({
-    from: '"Meryl" <exleolee@gmail.com>', // change email accordingly
-    to: email,
-    subject: 'Hello ✔',
-    text: 'Hello world?',
-    html: '<b>Send a link here which directs user to a form that lets them change pw, then use edit endpoint to update</b>'
-  });
-  console.log('Message sent');
-};
-
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
@@ -155,4 +130,3 @@ exports.deleteUserById = deleteUserById;
 exports.enableUser = enableUser;
 exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
-exports.sendEmail = sendEmail;
