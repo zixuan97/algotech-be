@@ -1,6 +1,7 @@
 const categoryModel = require('../models/categoryModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
+const { log } = require('../helpers/logger');
 
 const createCategory = async (req, res) => {
   const { name, description } = req.body;
@@ -34,6 +35,23 @@ const getAllCategories = async (req, res) => {
   }
 };
 
+
+/**
+ * Gets Category
+ */
+ const getCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const category = await categoryModel.findCategoryById({id:id});
+    res.json(category);
+  } catch (error) {
+    log.error('ERR_CATEGORY_GET-CATEGORY', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+
 const updateCategory = async (req, res) => {
   const { id, name, description } = req.body;
   const { error } = await common.awaitWrap(
@@ -66,3 +84,4 @@ exports.createCategory = createCategory;
 exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
+exports.getCategory = getCategory;
