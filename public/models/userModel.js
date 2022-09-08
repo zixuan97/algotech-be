@@ -1,6 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
-const prisma = new PrismaClient(); 
+const prisma = new PrismaClient();
 const { UserStatus, UserRole } = require('@prisma/client');
 const nodemailer = require('nodemailer');
 
@@ -25,7 +25,7 @@ const findUserById = async (req) => {
   const { id } = req;
   const user = await prisma.User.findUnique({
     where: {
-      id: id
+      id
     }
   });
   return user;
@@ -54,15 +54,18 @@ const getUserDetails = async (req) => {
 const editUser = async (req) => {
   const { updatedUser } = req;
   const id = updatedUser.id;
-  const currUser = await findUserById({id});
+  const currUser = await findUserById({ id });
   user = await prisma.User.update({
     where: { id: Number(id) },
     data: {
       email: updatedUser.email,
-      password: (updatedUser.password !== undefined) ? await bcrypt.hash(updatedUser.password, 10) : currUser.password,
+      password:
+        updatedUser.password !== undefined
+          ? await bcrypt.hash(updatedUser.password, 10)
+          : currUser.password,
       role: updatedUser.role,
-      status: updatedUser.status,
-    },
+      status: updatedUser.status
+    }
   });
   return user;
 };
@@ -82,8 +85,8 @@ const enableUser = async (req) => {
   const user = await prisma.User.update({
     where: { id: Number(id) },
     data: {
-      status: UserStatus.ACTIVE,
-    },
+      status: UserStatus.ACTIVE
+    }
   });
   return user;
 };
@@ -93,8 +96,8 @@ const disableUser = async (req) => {
   const user = await prisma.User.update({
     where: { id: Number(id) },
     data: {
-      status: UserStatus.DISABLED,
-    },
+      status: UserStatus.DISABLED
+    }
   });
   return user;
 };
@@ -116,7 +119,7 @@ const changeUserRole = async (req) => {
     where: { id: Number(id) },
     data: {
       role: newRole
-    },
+    }
   });
   return user;
 };

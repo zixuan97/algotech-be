@@ -3,7 +3,6 @@ const { log } = require('../helpers/logger');
 const config = process.env;
 
 const verifyToken = (req, res, next) => {
-  console.log(req.headers['x-access-token']);
   const token = req.headers['x-access-token'];
   if (!token) {
     log.error('ERR_AUTH_VERIFY', 'no token');
