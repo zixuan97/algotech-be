@@ -1,15 +1,15 @@
 const puppeteer = require('puppeteer');
-const chromium = require('chrome-aws-lambda');
-const common = require('@kelchy/common');
 
 const generatePdfTemplate = async (html = '') => {
   const { data: browser, error: puppeteerError } = await common.awaitWrap(
-    chromium.puppeteer.launch({
-      args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
+    puppeteer.launch({
       headless: true,
-      ignoreHTTPSErrors: true
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-sandbox'
+      ]
     })
   );
 
@@ -40,5 +40,3 @@ const generatePdfTemplate = async (html = '') => {
     await browser.close();
   }
 };
-
-exports.generatePdfTemplate = generatePdfTemplate;

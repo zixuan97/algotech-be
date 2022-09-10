@@ -1,7 +1,5 @@
 const productModel = require('../models/productModel');
 const categoryModel = require('../models/categoryModel');
-const { generatePdfTemplate } = require('../helpers/pdf');
-const testTemplate = require('../utils/templates/testTemplate');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -146,24 +144,6 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-const generatePdf = async (req, res) => {
-  const message = testTemplate();
-
-  await generatePdfTemplate(message)
-    .then((pdfBuffer) => {
-      res
-        .writeHead(200, {
-          'Content-Length': Buffer.byteLength(pdfBuffer),
-          'Content-Type': 'application/pdf',
-          'Content-disposition': 'attachment; filename = test.pdf'
-        })
-        .end(pdfBuffer);
-    })
-    .catch((error) => {
-      return res.status(error).json(error.message);
-    });
-};
-
 exports.createProduct = createProduct;
 exports.getAllProducts = getAllProducts;
 exports.updateProduct = updateProduct;
@@ -171,4 +151,3 @@ exports.deleteProduct = deleteProduct;
 exports.getProductById = getProductById;
 exports.getProductBySku = getProductBySku;
 exports.getProductByName = getProductByName;
-exports.generatePdf = generatePdf;
