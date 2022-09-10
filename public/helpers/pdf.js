@@ -1,5 +1,6 @@
 const chromium = require('chrome-aws-lambda');
 const common = require('@kelchy/common');
+const { puppeteer } = require('chrome-aws-lambda');
 
 const generatePdfTemplate = async (html = '') => {
   const { data: browser, error: puppeteerError } = await common.awaitWrap(
@@ -13,6 +14,7 @@ const generatePdfTemplate = async (html = '') => {
   );
 
   if (puppeteerError) {
+    console.log(puppeteer);
     throw new Error('Error launching puppeteer');
   }
   try {

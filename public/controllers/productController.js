@@ -3,7 +3,6 @@ const categoryModel = require('../models/categoryModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { generatePdfTemplate } = require('../helpers/pdf');
 const testTemplate = require('../utils/templates/testTemplate');
 
 const createProduct = async (req, res) => {
