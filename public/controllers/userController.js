@@ -171,16 +171,17 @@ const changeUserRole = async (req, res) => {
 
 const sendForgetEmailPassword = async (req, res) => {
   try {
-    const { email, subject, content } = req.body;
-    const user = await userModel.findUserByEmail({ email });
+    const { recipientEmail, subject, content } = req.body;
+    const attachment = 'customers.txt';
+    const user = await userModel.findUserByEmail({ email: recipientEmail });
     if (user != null) {
-      await emailHelper.sendEmail({ email, subject, content });
+      await emailHelper.sendEmail({ recipientEmail, subject, content, attachment });
       log.out('OK_USER_SENT-EMAIL');
       res.json({
         message: 'Email sent'
       });
     } else {
-      log.error('ERR_USER_SEND', error.message);
+      log.error('ERR_USER_SEND', 'user is not registered');
       res.status(500).send('Failed to send email');
     }
   } catch (error) {
