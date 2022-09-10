@@ -3,7 +3,7 @@ const categoryModel = require('../models/categoryModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const testTemplate = require('../utils/templates/testTemplate');
+const { generatePdfTemplate } = require('../helpers/pdf');
 
 const createProduct = async (req, res) => {
   const { sku, name, description, image, categories, brand_id, qtyThreshold } =
@@ -146,9 +146,7 @@ const deleteProduct = async (req, res) => {
 };
 
 const generatePdf = async (req, res) => {
-  const message = testTemplate();
-
-  await generatePdfTemplate(message)
+  await generatePdfTemplate()
     .then((pdfBuffer) => {
       res
         .writeHead(200, {
