@@ -28,12 +28,12 @@ model Brand {
 }
 
 model ProductCategory {
-  product_id  String
-  product     Product  @relation(fields: [product_id], references: [sku])
-  category_id String
-  category    Category @relation(fields: [category_id], references: [name])
+  product_sku String
+  product     Product  @relation(fields: [product_sku], references: [sku])
+  category_id Int
+  category    Category @relation(fields: [category_id], references: [id])
 
-  @@id([product_id, category_id])
+  @@id([product_sku, category_id])
 }
 
 model Product {

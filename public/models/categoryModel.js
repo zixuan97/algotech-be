@@ -62,9 +62,20 @@ const findCategoryById = async (req) => {
   return category;
 };
 
+const findCategoryByName = async (req) => {
+  const { name } = req;
+  const category = await prisma.category.findUnique({
+    where: {
+      name
+    }
+  });
+  return category;
+};
+
 exports.createCategory = createCategory;
 exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
 exports.findCategoryById = findCategoryById;
 exports.connectOrCreateCategory = connectOrCreateCategory;
+exports.findCategoryByName = findCategoryByName;
