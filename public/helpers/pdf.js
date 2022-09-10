@@ -1,25 +1,15 @@
 const common = require('@kelchy/common');
-chrome = require('chrome-aws-lambda');
-let puppeteer;
-
-if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-  // running on the Vercel platform.
-  puppeteer = require('puppeteer-core');
-} else {
-  // running locally.
-  puppeteer = require('puppeteer');
-}
+const chromium = require('chrome-aws-lambda');
+const playwright = require('playwright-core');
 
 const generatePdfTemplate = async (html = '') => {
-  const { data: browser, error: puppeteerError } = await common.awaitWrap(
-    puppeteer.launch({
-      args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath,
-      headless: true,
-      ignoreHTTPSErrors: true
-    })
-  );
+  const browser = await playwright.chromium.launch({
+    args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: true,
+    ignoreHTTPSErrors: true
+  });
 
   if (puppeteerError) {
     throw new Error('Error launching puppeteer');
