@@ -30,7 +30,7 @@ const getAllCategories = async (req, res) => {
     res.json(Error.http(error));
   } else {
     log.out('OK_CATEGORY_GET-ALL-CATEGORIES');
-    res.json({ data, message: 'Retrieved all categories' });
+    res.json(data);
   }
 };
 

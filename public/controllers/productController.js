@@ -67,7 +67,7 @@ const getAllProducts = async (req, res) => {
     res.json(Error.http(error));
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS');
-    res.json({ data, message: 'Retrieved all products' });
+    res.json(data);
   }
 };
 
