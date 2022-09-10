@@ -42,7 +42,7 @@ const getAllBrands = async (req, res) => {
     res.json(Error.http(error));
   } else {
     log.out('OK_BRAND_GET-ALL-BRANDS');
-    res.json({ data, message: 'Retrieved all brands' });
+    res.json(data);
   }
 };
 
