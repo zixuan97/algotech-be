@@ -22,9 +22,9 @@ model Category {
 }
 
 model Brand {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  //  Product Product[]
+  id      Int       @id @default(autoincrement())
+  name    String    @unique
+  Product Product[]
 }
 
 model ProductCategory {
@@ -42,8 +42,8 @@ model Product {
   name            String            @unique
   description     String?
   image           String?
-  // brand_id        Int
-  // brand           Brand             @relation(fields: [brand_id], references: [id])
+  brand_id        Int
+  brand           Brand             @relation(fields: [brand_id], references: [id])
   stockQuantity   StockQuantity[]
   ProductCategory ProductCategory[]
 }

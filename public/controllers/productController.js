@@ -7,14 +7,21 @@ const { log } = require('../helpers/logger');
 const createProduct = async (req, res) => {
   const { sku, name, description, image, categories, brand_id } = req.body;
   // check if product exists
-  const { data: product } = await common.awaitWrap(
+  const { data: productSku } = await common.awaitWrap(
     productModel.findProductBySku({ sku })
   );
 
+  const { data: productName } = await common.awaitWrap(
+    productModel.findProductByName({ name })
+  );
+
   // if exists throw error
-  if (product) {
+  if (productSku) {
     log.error('ERR_PRODUCT_CREATE-PRODUCT');
     res.json({ message: 'Product sku already exists' });
+  } else if (productName) {
+    log.error('ERR_PRODUCT_CREATE-PRODUCT');
+    res.json({ message: 'Product name already exists' });
   } else {
     // find or create category
     const { error: connectOrCreateCategoryError } = await common.awaitWrap(
