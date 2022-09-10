@@ -1,10 +1,9 @@
 const productModel = require('../models/productModel');
 const categoryModel = require('../models/categoryModel');
-const { generatePdfTemplate } = require('../helpers/pdf');
-const testTemplate = require('../utils/templates/testTemplate');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const testTemplate = require('../utils/templates/testTemplate');
 
 const createProduct = async (req, res) => {
   const { sku, name, description, image, categories, brand_id, qtyThreshold } =

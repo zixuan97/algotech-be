@@ -1,7 +1,6 @@
 const testTemplate = () => `<html>
   <head>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-
     <link
       href="https://fonts.googleapis.com/css?family=Roboto"
       rel="stylesheet"
@@ -52,7 +51,6 @@ const testTemplate = () => `<html>
       style="width: 600px; height: 200px; margin: auto"
     />
   </div>
-
   <div class="w3-container" style="width: 600px; margin: auto">
     <b> </b>
     <p
@@ -117,7 +115,6 @@ const testTemplate = () => `<html>
       Upon Travel eSIM set up, please allow up to 2 hours for your eSIM to be
       activated.
     </p>
-
     <div class="w3-container" style="width: 395px; margin: auto">
       <img
         style="vertical-align: middle"
@@ -219,7 +216,6 @@ const testTemplate = () => `<html>
             </span>
             <br />
             <br/>
-
         
             <br />
             <span
@@ -243,9 +239,7 @@ const testTemplate = () => `<html>
             >
               {{smdp_address}}
             </span>
-
             <br /><br />
-
             <span
               style="
                 font-family: Roboto, sans-serif;

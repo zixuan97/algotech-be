@@ -1,17 +1,20 @@
-const common = require('@kelchy/common');
 const chromium = require('chrome-aws-lambda');
-const playwright = require('playwright-core');
+const common = require('@kelchy/common');
+const { puppeteer } = require('chrome-aws-lambda');
 
 const generatePdfTemplate = async (html = '') => {
-  const browser = await playwright.chromium.launch({
-    args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath,
-    headless: true,
-    ignoreHTTPSErrors: true
-  });
+  const { data: browser, error: puppeteerError } = await common.awaitWrap(
+    chromium.puppeteer.launch({
+      args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: true,
+      ignoreHTTPSErrors: true
+    })
+  );
 
   if (puppeteerError) {
+    console.log(puppeteer);
     throw new Error('Error launching puppeteer');
   }
   try {
