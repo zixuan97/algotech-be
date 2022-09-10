@@ -10,6 +10,7 @@ const createProduct = async (req, res) => {
   const { data: product } = await common.awaitWrap(
     productModel.findProductBySku({ sku })
   );
+
   // if exists throw error
   if (product) {
     log.error('ERR_PRODUCT_CREATE-PRODUCT');
@@ -19,6 +20,7 @@ const createProduct = async (req, res) => {
     const { error: connectOrCreateCategoryError } = await common.awaitWrap(
       categoryModel.connectOrCreateCategory({ categories })
     );
+    log.out('OK_CATEGORY_CONNECT-CREATE-CATEGORY');
     if (connectOrCreateCategoryError) {
       log.error(
         'ERR_CATEGORY_CREATE-CATEGORY',
@@ -62,13 +64,35 @@ const getAllProducts = async (req, res) => {
   }
 };
 
-/**
- * Gets product
- */
-const getProduct = async (req, res) => {
+const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await productModel.findProductById({ id });
+    log.out('OK_PRODUCT_GET-PRODUCT-BY-ID');
+    res.json(product);
+  } catch (error) {
+    log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getProductByName = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const product = await productModel.findProductByName({ name });
+    log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME');
+    res.json(product);
+  } catch (error) {
+    log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getProductBySku = async (req, res) => {
+  try {
+    const { sku } = req.params;
+    const product = await productModel.findProductBySku({ sku });
+    log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
     res.json(product);
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
@@ -106,4 +130,6 @@ exports.createProduct = createProduct;
 exports.getAllProducts = getAllProducts;
 exports.updateProduct = updateProduct;
 exports.deleteProduct = deleteProduct;
-exports.getProduct = getProduct;
+exports.getProductById = getProductById;
+exports.getProductBySku = getProductBySku;
+exports.getProductByName = getProductByName;

@@ -34,13 +34,23 @@ const getAllCategories = async (req, res) => {
   }
 };
 
-/**
- * Gets Category
- */
 const getCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const category = await categoryModel.findCategoryById({ id });
+    log.out('OK_CATEGORY_GET-CATEGORY-BY-ID');
+    res.json(category);
+  } catch (error) {
+    log.error('ERR_CATEGORY_GET-CATEGORY', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getCategoryByName = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const category = await categoryModel.findCategoryByName({ name });
+    log.out('OK_CATEGORY_GET-CATEGORY-BY-ID');
     res.json(category);
   } catch (error) {
     log.error('ERR_CATEGORY_GET-CATEGORY', error.message);
@@ -81,3 +91,4 @@ exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
 exports.getCategory = getCategory;
+exports.getCategoryByName = getCategoryByName;
