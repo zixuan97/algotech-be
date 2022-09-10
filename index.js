@@ -34,6 +34,7 @@ app.get('/', (req, res) => {
 app.use('/user', require('./public/routes/userRoutes'));
 app.use('/category', require('./public/routes/categoryRoutes'));
 app.use('/product', require('./public/routes/productRoutes'));
+app.use('/brand', require('./public/routes/brandRoutes'));
 
 const port = process.env.PORT || 4000;
 
