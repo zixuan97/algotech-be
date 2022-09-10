@@ -2,7 +2,8 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createProduct = async (req) => {
-  const { sku, name, description, image, categories, brand_id } = req;
+  const { sku, name, description, image, categories, brand_id, qtyThreshold } =
+    req;
 
   await prisma.product.create({
     data: {
@@ -11,8 +12,10 @@ const createProduct = async (req) => {
       description,
       image,
       brand_id,
+      qtyThreshold,
       ProductCategory: {
         create: categories.map((c) => ({
+          category_name: c.name,
           category: {
             connect: {
               name: c.name
@@ -62,14 +65,16 @@ const findProductByName = async (req) => {
 };
 
 const updateProduct = async (req) => {
-  const { id, name, description, image, category_id } = req;
+  const { id, name, description, image, category_id, qtyThreshold } = req;
   product = await prisma.product.update({
     where: { id },
     data: {
       name,
       description,
       image,
-      category_id
+      category_id,
+      qtyThreshold,
+      brand_id
     }
   });
   return product;

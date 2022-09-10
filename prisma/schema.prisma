@@ -28,10 +28,11 @@ model Brand {
 }
 
 model ProductCategory {
-  product_sku String
-  product     Product  @relation(fields: [product_sku], references: [sku])
-  category_id Int
-  category    Category @relation(fields: [category_id], references: [id])
+  product_sku   String
+  product       Product  @relation(fields: [product_sku], references: [sku])
+  category_name String
+  category_id   Int
+  category      Category @relation(fields: [category_id], references: [id])
 
   @@id([product_sku, category_id])
 }
@@ -42,6 +43,7 @@ model Product {
   name            String            @unique
   description     String?
   image           String?
+  qtyThreshold    Int?
   brand_id        Int
   brand           Brand             @relation(fields: [brand_id], references: [id])
   stockQuantity   StockQuantity[]
@@ -66,6 +68,13 @@ model StockQuantity {
   product     Product  @relation(fields: [product_id], references: [id])
 
   @@id([product_id, location_id])
+}
+
+model Bundle {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
 }
 
 enum UserRole {

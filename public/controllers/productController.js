@@ -5,7 +5,8 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createProduct = async (req, res) => {
-  const { sku, name, description, image, categories, brand_id } = req.body;
+  const { sku, name, description, image, categories, brand_id, qtyThreshold } =
+    req.body;
   // check if product exists
   const { data: productSku } = await common.awaitWrap(
     productModel.findProductBySku({ sku })
@@ -42,6 +43,7 @@ const createProduct = async (req, res) => {
         name,
         description,
         image,
+        qtyThreshold,
         brand_id,
         categories
       })
@@ -108,9 +110,18 @@ const getProductBySku = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  const { id, name, description, image, category_id } = req.body;
+  const { id, name, description, image, category_id, qtyThreshold, brand_id } =
+    req.body;
   const { error } = await common.awaitWrap(
-    productModel.updateProduct({ id, name, description, image, category_id })
+    productModel.updateProduct({
+      id,
+      name,
+      description,
+      image,
+      category_id,
+      qtyThreshold,
+      brand_id
+    })
   );
   if (error) {
     log.error('ERR_PRODUCT_UPDATE-PRODUCT', error.message);
