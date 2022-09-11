@@ -175,7 +175,8 @@ const sendForgetEmailPassword = async (req, res) => {
     const attachment = 'customers.txt';
     const user = await userModel.findUserByEmail({ email: recipientEmail });
     if (user != null) {
-      await emailHelper.sendEmail({ recipientEmail, subject, content, attachment });
+      await emailHelper.sendEmail({ recipientEmail, subject, content });
+      //await emailHelper.sendEmailWithAttachment({ recipientEmail, subject, content, attachment });
       log.out('OK_USER_SENT-EMAIL');
       res.json({
         message: 'Email sent'
