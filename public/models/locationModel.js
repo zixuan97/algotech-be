@@ -50,6 +50,7 @@ const addProductsToLocation = async (req) => {
           product_name: p.name,
           price: p.price,
           quantity: p.quantity,
+          product_qtyThreshold: p.qtyThreshold,
           product: {
             connect: {
               id: p.id
