@@ -48,6 +48,7 @@ model Product {
   brand           Brand             @relation(fields: [brand_id], references: [id])
   stockQuantity   StockQuantity[]
   productCategory ProductCategory[]
+  BundleProduct   BundleProduct[]
 }
 
 model Location {
@@ -73,10 +74,22 @@ model StockQuantity {
 }
 
 model Bundle {
-  id          Int    @id @default(autoincrement())
-  name        String
-  description String
-  price       Float
+  id            Int             @id @default(autoincrement())
+  name          String
+  description   String
+  price         Float
+  BundleProduct BundleProduct[]
+}
+
+model BundleProduct {
+  bundle_id  Int
+  product_id Int
+  product_sku Int
+  bundle_name String
+  product    Product @relation(fields: [product_id], references: [id])
+  bundle     Bundle  @relation(fields: [bundle_id], references: [id])
+
+  @@id([product_id, bundle_id])
 }
 
 enum UserRole {
