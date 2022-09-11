@@ -13,7 +13,7 @@ const createProduct = async (req) => {
       image,
       brand_id,
       qtyThreshold,
-      ProductCategory: {
+      productCategory: {
         create: categories.map((c) => ({
           category_name: c.name,
           category: {
@@ -29,7 +29,7 @@ const createProduct = async (req) => {
 
 const getAllProducts = async () => {
   const products = await prisma.product.findMany({
-    include: { ProductCategory: true }
+    include: { productCategory: true, stockQuantity: true }
   });
   return products;
 };
@@ -39,7 +39,8 @@ const findProductById = async (req) => {
   const product = await prisma.product.findUnique({
     where: {
       id: Number(id)
-    }
+    },
+    include: { productCategory: true, stockQuantity: true }
   });
   return product;
 };
@@ -49,7 +50,8 @@ const findProductBySku = async (req) => {
   const product = await prisma.product.findUnique({
     where: {
       sku
-    }
+    },
+    include: { productCategory: true, stockQuantity: true }
   });
   return product;
 };
@@ -59,7 +61,8 @@ const findProductByName = async (req) => {
   const product = await prisma.product.findUnique({
     where: {
       name
-    }
+    },
+    include: { productCategory: true, stockQuantity: true }
   });
   return product;
 };

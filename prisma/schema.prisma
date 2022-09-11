@@ -47,13 +47,13 @@ model Product {
   brand_id        Int
   brand           Brand             @relation(fields: [brand_id], references: [id])
   stockQuantity   StockQuantity[]
-  ProductCategory ProductCategory[]
+  productCategory ProductCategory[]
 }
 
 model Location {
   id            Int             @id @default(autoincrement())
   name          String          @unique
-  StockQuantity StockQuantity[]
+  stockQuantity StockQuantity[]
 }
 
 model StockQuantity {
