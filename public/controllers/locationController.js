@@ -4,7 +4,7 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createLocation = async (req, res) => {
-  const { name, products, price } = req.body;
+  const { name, address } = req.body;
   const { data, error: duplicateLocationNameError } = await common.awaitWrap(
     locationModel.findLocationByName({ name })
   );
@@ -20,13 +20,15 @@ const createLocation = async (req, res) => {
   } else {
     const { error } = await common.awaitWrap(
       locationModel.createLocation({
-        name
+        name,
+        address
       })
     );
 
     if (error) {
       log.error('ERR_LOCATION_CREATE-LOCATION', error.message);
-      res.json(Error.http(error));
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
     } else {
       log.out('OK_LOCATION_CREATE-LOCATION');
       res.json({ message: 'location created' });
@@ -41,7 +43,8 @@ const getAllLocations = async (req, res) => {
 
   if (error) {
     log.error('ERR_LOCATION_GET-ALL-LOCATIONS', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_GET-ALL-LOCATIONS');
     res.json(data);
@@ -73,13 +76,14 @@ const getLocationByName = async (req, res) => {
 };
 
 const updateLocation = async (req, res) => {
-  const { id, name } = req.body;
+  const { id, name, products, address } = req.body;
   const { error } = await common.awaitWrap(
-    locationModel.updateLocations({ id, name })
+    locationModel.updateLocations({ id, name, products, address })
   );
   if (error) {
     log.error('ERR_LOCATION_UPDATE-LOCATION', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_UPDATE-LOCATION');
     res.json({ message: `Updated location with id:${id}` });
@@ -93,7 +97,8 @@ const addProductsToLocation = async (req, res) => {
   );
   if (error) {
     log.error('ERR_LOCATION_ADD-PRODUCTS', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_ADD-PRODUCTS');
     res.json({ message: `Updated location with id:${id}` });
@@ -107,7 +112,8 @@ const deleteLocation = async (req, res) => {
   );
   if (error) {
     log.error('ERR_LOCATION_DELETE_LOCATION', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_DELETE_LOCATION');
     res.json({ message: `Deleted location with id:${id}` });

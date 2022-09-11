@@ -16,6 +16,7 @@ const createProduct = async (req) => {
       productCategory: {
         create: categories.map((c) => ({
           category_name: c.name,
+          product_sku: sku,
           category: {
             connect: {
               name: c.name

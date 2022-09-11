@@ -2,11 +2,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createLocation = async (req) => {
-  const { name } = req;
+  const { name, address } = req;
 
   await prisma.location.create({
     data: {
-      name
+      name,
+      address
     }
   });
 };
@@ -19,12 +20,23 @@ const getAllLocations = async () => {
 };
 
 const updateLocations = async (req) => {
-  const { id, name } = req;
+  const { id, name, products, address } = req;
 
   location = await prisma.location.update({
     where: { id },
     data: {
-      name
+      name,
+      address,
+      stockQuantity: {
+        deleteMany: {},
+        create: products.map((p) => ({
+          product: {
+            connect: {
+              id: p.id
+            }
+          }
+        }))
+      }
     }
   });
   return location;
