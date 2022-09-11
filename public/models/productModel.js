@@ -68,7 +68,8 @@ const findProductByName = async (req) => {
 };
 
 const updateProduct = async (req) => {
-  const { id, name, description, image, category_id, qtyThreshold } = req;
+  const { id, name, description, image, category_id, qtyThreshold, brand_id } =
+    req;
   product = await prisma.product.update({
     where: { id },
     data: {
