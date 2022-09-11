@@ -77,7 +77,7 @@ model StockQuantity {
 
 model Bundle {
   id            Int             @id @default(autoincrement())
-  name          String
+  name          String          @unique 
   description   String
   price         Float
   bundleProduct BundleProduct[]
