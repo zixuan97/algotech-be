@@ -28,13 +28,14 @@ model Brand {
 }
 
 model ProductCategory {
+  product_id    Int
   product_sku   String
-  product       Product  @relation(fields: [product_sku], references: [sku])
+  product       Product  @relation(fields: [product_id], references: [id])
   category_name String
   category_id   Int
   category      Category @relation(fields: [category_id], references: [id])
 
-  @@id([product_sku, category_id])
+  @@id([product_id, category_id])
 }
 
 model Product {
@@ -48,12 +49,13 @@ model Product {
   brand           Brand             @relation(fields: [brand_id], references: [id])
   stockQuantity   StockQuantity[]
   productCategory ProductCategory[]
-  BundleProduct   BundleProduct[]
+  bundleProduct   BundleProduct[]
 }
 
 model Location {
   id            Int             @id @default(autoincrement())
   name          String          @unique
+  address       String
   stockQuantity StockQuantity[]
 }
 
@@ -78,16 +80,16 @@ model Bundle {
   name          String
   description   String
   price         Float
-  BundleProduct BundleProduct[]
+  bundleProduct BundleProduct[]
 }
 
 model BundleProduct {
-  bundle_id  Int
-  product_id Int
-  product_sku Int
+  bundle_id   Int
+  product_id  Int
+  product_sku String
   bundle_name String
-  product    Product @relation(fields: [product_id], references: [id])
-  bundle     Bundle  @relation(fields: [bundle_id], references: [id])
+  product     Product @relation(fields: [product_id], references: [id])
+  bundle      Bundle  @relation(fields: [bundle_id], references: [id])
 
   @@id([product_id, bundle_id])
 }
