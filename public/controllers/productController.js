@@ -3,7 +3,7 @@ const categoryModel = require('../models/categoryModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { generatePdfTemplate } = require('../helpers/pdf');
+const { generatePdfTemplate, generateProcurementPdfTemplate } = require('../helpers/pdf');
 
 const createProduct = async (req, res) => {
   const { sku, name, description, image, categories, brand_id, qtyThreshold } =
@@ -161,6 +161,22 @@ const generatePdf = async (req, res) => {
     });
 };
 
+const generateProcurementPdf = async (req, res) => {
+  await generateProcurementPdfTemplate()
+    .then((pdfBuffer) => {
+      res
+        .writeHead(200, {
+          'Content-Length': Buffer.byteLength(pdfBuffer),
+          'Content-Type': 'application/pdf',
+          'Content-disposition': 'attachment; filename = test.pdf'
+        })
+        .end(pdfBuffer);
+    })
+    .catch((error) => {
+      return res.status(error).json(error.message);
+    });
+};
+
 exports.createProduct = createProduct;
 exports.getAllProducts = getAllProducts;
 exports.updateProduct = updateProduct;
@@ -169,3 +185,4 @@ exports.getProductById = getProductById;
 exports.getProductBySku = getProductBySku;
 exports.getProductByName = getProductByName;
 exports.generatePdf = generatePdf;
+exports.generateProcurementPdf = generateProcurementPdf;
