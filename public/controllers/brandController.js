@@ -26,7 +26,8 @@ const createBrand = async (req, res) => {
 
     if (error) {
       log.error('ERR_BRAND_CREATE-BRAND', error.message);
-      res.json(Error.http(error));
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
     } else {
       log.out('OK_BRAND_CREATE-BRAND');
       res.json({ message: 'brand created' });
@@ -39,7 +40,8 @@ const getAllBrands = async (req, res) => {
 
   if (error) {
     log.error('ERR_BRAND_GET-ALL-BRANDS', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_BRAND_GET-ALL-BRANDS');
     res.json(data);
@@ -77,7 +79,8 @@ const updateBrand = async (req, res) => {
   );
   if (error) {
     log.error('ERR_BRAND_UPDATE_BRAND', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_BRAND_UPDATE_BRAND');
     res.json({ message: `Updated brand with id:${id}` });
@@ -89,7 +92,8 @@ const deleteBrand = async (req, res) => {
   const { error } = await common.awaitWrap(brandModel.deleteBrand({ id }));
   if (error) {
     log.error('ERR_BRAND_DELETE_BRAND', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_BRAND_DELETE_BRAND');
     res.json({ message: `Deleted brand with id:${id}` });

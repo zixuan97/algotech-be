@@ -3,7 +3,10 @@ const categoryModel = require('../models/categoryModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { generatePdfTemplate, generateProcurementPdfTemplate } = require('../helpers/pdf');
+const {
+  generatePdfTemplate,
+  generateProcurementPdfTemplate
+} = require('../helpers/pdf');
 
 const createProduct = async (req, res) => {
   const { sku, name, description, image, categories, brand_id, qtyThreshold } =
@@ -35,7 +38,8 @@ const createProduct = async (req, res) => {
         'ERR_CATEGORY_CREATE-CATEGORY',
         connectOrCreateCategoryError.message
       );
-      res.json(Error.http(connectOrCreateCategoryError));
+      const e = Error.http(connectOrCreateCategoryError);
+      res.status(e.code).json(e.message);
     }
     //connect to existing categories
     const { error } = await common.awaitWrap(
@@ -52,7 +56,8 @@ const createProduct = async (req, res) => {
 
     if (error) {
       log.error('ERR_PRODUCT_CREATE-PRODUCT', error.message);
-      res.json(Error.http(error));
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
     } else {
       log.out('OK_PRODUCT_CREATE-PRODUCT');
       res.json({ message: 'product created' });
@@ -67,7 +72,8 @@ const getAllProducts = async (req, res) => {
 
   if (error) {
     log.error('ERR_PRODUCT_GET-ALL-PRODUCTS', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS');
     res.json(data);
@@ -126,7 +132,8 @@ const updateProduct = async (req, res) => {
   );
   if (error) {
     log.error('ERR_PRODUCT_UPDATE-PRODUCT', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_PRODUCT_UPDATE-PRODUCT');
     res.json({ message: `Updated product with id:${id}` });
@@ -138,7 +145,8 @@ const deleteProduct = async (req, res) => {
   const { error } = await common.awaitWrap(productModel.deleteProduct({ id }));
   if (error) {
     log.error('ERR_PRODUCT_DELETE-PRODUCT', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_PRODUCT_DELETE-PRODUCT');
     res.json({ message: `Deleted product with id:${id}` });
