@@ -26,7 +26,8 @@ const createLocation = async (req, res) => {
 
     if (error) {
       log.error('ERR_LOCATION_CREATE-LOCATION', error.message);
-      res.json(Error.http(error));
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
     } else {
       log.out('OK_LOCATION_CREATE-LOCATION');
       res.json({ message: 'location created' });
@@ -41,7 +42,8 @@ const getAllLocations = async (req, res) => {
 
   if (error) {
     log.error('ERR_LOCATION_GET-ALL-LOCATIONS', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_GET-ALL-LOCATIONS');
     res.json(data);
@@ -79,7 +81,8 @@ const updateLocation = async (req, res) => {
   );
   if (error) {
     log.error('ERR_LOCATION_UPDATE-LOCATION', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_UPDATE-LOCATION');
     res.json({ message: `Updated location with id:${id}` });
@@ -93,7 +96,8 @@ const addProductsToLocation = async (req, res) => {
   );
   if (error) {
     log.error('ERR_LOCATION_ADD-PRODUCTS', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_ADD-PRODUCTS');
     res.json({ message: `Updated location with id:${id}` });
@@ -107,7 +111,8 @@ const deleteLocation = async (req, res) => {
   );
   if (error) {
     log.error('ERR_LOCATION_DELETE_LOCATION', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_DELETE_LOCATION');
     res.json({ message: `Deleted location with id:${id}` });
