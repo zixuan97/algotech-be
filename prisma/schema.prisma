@@ -18,7 +18,7 @@ model User {
 model Category {
   id              Int               @id @default(autoincrement())
   name            String            @unique
-  ProductCategory ProductCategory[]
+  productCategory ProductCategory[]
 }
 
 model Brand {
@@ -38,16 +38,17 @@ model ProductCategory {
 }
 
 model Product {
-  id              Int               @id @default(autoincrement())
-  sku             String            @unique
-  name            String            @unique
-  description     String?
-  image           String?
-  qtyThreshold    Int?
-  brand_id        Int
-  brand           Brand             @relation(fields: [brand_id], references: [id])
-  stockQuantity   StockQuantity[]
-  productCategory ProductCategory[]
+  id                    Int               @id @default(autoincrement())
+  sku                   String            @unique
+  name                  String            @unique
+  description           String?
+  image                 String?
+  qtyThreshold          Int?
+  brand_id              Int
+  brand                 Brand             @relation(fields: [brand_id], references: [id])
+  stockQuantity         StockQuantity[]
+  productCategory       ProductCategory[]
+  procurementOrderItems ProcurementOrderItem[]
 }
 
 model Location {
@@ -79,6 +80,36 @@ model Bundle {
   price       Float
 }
 
+model ProcurementOrder {
+  id                Int        @id @default(autoincrement())
+  order_date        DateTime
+  amount            Float
+  description       String
+  payment_status    PaymentStatus @default(PENDING)
+  fulfilment_status FulfilmentStatus @default(CREATED)
+  proc_order_items  ProcurementOrderItem[]
+  supplier          Supplier @relation(fields: [supplier_id], references: [id])
+  supplier_id       Int
+}
+
+model ProcurementOrderItem {
+  quantity      Int
+  proc_order    ProcurementOrder @relation(fields: [proc_order_id], references: [id])
+  proc_order_id Int
+  product       Product @relation(fields: [product_id], references: [id])
+  product_id    Int
+
+  @@id([proc_order_id, product_id])
+}
+
+model Supplier {
+  id               Int      @id @default(autoincrement())
+  email            String
+  name             String
+  address          String
+  proc_order_items ProcurementOrder[]
+}
+
 enum UserRole {
   ADMIN
   INTERN
@@ -90,4 +121,15 @@ enum UserRole {
 enum UserStatus {
   ACTIVE
   DISABLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+}
+
+enum FulfilmentStatus {
+  CREATED
+  ARRIVED
+  COMPLETED
 }
