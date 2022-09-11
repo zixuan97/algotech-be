@@ -39,17 +39,19 @@ const deleteCategory = async (req) => {
 
 const connectOrCreateCategory = async (req) => {
   const { categories } = req;
-  await categories.map(async (c) => {
-    await prisma.category.upsert({
-      where: {
-        name: c.name
-      },
-      update: {},
-      create: {
-        name: c.name
-      }
-    });
-  });
+  await Promise.allSettled(
+    categories.map(async (c) => {
+      await prisma.category.upsert({
+        where: {
+          name: c.name
+        },
+        update: {},
+        create: {
+          name: c.name
+        }
+      });
+    })
+  );
 };
 
 const findCategoryById = async (req) => {
