@@ -11,7 +11,6 @@ const SES_CONFIG = {
 const AWS_SES = new AWS.SES(SES_CONFIG);
 
 const sendEmailWithAttachment = (req) => {
-  console.log(req)
   const { recipientEmail, subject, content, attachment } = req;
   var mailContent = mimemessage.factory({ contentType: 'multipart/mixed', body: [] });
   mailContent.header('From', 'Meryl <e0421281@u.nus.edu>');
@@ -53,7 +52,7 @@ const sendEmailWithAttachment = (req) => {
 }
 
 const sendEmail = (req) => {
-  const { recipientEmail, subject, content } = req;
+  const { recipientEmail, subject, content, attachment } = req;
   const params = {
     Source: 'Meryl <e0421281@u.nus.edu>',
     Destination: {

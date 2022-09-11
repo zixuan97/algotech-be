@@ -7,11 +7,14 @@ const { log } = require('../helpers/logger');
 const emailHelper = require('../helpers/email');
 
 const createUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { first_name, last_name, email, password, role } = req.body;
   const { error } = await common.awaitWrap(
     userModel.createUser({
+      first_name,
+      last_name,
       email,
-      password
+      password,
+      role
     })
   );
   if (error) {
@@ -176,8 +179,8 @@ const sendForgetEmailPassword = async (req, res) => {
     const attachment = 'customers.txt';
     const user = await userModel.findUserByEmail({ email: recipientEmail });
     if (user != null) {
-      await emailHelper.sendEmail({ recipientEmail, subject, content });
-      //await emailHelper.sendEmailWithAttachment({ recipientEmail, subject, content, attachment });
+      // await emailHelper.sendEmail({ recipientEmail, subject, content });
+      await emailHelper.sendEmailWithAttachment({ recipientEmail, subject, content, attachment });
       log.out('OK_USER_SENT-EMAIL');
       res.json({
         message: 'Email sent'
