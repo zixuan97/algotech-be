@@ -73,9 +73,9 @@ const getLocationByName = async (req, res) => {
 };
 
 const updateLocation = async (req, res) => {
-  const { id, name } = req.body;
+  const { id, name, products } = req.body;
   const { error } = await common.awaitWrap(
-    locationModel.updateLocations({ id, name })
+    locationModel.updateLocations({ id, name, products })
   );
   if (error) {
     log.error('ERR_LOCATION_UPDATE-LOCATION', error.message);

@@ -19,12 +19,22 @@ const getAllLocations = async () => {
 };
 
 const updateLocations = async (req) => {
-  const { id, name } = req;
+  const { id, name, products } = req;
 
   location = await prisma.location.update({
     where: { id },
     data: {
-      name
+      name,
+      stockQuantity: {
+        deleteMany: {},
+        create: products.map((p) => ({
+          product: {
+            connect: {
+              id: p.id
+            }
+          }
+        }))
+      }
     }
   });
   return location;
