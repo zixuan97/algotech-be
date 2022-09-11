@@ -22,16 +22,18 @@ model Category {
 }
 
 model Brand {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  //  Product Product[]
+  id      Int       @id @default(autoincrement())
+  name    String    @unique
+  Product Product[]
 }
 
 model ProductCategory {
-  product_id  String
-  product     Product  @relation(fields: [product_id], references: [sku])
-  category_id String
-  category    Category @relation(fields: [category_id], references: [name])
+  product_id    Int
+  product_sku   String
+  product       Product  @relation(fields: [product_id], references: [id])
+  category_name String
+  category_id   Int
+  category      Category @relation(fields: [category_id], references: [id])
 
   @@id([product_id, category_id])
 }
@@ -42,30 +44,54 @@ model Product {
   name            String            @unique
   description     String?
   image           String?
-  // brand_id        Int
-  // brand           Brand             @relation(fields: [brand_id], references: [id])
+  qtyThreshold    Int?
+  brand_id        Int
+  brand           Brand             @relation(fields: [brand_id], references: [id])
   stockQuantity   StockQuantity[]
-  ProductCategory ProductCategory[]
+  productCategory ProductCategory[]
+  bundleProduct   BundleProduct[]
 }
 
 model Location {
   id            Int             @id @default(autoincrement())
   name          String          @unique
-  details       String
-  StockQuantity StockQuantity[]
+  address       String
+  stockQuantity StockQuantity[]
 }
 
 model StockQuantity {
-  product_id  Int
-  location_id Int
-  quantity    Int
-  price       Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  location    Location @relation(fields: [location_id], references: [id])
-  product     Product  @relation(fields: [product_id], references: [id])
+  product_id           Int
+  product_name         String
+  product_sku          String
+  product_qtyThreshold Int?
+  location_id          Int
+  quantity             Int
+  price                Float
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  location             Location @relation(fields: [location_id], references: [id])
+  product              Product  @relation(fields: [product_id], references: [id])
 
   @@id([product_id, location_id])
+}
+
+model Bundle {
+  id            Int             @id @default(autoincrement())
+  name          String
+  description   String
+  price         Float
+  bundleProduct BundleProduct[]
+}
+
+model BundleProduct {
+  bundle_id   Int
+  product_id  Int
+  product_sku String
+  bundle_name String
+  product     Product @relation(fields: [product_id], references: [id])
+  bundle      Bundle  @relation(fields: [bundle_id], references: [id])
+
+  @@id([product_id, bundle_id])
 }
 
 enum UserRole {

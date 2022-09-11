@@ -2,7 +2,8 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createProduct = async (req) => {
-  const { sku, name, description, image, categories, brand_id } = req;
+  const { sku, name, description, image, categories, brand_id, qtyThreshold } =
+    req;
 
   await prisma.product.create({
     data: {
@@ -11,8 +12,10 @@ const createProduct = async (req) => {
       description,
       image,
       brand_id,
-      ProductCategory: {
+      qtyThreshold,
+      productCategory: {
         create: categories.map((c) => ({
+          category_name: c.name,
           category: {
             connect: {
               name: c.name
@@ -25,7 +28,9 @@ const createProduct = async (req) => {
 };
 
 const getAllProducts = async () => {
-  const products = await prisma.product.findMany({});
+  const products = await prisma.product.findMany({
+    include: { productCategory: true, stockQuantity: true }
+  });
   return products;
 };
 
@@ -34,7 +39,8 @@ const findProductById = async (req) => {
   const product = await prisma.product.findUnique({
     where: {
       id: Number(id)
-    }
+    },
+    include: { productCategory: true, stockQuantity: true }
   });
   return product;
 };
@@ -44,20 +50,34 @@ const findProductBySku = async (req) => {
   const product = await prisma.product.findUnique({
     where: {
       sku
-    }
+    },
+    include: { productCategory: true, stockQuantity: true }
+  });
+  return product;
+};
+
+const findProductByName = async (req) => {
+  const { name } = req;
+  const product = await prisma.product.findUnique({
+    where: {
+      name
+    },
+    include: { productCategory: true, stockQuantity: true }
   });
   return product;
 };
 
 const updateProduct = async (req) => {
-  const { id, name, description, image, category_id } = req;
+  const { id, name, description, image, category_id, qtyThreshold } = req;
   product = await prisma.product.update({
     where: { id },
     data: {
       name,
       description,
       image,
-      category_id
+      category_id,
+      qtyThreshold,
+      brand_id
     }
   });
   return product;
@@ -78,3 +98,4 @@ exports.updateProduct = updateProduct;
 exports.deleteProduct = deleteProduct;
 exports.findProductById = findProductById;
 exports.findProductBySku = findProductBySku;
+exports.findProductByName = findProductByName;

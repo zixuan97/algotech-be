@@ -39,17 +39,19 @@ const deleteCategory = async (req) => {
 
 const connectOrCreateCategory = async (req) => {
   const { categories } = req;
-  categories.map(async (c) => {
-    await prisma.category.upsert({
-      where: {
-        name: c.name
-      },
-      update: {},
-      create: {
-        name: c.name
-      }
-    });
-  });
+  await Promise.allSettled(
+    categories.map(async (c) => {
+      await prisma.category.upsert({
+        where: {
+          name: c.name
+        },
+        update: {},
+        create: {
+          name: c.name
+        }
+      });
+    })
+  );
 };
 
 const findCategoryById = async (req) => {
@@ -62,9 +64,20 @@ const findCategoryById = async (req) => {
   return category;
 };
 
+const findCategoryByName = async (req) => {
+  const { name } = req;
+  const category = await prisma.category.findUnique({
+    where: {
+      name
+    }
+  });
+  return category;
+};
+
 exports.createCategory = createCategory;
 exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
 exports.findCategoryById = findCategoryById;
 exports.connectOrCreateCategory = connectOrCreateCategory;
+exports.findCategoryByName = findCategoryByName;

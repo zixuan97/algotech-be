@@ -13,7 +13,8 @@ const createCategory = async (req, res) => {
 
   if (error) {
     log.error('ERR_CATEGORY_CREATE-CATEGORY', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_CATEGORY_CREATE-CATEGORY');
     res.json({ message: 'category created' });
@@ -27,20 +28,31 @@ const getAllCategories = async (req, res) => {
 
   if (error) {
     log.error('ERR_CATEGORY_GET-ALL-CATEGORIES', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_CATEGORY_GET-ALL-CATEGORIES');
-    res.json({ data, message: 'Retrieved all categories' });
+    res.json(data);
   }
 };
 
-/**
- * Gets Category
- */
 const getCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const category = await categoryModel.findCategoryById({ id });
+    log.out('OK_CATEGORY_GET-CATEGORY-BY-ID');
+    res.json(category);
+  } catch (error) {
+    log.error('ERR_CATEGORY_GET-CATEGORY', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getCategoryByName = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const category = await categoryModel.findCategoryByName({ name });
+    log.out('OK_CATEGORY_GET-CATEGORY-BY-ID');
     res.json(category);
   } catch (error) {
     log.error('ERR_CATEGORY_GET-CATEGORY', error.message);
@@ -55,7 +67,8 @@ const updateCategory = async (req, res) => {
   );
   if (error) {
     log.error('ERR_CATEGORY_UPDATE_CATEGORY', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_CATEGORY_UPDATE_CATEGORY');
     res.json({ message: `Updated category with id:${id}` });
@@ -69,7 +82,8 @@ const deleteCategory = async (req, res) => {
   );
   if (error) {
     log.error('ERR_CATEGORY_DELETE_CATEGORY', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_CATEGORY_DELETE_CATEGORY');
     res.json({ message: `Deleted category with id:${id}` });
@@ -81,3 +95,4 @@ exports.getAllCategories = getAllCategories;
 exports.updateCategory = updateCategory;
 exports.deleteCategory = deleteCategory;
 exports.getCategory = getCategory;
+exports.getCategoryByName = getCategoryByName;

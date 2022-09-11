@@ -16,7 +16,8 @@ const createUser = async (req, res) => {
   );
   if (error) {
     log.error('ERR_USER_CREATE-USER', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_USER_CREATE-USER');
     res.status(200).json({ message: 'User created' });
