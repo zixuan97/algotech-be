@@ -59,13 +59,13 @@ const createProduct = async (req, res) => {
       const e = Error.http(uploadS3Error);
       res.status(e.code).json(e.message);
     }
+    log.out('OK_PRODUCT_UPLOAD-S3');
     //connect to existing categories
     const { error } = await common.awaitWrap(
       productModel.createProduct({
         sku,
         name,
         description,
-        image: `productImages/${sku}-img`,
         qtyThreshold,
         brand_id,
         categories,
@@ -133,12 +133,13 @@ const getProductBySku = async (req, res) => {
         key: `productImages/${sku}-img`
       })
     );
-    console.log(productImg);
+
     if (getS3Error) {
       log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
       const e = Error.http(uploadS3Error);
       res.status(e.code).json(e.message);
     }
+    log.out('OK_PRODUCT_GET-PRODUCT-IMG');
     log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
     product.image = productImg;
     res.json(product);
@@ -160,12 +161,24 @@ const updateProduct = async (req, res) => {
     brand_id,
     locations
   } = req.body;
+  //uploadImg to s3
+  const { error: uploadS3Error } = await common.awaitWrap(
+    uploadS3({
+      key: `productImages/${sku}-img`,
+      payload: image
+    })
+  );
+  if (uploadS3Error) {
+    log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
+    const e = Error.http(uploadS3Error);
+    res.status(e.code).json(e.message);
+  }
+  log.out('OK_PRODUCT_UPLOAD-S3');
   const { error } = await common.awaitWrap(
     productModel.updateProduct({
       id,
       name,
       description,
-      image,
       sku,
       categories,
       qtyThreshold,
