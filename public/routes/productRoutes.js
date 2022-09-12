@@ -9,6 +9,5 @@ router.get('/sku/:sku', productController.getProductBySku);
 router.put('/', productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
 router.post('/pdf', productController.generatePdf);
-router.post('/pdf/procurement/pdf', productController.generateProcurementPdf);
 
 module.exports = router;

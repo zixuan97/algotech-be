@@ -3,10 +3,8 @@ const categoryModel = require('../models/categoryModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const {
-  generatePdfTemplate,
-  generateProcurementPdfTemplate
-} = require('../helpers/pdf');
+const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
+const { generatePdfTemplate } = require('../helpers/pdf');
 
 const createProduct = async (req, res) => {
   const {
@@ -49,13 +47,25 @@ const createProduct = async (req, res) => {
       const e = Error.http(connectOrCreateCategoryError);
       res.status(e.code).json(e.message);
     }
+    //uploadImg to s3
+    const { error: uploadS3Error } = await common.awaitWrap(
+      uploadS3({
+        key: `productImages/${sku}-img`,
+        payload: image
+      })
+    );
+    if (uploadS3Error) {
+      log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
+      const e = Error.http(uploadS3Error);
+      res.status(e.code).json(e.message);
+    }
     //connect to existing categories
     const { error } = await common.awaitWrap(
       productModel.createProduct({
         sku,
         name,
         description,
-        image,
+        image: `productImages/${sku}-img`,
         qtyThreshold,
         brand_id,
         categories,
@@ -117,7 +127,20 @@ const getProductBySku = async (req, res) => {
   try {
     const { sku } = req.params;
     const product = await productModel.findProductBySku({ sku });
+    //getImg from s3
+    const { data: productImg, error: getS3Error } = await common.awaitWrap(
+      getS3({
+        key: `productImages/${sku}-img`
+      })
+    );
+    console.log(productImg);
+    if (getS3Error) {
+      log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+      const e = Error.http(uploadS3Error);
+      res.status(e.code).json(e.message);
+    }
     log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
+    product.image = productImg;
     res.json(product);
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
@@ -126,7 +149,6 @@ const getProductBySku = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  req.body;
   const {
     id,
     name,
@@ -190,22 +212,6 @@ const generatePdf = async (req, res) => {
     });
 };
 
-const generateProcurementPdf = async (req, res) => {
-  await generateProcurementPdfTemplate()
-    .then((pdfBuffer) => {
-      res
-        .writeHead(200, {
-          'Content-Length': Buffer.byteLength(pdfBuffer),
-          'Content-Type': 'application/pdf',
-          'Content-disposition': 'attachment; filename = test.pdf'
-        })
-        .end(pdfBuffer);
-    })
-    .catch((error) => {
-      return res.status(error).json(error.message);
-    });
-};
-
 exports.createProduct = createProduct;
 exports.getAllProducts = getAllProducts;
 exports.updateProduct = updateProduct;
@@ -214,4 +220,3 @@ exports.getProductById = getProductById;
 exports.getProductBySku = getProductBySku;
 exports.getProductByName = getProductByName;
 exports.generatePdf = generatePdf;
-exports.generateProcurementPdf = generateProcurementPdf;
