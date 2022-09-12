@@ -9,24 +9,19 @@ const s3 = new AWS.S3({
 
 const uploadS3 = async (req) => {
   const { key, payload } = req;
+  try {
+    const params = {
+      Bucket: process.env.BUCKET,
+      Body: payload,
+      Key: key
+    };
 
-  const params = {
-    Bucket: process.env.BUCKET,
-    Body: payload,
-    Key: key
-  };
-
-  s3.upload(params, function (err, data) {
+    s3.upload(params);
+    return 'Successfully uploaded file to bucket';
+  } catch (err) {
     //handle error
-    if (err) {
-      throw err;
-    }
-
-    //success
-    if (data) {
-      return data.Location;
-    }
-  });
+    throw new Error(`Could not upload file to S3: ${err.message}`);
+  }
 };
 
 // Delete image from s3 bucket
@@ -34,43 +29,36 @@ const uploadS3 = async (req) => {
 const deleteS3 = async (req) => {
   const { key } = req;
 
-  const params = {
-    Bucket: process.env.BUCKET,
-    Key: key
-  };
+  try {
+    const params = {
+      Bucket: process.env.BUCKET,
+      Key: key
+    };
 
-  s3.deleteObject(params, function (err, data) {
+    s3.deleteObject(params);
+    return 'Successfully deleted file from bucket';
+  } catch (err) {
     //handle error
-    if (err) {
-      throw err;
-    } else {
-      return 'Successfully deleted file from bucket';
-    }
-  });
+    throw new Error(`Could not delete file from S3: ${err.message}`);
+  }
 };
 
 // Get image from s3 bucket
 
 const getS3 = async (req) => {
   const { key } = req;
-  const params = {
-    Bucket: process.env.BUCKET,
-    Key: key
-  };
+  try {
+    const params = {
+      Bucket: process.env.BUCKET,
+      Key: key
+    };
 
-  s3.getObject(params, function (err, data) {
-    //handle error
-    if (err) {
-      console.log(err);
-      throw err;
-    }
+    const data = await s3.getObject(params).promise();
 
-    //success
-    if (data) {
-      let objectData = data.Body.toString('utf-8');
-      return objectData;
-    }
-  });
+    return data.Body.toString('utf-8');
+  } catch (err) {
+    throw new Error(`Could not retrieve file from S3: ${err.message}`);
+  }
 };
 
 exports.uploadS3 = uploadS3;

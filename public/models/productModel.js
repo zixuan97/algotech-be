@@ -6,7 +6,6 @@ const createProduct = async (req) => {
     sku,
     name,
     description,
-    image,
     categories,
     brand_id,
     qtyThreshold,
@@ -18,7 +17,6 @@ const createProduct = async (req) => {
       sku,
       name,
       description,
-      image,
       brand_id,
       qtyThreshold,
       productCategory: {
