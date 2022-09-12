@@ -9,8 +9,16 @@ const {
 } = require('../helpers/pdf');
 
 const createProduct = async (req, res) => {
-  const { sku, name, description, image, categories, brand_id, qtyThreshold } =
-    req.body;
+  const {
+    sku,
+    name,
+    description,
+    image,
+    categories,
+    brand_id,
+    qtyThreshold,
+    locations
+  } = req.body;
   // check if product exists
   const { data: productSku } = await common.awaitWrap(
     productModel.findProductBySku({ sku })
@@ -50,7 +58,8 @@ const createProduct = async (req, res) => {
         image,
         qtyThreshold,
         brand_id,
-        categories
+        categories,
+        locations
       })
     );
 
@@ -117,17 +126,29 @@ const getProductBySku = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  const { id, name, description, image, category_id, qtyThreshold, brand_id } =
-    req.body;
+  req.body;
+  const {
+    id,
+    name,
+    description,
+    image,
+    sku,
+    categories,
+    qtyThreshold,
+    brand_id,
+    locations
+  } = req.body;
   const { error } = await common.awaitWrap(
     productModel.updateProduct({
       id,
       name,
       description,
       image,
-      category_id,
+      sku,
+      categories,
       qtyThreshold,
-      brand_id
+      brand_id,
+      locations
     })
   );
   if (error) {
