@@ -12,7 +12,11 @@ const createBrand = async (req) => {
 };
 
 const getAllBrands = async () => {
-  const brands = await prisma.brand.findMany({});
+  const brands = await prisma.brand.findMany({
+    include: {
+      product: true
+    }
+  });
   return brands;
 };
 
