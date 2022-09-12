@@ -101,7 +101,7 @@ const updateProduct = async (req) => {
     qtyThreshold,
     locations
   } = req;
-  product = await prisma.product.update({
+  const product = await prisma.product.update({
     where: { id },
     data: {
       sku,
@@ -141,6 +141,16 @@ const updateProduct = async (req) => {
   return product;
 };
 
+const getAllProductsByBrand = async (req) => {
+  const { brand_id } = req;
+  const products = await prisma.product.findMany({
+    where: {
+      brand_id: Number(brand_id)
+    }
+  });
+  return products;
+};
+
 const deleteProduct = async (req) => {
   const { id } = req;
   await prisma.product.update({
@@ -173,3 +183,4 @@ exports.deleteProduct = deleteProduct;
 exports.findProductById = findProductById;
 exports.findProductBySku = findProductBySku;
 exports.findProductByName = findProductByName;
+exports.getAllProductsByBrand = getAllProductsByBrand;
