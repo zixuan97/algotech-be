@@ -26,7 +26,7 @@ const sendEmailWithAttachment = (req) => {
           '   <head></head>  '  + 
           '   <body>  '  + 
           '   <h1>Hello!</h1>  '  + 
-          '   <p>Please see the attached file for a list of customers to contact.</p>  '  + 
+          '   <p>Please see the attached file for the procurement order.</p>  '  + 
           '   </body>  '  + 
           '  </html>  ' 
   });
@@ -43,7 +43,7 @@ const sendEmailWithAttachment = (req) => {
     contentTransferEncoding: 'base64',
     body: data.toString('base64').replace(/([^\0]{76})/g, "$1\n")
   });
-  attachmentEntity.header('Content-Disposition', 'attachment ;filename="customers.txt"');
+  attachmentEntity.header('Content-Disposition', 'attachment ;filename="purchaseorder.pdf"');
   mailContent.body.push(attachmentEntity);
   AWS_SES.sendRawEmail({
     RawMessage: { Data: mailContent.toString() }
@@ -52,7 +52,7 @@ const sendEmailWithAttachment = (req) => {
 }
 
 const sendEmail = (req) => {
-  const { recipientEmail, subject, content, attachment } = req;
+  const { recipientEmail, subject, content } = req;
   const params = {
     Source: 'Meryl <e0421281@u.nus.edu>',
     Destination: {
