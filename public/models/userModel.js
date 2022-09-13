@@ -126,6 +126,16 @@ const changeUserRole = async (req) => {
   return user;
 };
 
+const generatePassword = async (req) => {
+  var result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (var i = 0; i < 20; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
@@ -136,3 +146,4 @@ exports.deleteUserById = deleteUserById;
 exports.enableUser = enableUser;
 exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
+exports.generatePassword = generatePassword;
