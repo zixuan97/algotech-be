@@ -2,8 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createProduct = async (req) => {
-  const { sku, name, description, image, categories, brand_id, qtyThreshold } =
-    req;
+  const { sku, name, description, image, categories, brand_id, qtyThreshold } = req;
 
   await prisma.product.create({
     data: {

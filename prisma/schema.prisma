@@ -51,7 +51,6 @@ model Product {
   brand                 Brand             @relation(fields: [brand_id], references: [id])
   stockQuantity         StockQuantity[]
   productCategory       ProductCategory[]
-  procurementOrderItems ProcurementOrderItem[]
   bundleProduct   BundleProduct[]
 }
 
@@ -100,8 +99,8 @@ model BundleProduct {
 model ProcurementOrder {
   id                Int        @id @default(autoincrement())
   order_date        DateTime
-  amount            Float
   description       String
+  total_amount      Float
   payment_status    PaymentStatus @default(PENDING)
   fulfilment_status FulfilmentStatus @default(CREATED)
   proc_order_items  ProcurementOrderItem[]
@@ -110,13 +109,13 @@ model ProcurementOrder {
 }
 
 model ProcurementOrderItem {
-  quantity      Int
-  proc_order    ProcurementOrder @relation(fields: [proc_order_id], references: [id])
-  proc_order_id Int
-  product       Product @relation(fields: [product_id], references: [id])
-  product_id    Int
-
-  @@id([proc_order_id, product_id])
+  id              Int @id @default(autoincrement())
+  quantity        Int
+  proc_order      ProcurementOrder @relation(fields: [proc_order_id], references: [id])
+  proc_order_id   Int
+  product_sku     String
+  product_name    String
+  rate            Float
 }
 
 model Supplier {
