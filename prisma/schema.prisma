@@ -70,7 +70,6 @@ model StockQuantity {
   price                Float
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
-  product_qtyThreshold Int?
   location             Location @relation(fields: [location_id], references: [id])
   product              Product  @relation(fields: [product_id], references: [id])
 
