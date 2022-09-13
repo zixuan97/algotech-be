@@ -8,6 +8,6 @@ router.get('/', productController.getProductByName);
 router.get('/sku/:sku', productController.getProductBySku);
 router.put('/', productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
-router.post('/pdf', productController.generatePdf);
+router.post('/excel', productController.generateExcel);
 
 module.exports = router;
