@@ -2,9 +2,16 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createProcurementOrder = async (req) => {
-  const { order_date, description, payment_status, fulfilment_status, proc_order_items, supplier_id } = req;
-  const totalAmount = 0;
-  proc_order_items.map(p => {
+  const {
+    order_date,
+    description,
+    payment_status,
+    fulfilment_status,
+    proc_order_items,
+    supplier_id
+  } = req;
+  let totalAmount = 0;
+  proc_order_items.map((p) => {
     totalAmount += p.quantity * p.rate;
   });
   await prisma.ProcurementOrder.create({
@@ -24,7 +31,7 @@ const createProcurementOrder = async (req) => {
       },
       supplier: {
         connect: {
-            id: supplier_id
+          id: supplier_id
         }
       }
     }
@@ -32,7 +39,16 @@ const createProcurementOrder = async (req) => {
 };
 
 const updateProcurementOrder = async (req) => {
-  const { id, order_date, description, total_amount, payment_status, fulfilment_status, proc_order_items, supplier_id } = req;
+  const {
+    id,
+    order_date,
+    description,
+    total_amount,
+    payment_status,
+    fulfilment_status,
+    proc_order_items,
+    supplier_id
+  } = req;
   proc_order = await prisma.ProcurementOrder.update({
     where: { id },
     data: {
