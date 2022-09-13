@@ -36,6 +36,7 @@ const createProduct = async (req) => {
           product_sku: sku,
           quantity: l.quantity,
           price: l.price,
+          location_name: l.name,
           location: {
             connect: {
               id: l.id
@@ -127,6 +128,7 @@ const updateProduct = async (req) => {
           product_sku: sku,
           quantity: l.quantity,
           price: l.price,
+          location_name: l.name,
           location: {
             connect: {
               id: l.id

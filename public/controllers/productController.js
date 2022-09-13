@@ -1,10 +1,13 @@
 const productModel = require('../models/productModel');
 const categoryModel = require('../models/categoryModel');
+const buffer = require('buffer');
+globalThis.Blob = buffer.Blob;
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
-const { generatePdfTemplate } = require('../helpers/pdf');
+const { generateInventoryExcel } = require('../helpers/excel');
+const { format } = require('date-fns');
 
 const createProduct = async (req, res) => {
   const {
@@ -48,18 +51,22 @@ const createProduct = async (req, res) => {
       res.status(e.code).json(e.message);
     }
     //uploadImg to s3
-    const { error: uploadS3Error } = await common.awaitWrap(
-      uploadS3({
-        key: `productImages/${sku}-img`,
-        payload: image
-      })
-    );
-    if (uploadS3Error) {
-      log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
-      const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
+    if (image) {
+      const { error: uploadS3Error } = await common.awaitWrap(
+        uploadS3({
+          key: `productImages/${sku}-img`,
+          payload: image
+        })
+      );
+
+      if (uploadS3Error) {
+        log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
+        const e = Error.http(uploadS3Error);
+        res.status(e.code).json(e.message);
+      }
+      log.out('OK_PRODUCT_UPLOAD-S3');
     }
-    log.out('OK_PRODUCT_UPLOAD-S3');
+
     //connect to existing categories
     const { error } = await common.awaitWrap(
       productModel.createProduct({
@@ -136,12 +143,13 @@ const getProductBySku = async (req, res) => {
 
     if (getS3Error) {
       log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
-      const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
+    }
+    if (productImg) {
+      product.image = productImg;
     }
     log.out('OK_PRODUCT_GET-PRODUCT-IMG');
     log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
-    product.image = productImg;
+
     res.json(product);
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
@@ -162,18 +170,21 @@ const updateProduct = async (req, res) => {
     locations
   } = req.body;
   //uploadImg to s3
-  const { error: uploadS3Error } = await common.awaitWrap(
-    uploadS3({
-      key: `productImages/${sku}-img`,
-      payload: image
-    })
-  );
-  if (uploadS3Error) {
-    log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
-    const e = Error.http(uploadS3Error);
-    res.status(e.code).json(e.message);
+  if (image) {
+    const { error: uploadS3Error } = await common.awaitWrap(
+      uploadS3({
+        key: `productImages/${sku}-img`,
+        payload: image
+      })
+    );
+    if (uploadS3Error) {
+      log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
+      const e = Error.http(uploadS3Error);
+      res.status(e.code).json(e.message);
+    }
+    log.out('OK_PRODUCT_UPLOAD-S3');
   }
-  log.out('OK_PRODUCT_UPLOAD-S3');
+
   const { error } = await common.awaitWrap(
     productModel.updateProduct({
       id,
@@ -209,16 +220,23 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-const generatePdf = async (req, res) => {
-  await generatePdfTemplate()
-    .then((pdfBuffer) => {
-      res
-        .writeHead(200, {
-          'Content-Length': Buffer.byteLength(pdfBuffer),
-          'Content-Type': 'application/pdf',
-          'Content-disposition': 'attachment; filename = test.pdf'
-        })
-        .end(pdfBuffer);
+const generateExcel = async (req, res) => {
+  const products = await productModel.getAllProducts();
+  await generateInventoryExcel({ products })
+    .then((blob) => {
+      const timeElapsed = Date.now();
+      const today = new Date(timeElapsed);
+      res.type(blob.type);
+      blob.arrayBuffer().then((buf) => {
+        res.setHeader(
+          'Content-disposition',
+          `attachment; filename = InventoryData${format(
+            today,
+            'yyyyMMdd'
+          )}.xlsx`
+        );
+        res.send(Buffer.from(buf));
+      });
     })
     .catch((error) => {
       return res.status(error).json(error.message);
@@ -232,4 +250,4 @@ exports.deleteProduct = deleteProduct;
 exports.getProductById = getProductById;
 exports.getProductBySku = getProductBySku;
 exports.getProductByName = getProductByName;
-exports.generatePdf = generatePdf;
+exports.generateExcel = generateExcel;

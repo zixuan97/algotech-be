@@ -23,6 +23,7 @@
     "blob-stream": "^0.1.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "date-fns": "^2.29.3",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "express-session": "^1.17.3",
@@ -32,7 +33,8 @@
     "mimemessage": "^1.0.5",
     "nodemailer": "^6.7.8",
     "nodemon": "^2.0.19",
-    "pdfkit": "^0.13.0"
+    "pdfkit": "^0.13.0",
+    "write-excel-file": "^1.4.12"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.3",
