@@ -12,7 +12,9 @@ const createCategory = async (req) => {
 };
 
 const getAllCategories = async () => {
-  const categories = await prisma.category.findMany({});
+  const categories = await prisma.category.findMany({
+    include: { productCategory: true }
+  });
   return categories;
 };
 
@@ -30,6 +32,16 @@ const updateCategory = async (req) => {
 
 const deleteCategory = async (req) => {
   const { id } = req;
+  await prisma.category.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      productCategory: {
+        deleteMany: {}
+      }
+    }
+  });
   await prisma.category.delete({
     where: {
       id: Number(id)
@@ -69,6 +81,9 @@ const findCategoryByName = async (req) => {
   const category = await prisma.category.findUnique({
     where: {
       name
+    },
+    include: {
+      productCategory: true
     }
   });
   return category;
