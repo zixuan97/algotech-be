@@ -16,8 +16,7 @@ const uploadS3 = async (req) => {
       Key: key
     };
 
-    s3.upload(params);
-    return 'Successfully uploaded file to bucket';
+    await s3.upload(params).promise();
   } catch (err) {
     //handle error
     throw new Error(`Could not upload file to S3: ${err.message}`);
@@ -35,7 +34,7 @@ const deleteS3 = async (req) => {
       Key: key
     };
 
-    s3.deleteObject(params);
+    await s3.deleteObject(params).promise();
     return 'Successfully deleted file from bucket';
   } catch (err) {
     //handle error
