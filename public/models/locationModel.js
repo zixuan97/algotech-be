@@ -30,6 +30,10 @@ const updateLocations = async (req) => {
       stockQuantity: {
         deleteMany: {},
         create: products.map((p) => ({
+          product_sku: p.sku,
+          product_name: p.name,
+          price: p.price,
+          quantity: p.quantity,
           product: {
             connect: {
               id: p.id
@@ -44,6 +48,16 @@ const updateLocations = async (req) => {
 
 const deleteLocation = async (req) => {
   const { id } = req;
+  await prisma.location.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      stockQuantity: {
+        deleteMany: {}
+      }
+    }
+  });
   await prisma.location.delete({
     where: {
       id: Number(id)
@@ -62,7 +76,6 @@ const addProductsToLocation = async (req) => {
           product_name: p.name,
           price: p.price,
           quantity: p.quantity,
-          product_qtyThreshold: p.qtyThreshold,
           product: {
             connect: {
               id: p.id

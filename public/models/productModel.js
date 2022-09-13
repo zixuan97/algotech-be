@@ -2,15 +2,21 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createProduct = async (req) => {
-  const { sku, name, description, image, categories, brand_id, qtyThreshold } =
-    req;
+  const {
+    sku,
+    name,
+    description,
+    categories,
+    brand_id,
+    qtyThreshold,
+    locations
+  } = req;
 
   await prisma.product.create({
     data: {
       sku,
       name,
       description,
-      image,
       brand_id,
       qtyThreshold,
       productCategory: {
@@ -20,6 +26,19 @@ const createProduct = async (req) => {
           category: {
             connect: {
               name: c.name
+            }
+          }
+        }))
+      },
+      stockQuantity: {
+        create: locations.map((l) => ({
+          product_name: name,
+          product_sku: sku,
+          quantity: l.quantity,
+          price: l.price,
+          location: {
+            connect: {
+              id: l.id
             }
           }
         }))
@@ -69,23 +88,85 @@ const findProductByName = async (req) => {
 };
 
 const updateProduct = async (req) => {
-  const { id, name, description, image, category_id, qtyThreshold } = req;
-  product = await prisma.product.update({
+  const {
+    id,
+    sku,
+    name,
+    description,
+    image,
+    categories,
+    brand_id,
+    qtyThreshold,
+    locations
+  } = req;
+  const product = await prisma.product.update({
     where: { id },
     data: {
+      sku,
       name,
       description,
       image,
-      category_id,
+      brand_id,
       qtyThreshold,
-      brand_id
+      productCategory: {
+        deleteMany: {},
+        create: categories.map((c) => ({
+          category_name: c.name,
+          product_sku: sku,
+          category: {
+            connect: {
+              name: c.name
+            }
+          }
+        }))
+      },
+      stockQuantity: {
+        deleteMany: {},
+        create: locations.map((l) => ({
+          product_name: name,
+          product_sku: sku,
+          quantity: l.quantity,
+          price: l.price,
+          location: {
+            connect: {
+              id: l.id
+            }
+          }
+        }))
+      }
     }
   });
   return product;
 };
 
+const getAllProductsByBrand = async (req) => {
+  const { brand_id } = req;
+  const products = await prisma.product.findMany({
+    where: {
+      brand_id: Number(brand_id)
+    }
+  });
+  return products;
+};
+
 const deleteProduct = async (req) => {
   const { id } = req;
+  await prisma.product.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      productCategory: {
+        deleteMany: {}
+      },
+      stockQuantity: {
+        deleteMany: {}
+      },
+      bundleProduct: {
+        deleteMany: {}
+      }
+    }
+  });
   await prisma.product.delete({
     where: {
       id: Number(id)
@@ -100,3 +181,4 @@ exports.deleteProduct = deleteProduct;
 exports.findProductById = findProductById;
 exports.findProductBySku = findProductBySku;
 exports.findProductByName = findProductByName;
+exports.getAllProductsByBrand = getAllProductsByBrand;

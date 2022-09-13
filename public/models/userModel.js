@@ -4,13 +4,16 @@ const prisma = new PrismaClient();
 const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req) => {
-  const { email, password } = req;
+  const { first_name, last_name, email, password, role } = req;
   encryptedPassword = await bcrypt.hash(password, 10);
 
   await prisma.User.create({
     data: {
+      first_name,
+      last_name,
       email,
-      password: encryptedPassword
+      password: encryptedPassword,
+      role
     }
   });
 };
@@ -123,6 +126,16 @@ const changeUserRole = async (req) => {
   return user;
 };
 
+const generatePassword = async (req) => {
+  var result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (var i = 0; i < 20; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
@@ -133,3 +146,4 @@ exports.deleteUserById = deleteUserById;
 exports.enableUser = enableUser;
 exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
+exports.generatePassword = generatePassword;

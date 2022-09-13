@@ -8,11 +8,13 @@ datasource db {
 }
 
 model User {
-  id       Int        @id @default(autoincrement())
-  email    String     @unique
-  password String
-  role     UserRole   @default(ADMIN)
-  status   UserStatus @default(ACTIVE)
+  id         Int        @id @default(autoincrement())
+  first_name String
+  last_name  String
+  email      String     @unique
+  password   String
+  role       UserRole   @default(ADMIN)
+  status     UserStatus @default(ACTIVE)
 }
 
 model Category {
@@ -24,16 +26,16 @@ model Category {
 model Brand {
   id      Int       @id @default(autoincrement())
   name    String    @unique
-  Product Product[]
+  product Product[]
 }
 
 model ProductCategory {
   product_id    Int
   product_sku   String
-  product       Product  @relation(fields: [product_id], references: [id])
   category_name String
   category_id   Int
   category      Category @relation(fields: [category_id], references: [id])
+  product       Product  @relation(fields: [product_id], references: [id])
 
   @@id([product_id, category_id])
 }
@@ -49,8 +51,7 @@ model Product {
   brand                 Brand             @relation(fields: [brand_id], references: [id])
   stockQuantity         StockQuantity[]
   productCategory       ProductCategory[]
-  procurementOrderItems ProcurementOrderItem[]
-  bundleProduct   BundleProduct[]
+  bundleProduct         BundleProduct[]
 }
 
 model Location {
@@ -64,7 +65,6 @@ model StockQuantity {
   product_id           Int
   product_name         String
   product_sku          String
-  product_qtyThreshold Int?
   location_id          Int
   quantity             Int
   price                Float
@@ -78,7 +78,7 @@ model StockQuantity {
 
 model Bundle {
   id            Int             @id @default(autoincrement())
-  name          String          @unique 
+  name          String          @unique
   description   String
   price         Float
   bundleProduct BundleProduct[]
@@ -89,36 +89,36 @@ model BundleProduct {
   product_id  Int
   product_sku String
   bundle_name String
-  product     Product @relation(fields: [product_id], references: [id])
   bundle      Bundle  @relation(fields: [bundle_id], references: [id])
+  product     Product @relation(fields: [product_id], references: [id])
 
   @@id([product_id, bundle_id])
 }
 
 model ProcurementOrder {
-  id                Int        @id @default(autoincrement())
+  id                Int                    @id @default(autoincrement())
   order_date        DateTime
-  amount            Float
   description       String
+  total_amount      Float
   payment_status    PaymentStatus @default(PENDING)
   fulfilment_status FulfilmentStatus @default(CREATED)
   proc_order_items  ProcurementOrderItem[]
-  supplier          Supplier @relation(fields: [supplier_id], references: [id])
   supplier_id       Int
+  supplier          Supplier               @relation(fields: [supplier_id], references: [id])
 }
 
 model ProcurementOrderItem {
-  quantity      Int
-  proc_order    ProcurementOrder @relation(fields: [proc_order_id], references: [id])
-  proc_order_id Int
-  product       Product @relation(fields: [product_id], references: [id])
-  product_id    Int
-
-  @@id([proc_order_id, product_id])
+  id              Int @id @default(autoincrement())
+  quantity        Int
+  proc_order      ProcurementOrder @relation(fields: [proc_order_id], references: [id])
+  proc_order_id   Int
+  product_sku     String
+  product_name    String
+  rate            Float
 }
 
 model Supplier {
-  id               Int      @id @default(autoincrement())
+  id               Int                @id @default(autoincrement())
   email            String
   name             String
   address          String

@@ -1,4 +1,5 @@
 const brandModel = require('../models/brandModel');
+const productModel = require('../models/productModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -89,6 +90,29 @@ const updateBrand = async (req, res) => {
 
 const deleteBrand = async (req, res) => {
   const { id } = req.params;
+  const { data: products, getAllProductsError } = await common.awaitWrap(
+    productModel.getAllProductsByBrand({ brand_id: id })
+  );
+
+  if (getAllProductsError) {
+    log.error('ERR_BRAND_GET-ALL-PRODUCTS', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_BRAND_GET-ALL-PRODUCTS');
+  }
+  const { error: deleteProductsError } = await common.awaitWrap(
+    await Promise.allSettled(
+      products.map(async (product) => {
+        await productModel.deleteProduct({ id: product.id });
+      })
+    )
+  );
+  if (deleteProductsError) {
+    log.error('ERR_PRODUCT_DELETE-ALL-PRODUCTS', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
   const { error } = await common.awaitWrap(brandModel.deleteBrand({ id }));
   if (error) {
     log.error('ERR_BRAND_DELETE_BRAND', error.message);
