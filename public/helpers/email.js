@@ -16,26 +16,26 @@ const sendEmailWithAttachment = (req) => {
   mailContent.header('From', 'Meryl <e0421281@u.nus.edu>');
   mailContent.header('To', recipientEmail);
   mailContent.header('Subject', subject);
-  var alternateEntity = mimemessage.factory({
-    contentType: 'multipart/alternate',
-    body: []
-  });
-  var htmlEntity = mimemessage.factory({
-    contentType: 'text/html;charset=utf-8',
-    body:  '   <html>  '  + 
-          '   <head></head>  '  + 
-          '   <body>  '  + 
-          '   <h1>Hello!</h1>  '  + 
-          '   <p>Please see the attached file for the procurement order.</p>  '  + 
-          '   </body>  '  + 
-          '  </html>  ' 
-  });
+  // var alternateEntity = mimemessage.factory({
+  //   contentType: 'multipart/alternate',
+  //   body: []
+  // });
+  // var htmlEntity = mimemessage.factory({
+  //   contentType: 'text/html;charset=utf-8',
+  //   body:  '   <html>  '  + 
+  //         '   <head></head>  '  + 
+  //         '   <body>  '  + 
+  //         '   <h1>Hello!</h1>  '  + 
+  //         '   <p>Please see the attached file for the procurement order.</p>  '  + 
+  //         '   </body>  '  + 
+  //         '  </html>  ' 
+  // });
   var plainEntity = mimemessage.factory({
     body: content
   });
-  alternateEntity.body.push(htmlEntity);
-  alternateEntity.body.push(plainEntity);
-  mailContent.body.push(alternateEntity);
+  //alternateEntity.body.push(htmlEntity);
+  //alternateEntity.body.push(plainEntity);
+  //mailContent.body.push(alternateEntity);
   mailContent.body.push(plainEntity);
   var data = fs.readFileSync(attachment);
   var attachmentEntity = mimemessage.factory({

@@ -7,13 +7,21 @@ const { log } = require('../helpers/logger');
 const emailHelper = require('../helpers/email');
 
 const createUser = async (req, res) => {
-  const { first_name, last_name, email, password, role } = req.body;
+  const { first_name, last_name, email, role } = req.body;
+  const password = await common.awaitWrap(userModel.generatePassword());
+  const content = "Hi " + first_name + " " + last_name + "! Your generated password is " + password.data + ". Click on this link to change your password.";
+  try {
+    await emailHelper.sendEmail({ recipientEmail: email, subject: "Your generated password", content });
+    console.log("Email sent");
+  } catch (error) {
+    console.log("Error sending email");
+  }
   const { error } = await common.awaitWrap(
     userModel.createUser({
       first_name,
       last_name,
       email,
-      password,
+      password: password.data,
       role
     })
   );
@@ -176,11 +184,9 @@ const changeUserRole = async (req, res) => {
 const sendForgetEmailPassword = async (req, res) => {
   try {
     const { recipientEmail, subject, content } = req.body;
-    const attachment = 'customers.txt';
     const user = await userModel.findUserByEmail({ email: recipientEmail });
     if (user != null) {
-      // await emailHelper.sendEmail({ recipientEmail, subject, content });
-      await emailHelper.sendEmailWithAttachment({ recipientEmail, subject, content, attachment });
+      await emailHelper.sendEmail({ recipientEmail, subject, content });
       log.out('OK_USER_SENT-EMAIL');
       res.json({
         message: 'Email sent'
