@@ -279,8 +279,8 @@ const alertLowInventory = async (req, res) => {
     const timeElapsed = Date.now();
     const today = new Date(timeElapsed);
     res.type(blob.type);
-    blob.arrayBuffer().then((buf) => {
-      emailHelper.sendEmailWithAttachment({
+    blob.arrayBuffer().then(async (buf) => {
+      await emailHelper.sendEmailWithAttachment({
         recipientEmail: 'exleolee@gmail.com',
         subject: `Daily Inventory Report ${format(today, 'yyyyMMdd')}`,
         content: 'Here are the products that are on low supply ',

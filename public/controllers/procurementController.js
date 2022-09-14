@@ -117,10 +117,10 @@ const sendProcurementEmail = async (req, res) => {
   try {
     const { recipientEmail, po_id } = req.body;
     const po = await procurementModel.findProcurementOrderById({ id: po_id });
-    await generateProcurementPdfTemplate({ po }).then((pdfBuffer) => {
+    await generateProcurementPdfTemplate({ po }).then(async (pdfBuffer) => {
       const subject = 'Procurement Order';
       const content = 'Attached please find the procurement order.';
-      emailHelper.sendEmailWithAttachment({
+      await emailHelper.sendEmailWithAttachment({
         recipientEmail,
         subject,
         content,
