@@ -65,7 +65,9 @@ const updateProcurementOrder = async (req) => {
 };
 
 const getAllProcurementOrders = async () => {
-  const pos = await prisma.ProcurementOrder.findMany({});
+  const pos = await prisma.ProcurementOrder.findMany({
+    include: { proc_order_items : true }
+  });
   return pos;
 };
 
@@ -74,7 +76,8 @@ const findProcurementOrderById = async (req) => {
   const po = await prisma.ProcurementOrder.findUnique({
     where: {
       id: Number(id)
-    }
+    },
+    include: { proc_order_items : true }
   });
   return po;
 };
