@@ -11,6 +11,7 @@ const createProcurementOrder = async (req, res) => {
     description,
     payment_status,
     fulfilment_status,
+    warehouse_address,
     proc_order_items,
     supplier_id
   } = req.body;
@@ -20,6 +21,7 @@ const createProcurementOrder = async (req, res) => {
       description,
       payment_status,
       fulfilment_status,
+      warehouse_address,
       proc_order_items,
       supplier_id
     })
@@ -40,6 +42,7 @@ const updateProcurementOrder = async (req, res) => {
     order_date,
     payment_status,
     fulfilment_status,
+    warehouse_address,
     proc_order_items,
     supplier_id
   } = req.body;
@@ -49,6 +52,7 @@ const updateProcurementOrder = async (req, res) => {
       order_date,
       payment_status,
       fulfilment_status,
+      warehouse_address,
       proc_order_items,
       supplier_id
     })
@@ -91,9 +95,9 @@ const getProcurementOrder = async (req, res) => {
 };
 
 const generatePO = async (req, res) => {
-  const { po_id, warehouse_address } = req.body;
-  const po = await procurementModel.findProcurementOrderById({ id: po_id });
-  await generateProcurementPdfTemplate({ po, warehouse_address })
+  const po_id  = req.params;
+  const po = await procurementModel.findProcurementOrderById(po_id);
+  await generateProcurementPdfTemplate({ po })
     .then((pdfBuffer) => {
       res
         .writeHead(200, {
@@ -111,12 +115,9 @@ const generatePO = async (req, res) => {
 
 const sendProcurementEmail = async (req, res) => {
   try {
-    const { recipientEmail, po_id, warehouse_address } = req.body;
+    const { recipientEmail, po_id } = req.body;
     const po = await procurementModel.findProcurementOrderById({ id: po_id });
-    await generateProcurementPdfTemplate({
-      po,
-      warehouse_address
-    }).then((pdfBuffer) => {
+    await generateProcurementPdfTemplate({ po }).then((pdfBuffer) => {
       const subject = 'Procurement Order';
       const content = 'Attached please find the procurement order.';
       emailHelper.sendEmailWithAttachment({

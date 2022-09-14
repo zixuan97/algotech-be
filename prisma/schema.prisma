@@ -106,6 +106,7 @@ model ProcurementOrder {
   supplier_id       Int
   total_amount      Float
   supplier          Supplier               @relation(fields: [supplier_id], references: [id])
+  warehouse_address String
   proc_order_items  ProcurementOrderItem[]
 }
 

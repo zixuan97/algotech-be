@@ -7,6 +7,7 @@ const createProcurementOrder = async (req) => {
     description,
     payment_status,
     fulfilment_status,
+    warehouse_address,
     proc_order_items,
     supplier_id
   } = req;
@@ -21,6 +22,7 @@ const createProcurementOrder = async (req) => {
       total_amount: totalAmount,
       payment_status,
       fulfilment_status,
+      warehouse_address,
       proc_order_items: {
         create: proc_order_items.map((p) => ({
           quantity: p.quantity,
@@ -46,6 +48,7 @@ const updateProcurementOrder = async (req) => {
     total_amount,
     payment_status,
     fulfilment_status,
+    warehouse_address,
     proc_order_items,
     supplier_id
   } = req;
@@ -57,6 +60,7 @@ const updateProcurementOrder = async (req) => {
       total_amount,
       payment_status,
       fulfilment_status,
+      warehouse_address,
       proc_order_items,
       supplier_id
     }
