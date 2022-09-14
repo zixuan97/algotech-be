@@ -267,6 +267,10 @@ const generateExcel = async (req, res) => {
     });
 };
 
+const alertLowInventory = async (req, res) => {
+  const products = await productModel.getAllProducts();
+};
+
 exports.createProduct = createProduct;
 exports.getAllProducts = getAllProducts;
 exports.updateProduct = updateProduct;
