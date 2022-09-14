@@ -25,13 +25,10 @@ const createProduct = async (req, res) => {
     locations
   } = req.body;
   // check if product exists
-  const { data: productSku } = await common.awaitWrap(
-    productModel.findProductBySku({ sku })
-  );
 
-  const { data: productName } = await common.awaitWrap(
-    productModel.findProductByName({ name })
-  );
+  const productSku = await productModel.findProductBySku({ sku });
+
+  const productName = await productModel.findProductByName({ name });
 
   // if exists throw error
   if (productSku) {
@@ -56,20 +53,18 @@ const createProduct = async (req, res) => {
     }
     //uploadImg to s3
     if (image) {
-      const { error: uploadS3Error } = await common.awaitWrap(
-        uploadS3({
+      try {
+        await uploadS3({
           key: `productImages/${sku}-img`,
           payload: image
-        })
-      );
-
-      if (uploadS3Error) {
+        });
+      } catch (uploadS3Error) {
         log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
         const e = Error.http(uploadS3Error);
         res.status(e.code).json(e.message);
       }
-      log.out('OK_PRODUCT_UPLOAD-S3');
     }
+    log.out('OK_PRODUCT_UPLOAD-S3');
 
     //connect to existing categories
     const { error } = await common.awaitWrap(
