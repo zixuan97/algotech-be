@@ -46,6 +46,9 @@ const findBrandById = async (req) => {
   const brand = await prisma.brand.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      product: true
     }
   });
   return brand;
@@ -56,6 +59,9 @@ const findBrandByName = async (req) => {
   const brand = await prisma.brand.findUnique({
     where: {
       name
+    },
+    include: {
+      product: true
     }
   });
   return brand;
