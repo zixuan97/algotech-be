@@ -15,7 +15,6 @@ model User {
   password    String
   role        UserRole   @default(ADMIN)
   status      UserStatus @default(ACTIVE)
-  is_verified Boolean    @default(false)
 }
 
 model Category {

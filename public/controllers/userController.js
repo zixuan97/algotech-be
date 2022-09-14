@@ -102,7 +102,8 @@ const getUsers = async (req, res) => {
   try {
     const users = await userModel.getUsers({});
     log.out('OK_USER_GET-USERS');
-    res.json(users.filter(u => u.id != req.user.user_id));
+    //res.json(users.filter(u => u.id != req.user.user_id));
+    res.json(users);
   } catch (error) {
     log.error('ERR_USER_GET-USERS', err.message);
     res.status(500).send('Server Error');
@@ -184,10 +185,12 @@ const changeUserRole = async (req, res) => {
 const sendForgetEmailPassword = async (req, res) => {
   try {
     const { recipientEmail } = req.body;
-    const subject = "Your generated password";
-    const content = "";
     const user = await userModel.findUserByEmail({ email: recipientEmail });
     if (user != null) {
+      const subject = "Your generated password";
+      const updatedPassword = await common.awaitWrap(userModel.generatePassword());
+      const content = "Your generated password is " + updatedPassword.data + ".";
+      const user = await userModel.editUser({ id: user.id, password: updatedPassword.data });
       await emailHelper.sendEmail({ recipientEmail, subject, content });
       log.out('OK_USER_SENT-EMAIL');
       res.json({
