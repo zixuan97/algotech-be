@@ -10,7 +10,7 @@ const SES_CONFIG = {
 
 const AWS_SES = new AWS.SES(SES_CONFIG);
 
-const sendEmailWithAttachment = (req) => {
+const sendEmailWithAttachment = async (req) => {
   const { recipientEmail, subject, content, data, filename } = req;
   var mailContent = mimemessage.factory({
     contentType: 'multipart/mixed',
@@ -50,12 +50,16 @@ const sendEmailWithAttachment = (req) => {
     `attachment ;filename="${filename}"`
   );
   mailContent.body.push(attachmentEntity);
-  AWS_SES.sendRawEmail(
+  try{
+  await AWS_SES.sendRawEmail(
     {
       RawMessage: { Data: mailContent.toString() }
     },
     (err, sesdata, res) => {}
-  );
+  ).promise();
+  } catch (err) {
+    throw err
+  }
 };
 
 const sendEmail = (req) => {
