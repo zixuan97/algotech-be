@@ -32,10 +32,10 @@ const createProduct = async (req, res) => {
   // if exists throw error
   if (productSku) {
     log.error('ERR_PRODUCT_CREATE-PRODUCT');
-    res.code(400).json({ message: 'Product sku already exists' });
+    res.status(400).json({ message: 'Product sku already exists' });
   } else if (productName) {
     log.error('ERR_PRODUCT_CREATE-PRODUCT');
-    res.code(400).json({ message: 'Product name already exists' });
+    res.status(400).json({ message: 'Product name already exists' });
   } else {
     // find or create category
     const { error: connectOrCreateCategoryError } = await common.awaitWrap(
@@ -265,6 +265,10 @@ const generateExcel = async (req, res) => {
     .catch((error) => {
       return res.status(error).json(error.message);
     });
+};
+
+const alertLowInventory = async (req, res) => {
+  const products = await productModel.getAllProducts();
 };
 
 exports.createProduct = createProduct;

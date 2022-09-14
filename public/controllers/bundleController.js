@@ -3,10 +3,8 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
-
 const createBundle = async (req, res) => {
-  const { name, description, price, products } =
-    req.body;
+  const { name, description, price, products } = req.body;
   // check if bundle name exists
   const { data: bundleName } = await common.awaitWrap(
     bundleModel.findBundleByName({ name })
@@ -15,12 +13,12 @@ const createBundle = async (req, res) => {
   // if exists throw error
   if (bundleName) {
     log.error('ERR_BUNDLE_CREATE-BUNDLE');
-    res.code(400).json({ message: 'Bundle name already exists' });
+    res.status(400).json({ message: 'Bundle name already exists' });
   } else {
     const { error } = await common.awaitWrap(
       bundleModel.createBundle({
-        name, 
-        description, 
+        name,
+        description,
         price,
         products
       })
@@ -29,7 +27,7 @@ const createBundle = async (req, res) => {
     if (error) {
       log.error('ERR_BUNDLE_CREATE-BUNDLE', error.message);
       const e = Error.http(error);
-    res.status(e.code).json(e.message);
+      res.status(e.code).json(e.message);
     } else {
       log.out('OK_BUNDLE_CREATE-BUNDLE');
       res.json({ message: 'Bundle created' });
@@ -38,9 +36,7 @@ const createBundle = async (req, res) => {
 };
 
 const getAllBundles = async (req, res) => {
-  const { data, error } = await common.awaitWrap(
-    bundleModel.getAllBundles({})
-  );
+  const { data, error } = await common.awaitWrap(bundleModel.getAllBundles({}));
 
   if (error) {
     log.error('ERR_BUNDLE_GET-ALL-BUNDLES', error.message);
@@ -76,10 +72,8 @@ const getBundleByName = async (req, res) => {
   }
 };
 
-
 const updateBundle = async (req, res) => {
-  const { id, name, description, price } =
-    req.body;
+  const { id, name, description, price } = req.body;
   const { error } = await common.awaitWrap(
     bundleModel.updateBundle({
       id,
@@ -110,7 +104,6 @@ const deleteBundle = async (req, res) => {
     res.json({ message: `Deleted bundle with id:${id}` });
   }
 };
-
 
 exports.createBundle = createBundle;
 exports.getAllBundles = getAllBundles;
