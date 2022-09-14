@@ -9,5 +9,6 @@ router.get('/sku/:sku', productController.getProductBySku);
 router.put('/', productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
 router.post('/excel', productController.generateExcel);
+router.post('/alerts/excel', productController.alertLowInventory);
 
 module.exports = router;

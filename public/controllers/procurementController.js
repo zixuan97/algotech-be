@@ -131,13 +131,13 @@ const sendProcurementEmail = async (req, res) => {
       proc_order_items
     })
       .then((pdfBuffer) => {
-        res
-          .writeHead(200, {
-            'Content-Length': Buffer.byteLength(pdfBuffer),
-            'Content-Type': 'application/pdf',
-            'Content-disposition': 'attachment; filename = purchaseorder.pdf'
-          })
-          .end(pdfBuffer);
+        // res
+        //   .writeHead(200, {
+        //     'Content-Length': Buffer.byteLength(pdfBuffer),
+        //     'Content-Type': 'application/pdf',
+        //     'Content-disposition': 'attachment; filename = purchaseorder.pdf'
+        //   })
+        //   .end(pdfBuffer);
         fs.writeFile('purchaseorder.pdf', pdfBuffer, 'binary', function (err) {
           if (err) {
             console.log(err);
@@ -158,6 +158,7 @@ const sendProcurementEmail = async (req, res) => {
             }
           }
         });
+        res.status(200).json({ message: 'email sent' });
       })
       .catch((error) => {
         log.error('ERR_PROCUREMENTORDER_GENERATE-PO-PDF', error.message);
