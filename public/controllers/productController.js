@@ -6,8 +6,13 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
-const { generateInventoryExcel } = require('../helpers/excel');
+const {
+  generateInventoryExcel,
+  generateLowStockExcel
+} = require('../helpers/excel');
 const { format } = require('date-fns');
+const emailHelper = require('../helpers/email');
+const fs = require('fs');
 
 const createProduct = async (req, res) => {
   const {
@@ -263,12 +268,51 @@ const generateExcel = async (req, res) => {
       });
     })
     .catch((error) => {
-      return res.status(error).json(error.message);
+      return res.status(400).json(error.message);
     });
 };
 
 const alertLowInventory = async (req, res) => {
+  const timeElapsed = Date.now();
+  const today = new Date(timeElapsed);
   const products = await productModel.getAllProducts();
+  await generateLowStockExcel({ products })
+    .then((blob) => {
+      const timeElapsed = Date.now();
+      const today = new Date(timeElapsed);
+      res.type(blob.type);
+      blob.arrayBuffer().then((buf) => {
+        fs.writeFile(
+          `LowStock${format(today, 'yyyyMMdd')}.xlsx`,
+          Buffer.from(buf),
+          'binary',
+          function (err) {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log('FILE SAVED');
+              const attachment = `LowStock${format(today, 'yyyyMMdd')}.xlsx`;
+              emailHelper.sendEmailWithAttachment({
+                recipientEmail: 'exleolee@gmail.com',
+                subject: `Daily Inventory Report ${format(today, 'yyyyMMdd')}`,
+                content: 'Here are the products that are on low supply ',
+                attachment
+              });
+              console.log('EMAIL SENT');
+              try {
+                fs.unlinkSync(attachment);
+              } catch (err) {
+                console.error(err);
+              }
+            }
+          }
+        );
+        res.status(200).json({ message: 'email sent' });
+      });
+    })
+    .catch((error) => {
+      return res.status(400).json(error.message);
+    });
 };
 
 exports.createProduct = createProduct;
@@ -279,3 +323,4 @@ exports.getProductById = getProductById;
 exports.getProductBySku = getProductBySku;
 exports.getProductByName = getProductByName;
 exports.generateExcel = generateExcel;
+exports.alertLowInventory = alertLowInventory;
