@@ -13,6 +13,7 @@ model User {
   last_name  String
   email      String     @unique
   password   String
+  isVerified Boolean    @default(false)
   role       UserRole   @default(ADMIN)
   status     UserStatus @default(ACTIVE)
 }
@@ -62,16 +63,17 @@ model Location {
 }
 
 model StockQuantity {
-  product_id   Int
-  product_name String
-  product_sku  String
-  location_id  Int
-  quantity     Int
-  price        Float
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  location     Location @relation(fields: [location_id], references: [id])
-  product      Product  @relation(fields: [product_id], references: [id])
+  product_id    Int
+  product_name  String
+  product_sku   String
+  location_id   Int
+  location_name String
+  quantity      Int
+  price         Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  location      Location @relation(fields: [location_id], references: [id])
+  product       Product  @relation(fields: [product_id], references: [id])
 
   @@id([product_id, location_id])
 }

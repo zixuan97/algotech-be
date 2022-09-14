@@ -1,5 +1,4 @@
 const writeXlsxFile = require('write-excel-file');
-const getStream = require('get-stream');
 
 const generateInventoryExcel = async (req) => {
   const { products } = req;
@@ -13,8 +12,8 @@ const generateInventoryExcel = async (req) => {
         name: product.name,
         sku: product.sku,
         quantity: stockqty.quantity,
-        price: stockqty.price
-        // location: stockqty.location_name
+        price: stockqty.price,
+        location: stockqty.location_name
       };
       objects[count] = obj;
       count++;
