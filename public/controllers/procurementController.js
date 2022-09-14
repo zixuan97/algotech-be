@@ -12,6 +12,7 @@ const createProcurementOrder = async (req, res) => {
     description,
     payment_status,
     fulfilment_status,
+    warehouse_address,
     proc_order_items,
     supplier_id
   } = req.body;
@@ -21,6 +22,7 @@ const createProcurementOrder = async (req, res) => {
       description,
       payment_status,
       fulfilment_status,
+      warehouse_address,
       proc_order_items,
       supplier_id
     })
@@ -41,6 +43,7 @@ const updateProcurementOrder = async (req, res) => {
     order_date,
     payment_status,
     fulfilment_status,
+    warehouse_address,
     proc_order_items,
     supplier_id
   } = req.body;
@@ -50,6 +53,7 @@ const updateProcurementOrder = async (req, res) => {
       order_date,
       payment_status,
       fulfilment_status,
+      warehouse_address,
       proc_order_items,
       supplier_id
     })
@@ -92,9 +96,9 @@ const getProcurementOrder = async (req, res) => {
 };
 
 const generatePO = async (req, res) => {
-  const { po_id, warehouse_address } = req.body;
-  const po = await procurementModel.findProcurementOrderById({ id: po_id });
-  await generateProcurementPdfTemplate({ po, warehouse_address })
+  const po_id  = req.params;
+  const po = await procurementModel.findProcurementOrderById(po_id);
+  await generateProcurementPdfTemplate({ po })
     .then((pdfBuffer) => {
       res
         .writeHead(200, {
@@ -114,14 +118,10 @@ const sendProcurementEmail = async (req, res) => {
   try {
     const {
       recipientEmail,
-      po_id,
-      warehouse_address
+      po_id
     } = req.body;
     const po = await procurementModel.findProcurementOrderById({ id: po_id });
-    await generateProcurementPdfTemplate({
-      po,
-      warehouse_address
-    })
+    await generateProcurementPdfTemplate({ po })
       .then((pdfBuffer) => {
         fs.writeFile('purchaseorder.pdf', pdfBuffer, 'binary', function (err) {
           if (err) {

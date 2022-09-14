@@ -18,7 +18,7 @@ const generatePdfTemplate = async () => {
 };
 
 const generateProcurementPdfTemplate = async (req) => {
-  const { po, warehouse_address } = req;
+  const { po } = req;
   const { id, order_date, supplier_id, proc_order_items } = po;
   const supplier = await supplierModel.findSupplierById({ id: supplier_id });
   // Create a document
@@ -70,7 +70,7 @@ const generateProcurementPdfTemplate = async (req) => {
     .fill('black')
     .fontSize(8)
     .text(
-      warehouse_address,
+      po.warehouse_address,
       leftAlign + 200,
       225,
       { width: 120 }
