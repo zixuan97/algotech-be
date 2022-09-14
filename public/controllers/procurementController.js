@@ -75,9 +75,8 @@ const getProcurementOrder = async (req, res) => {
 };
 
 const generatePO = async (req, res) => {
-  await generateProcurementPdfTemplate(req)
+  await generateProcurementPdfTemplate(req.body)
     .then((pdfBuffer) => {
-      console.log("res", res)
       res
         .writeHead(200, {
           'Content-Length': Buffer.byteLength(pdfBuffer),
@@ -85,13 +84,6 @@ const generatePO = async (req, res) => {
           'Content-disposition': 'attachment; filename = test.pdf'
         })
         .end(pdfBuffer);
-        fs.writeFile("purchaseorder.pdf", pdfBuffer,  "binary", function(err) {
-          if(err) {
-              console.log(err);
-          } else {
-              console.log("The file was saved!");
-          }
-      });
     })
     .catch((error) => {
       log.error('ERR_PROCUREMENTORDER_GENERATE-PO-PDF', error.message);
