@@ -74,7 +74,8 @@ const generateLowStockExcel = async (req) => {
       const obj = {
         name: product.name,
         sku: product.sku,
-        qtyThreshold: product.qtyThreshold
+        qtyThreshold: product.qtyThreshold,
+        currentQty : totalQty
       };
       objects[count] = obj;
       count++;
@@ -96,6 +97,11 @@ const generateLowStockExcel = async (req) => {
       column: 'Quantity Threshold',
       type: Number,
       value: (product) => product.qtyThreshold
+    },
+    {
+      column: 'Current Quantity',
+      type: Number,
+      value: (product) => product.currentQty
     }
   ];
 
