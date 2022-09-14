@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req) => {
-  const { first_name, last_name, email, password, role } = req;
+  const { first_name, last_name, email, password, role, isVerified } = req;
   encryptedPassword = await bcrypt.hash(password, 10);
 
   await prisma.User.create({
@@ -13,7 +13,8 @@ const createUser = async (req) => {
       last_name,
       email,
       password: encryptedPassword,
-      role
+      role,
+      isVerified
     }
   });
 };
@@ -66,7 +67,8 @@ const editUser = async (req) => {
           ? await bcrypt.hash(updatedUser.password, 10)
           : currUser.password,
       role: updatedUser.role,
-      status: updatedUser.status
+      status: updatedUser.status,
+      isVerified: updatedUser.isVerified
     }
   });
   return user;
