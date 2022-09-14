@@ -119,8 +119,6 @@ const getProductById = async (req, res) => {
 
     if (getS3Error) {
       log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
-      const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
     }
     log.out('OK_PRODUCT_GET-PRODUCT-IMG');
     product.image = productImg;
@@ -145,8 +143,6 @@ const getProductByName = async (req, res) => {
 
     if (getS3Error) {
       log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
-      const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
     }
     log.out('OK_PRODUCT_GET-PRODUCT-IMG');
     product.image = productImg;
