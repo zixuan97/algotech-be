@@ -12,7 +12,6 @@ const {
 } = require('../helpers/excel');
 const { format } = require('date-fns');
 const emailHelper = require('../helpers/email');
-const fs = require('fs');
 
 const createProduct = async (req, res) => {
   const {
@@ -276,43 +275,22 @@ const alertLowInventory = async (req, res) => {
   const timeElapsed = Date.now();
   const today = new Date(timeElapsed);
   const products = await productModel.getAllProducts();
-  await generateLowStockExcel({ products })
-    .then((blob) => {
-      const timeElapsed = Date.now();
-      const today = new Date(timeElapsed);
-      res.type(blob.type);
-      blob.arrayBuffer().then((buf) => {
-        fs.writeFile(
-          `LowStock${format(today, 'yyyyMMdd')}.xlsx`,
-          Buffer.from(buf),
-          'binary',
-          function (err) {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log('FILE SAVED');
-              const attachment = `LowStock${format(today, 'yyyyMMdd')}.xlsx`;
-              emailHelper.sendEmailWithAttachment({
-                recipientEmail: 'exleolee@gmail.com',
-                subject: `Daily Inventory Report ${format(today, 'yyyyMMdd')}`,
-                content: 'Here are the products that are on low supply ',
-                attachment
-              });
-              console.log('EMAIL SENT');
-              try {
-                fs.unlinkSync(attachment);
-              } catch (err) {
-                console.error(err);
-              }
-            }
-          }
-        );
-        res.status(200).json({ message: 'email sent' });
+  await generateLowStockExcel({ products }).then((blob) => {
+    const timeElapsed = Date.now();
+    const today = new Date(timeElapsed);
+    res.type(blob.type);
+    blob.arrayBuffer().then((buf) => {
+      emailHelper.sendEmailWithAttachment({
+        recipientEmail: 'exleolee@gmail.com',
+        subject: `Daily Inventory Report ${format(today, 'yyyyMMdd')}`,
+        content: 'Here are the products that are on low supply ',
+        data: Buffer.from(buf).toString('base64'),
+        filename: `LowStockReport${format(today, 'yyyyMMdd')}.xlsx`
       });
-    })
-    .catch((error) => {
-      return res.status(400).json(error.message);
+      console.log('EMAIL SENT');
     });
+    res.status(200).json({ message: 'email sent' });
+  });
 };
 
 exports.createProduct = createProduct;
