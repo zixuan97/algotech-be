@@ -104,7 +104,7 @@ const deleteBrand = async (req, res) => {
     log.out('OK_BRAND_GET-ALL-PRODUCTS');
   }
   const { error: deleteProductsError } = await common.awaitWrap(
-    await Promise.allSettled(
+    Promise.allSettled(
       products.map(async (product) => {
         await productModel.deleteProduct({ id: product.id });
       })
