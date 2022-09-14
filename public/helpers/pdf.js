@@ -1,6 +1,7 @@
 const { Lightsail } = require('aws-sdk');
 const getStream = require('get-stream');
 const PDFDocument = require('pdfkit');
+const supplierModel = require('../models/supplierModel');
 
 const generatePdfTemplate = async () => {
   // Create a document
@@ -17,7 +18,10 @@ const generatePdfTemplate = async () => {
 };
 
 const generateProcurementPdfTemplate = async (req) => {
-  const { companyName, companyEmail, website, supplierName, shipTo, po_id, po_date, proc_order_items } = req;
+  console.log("req", req)
+  const { po, warehouse_address } = req;
+  const { id, order_date, supplier_id, proc_order_items } = po;
+  const supplier = await supplierModel.findSupplierById({ id: supplier_id });
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
 
@@ -33,7 +37,7 @@ const generateProcurementPdfTemplate = async (req) => {
   );
 
   //company name
-  doc.fontSize(22).text(companyName, {
+  doc.fontSize(22).text('The Savoury Nosh Pte Ltd', {
     align: 'left'
   });
 
@@ -41,8 +45,8 @@ const generateProcurementPdfTemplate = async (req) => {
   //company details
   doc
     .fontSize(8)
-    .text(companyEmail, leftAlign, 110, { align: 'left' });
-  doc.fontSize(8).text(website, { align: 'left' });
+    .text('czy199162@gmail.com', leftAlign, 110, { align: 'left' });
+  doc.fontSize(8).text('www.thekettlegourmet.com', { align: 'left' });
 
   //vendor information
   doc.fill('black').fontSize(18).text('Purchase Order', leftAlign, 180);
@@ -62,12 +66,12 @@ const generateProcurementPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(8)
-    .text(supplierName, leftAlign, 225);
+    .text(supplier.name, leftAlign, 225);
   doc
     .fill('black')
     .fontSize(8)
     .text(
-      shipTo,
+      warehouse_address,
       leftAlign + 200,
       225,
       { width: 120 }
@@ -75,11 +79,11 @@ const generateProcurementPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(8)
-    .text(po_id, leftAlign + 420, 211);
+    .text(id, leftAlign + 420, 211);
   doc
     .fill('black')
     .fontSize(8)
-    .text(po_date, leftAlign + 420, 231);
+    .text(order_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''), leftAlign + 420, 231);
 
   //PO information
   doc.fill('black').fontSize(10).text('PRODUCT/SERVICE', leftAlign, 280);

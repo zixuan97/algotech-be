@@ -92,7 +92,9 @@ const getProcurementOrder = async (req, res) => {
 };
 
 const generatePO = async (req, res) => {
-  await generateProcurementPdfTemplate(req.body)
+  const { po_id, warehouse_address } = req.body;
+  const po = await procurementModel.findProcurementOrderById({ id: po_id });
+  await generateProcurementPdfTemplate({ po, warehouse_address })
     .then((pdfBuffer) => {
       res
         .writeHead(200, {
