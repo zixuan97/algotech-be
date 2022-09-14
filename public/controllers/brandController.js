@@ -6,18 +6,20 @@ const { log } = require('../helpers/logger');
 
 const createBrand = async (req, res) => {
   const { name } = req.body;
-  const { data, error: duplicateProductNameError } = await common.awaitWrap(
+  const { data, error: duplicateBrandNameError } = await common.awaitWrap(
     brandModel.findBrandByName({ name })
   );
   if (data) {
     log.error('ERR_BRAND_CREATE-BRAND');
-    res.json({ message: 'Brand name already exists' });
-  } else if (duplicateProductNameError) {
+    res.code(400).json({ message: 'Brand name already exists' });
+  } else if (duplicateBrandNameError) {
     log.error('ERR_BRAND_CREATE-BRAND');
-    res.json(
-      { message: 'Unable to find brand name' },
-      duplicateProductNameError.message
-    );
+    res
+      .code(400)
+      .json(
+        { message: 'Unable to find brand name' },
+        duplicateBrandNameError.message
+      );
   } else {
     const { error } = await common.awaitWrap(
       brandModel.createBrand({

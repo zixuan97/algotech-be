@@ -10,7 +10,7 @@ const createLocation = async (req, res) => {
   );
   if (data) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
-    res.json({ message: 'Location name already exists' });
+    res.code(400).json({ message: 'Location name already exists' });
   } else if (duplicateLocationNameError) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
     res.json(
