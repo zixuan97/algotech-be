@@ -11,11 +11,11 @@ const createBrand = async (req, res) => {
   );
   if (data) {
     log.error('ERR_BRAND_CREATE-BRAND');
-    res.code(400).json({ message: 'Brand name already exists' });
+    res.status(400).json({ message: 'Brand name already exists' });
   } else if (duplicateBrandNameError) {
     log.error('ERR_BRAND_CREATE-BRAND');
     res
-      .code(400)
+      .status(400)
       .json(
         { message: 'Unable to find brand name' },
         duplicateBrandNameError.message
