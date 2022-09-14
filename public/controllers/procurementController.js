@@ -7,7 +7,14 @@ const emailHelper = require('../helpers/email');
 const fs = require('fs');
 
 const createProcurementOrder = async (req, res) => {
-  const { order_date, description, payment_status, fulfilment_status, proc_order_items, supplier_id } = req.body;
+  const {
+    order_date,
+    description,
+    payment_status,
+    fulfilment_status,
+    proc_order_items,
+    supplier_id
+  } = req.body;
   const { error } = await common.awaitWrap(
     procurementModel.createProcurementOrder({
       order_date,
@@ -17,7 +24,7 @@ const createProcurementOrder = async (req, res) => {
       proc_order_items,
       supplier_id
     })
-  );  
+  );
   if (error) {
     log.error('ERR_PROCUREMENTORDER_CREATE-PO', error.message);
     res.json(Error.http(error));
@@ -28,7 +35,14 @@ const createProcurementOrder = async (req, res) => {
 };
 
 const updateProcurementOrder = async (req, res) => {
-  const { id, order_date, payment_status, fulfilment_status, proc_order_items, supplier_id } = req.body;
+  const {
+    id,
+    order_date,
+    payment_status,
+    fulfilment_status,
+    proc_order_items,
+    supplier_id
+  } = req.body;
   const { error } = await common.awaitWrap(
     procurementModel.updateProcurementOrder({
       id,
@@ -93,36 +107,62 @@ const generatePO = async (req, res) => {
 
 const sendProcurementEmail = async (req, res) => {
   try {
-    const { recipientEmail, subject, content, companyName, companyEmail, website, supplierName, shipTo, po_id, po_date, proc_order_items } = req.body;
-    await generateProcurementPdfTemplate({ companyName, companyEmail, website, supplierName, shipTo, po_id, po_date, proc_order_items })
-    .then((pdfBuffer) => {
-      res
-        .writeHead(200, {
-          'Content-Length': Buffer.byteLength(pdfBuffer),
-          'Content-Type': 'application/pdf',
-          'Content-disposition': 'attachment; filename = purchaseorder.pdf'
-        })
-        .end(pdfBuffer);
-        fs.writeFile("purchaseorder.pdf", pdfBuffer,  "binary", function(err) {
+    const {
+      recipientEmail,
+      subject,
+      content,
+      companyName,
+      companyEmail,
+      website,
+      supplierName,
+      shipTo,
+      po_id,
+      po_date,
+      proc_order_items
+    } = req.body;
+    await generateProcurementPdfTemplate({
+      companyName,
+      companyEmail,
+      website,
+      supplierName,
+      shipTo,
+      po_id,
+      po_date,
+      proc_order_items
+    })
+      .then((pdfBuffer) => {
+        res
+          .writeHead(200, {
+            'Content-Length': Buffer.byteLength(pdfBuffer),
+            'Content-Type': 'application/pdf',
+            'Content-disposition': 'attachment; filename = purchaseorder.pdf'
+          })
+          .end(pdfBuffer);
+        fs.writeFile('purchaseorder.pdf', pdfBuffer, 'binary', function (err) {
           if (err) {
-              console.log(err);
+            console.log(err);
           } else {
-              console.log("FILE SAVED")
-              const attachment = "purchaseorder.pdf";
-              emailHelper.sendEmailWithAttachment({ recipientEmail, subject, content, attachment });
-              console.log("EMAIL SENT");
-              try {
-                fs.unlinkSync(attachment)
-              } catch(err) {
-                console.error(err)
-              }
+            console.log('FILE SAVED');
+            const attachment = 'purchaseorder.pdf';
+            emailHelper.sendEmailWithAttachment({
+              recipientEmail,
+              subject,
+              content,
+              attachment
+            });
+            console.log('EMAIL SENT');
+            try {
+              fs.unlinkSync(attachment);
+            } catch (err) {
+              console.error(err);
+            }
           }
+        });
+      })
+      .catch((error) => {
+        log.error('ERR_PROCUREMENTORDER_GENERATE-PO-PDF', error.message);
+        return res.status(error).json(error.message);
       });
-    })
-    .catch((error) => {
-      log.error('ERR_PROCUREMENTORDER_GENERATE-PO-PDF', error.message);
-      return res.status(error).json(error.message);
-    })
   } catch (error) {
     log.error('ERR_USER_SEND', error.message);
     res.status(500).send('Server Error');
