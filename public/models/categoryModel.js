@@ -71,6 +71,9 @@ const findCategoryById = async (req) => {
   const category = await prisma.category.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      productCategory: true
     }
   });
   return category;
