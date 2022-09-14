@@ -27,7 +27,8 @@ const createProcurementOrder = async (req, res) => {
   );
   if (error) {
     log.error('ERR_PROCUREMENTORDER_CREATE-PO', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_PROCUREMENTORDER_CREATE-PO');
     res.json({ message: 'procurement order created' });
@@ -55,7 +56,8 @@ const updateProcurementOrder = async (req, res) => {
   );
   if (error) {
     log.error('ERR_PROCUREMENTORDER_UPDATE-PO', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_PROCUREMENTORDER_UPDATE-PO');
     res.json({ message: `Updated procurement order with id:${id}` });
@@ -69,7 +71,8 @@ const getAllProcurementOrders = async (req, res) => {
 
   if (error) {
     log.error('ERR_PROCUREMENTORDER_GET-ALL-PO', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_PROCUREMENTORDER_GET-ALL-PO');
     res.json(data);
