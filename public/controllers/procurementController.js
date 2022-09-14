@@ -4,7 +4,6 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { generateProcurementPdfTemplate } = require('../helpers/pdf');
 const emailHelper = require('../helpers/email');
-const fs = require('fs');
 
 const createProcurementOrder = async (req, res) => {
   const {

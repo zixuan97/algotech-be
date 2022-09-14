@@ -12,7 +12,6 @@ const {
 } = require('../helpers/excel');
 const { format } = require('date-fns');
 const emailHelper = require('../helpers/email');
-const fs = require('fs');
 
 const createProduct = async (req, res) => {
   const {
