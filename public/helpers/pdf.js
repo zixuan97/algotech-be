@@ -1,4 +1,3 @@
-const { Lightsail } = require('aws-sdk');
 const getStream = require('get-stream');
 const PDFDocument = require('pdfkit');
 const supplierModel = require('../models/supplierModel');
@@ -23,12 +22,12 @@ const generateProcurementPdfTemplate = async (req) => {
   const supplier = await supplierModel.findSupplierById({ id: supplier_id });
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
-
+  const path = process.cwd() + '/logo.png';
   // Add an image, constrain it to a given size, and center it vertically and horizontally
-
+  console.log(path)
   //logo
   doc.image(
-    './logo.png',
+    path,
     450,
     25,
     { fit: [120, 120] },
