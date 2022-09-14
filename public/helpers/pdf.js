@@ -28,7 +28,7 @@ const generateProcurementPdfTemplate = async (req) => {
 
   //logo
   doc.image(
-    '../logo.png',
+    './logo.png',
     450,
     25,
     { fit: [120, 120] },
