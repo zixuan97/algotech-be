@@ -4,7 +4,6 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { generateProcurementPdfTemplate } = require('../helpers/pdf');
 const emailHelper = require('../helpers/email');
-const fs = require('fs');
 
 const createProcurementOrder = async (req, res) => {
   const {
@@ -112,45 +111,24 @@ const generatePO = async (req, res) => {
 
 const sendProcurementEmail = async (req, res) => {
   try {
-    const {
-      recipientEmail,
-      po_id,
-      warehouse_address
-    } = req.body;
+    const { recipientEmail, po_id, warehouse_address } = req.body;
     const po = await procurementModel.findProcurementOrderById({ id: po_id });
     await generateProcurementPdfTemplate({
       po,
       warehouse_address
-    })
-      .then((pdfBuffer) => {
-        fs.writeFile('purchaseorder.pdf', pdfBuffer, 'binary', function (err) {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log('FILE SAVED');
-            const subject = "Procurement Order";
-            const content = "Attached please find the procurement order."
-            const attachment = 'purchaseorder.pdf';
-            emailHelper.sendEmailWithAttachment({
-              recipientEmail,
-              subject,
-              content,
-              attachment
-            });
-            console.log('EMAIL SENT');
-            try {
-              fs.unlinkSync(attachment);
-            } catch (err) {
-              console.error(err);
-            }
-          }
-        });
-        res.status(200).json({ message: 'email sent' });
-      })
-      .catch((error) => {
-        log.error('ERR_PROCUREMENTORDER_GENERATE-PO-PDF', error.message);
-        return res.status(error).json(error.message);
+    }).then((pdfBuffer) => {
+      const subject = 'Procurement Order';
+      const content = 'Attached please find the procurement order.';
+      emailHelper.sendEmailWithAttachment({
+        recipientEmail,
+        subject,
+        content,
+        data: pdfBuffer.toString('base64'),
+        filename: 'purchaseorder.pdf'
       });
+      console.log('EMAIL SENT');
+    });
+    res.status(200).json({ message: 'email sent' });
   } catch (error) {
     log.error('ERR_USER_SEND', error.message);
     res.status(500).send('Server Error');

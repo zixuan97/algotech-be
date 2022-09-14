@@ -11,7 +11,7 @@ const SES_CONFIG = {
 const AWS_SES = new AWS.SES(SES_CONFIG);
 
 const sendEmailWithAttachment = (req) => {
-  const { recipientEmail, subject, content, attachment } = req;
+  const { recipientEmail, subject, content, data, filename } = req;
   var mailContent = mimemessage.factory({
     contentType: 'multipart/mixed',
     body: []
@@ -40,7 +40,6 @@ const sendEmailWithAttachment = (req) => {
   //alternateEntity.body.push(plainEntity);
   //mailContent.body.push(alternateEntity);
   mailContent.body.push(plainEntity);
-  var data = fs.readFileSync(attachment);
   var attachmentEntity = mimemessage.factory({
     contentType: 'text/plain',
     contentTransferEncoding: 'base64',
@@ -48,7 +47,7 @@ const sendEmailWithAttachment = (req) => {
   });
   attachmentEntity.header(
     'Content-Disposition',
-    `attachment ;filename="${attachment}"`
+    `attachment ;filename="${filename}"`
   );
   mailContent.body.push(attachmentEntity);
   AWS_SES.sendRawEmail(
