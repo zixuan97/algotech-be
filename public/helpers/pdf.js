@@ -18,7 +18,6 @@ const generatePdfTemplate = async () => {
 };
 
 const generateProcurementPdfTemplate = async (req) => {
-  console.log("req", req)
   const { po, warehouse_address } = req;
   const { id, order_date, supplier_id, proc_order_items } = po;
   const supplier = await supplierModel.findSupplierById({ id: supplier_id });
