@@ -100,9 +100,10 @@ const auth = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
+    console.log(req.user.user_id)
     const users = await userModel.getUsers({});
     log.out('OK_USER_GET-USERS');
-    res.json(users);
+    res.json(users.filter(u => u.id != req.user.user_id));
   } catch (error) {
     log.error('ERR_USER_GET-USERS', err.message);
     res.status(500).send('Server Error');
