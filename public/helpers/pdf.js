@@ -17,14 +17,12 @@ const generatePdfTemplate = async () => {
 };
 
 const generateProcurementPdfTemplate = async (req) => {
-  const { po } = req;
-  const { id, order_date, supplier_id, proc_order_items } = po;
+  const { order_date, supplier_id, warehouse_address, proc_order_items } = req;
   const supplier = await supplierModel.findSupplierById({ id: supplier_id });
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
   const path = process.cwd() + '/logo.png';
   // Add an image, constrain it to a given size, and center it vertically and horizontally
-  console.log(path)
   //logo
   doc.image(
     path,
@@ -53,14 +51,14 @@ const generateProcurementPdfTemplate = async (req) => {
     .fill('grey')
     .fontSize(10)
     .text('SHIP TO', leftAlign + 200, 210);
+  // doc
+  //   .fill('grey')
+  //   .fontSize(10)
+  //   .text('P.O.', leftAlign + 390, 210);
   doc
     .fill('grey')
     .fontSize(10)
-    .text('P.O.', leftAlign + 390, 210);
-  doc
-    .fill('grey')
-    .fontSize(10)
-    .text('DATE', leftAlign + 390, 230);
+    .text('DATE', leftAlign + 390, 210);
   doc
     .fill('black')
     .fontSize(8)
@@ -69,19 +67,19 @@ const generateProcurementPdfTemplate = async (req) => {
     .fill('black')
     .fontSize(8)
     .text(
-      po.warehouse_address,
+      warehouse_address,
       leftAlign + 200,
       225,
       { width: 120 }
     );
+  // doc
+  //   .fill('black')
+  //   .fontSize(8)
+  //   .text(id, leftAlign + 420, 211);
   doc
     .fill('black')
     .fontSize(8)
-    .text(id, leftAlign + 420, 211);
-  doc
-    .fill('black')
-    .fontSize(8)
-    .text(order_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''), leftAlign + 420, 231);
+    .text(order_date, leftAlign + 390, 225);
 
   //PO information
   doc.fill('black').fontSize(10).text('PRODUCT/SERVICE', leftAlign, 280);
