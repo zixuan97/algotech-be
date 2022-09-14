@@ -5,6 +5,7 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { generateProcurementPdfTemplate } = require('../helpers/pdf');
 const emailHelper = require('../helpers/email');
+const { format } = require('date-fns');
 
 const createProcurementOrder = async (req, res) => {
   const {
@@ -16,6 +17,7 @@ const createProcurementOrder = async (req, res) => {
     supplier_id
   } = req.body;
   const order_date = new Date();
+  const order_formatted = format(order_date, 'dd MMM yyyy')
   const { error } = await common.awaitWrap(
     procurementModel.createProcurementOrder({
       order_date,
@@ -27,7 +29,7 @@ const createProcurementOrder = async (req, res) => {
       supplier_id
     })
   );
-  await sendProcurementEmail({ order_date, supplier_id, warehouse_address, proc_order_items });
+  await sendProcurementEmail({ order_formatted, supplier_id, warehouse_address, proc_order_items });
   if (error) {
     log.error('ERR_PROCUREMENTORDER_CREATE-PO', error.message);
     const e = Error.http(error);
@@ -101,9 +103,10 @@ const getProcurementOrder = async (req, res) => {
 const generatePO = async (req, res) => {
   const po_id  = req.params;
   const po = await procurementModel.findProcurementOrderById(po_id);
-  const { order_date, supplier_id, warehouse_address, proc_order_items } = po;
-  const orderDateString = order_date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-  await generateProcurementPdfTemplate({ order_date: orderDateString, supplier_id, warehouse_address, proc_order_items })
+  const { supplier_id, warehouse_address, proc_order_items } = po;
+  const order_date = new Date();
+  const order_formatted = format(order_date, 'dd MMM yyyy')
+  await generateProcurementPdfTemplate({ order_formatted, supplier_id, warehouse_address, proc_order_items })
     .then((pdfBuffer) => {
       res
         .writeHead(200, {
@@ -121,10 +124,9 @@ const generatePO = async (req, res) => {
 
 const sendProcurementEmail = async (req, res) => {
   try {
-    const { order_date, supplier_id, warehouse_address, proc_order_items } = req;
-    const orderDateString = order_date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    const { order_formatted, supplier_id, warehouse_address, proc_order_items } = req;
     const supplier = await supplierModel.findSupplierById({ id: supplier_id });
-    await generateProcurementPdfTemplate({ order_date: orderDateString, supplier_id, warehouse_address, proc_order_items })
+    await generateProcurementPdfTemplate({ order_formatted, supplier_id, warehouse_address, proc_order_items })
     .then(async (pdfBuffer) => {
       const subject = 'Procurement Order';
       const content = 'Attached please find the procurement order.';
@@ -138,10 +140,8 @@ const sendProcurementEmail = async (req, res) => {
       });
       console.log('EMAIL SENT');
     });
-    //res.status(200).json({ message: 'email sent' });
   } catch (error) {
     log.error('ERR_USER_SEND', error.message);
-    //res.status(500).send('Server Error');
   }
 };
 

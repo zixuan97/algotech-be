@@ -17,7 +17,7 @@ const generatePdfTemplate = async () => {
 };
 
 const generateProcurementPdfTemplate = async (req) => {
-  const { order_date, supplier_id, warehouse_address, proc_order_items } = req;
+  const { order_formatted, supplier_id, warehouse_address, proc_order_items } = req;
   const supplier = await supplierModel.findSupplierById({ id: supplier_id });
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
@@ -79,7 +79,7 @@ const generateProcurementPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(8)
-    .text(order_date, leftAlign + 390, 225);
+    .text(order_formatted, leftAlign + 390, 225);
 
   //PO information
   doc.fill('black').fontSize(10).text('PRODUCT/SERVICE', leftAlign, 280);
