@@ -92,7 +92,9 @@ const getProcurementOrder = async (req, res) => {
 };
 
 const generatePO = async (req, res) => {
-  await generateProcurementPdfTemplate(req.body)
+  const { po_id, warehouse_address } = req.body;
+  const po = await procurementModel.findProcurementOrderById({ id: po_id });
+  await generateProcurementPdfTemplate({ po, warehouse_address })
     .then((pdfBuffer) => {
       res
         .writeHead(200, {
@@ -112,40 +114,22 @@ const sendProcurementEmail = async (req, res) => {
   try {
     const {
       recipientEmail,
-      subject,
-      content,
-      companyName,
-      companyEmail,
-      website,
-      supplierName,
-      shipTo,
       po_id,
-      po_date,
-      proc_order_items
+      warehouse_address
     } = req.body;
+    const po = await procurementModel.findProcurementOrderById({ id: po_id });
     await generateProcurementPdfTemplate({
-      companyName,
-      companyEmail,
-      website,
-      supplierName,
-      shipTo,
-      po_id,
-      po_date,
-      proc_order_items
+      po,
+      warehouse_address
     })
       .then((pdfBuffer) => {
-        // res
-        //   .writeHead(200, {
-        //     'Content-Length': Buffer.byteLength(pdfBuffer),
-        //     'Content-Type': 'application/pdf',
-        //     'Content-disposition': 'attachment; filename = purchaseorder.pdf'
-        //   })
-        //   .end(pdfBuffer);
         fs.writeFile('purchaseorder.pdf', pdfBuffer, 'binary', function (err) {
           if (err) {
             console.log(err);
           } else {
             console.log('FILE SAVED');
+            const subject = "Procurement Order";
+            const content = "Attached please find the procurement order."
             const attachment = 'purchaseorder.pdf';
             emailHelper.sendEmailWithAttachment({
               recipientEmail,
