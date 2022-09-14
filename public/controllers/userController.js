@@ -7,9 +7,9 @@ const { log } = require('../helpers/logger');
 const emailHelper = require('../helpers/email');
 
 const createUser = async (req, res) => {
-  const { first_name, last_name, email, role } = req.body;
+  const { first_name, last_name, email, role, isVerified } = req.body;
   const password = await common.awaitWrap(userModel.generatePassword());
-  const content = "Hi " + first_name + " " + last_name + "! Your generated password is " + password.data + ". Click on this link to change your password.";
+  const content = "Hi " + first_name + " " + last_name + "! Your generated password is " + password.data + ".";
   try {
     await emailHelper.sendEmail({ recipientEmail: email, subject: "Your generated password", content });
     console.log("Email sent");
@@ -22,7 +22,8 @@ const createUser = async (req, res) => {
       last_name,
       email,
       password: password.data,
-      role
+      role,
+      isVerified
     })
   );
   if (error) {
@@ -100,10 +101,10 @@ const auth = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    console.log(req.user.user_id)
     const users = await userModel.getUsers({});
     log.out('OK_USER_GET-USERS');
     res.json(users.filter(u => u.id != req.user.user_id));
+    //res.json(users);
   } catch (error) {
     log.error('ERR_USER_GET-USERS', err.message);
     res.status(500).send('Server Error');
@@ -184,9 +185,14 @@ const changeUserRole = async (req, res) => {
 
 const sendForgetEmailPassword = async (req, res) => {
   try {
-    const { recipientEmail, subject, content } = req.body;
+    const { recipientEmail } = req.body;
     const user = await userModel.findUserByEmail({ email: recipientEmail });
     if (user != null) {
+      const subject = "Your generated password";
+      const updatedPassword = await common.awaitWrap(userModel.generatePassword());
+      const content = "Your generated password is " + updatedPassword.data + ".";
+      const updatedUser = { id: user.id, password: updatedPassword.data, isVerified: false };
+      await userModel.editUser({ updatedUser });
       await emailHelper.sendEmail({ recipientEmail, subject, content });
       log.out('OK_USER_SENT-EMAIL');
       res.json({
