@@ -100,7 +100,6 @@ const auth = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    console.log(req.user.user_id)
     const users = await userModel.getUsers({});
     log.out('OK_USER_GET-USERS');
     res.json(users.filter(u => u.id != req.user.user_id));
@@ -184,7 +183,9 @@ const changeUserRole = async (req, res) => {
 
 const sendForgetEmailPassword = async (req, res) => {
   try {
-    const { recipientEmail, subject, content } = req.body;
+    const { recipientEmail } = req.body;
+    const subject = "Your generated password";
+    const content = "";
     const user = await userModel.findUserByEmail({ email: recipientEmail });
     if (user != null) {
       await emailHelper.sendEmail({ recipientEmail, subject, content });

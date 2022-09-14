@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createBundle = async (req) => {
-  const { name, description, price,products } =
+  const { name, description, price, products } =
     req;
 
   await prisma.bundle.create({
@@ -10,9 +10,9 @@ const createBundle = async (req) => {
       name,
       description,
       price,
-      bundleProduct : {
+      bundleProduct: {
         create: products.map((p) => ({
-            product_sku : p.sku,
+            product_sku: p.sku,
             bundle_name: name,
             product: {
               connect: {
@@ -72,6 +72,11 @@ const deleteBundle = async (req) => {
   await prisma.bundle.delete({
     where: {
       id: Number(id)
+    },
+    data: {
+      bundleProduct: {
+        deleteMany: {}
+      }
     }
   });
 };

@@ -9,7 +9,7 @@ const createBundle = async (req, res) => {
     req.body;
   // check if bundle name exists
   const { data: bundleName } = await common.awaitWrap(
-    bundleModel.findBundleByName({ bundleName })
+    bundleModel.findBundleByName({ name })
   );
 
   // if exists throw error
