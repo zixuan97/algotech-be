@@ -5,20 +5,28 @@ const { log } = require('../helpers/logger');
 
 const createSupplier = async (req, res) => {
   const { email, name, address } = req.body;
-  const { error } = await common.awaitWrap(
-    supplierModel.createSupplier({
-      email,
-      name,
-      address
-    })
-  );
-
-  if (error) {
-    log.error('ERR_SUPPLIER_CREATE-SUPPLIER', error.message);
-    res.json(Error.http(error));
+  var supplier_emails = []
+  const suppliers = await supplierModel.getAllSuppliers({})
+  suppliers.map(s => supplier_emails.push(s.email))
+  // if exists throw error
+  if (supplier_emails.includes(email)) {
+    log.error('ERR_PRODUCT_CREATE-SUPPLIER');
+    res.status(400).json({ message: 'Supplier already exists' });
   } else {
-    log.out('OK_SUPPLIER_CREATE-SUPPLIER');
-    res.json({ message: 'supplier created' });
+    const { error } = await common.awaitWrap(
+      supplierModel.createSupplier({
+        email,
+        name,
+        address
+      })
+    );
+    if (error) {
+      log.error('ERR_SUPPLIER_CREATE-SUPPLIER', error.message);
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_SUPPLIER_CREATE-SUPPLIER');
+      res.json({ message: 'supplier created' });
+    }
   }
 };
 
@@ -62,15 +70,24 @@ const getSupplierByName = async (req, res) => {
 
 const updateSupplier = async (req, res) => {
   const { id, email, name, address } = req.body;
-  const { error } = await common.awaitWrap(
-    supplierModel.updateSupplier({ id, email, name, address })
-  );
-  if (error) {
-    log.error('ERR_SUPPLIER_UPDATE_SUPPLIER', error.message);
-    res.json(Error.http(error));
+  var supplier_emails = []
+  const suppliers = await supplierModel.getAllSuppliers({})
+  suppliers.map(s => supplier_emails.push(s.email))
+  // if exists throw error
+  if (supplier_emails.includes(email)) {
+    log.error('ERR_PRODUCT_CREATE-SUPPLIER');
+    res.status(400).json({ message: 'Supplier already exists' });
   } else {
-    log.out('OK_SUPPLIER_UPDATE_SUPPLIER');
-    res.json({ message: `Updated supplier with id:${id}` });
+    const { error } = await common.awaitWrap(
+      supplierModel.updateSupplier({ id, email, name, address })
+    );
+    if (error) {
+      log.error('ERR_SUPPLIER_UPDATE_SUPPLIER', error.message);
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_SUPPLIER_UPDATE_SUPPLIER');
+      res.json({ message: `Updated supplier with id:${id}` });
+    }
   }
 };
 

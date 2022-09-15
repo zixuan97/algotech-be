@@ -27,7 +27,6 @@ const createProduct = async (req, res) => {
   // check if product exists
 
   const productSku = await productModel.findProductBySku({ sku });
-
   const productName = await productModel.findProductByName({ name });
 
   // if exists throw error
@@ -223,25 +222,37 @@ const updateProduct = async (req, res) => {
     log.out('OK_PRODUCT_UPLOAD-S3');
   }
 
-  const { error } = await common.awaitWrap(
-    productModel.updateProduct({
-      id,
-      name,
-      description,
-      sku,
-      categories,
-      qtyThreshold,
-      brand_id,
-      locations
-    })
-  );
-  if (error) {
-    log.error('ERR_PRODUCT_UPDATE-PRODUCT', error.message);
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  const productSku = await productModel.findProductBySku({ sku });
+  const productName = await productModel.findProductByName({ name });
+
+  // if exists throw error
+  if (productSku && productSku.id != id) {
+    log.error('ERR_PRODUCT_UPDATE-PRODUCT');
+    res.status(400).json({ message: 'Product sku already exists' });
+  } else if (productName && productName.id != id) {
+    log.error('ERR_PRODUCT_UPDATE-PRODUCT');
+    res.status(400).json({ message: 'Product name already exists' });
   } else {
-    log.out('OK_PRODUCT_UPDATE-PRODUCT');
-    res.json({ message: `Updated product with id:${id}` });
+    const { error } = await common.awaitWrap(
+      productModel.updateProduct({
+        id,
+        name,
+        description,
+        sku,
+        categories,
+        qtyThreshold,
+        brand_id,
+        locations
+      })
+    );
+    if (error) {
+      log.error('ERR_PRODUCT_UPDATE-PRODUCT', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_PRODUCT_UPDATE-PRODUCT');
+      res.json({ message: `Updated product with id:${id}` });
+    }
   }
 };
 

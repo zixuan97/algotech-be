@@ -38,6 +38,16 @@ const findSupplierByName = async (req) => {
   return supplier;
 };
 
+const findSupplierByEmail = async (req) => {
+  const { email } = req;
+  const supplier = await prisma.supplier.findUnique({
+    where: {
+      email
+    }
+  });
+  return supplier;
+};
+
 const updateSupplier = async (req) => {
   const { id, email, name, address } = req;
   supplier = await prisma.supplier.update({
@@ -66,3 +76,4 @@ exports.updateSupplier = updateSupplier;
 exports.deleteSupplier = deleteSupplier;
 exports.findSupplierById = findSupplierById;
 exports.findSupplierByName = findSupplierByName;
+exports.findSupplierByEmail = findSupplierByEmail;

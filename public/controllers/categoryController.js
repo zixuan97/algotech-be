@@ -5,19 +5,24 @@ const { log } = require('../helpers/logger');
 
 const createCategory = async (req, res) => {
   const { name } = req.body;
-  const { error } = await common.awaitWrap(
-    categoryModel.createCategory({
-      name
-    })
-  );
-
-  if (error) {
-    log.error('ERR_CATEGORY_CREATE-CATEGORY', error.message);
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  const category = await categoryModel.findCategoryByName({ name });
+  if (category) {
+    log.error('ERR_USER_CREATE-CATEGORY');
+    res.status(400).json({ message: 'Category already exists' });
   } else {
-    log.out('OK_CATEGORY_CREATE-CATEGORY');
-    res.json({ message: 'category created' });
+    const { error } = await common.awaitWrap(
+      categoryModel.createCategory({
+        name
+      })
+    );
+    if (error) {
+      log.error('ERR_CATEGORY_CREATE-CATEGORY', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_CATEGORY_CREATE-CATEGORY');
+      res.json({ message: 'category created' });
+    }
   }
 };
 
@@ -62,16 +67,22 @@ const getCategoryByName = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   const { id, name } = req.body;
-  const { error } = await common.awaitWrap(
-    categoryModel.updateCategory({ id, name })
-  );
-  if (error) {
-    log.error('ERR_CATEGORY_UPDATE_CATEGORY', error.message);
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  const category = await categoryModel.findCategoryByName({ name });
+  if (category && category.id != id) {
+    log.error('ERR_USER_CREATE-CATEGORY');
+    res.status(400).json({ message: 'Category already exists' });
   } else {
-    log.out('OK_CATEGORY_UPDATE_CATEGORY');
-    res.json({ message: `Updated category with id:${id}` });
+    const { error } = await common.awaitWrap(
+      categoryModel.updateCategory({ id, name })
+    );
+    if (error) {
+      log.error('ERR_CATEGORY_UPDATE_CATEGORY', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_CATEGORY_UPDATE_CATEGORY');
+      res.json({ message: `Updated category with id:${id}` });
+    }
   }
 };
 
