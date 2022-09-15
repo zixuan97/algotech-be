@@ -13,5 +13,6 @@ router.put('/enable/:id', UserController.enableUser);
 router.put('/disable/:id', UserController.disableUser);
 router.put('/role/:id/:action', UserController.changeUserRole);
 router.post('/forgetpw', UserController.sendForgetEmailPassword);
+router.post('/updatepw', UserController.verifyPassword);
 
 module.exports = router;
