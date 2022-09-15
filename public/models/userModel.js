@@ -138,6 +138,21 @@ const generatePassword = async (req) => {
   return result;
 };
 
+const verifyPassword = async (req) => {
+  const { userEmail, currentPassword, newPassword } = req;
+  let user = await findUserByEmail({ email: userEmail });
+  const is_equal = await bcrypt.compare(currentPassword, user.password);
+  if (is_equal) {
+    user = await prisma.User.update({
+      where: { id: user.id },
+      data: {
+        password: await bcrypt.hash(newPassword, 10)
+      }
+    });
+  }
+  return is_equal;
+};
+
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
@@ -149,3 +164,4 @@ exports.enableUser = enableUser;
 exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
 exports.generatePassword = generatePassword;
+exports.verifyPassword = verifyPassword;

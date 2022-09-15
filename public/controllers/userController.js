@@ -208,6 +208,22 @@ const sendForgetEmailPassword = async (req, res) => {
   }
 };
 
+const verifyPassword = async (req, res) => {
+  try {
+    const { userEmail, currentPassword, newPassword } = req.body;
+    const user = await userModel.verifyPassword({ userEmail, currentPassword, newPassword });
+    if (user) {
+      res.json({ message: 'Password verified' });
+    } else {
+      res.json({ message: 'Passwords do not match' });
+    }
+    log.out('OK_USER_VERIFY-PW');
+  } catch (error) {
+    log.error('ERR_USER_VERIFY-PW', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -219,3 +235,4 @@ exports.enableUser = enableUser;
 exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
 exports.sendForgetEmailPassword = sendForgetEmailPassword;
+exports.verifyPassword = verifyPassword;
