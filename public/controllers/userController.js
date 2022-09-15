@@ -8,42 +8,49 @@ const emailHelper = require('../helpers/email');
 
 const createUser = async (req, res) => {
   const { first_name, last_name, email, role, isVerified } = req.body;
-  const password = await common.awaitWrap(userModel.generatePassword());
-  const content =
-    'Hi ' +
-    first_name +
-    ' ' +
-    last_name +
-    '! Your generated password is ' +
-    password.data +
-    '.';
-  try {
-    await emailHelper.sendEmail({
-      recipientEmail: email,
-      subject: 'Your generated password',
-      content
-    });
-    console.log('Email sent');
-  } catch (error) {
-    console.log('Error sending email');
-  }
-  const { error } = await common.awaitWrap(
-    userModel.createUser({
-      first_name,
-      last_name,
-      email,
-      password: password.data,
-      role,
-      isVerified
-    })
-  );
-  if (error) {
-    log.error('ERR_USER_CREATE-USER', error.message);
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+
+  const user = await userModel.findUserByEmail({ email });
+  if (user) {
+    log.error('ERR_USER_CREATE-USER');
+    res.status(400).json({ message: 'User already exists' });
   } else {
-    log.out('OK_USER_CREATE-USER');
-    res.status(200).json({ message: 'User created' });
+    const password = await common.awaitWrap(userModel.generatePassword());
+    const content =
+      'Hi ' +
+      first_name +
+      ' ' +
+      last_name +
+      '! Your generated password is ' +
+      password.data +
+      '.';
+    try {
+      await emailHelper.sendEmail({
+        recipientEmail: email,
+        subject: 'Your generated password',
+        content
+      });
+      console.log('Email sent');
+    } catch (error) {
+      console.log('Error sending email');
+    }
+    const { error } = await common.awaitWrap(
+      userModel.createUser({
+        first_name,
+        last_name,
+        email,
+        password: password.data,
+        role,
+        isVerified
+      })
+    );
+    if (error) {
+      log.error('ERR_USER_CREATE-USER', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_USER_CREATE-USER');
+      res.status(200).json({ message: 'User created' });
+    }
   }
 };
 
