@@ -211,8 +211,8 @@ const sendForgetEmailPassword = async (req, res) => {
 const verifyPassword = async (req, res) => {
   try {
     const { userEmail, currentPassword, newPassword } = req.body;
-    const user = await userModel.verifyPassword({ userEmail, currentPassword, newPassword });
-    if (user) {
+    const is_equal = await userModel.verifyPassword({ userEmail, currentPassword, newPassword });
+    if (is_equal) {
       res.json({ message: 'Password verified' });
     } else {
       res.json({ message: 'Passwords do not match' });
