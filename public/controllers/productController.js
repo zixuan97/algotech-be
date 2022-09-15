@@ -109,20 +109,25 @@ const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await productModel.findProductById({ id });
-    //getImg from s3
-    const { data: productImg, error: getS3Error } = await common.awaitWrap(
-      getS3({
-        key: `productImages/${product.sku}-img`
-      })
-    );
+    if (product) {
+      //getImg from s3
+      const { data: productImg, error: getS3Error } = await common.awaitWrap(
+        getS3({
+          key: `productImages/${product.sku}-img`
+        })
+      );
 
-    if (getS3Error) {
-      log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+      if (getS3Error) {
+        log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+      }
+      log.out('OK_PRODUCT_GET-PRODUCT-IMG');
+      product.image = productImg;
+      log.out('OK_PRODUCT_GET-PRODUCT-BY-ID');
+      res.json(product);
+    } else {
+      log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+      res.status(500).send('Server Error');
     }
-    log.out('OK_PRODUCT_GET-PRODUCT-IMG');
-    product.image = productImg;
-    log.out('OK_PRODUCT_GET-PRODUCT-BY-ID');
-    res.json(product);
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
     res.status(500).send('Server Error');
@@ -134,19 +139,24 @@ const getProductByName = async (req, res) => {
     const { name } = req.body;
     const product = await productModel.findProductByName({ name });
     //getImg from s3
-    const { data: productImg, error: getS3Error } = await common.awaitWrap(
-      getS3({
-        key: `productImages/${product.sku}-img`
-      })
-    );
+    if (product) {
+      const { data: productImg, error: getS3Error } = await common.awaitWrap(
+        getS3({
+          key: `productImages/${product.sku}-img`
+        })
+      );
 
-    if (getS3Error) {
-      log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+      if (getS3Error) {
+        log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+      }
+      log.out('OK_PRODUCT_GET-PRODUCT-IMG');
+      product.image = productImg;
+      log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME');
+      res.json(product);
+    } else {
+      log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+      res.status(500).send('Server Error');
     }
-    log.out('OK_PRODUCT_GET-PRODUCT-IMG');
-    product.image = productImg;
-    log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME');
-    res.json(product);
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
     res.status(500).send('Server Error');
@@ -157,23 +167,28 @@ const getProductBySku = async (req, res) => {
   try {
     const { sku } = req.params;
     const product = await productModel.findProductBySku({ sku });
-    //getImg from s3
-    const { data: productImg, error: getS3Error } = await common.awaitWrap(
-      getS3({
-        key: `productImages/${sku}-img`
-      })
-    );
+    if (product) {
+      //getImg from s3
+      const { data: productImg, error: getS3Error } = await common.awaitWrap(
+        getS3({
+          key: `productImages/${sku}-img`
+        })
+      );
 
-    if (getS3Error) {
-      log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
-    }
-    if (productImg) {
-      product.image = productImg;
-    }
-    log.out('OK_PRODUCT_GET-PRODUCT-IMG');
-    log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
+      if (getS3Error) {
+        log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+      }
+      if (productImg) {
+        product.image = productImg;
+      }
+      log.out('OK_PRODUCT_GET-PRODUCT-IMG');
+      log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
 
-    res.json(product);
+      res.json(product);
+    } else {
+      log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+      res.status(500).send('Server Error');
+    }
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
     res.status(500).send('Server Error');
