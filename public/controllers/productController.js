@@ -39,18 +39,18 @@ const createProduct = async (req, res) => {
     res.status(400).json({ message: 'Product name already exists' });
   } else {
     // find or create category
-    const { error: connectOrCreateCategoryError } = await common.awaitWrap(
-      categoryModel.connectOrCreateCategory({ categories })
-    );
-    log.out('OK_CATEGORY_CONNECT-CREATE-CATEGORY');
-    if (connectOrCreateCategoryError) {
-      log.error(
-        'ERR_CATEGORY_CREATE-CATEGORY',
-        connectOrCreateCategoryError.message
-      );
-      const e = Error.http(connectOrCreateCategoryError);
-      res.status(e.code).json(e.message);
-    }
+    // const { error: connectOrCreateCategoryError } = await common.awaitWrap(
+    //   categoryModel.connectOrCreateCategory({ categories })
+    // );
+    // log.out('OK_CATEGORY_CONNECT-CREATE-CATEGORY');
+    // if (connectOrCreateCategoryError) {
+    //   log.error(
+    //     'ERR_CATEGORY_CREATE-CATEGORY',
+    //     connectOrCreateCategoryError.message
+    //   );
+    //   const e = Error.http(connectOrCreateCategoryError);
+    //   res.status(e.code).json(e.message);
+    // }
     //uploadImg to s3
     if (image) {
       try {
