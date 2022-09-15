@@ -9,12 +9,23 @@ const emailHelper = require('../helpers/email');
 const createUser = async (req, res) => {
   const { first_name, last_name, email, role, isVerified } = req.body;
   const password = await common.awaitWrap(userModel.generatePassword());
-  const content = "Hi " + first_name + " " + last_name + "! Your generated password is " + password.data + ".";
+  const content =
+    'Hi ' +
+    first_name +
+    ' ' +
+    last_name +
+    '! Your generated password is ' +
+    password.data +
+    '.';
   try {
-    await emailHelper.sendEmail({ recipientEmail: email, subject: "Your generated password", content });
-    console.log("Email sent");
+    await emailHelper.sendEmail({
+      recipientEmail: email,
+      subject: 'Your generated password',
+      content
+    });
+    console.log('Email sent');
   } catch (error) {
-    console.log("Error sending email");
+    console.log('Error sending email');
   }
   const { error } = await common.awaitWrap(
     userModel.createUser({
@@ -103,7 +114,7 @@ const getUsers = async (req, res) => {
   try {
     const users = await userModel.getUsers({});
     log.out('OK_USER_GET-USERS');
-    res.json(users.filter(u => u.id != req.user.user_id));
+    res.json(users.filter((u) => u.id != req.user.user_id));
     //res.json(users);
   } catch (error) {
     log.error('ERR_USER_GET-USERS', err.message);
@@ -188,10 +199,17 @@ const sendForgetEmailPassword = async (req, res) => {
     const { recipientEmail } = req.body;
     const user = await userModel.findUserByEmail({ email: recipientEmail });
     if (user != null) {
-      const subject = "Your generated password";
-      const updatedPassword = await common.awaitWrap(userModel.generatePassword());
-      const content = "Your generated password is " + updatedPassword.data + ".";
-      const updatedUser = { id: user.id, password: updatedPassword.data, isVerified: false };
+      const subject = 'Your generated password';
+      const updatedPassword = await common.awaitWrap(
+        userModel.generatePassword()
+      );
+      const content =
+        'Your generated password is ' + updatedPassword.data + '.';
+      const updatedUser = {
+        id: user.id,
+        password: updatedPassword.data,
+        isVerified: false
+      };
       await userModel.editUser({ updatedUser });
       await emailHelper.sendEmail({ recipientEmail, subject, content });
       log.out('OK_USER_SENT-EMAIL');
@@ -211,13 +229,17 @@ const sendForgetEmailPassword = async (req, res) => {
 const verifyPassword = async (req, res) => {
   try {
     const { userEmail, currentPassword, newPassword } = req.body;
-    const is_equal = await userModel.verifyPassword({ userEmail, currentPassword, newPassword });
+    const is_equal = await userModel.verifyPassword({
+      userEmail,
+      currentPassword,
+      newPassword
+    });
     if (is_equal) {
-      res.json({ message: 'Password verified' });
+      log.out('OK_USER_VERIFY-PW');
+      res.status(200).json({ message: 'Password verified' });
     } else {
-      res.json({ message: 'Passwords do not match' });
+      res.status(400).json({ message: 'Passwords do not match' });
     }
-    log.out('OK_USER_VERIFY-PW');
   } catch (error) {
     log.error('ERR_USER_VERIFY-PW', error.message);
     res.status(500).send('Server Error');
