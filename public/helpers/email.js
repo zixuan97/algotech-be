@@ -16,7 +16,7 @@ const sendEmailWithAttachment = async (req) => {
     contentType: 'multipart/mixed',
     body: []
   });
-  mailContent.header('From', 'Meryl <e0421281@u.nus.edu>');
+  mailContent.header('From', 'Auto-generated-email <exleolee@gmail.com>');
   mailContent.header('To', recipientEmail);
   mailContent.header('Subject', subject);
   // var alternateEntity = mimemessage.factory({
@@ -50,22 +50,22 @@ const sendEmailWithAttachment = async (req) => {
     `attachment ;filename="${filename}"`
   );
   mailContent.body.push(attachmentEntity);
-  try{
-  await AWS_SES.sendRawEmail(
-    {
-      RawMessage: { Data: mailContent.toString() }
-    },
-    (err, sesdata, res) => {}
-  ).promise();
+  try {
+    await AWS_SES.sendRawEmail(
+      {
+        RawMessage: { Data: mailContent.toString() }
+      },
+      (err, sesdata, res) => {}
+    ).promise();
   } catch (err) {
-    throw err
+    throw err;
   }
 };
 
 const sendEmail = (req) => {
   const { recipientEmail, subject, content } = req;
   const params = {
-    Source: 'Meryl <e0421281@u.nus.edu>',
+    Source: 'Auto-generated-email <exleolee@gmail.com>',
     Destination: {
       ToAddresses: [recipientEmail]
     },
