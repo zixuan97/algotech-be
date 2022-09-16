@@ -74,21 +74,31 @@ const getBundleByName = async (req, res) => {
 
 const updateBundle = async (req, res) => {
   const { id, name, description, price } = req.body;
-  const { error } = await common.awaitWrap(
-    bundleModel.updateBundle({
-      id,
-      name,
-      description,
-      price
-    })
+  const { data: bundle } = await common.awaitWrap(
+    bundleModel.findBundleByName({ name })
   );
-  if (error) {
-    log.error('ERR_BUNDLE_UPDATE-BUNDLE', error.message);
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+
+  // if exists throw error
+  if (bundle && bundle.id != id) {
+    log.error('ERR_BUNDLE_CREATE-BUNDLE');
+    res.status(400).json({ message: 'Bundle name already exists' });
   } else {
-    log.out('OK_BUNDLE_UPDATE-BUNDLE');
-    res.json({ message: `Updated bundle with id:${id}` });
+    const { error } = await common.awaitWrap(
+      bundleModel.updateBundle({
+        id,
+        name,
+        description,
+        price
+      })
+    );
+    if (error) {
+      log.error('ERR_BUNDLE_UPDATE-BUNDLE', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_BUNDLE_UPDATE-BUNDLE');
+      res.json({ message: `Updated bundle with id:${id}` });
+    }
   }
 };
 

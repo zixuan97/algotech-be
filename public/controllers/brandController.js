@@ -77,16 +77,32 @@ const getBrandByName = async (req, res) => {
 
 const updateBrand = async (req, res) => {
   const { id, name } = req.body;
-  const { error } = await common.awaitWrap(
-    brandModel.updateBrands({ id, name })
+  const { data, error: duplicateBrandNameError } = await common.awaitWrap(
+    brandModel.findBrandByName({ name })
   );
-  if (error) {
-    log.error('ERR_BRAND_UPDATE_BRAND', error.message);
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  if (data && data.id != id) {
+    log.error('ERR_BRAND_CREATE-BRAND');
+    res.status(400).json({ message: 'Brand name already exists' });
+  } else if (duplicateBrandNameError) {
+    log.error('ERR_BRAND_CREATE-BRAND');
+    res
+      .status(400)
+      .json(
+        { message: 'Unable to find brand name' },
+        duplicateBrandNameError.message
+      );
   } else {
-    log.out('OK_BRAND_UPDATE_BRAND');
-    res.json({ message: `Updated brand with id:${id}` });
+    const { error } = await common.awaitWrap(
+      brandModel.updateBrands({ id, name })
+    );
+    if (error) {
+      log.error('ERR_BRAND_UPDATE_BRAND', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_BRAND_UPDATE_BRAND');
+      res.json({ message: `Updated brand with id:${id}` });
+    }
   }
 };
 

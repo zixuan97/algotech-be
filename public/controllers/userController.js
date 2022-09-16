@@ -130,16 +130,24 @@ const getUsers = async (req, res) => {
 };
 
 const editUser = async (req, res) => {
-  try {
-    const user = await userModel.editUser({ updatedUser: req.body });
-    log.out('OK_USER_EDIT-USER');
-    res.json({
-      message: 'User edited',
-      payload: user
-    });
-  } catch (error) {
-    log.error('ERR_USER_EDIT-USER', error.message);
-    res.status(500).send('Server Error');
+  const updatedUser = req.body;
+  const email = updatedUser.email;
+  const user = await userModel.findUserByEmail({ email });
+  if (user && user.id != updatedUser.id) {
+    log.error('ERR_USER_EDIT-USER');
+    res.status(400).json({ message: 'User already exists' });
+  } else {
+    try {
+      user = await userModel.editUser({ updatedUser: req.body });
+      log.out('OK_USER_EDIT-USER');
+      res.json({
+        message: 'User edited',
+        payload: user
+      });
+    } catch (error) {
+      log.error('ERR_USER_EDIT-USER', error.message);
+      res.status(500).send('Server Error');
+    }
   }
 };
 
@@ -225,7 +233,7 @@ const sendForgetEmailPassword = async (req, res) => {
       });
     } else {
       log.error('ERR_USER_SEND', 'user is not registered');
-      res.status(500).send('Failed to send email');
+      res.status(500).send('Failed to send email as user is not registered');
     }
   } catch (error) {
     log.error('ERR_USER_SEND', error.message);
@@ -236,16 +244,27 @@ const sendForgetEmailPassword = async (req, res) => {
 const verifyPassword = async (req, res) => {
   try {
     const { userEmail, currentPassword, newPassword } = req.body;
-    const is_equal = await userModel.verifyPassword({
-      userEmail,
-      currentPassword,
-      newPassword
-    });
-    if (is_equal) {
-      log.out('OK_USER_VERIFY-PW');
-      res.status(200).json({ message: 'Password verified' });
+    if (currentPassword === newPassword) {
+      log.out('ERR_USER_VERIFY-PW');
+      res.status(200).json({ message: 'Old and new password cannot be the same' });
+    }
+    const user = await userModel.findUserByEmail({ email: userEmail });
+    if (user) {
+      const is_equal = await userModel.verifyPassword({
+        userEmail,
+        currentPassword,
+        newPassword
+      });
+      if (is_equal) {
+        log.out('OK_USER_VERIFY-PW');
+        res.status(200).json({ message: 'Password verified' });
+      } else {
+        log.out('ERR_USER_VERIFY-PW');
+        res.status(400).json({ message: 'Passwords do not match' });
+      }
     } else {
-      res.status(400).json({ message: 'Passwords do not match' });
+      log.error('ERR_USER_VERIFY-PW');
+      res.status(400).json({ message: 'User does not exist' });
     }
   } catch (error) {
     log.error('ERR_USER_VERIFY-PW', error.message);
