@@ -61,6 +61,8 @@ const editUser = async (req) => {
   user = await prisma.User.update({
     where: { id: Number(id) },
     data: {
+      first_name: updatedUser.first_name,
+      last_name: updatedUser.last_name,
       email: updatedUser.email,
       password:
         updatedUser.password !== undefined
