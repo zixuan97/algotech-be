@@ -9,7 +9,7 @@ const createProcurementOrder = async (req) => {
     fulfilment_status,
     warehouse_address,
     proc_order_items,
-    supplier_id
+    supplier
   } = req;
   let totalAmount = 0;
   proc_order_items.map((p) => {
@@ -31,11 +31,10 @@ const createProcurementOrder = async (req) => {
           rate: p.rate
         }))
       },
-      supplier: {
-        connect: {
-          id: supplier_id
-        }
-      }
+      supplier_id: supplier.id,
+      supplier_name: supplier.name,
+      supplier_address: supplier.address,
+      supplier_email: supplier.email
     }
   });
 };
@@ -49,8 +48,7 @@ const updateProcurementOrder = async (req) => {
     payment_status,
     fulfilment_status,
     warehouse_address,
-    proc_order_items,
-    supplier_id
+    proc_order_items
   } = req;
   proc_order = await prisma.ProcurementOrder.update({
     where: { id },
@@ -61,8 +59,7 @@ const updateProcurementOrder = async (req) => {
       payment_status,
       fulfilment_status,
       warehouse_address,
-      proc_order_items,
-      supplier_id
+      proc_order_items
     }
   });
   return proc_order;
@@ -70,7 +67,7 @@ const updateProcurementOrder = async (req) => {
 
 const getAllProcurementOrders = async () => {
   const pos = await prisma.ProcurementOrder.findMany({
-    include: { proc_order_items : true }
+    include: { proc_order_items: true }
   });
   return pos;
 };
@@ -81,7 +78,7 @@ const findProcurementOrderById = async (req) => {
     where: {
       id: Number(id)
     },
-    include: { proc_order_items : true }
+    include: { proc_order_items: true }
   });
   return po;
 };
