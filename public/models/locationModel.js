@@ -46,6 +46,19 @@ const updateLocations = async (req) => {
   return location;
 };
 
+const updateLocationsWithoutProducts = async (req) => {
+  const { id, name, address } = req;
+
+  location = await prisma.location.update({
+    where: { id },
+    data: {
+      name,
+      address
+    }
+  });
+  return location;
+};
+
 const deleteLocation = async (req) => {
   const { id } = req;
   await prisma.location.update({
@@ -120,3 +133,4 @@ exports.deleteLocation = deleteLocation;
 exports.findLocationById = findLocationById;
 exports.findLocationByName = findLocationByName;
 exports.addProductsToLocation = addProductsToLocation;
+exports.updateLocationsWithoutProducts = updateLocationsWithoutProducts;

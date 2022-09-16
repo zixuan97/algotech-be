@@ -104,6 +104,35 @@ const updateLocation = async (req, res) => {
   }
 };
 
+const updateLocationWithoutProducts = async (req, res) => {
+  const { id, name, address } = req.body;
+  const { data, error: duplicateLocationNameError } = await common.awaitWrap(
+    locationModel.findLocationByName({ name })
+  );
+  if (data && data.id != id) {
+    log.error('ERR_LOCATION_CREATE-LOCATION');
+    res.status(400).json({ message: 'Location name already exists' });
+  } else if (duplicateLocationNameError) {
+    log.error('ERR_LOCATION_CREATE-LOCATION');
+    res.json(
+      { message: 'Unable to find location name' },
+      duplicateLocationNameError.message
+    );
+  } else {
+    const { error } = await common.awaitWrap(
+      locationModel.updateLocationsWithoutProducts({ id, name, address })
+    );
+    if (error) {
+      log.error('ERR_LOCATION_UPDATE-LOCATION', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_LOCATION_UPDATE-LOCATION');
+      res.json({ message: `Updated location with id:${id}` });
+    }
+  }
+};
+
 const addProductsToLocation = async (req, res) => {
   const { products, location_id: id } = req.body;
   const { error } = await common.awaitWrap(
@@ -141,3 +170,4 @@ exports.deleteLocation = deleteLocation;
 exports.getLocation = getLocation;
 exports.getLocationByName = getLocationByName;
 exports.addProductsToLocation = addProductsToLocation;
+exports.updateLocationWithoutProducts = updateLocationWithoutProducts;
