@@ -1,6 +1,5 @@
 const getStream = require('get-stream');
 const PDFDocument = require('pdfkit');
-const supplierModel = require('../models/supplierModel');
 
 const generatePdfTemplate = async () => {
   // Create a document
@@ -17,8 +16,13 @@ const generatePdfTemplate = async () => {
 };
 
 const generateProcurementPdfTemplate = async (req) => {
-  const { order_formatted, supplier_id, warehouse_address, proc_order_items } = req;
-  const supplier = await supplierModel.findSupplierById({ id: supplier_id });
+  const {
+    order_formatted,
+    warehouse_address,
+    proc_order_items,
+    supplier_name
+  } = req;
+
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
   const path = process.cwd() + '/logo.png';
@@ -59,19 +63,11 @@ const generateProcurementPdfTemplate = async (req) => {
     .fill('grey')
     .fontSize(10)
     .text('DATE', leftAlign + 390, 210);
+  doc.fill('black').fontSize(8).text(supplier_name, leftAlign, 225);
   doc
     .fill('black')
     .fontSize(8)
-    .text(supplier.name, leftAlign, 225);
-  doc
-    .fill('black')
-    .fontSize(8)
-    .text(
-      warehouse_address,
-      leftAlign + 200,
-      225,
-      { width: 120 }
-    );
+    .text(warehouse_address, leftAlign + 200, 225, { width: 120 });
   // doc
   //   .fill('black')
   //   .fontSize(8)
@@ -96,18 +92,24 @@ const generateProcurementPdfTemplate = async (req) => {
     .fontSize(10)
     .text('AMOUNT', leftAlign + 420, 280);
   //no highlight
-  doc.rect(leftAlign-4,275,leftAlign+401,18)
-  .fillOpacity(0.4)
- .fillAndStroke("grey", "#CDC4C2")
+  doc
+    .rect(leftAlign - 4, 275, leftAlign + 401, 18)
+    .fillOpacity(0.4)
+    .fillAndStroke('grey', '#CDC4C2');
 
- doc.fillOpacity(1);
+  doc.fillOpacity(1);
 
- var po_list = []
+  var po_list = [];
 
- proc_order_items.map(p => {
-  const totalAmount = p.quantity * p.rate;
-  po_list.push({ name: p.product_name, quantity: p.quantity, rate: p.rate, amount: totalAmount })
- });
+  proc_order_items.map((p) => {
+    const totalAmount = p.quantity * p.rate;
+    po_list.push({
+      name: p.product_name,
+      quantity: p.quantity,
+      rate: p.rate,
+      amount: totalAmount
+    });
+  });
 
   //table
   const tableTop = 280;
@@ -126,25 +128,63 @@ const generateProcurementPdfTemplate = async (req) => {
     doc.text(amount, leftAlign + 420, currentPosY);
   }
 
- doc.moveTo(leftAlign-50,currentPosY+30) // set the current point
- .lineTo(leftAlign+1000,currentPosY+30) .dash(5, { space: 2 }) 
- .stroke(); 
+  doc
+    .moveTo(leftAlign - 50, currentPosY + 30) // set the current point
+    .lineTo(leftAlign + 1000, currentPosY + 30)
+    .dash(5, { space: 2 })
+    .stroke();
 
- const topAlign = currentPosY + 30;
+  const topAlign = currentPosY + 30;
 
- //prices
- doc.fill('grey').fontSize(8).text('Prices stated are in Malaysian Ringgit (MYR)', leftAlign, topAlign + 20);
- doc.fill('grey').fontSize(8).text('Inclusive of SST', leftAlign, topAlign + 30, { width: 90 });
- doc.fill('grey').fontSize(9).text('SUBTOTAL', leftAlign + 300, topAlign + 20, { width: 90 });
- doc.fill('grey').fontSize(9).text(totalCost, leftAlign + 420, topAlign + 20, { width: 90 });
- doc.fill('grey').fontSize(9).text('TOTAL', leftAlign + 300, topAlign + 30, { width: 90 });
- doc.fill('grey').fontSize(9).text(totalCost, leftAlign + 420, topAlign + 30, { width: 90 });
+  //prices
+  doc
+    .fill('grey')
+    .fontSize(8)
+    .text(
+      'Prices stated are in Malaysian Ringgit (MYR)',
+      leftAlign,
+      topAlign + 20
+    );
+  doc
+    .fill('grey')
+    .fontSize(8)
+    .text('Inclusive of SST', leftAlign, topAlign + 30, { width: 90 });
+  doc
+    .fill('grey')
+    .fontSize(9)
+    .text('SUBTOTAL', leftAlign + 300, topAlign + 20, { width: 90 });
+  doc
+    .fill('grey')
+    .fontSize(9)
+    .text(totalCost, leftAlign + 420, topAlign + 20, { width: 90 });
+  doc
+    .fill('grey')
+    .fontSize(9)
+    .text('TOTAL', leftAlign + 300, topAlign + 30, { width: 90 });
+  doc
+    .fill('grey')
+    .fontSize(9)
+    .text(totalCost, leftAlign + 420, topAlign + 30, { width: 90 });
 
- //signature and date
- doc.fill('grey').fontSize(8).text('Approved By', leftAlign, topAlign + 70, { width: 90 });
- doc.moveTo(leftAlign + 100, topAlign + 80).lineTo(leftAlign + 500 , topAlign + 80).dash(500, {space: 10}).stroke();
- doc.fill('grey').fontSize(8).text('Date', leftAlign, topAlign + 90, { width: 90 });
- doc.moveTo(leftAlign + 100, topAlign + 100).lineTo(leftAlign + 500 , topAlign + 100).dash(500, {space: 10}).stroke();
+  //signature and date
+  doc
+    .fill('grey')
+    .fontSize(8)
+    .text('Approved By', leftAlign, topAlign + 70, { width: 90 });
+  doc
+    .moveTo(leftAlign + 100, topAlign + 80)
+    .lineTo(leftAlign + 500, topAlign + 80)
+    .dash(500, { space: 10 })
+    .stroke();
+  doc
+    .fill('grey')
+    .fontSize(8)
+    .text('Date', leftAlign, topAlign + 90, { width: 90 });
+  doc
+    .moveTo(leftAlign + 100, topAlign + 100)
+    .lineTo(leftAlign + 500, topAlign + 100)
+    .dash(500, { space: 10 })
+    .stroke();
 
   // Finalize PDF file Inclusive of SST
   doc.end();

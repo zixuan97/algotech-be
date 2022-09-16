@@ -17,7 +17,9 @@ const createProcurementOrder = async (req, res) => {
     supplier_id
   } = req.body;
   const order_date = new Date();
-  const order_formatted = format(order_date, 'dd MMM yyyy')
+  const order_formatted = format(order_date, 'dd MMM yyyy');
+  const supplier = await supplierModel.findSupplierById({ id: supplier_id });
+
   const { error } = await common.awaitWrap(
     procurementModel.createProcurementOrder({
       order_date,
@@ -26,15 +28,21 @@ const createProcurementOrder = async (req, res) => {
       fulfilment_status,
       warehouse_address,
       proc_order_items,
-      supplier_id
+      supplier
     })
   );
-  await sendProcurementEmail({ order_formatted, supplier_id, warehouse_address, proc_order_items });
+
   if (error) {
     log.error('ERR_PROCUREMENTORDER_CREATE-PO', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
+    await sendProcurementEmail({
+      order_formatted,
+      supplier_id,
+      warehouse_address,
+      proc_order_items
+    });
     log.out('OK_PROCUREMENTORDER_CREATE-PO');
     res.json({ message: 'procurement order created' });
   }
@@ -48,9 +56,9 @@ const updateProcurementOrder = async (req, res) => {
     payment_status,
     fulfilment_status,
     warehouse_address,
-    proc_order_items,
-    supplier_id
+    proc_order_items
   } = req.body;
+
   const { error } = await common.awaitWrap(
     procurementModel.updateProcurementOrder({
       id,
@@ -59,8 +67,7 @@ const updateProcurementOrder = async (req, res) => {
       payment_status,
       fulfilment_status,
       warehouse_address,
-      proc_order_items,
-      supplier_id
+      proc_order_items
     })
   );
   if (error) {
@@ -101,12 +108,17 @@ const getProcurementOrder = async (req, res) => {
 };
 
 const generatePO = async (req, res) => {
-  const po_id  = req.params;
+  const po_id = req.params;
   const po = await procurementModel.findProcurementOrderById(po_id);
-  const { supplier_id, warehouse_address, proc_order_items } = po;
+  const { supplier_name, warehouse_address, proc_order_items } = po;
   const order_date = new Date();
-  const order_formatted = format(order_date, 'dd MMM yyyy')
-  await generateProcurementPdfTemplate({ order_formatted, supplier_id, warehouse_address, proc_order_items })
+  const order_formatted = format(order_date, 'dd MMM yyyy');
+  await generateProcurementPdfTemplate({
+    order_formatted,
+    warehouse_address,
+    proc_order_items,
+    supplier_name
+  })
     .then((pdfBuffer) => {
       res
         .writeHead(200, {
@@ -124,10 +136,19 @@ const generatePO = async (req, res) => {
 
 const sendProcurementEmail = async (req, res) => {
   try {
-    const { order_formatted, supplier_id, warehouse_address, proc_order_items } = req;
+    const {
+      order_formatted,
+      supplier_id,
+      warehouse_address,
+      proc_order_items
+    } = req;
     const supplier = await supplierModel.findSupplierById({ id: supplier_id });
-    await generateProcurementPdfTemplate({ order_formatted, supplier_id, warehouse_address, proc_order_items })
-    .then(async (pdfBuffer) => {
+    await generateProcurementPdfTemplate({
+      order_formatted,
+      supplier_id,
+      warehouse_address,
+      proc_order_items
+    }).then(async (pdfBuffer) => {
       const subject = 'Procurement Order';
       const content = 'Attached please find the procurement order.';
       const recipientEmail = supplier.email;

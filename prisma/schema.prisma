@@ -105,7 +105,9 @@ model ProcurementOrder {
   fulfilment_status FulfilmentStatus       @default(CREATED)
   supplier_id       Int
   total_amount      Float
-  supplier          Supplier               @relation(fields: [supplier_id], references: [id])
+  supplier_name     String
+  supplier_email    String
+  supplier_address  String
   warehouse_address String
   proc_order_items  ProcurementOrderItem[]
 }
@@ -121,11 +123,10 @@ model ProcurementOrderItem {
 }
 
 model Supplier {
-  id               Int                @id @default(autoincrement())
-  email            String
-  name             String
-  address          String
-  proc_order_items ProcurementOrder[]
+  id      Int    @id @default(autoincrement())
+  email   String
+  name    String
+  address String
 }
 
 enum UserRole {

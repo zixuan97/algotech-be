@@ -20,6 +20,7 @@ const getAllSuppliers = async () => {
 
 const findSupplierById = async (req) => {
   const { id } = req;
+
   const supplier = await prisma.supplier.findUnique({
     where: {
       id: Number(id)
