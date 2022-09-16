@@ -145,7 +145,7 @@ const sendProcurementEmail = async (req, res) => {
     const supplier = await supplierModel.findSupplierById({ id: supplier_id });
     await generateProcurementPdfTemplate({
       order_formatted,
-      supplier_id,
+      supplier_name: supplier.name,
       warehouse_address,
       proc_order_items
     }).then(async (pdfBuffer) => {
