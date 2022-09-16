@@ -206,21 +206,6 @@ const updateProduct = async (req, res) => {
     brand_id,
     locations
   } = req.body;
-  //uploadImg to s3
-  if (image) {
-    const { error: uploadS3Error } = await common.awaitWrap(
-      uploadS3({
-        key: `productImages/${sku}-img`,
-        payload: image
-      })
-    );
-    if (uploadS3Error) {
-      log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
-      const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
-    }
-    log.out('OK_PRODUCT_UPLOAD-S3');
-  }
 
   const productSku = await productModel.findProductBySku({ sku });
   const productName = await productModel.findProductByName({ name });
@@ -233,6 +218,21 @@ const updateProduct = async (req, res) => {
     log.error('ERR_PRODUCT_UPDATE-PRODUCT');
     res.status(400).json({ message: 'Product name already exists' });
   } else {
+    //uploadImg to s3
+    if (image) {
+      const { error: uploadS3Error } = await common.awaitWrap(
+        uploadS3({
+          key: `productImages/${sku}-img`,
+          payload: image
+        })
+      );
+      if (uploadS3Error) {
+        log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
+        const e = Error.http(uploadS3Error);
+        res.status(e.code).json(e.message);
+      }
+      log.out('OK_PRODUCT_UPLOAD-S3');
+    }
     const { error } = await common.awaitWrap(
       productModel.updateProduct({
         id,
