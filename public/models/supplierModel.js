@@ -66,4 +66,3 @@ exports.updateSupplier = updateSupplier;
 exports.deleteSupplier = deleteSupplier;
 exports.findSupplierById = findSupplierById;
 exports.findSupplierByName = findSupplierByName;
-exports.findSupplierByEmail = findSupplierByEmail;
