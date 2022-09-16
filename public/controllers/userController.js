@@ -132,7 +132,7 @@ const getUsers = async (req, res) => {
 const editUser = async (req, res) => {
   const updatedUser = req.body;
   const email = updatedUser.email;
-  const user = await userModel.findUserByEmail({ email });
+  let user = await userModel.findUserByEmail({ email });
   if (user && user.id != updatedUser.id) {
     log.error('ERR_USER_EDIT-USER');
     res.status(400).json({ message: 'User already exists' });
