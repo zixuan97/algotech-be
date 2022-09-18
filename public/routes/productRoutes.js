@@ -6,6 +6,15 @@ router.get('/all', productController.getAllProducts);
 router.get('/:id', productController.getProductById);
 router.get('/', productController.getProductByName);
 router.get('/sku/:sku', productController.getProductBySku);
+router.get(
+  '/category/:category_id',
+  productController.getAllProductsByCategory
+);
+router.get(
+  '/location/:location_id',
+  productController.getAllProductsByLocation
+);
+router.get('/brand/:brand_id', productController.getAllProductsByBrand);
 router.put('/', productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
 router.post('/excel', productController.generateExcel);
