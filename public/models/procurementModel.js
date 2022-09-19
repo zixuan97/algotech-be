@@ -3,38 +3,38 @@ const prisma = new PrismaClient();
 
 const createProcurementOrder = async (req) => {
   const {
-    order_date,
+    orderDate,
     description,
-    payment_status,
-    fulfilment_status,
-    warehouse_address,
-    proc_order_items,
+    paymentStatus,
+    fulfilmentStatus,
+    warehouseAddress,
+    procOrderItems,
     supplier
   } = req;
   let totalAmount = 0;
-  proc_order_items.map((p) => {
+  procOrderItems.map((p) => {
     totalAmount += p.quantity * p.rate;
   });
   await prisma.ProcurementOrder.create({
     data: {
-      order_date,
+      orderDate,
       description,
-      total_amount: totalAmount,
-      payment_status,
-      fulfilment_status,
-      warehouse_address,
-      proc_order_items: {
-        create: proc_order_items.map((p) => ({
+      totalAmount: totalAmount,
+      paymentStatus,
+      fulfilmentStatus,
+      warehouseAddress,
+      procOrderItems: {
+        create: procOrderItems.map((p) => ({
           quantity: p.quantity,
-          product_sku: p.product_sku,
-          product_name: p.product_name,
+          productSku: p.productSku,
+          productName: p.productName,
           rate: p.rate
         }))
       },
-      supplier_id: supplier.id,
-      supplier_name: supplier.name,
-      supplier_address: supplier.address,
-      supplier_email: supplier.email
+      supplierId: supplier.id,
+      supplierName: supplier.name,
+      supplierAddress: supplier.address,
+      supplierEmail: supplier.email
     }
   });
 };
@@ -42,32 +42,32 @@ const createProcurementOrder = async (req) => {
 const updateProcurementOrder = async (req) => {
   const {
     id,
-    order_date,
+    orderDate,
     description,
-    total_amount,
-    payment_status,
-    fulfilment_status,
-    warehouse_address,
-    proc_order_items
+    totalAmount,
+    paymentStatus,
+    fulfilmentStatus,
+    warehouseAddress,
+    procOrderItems
   } = req;
-  proc_order = await prisma.ProcurementOrder.update({
+  procOrder = await prisma.ProcurementOrder.update({
     where: { id },
     data: {
-      order_date,
+      orderDate,
       description,
-      total_amount,
-      payment_status,
-      fulfilment_status,
-      warehouse_address,
-      proc_order_items
+      totalAmount,
+      paymentStatus,
+      fulfilmentStatus,
+      warehouseAddress,
+      procOrderItems
     }
   });
-  return proc_order;
+  return procOrder;
 };
 
 const getAllProcurementOrders = async () => {
   const pos = await prisma.ProcurementOrder.findMany({
-    include: { proc_order_items: true }
+    include: { procOrderItems: true }
   });
   return pos;
 };
@@ -78,7 +78,7 @@ const findProcurementOrderById = async (req) => {
     where: {
       id: Number(id)
     },
-    include: { proc_order_items: true }
+    include: { procOrderItems: true }
   });
   return po;
 };

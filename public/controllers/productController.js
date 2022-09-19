@@ -201,9 +201,9 @@ const getProductBySku = async (req, res) => {
 };
 
 const getAllProductsByCategory = async (req, res) => {
-  const { category_id } = req.params;
+  const { categoryId } = req.params;
   const { data, error } = await common.awaitWrap(
-    productModel.getAllProductsByCategory({ category_id })
+    productModel.getAllProductsByCategory({ categoryId })
   );
 
   if (error) {
@@ -225,9 +225,9 @@ const getAllProductsByCategory = async (req, res) => {
 };
 
 const getAllProductsByLocation = async (req, res) => {
-  const { location_id } = req.params;
+  const { locationId } = req.params;
   const { data, error } = await common.awaitWrap(
-    productModel.getAllProductsByLocation({ location_id })
+    productModel.getAllProductsByLocation({ locationId })
   );
 
   if (error) {
@@ -249,9 +249,9 @@ const getAllProductsByLocation = async (req, res) => {
 };
 
 const getAllProductsByBrand = async (req, res) => {
-  const { brand_id } = req.params;
+  const { brandId } = req.params;
   const { data, error } = await common.awaitWrap(
-    productModel.getAllProductsByBrand({ brand_id })
+    productModel.getAllProductsByBrand({ brandId })
   );
 
   if (error) {

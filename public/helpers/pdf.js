@@ -16,12 +16,8 @@ const generatePdfTemplate = async () => {
 };
 
 const generateProcurementPdfTemplate = async (req) => {
-  const {
-    order_formatted,
-    warehouse_address,
-    proc_order_items,
-    supplier_name
-  } = req;
+  const { orderFormatted, warehouseAddress, procOrderItems, supplierName } =
+    req;
 
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
@@ -63,11 +59,11 @@ const generateProcurementPdfTemplate = async (req) => {
     .fill('grey')
     .fontSize(10)
     .text('DATE', leftAlign + 390, 210);
-  doc.fill('black').fontSize(8).text(supplier_name, leftAlign, 225);
+  doc.fill('black').fontSize(8).text(supplierName, leftAlign, 225);
   doc
     .fill('black')
     .fontSize(8)
-    .text(warehouse_address, leftAlign + 200, 225, { width: 120 });
+    .text(warehouseAddress, leftAlign + 200, 225, { width: 120 });
   // doc
   //   .fill('black')
   //   .fontSize(8)
@@ -75,7 +71,7 @@ const generateProcurementPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(8)
-    .text(order_formatted, leftAlign + 390, 225);
+    .text(orderFormatted, leftAlign + 390, 225);
 
   //PO information
   doc.fill('black').fontSize(10).text('PRODUCT/SERVICE', leftAlign, 280);
@@ -99,12 +95,12 @@ const generateProcurementPdfTemplate = async (req) => {
 
   doc.fillOpacity(1);
 
-  var po_list = [];
+  var poList = [];
 
-  proc_order_items.map((p) => {
+  procOrderItems.map((p) => {
     const totalAmount = p.quantity * p.rate;
-    po_list.push({
-      name: p.product_name,
+    poList.push({
+      name: p.productName,
       quantity: p.quantity,
       rate: p.rate,
       amount: totalAmount
@@ -115,11 +111,11 @@ const generateProcurementPdfTemplate = async (req) => {
   const tableTop = 280;
   let currentPosY = tableTop;
   let totalCost = 0;
-  for (let i = 0; i < po_list.length; i++) {
-    const name = po_list[i].name;
-    const quantity = po_list[i].quantity;
-    const rate = po_list[i].rate;
-    const amount = po_list[i].amount;
+  for (let i = 0; i < poList.length; i++) {
+    const name = poList[i].name;
+    const quantity = poList[i].quantity;
+    const rate = poList[i].rate;
+    const amount = poList[i].amount;
     currentPosY = tableTop + 15 + i * 12;
     totalCost = totalCost + amount;
     doc.text(name, leftAlign, currentPosY);

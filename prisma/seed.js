@@ -7,8 +7,8 @@ async function main() {
 
   await prisma.User.create({
     data: {
-      first_name: 'Wee Kek',
-      last_name: 'Tan',
+      firstName: 'Wee Kek',
+      lastName: 'Tan',
       email: 'tanwk@comp.nus.edu.sg',
       password: encryptedPassword,
       role: 'ADMIN',
@@ -18,8 +18,8 @@ async function main() {
 
   await prisma.User.create({
     data: {
-      first_name: 'Wee Kek',
-      last_name: 'Tan',
+      firstName: 'Wee Kek',
+      lastName: 'Tan',
       email: 'tanwk+user@comp.nus.edu.sg',
       password: encryptedPassword,
       role: 'FULLTIME',
@@ -78,13 +78,13 @@ async function main() {
       sku: 'SKU123',
       name: 'Nasi Lemak Popcorn',
       description: 'Delicious',
-      brand_id: 1,
+      brandId: 1,
       qtyThreshold: 20,
       productCategory: {
         create: [
           {
-            category_name: 'Asian Favourites',
-            product_sku: 'SKU123',
+            categoryName: 'Asian Favourites',
+            productSku: 'SKU123',
             category: {
               connect: {
                 name: 'Asian Favourites'
@@ -96,11 +96,11 @@ async function main() {
       stockQuantity: {
         create: [
           {
-            product_name: 'Nasi Lemak Popcorn',
-            product_sku: 'SKU123',
+            productName: 'Nasi Lemak Popcorn',
+            productSku: 'SKU123',
             quantity: 20,
             price: 2,
-            location_name: 'Punggol Warehouse',
+            locationName: 'Punggol Warehouse',
             location: {
               connect: {
                 id: 1
@@ -117,13 +117,13 @@ async function main() {
       sku: 'SKU124',
       name: 'Curry Popcorn',
       description: 'Spicy',
-      brand_id: 1,
+      brandId: 1,
       qtyThreshold: 20,
       productCategory: {
         create: [
           {
-            category_name: 'Asian Favourites',
-            product_sku: 'SKU124',
+            categoryName: 'Asian Favourites',
+            productSku: 'SKU124',
             category: {
               connect: {
                 name: 'Asian Favourites'
@@ -135,11 +135,11 @@ async function main() {
       stockQuantity: {
         create: [
           {
-            product_name: 'Curry Popcorn',
-            product_sku: 'SKU124',
+            productName: 'Curry Popcorn',
+            productSku: 'SKU124',
             quantity: 50,
             price: 2,
-            location_name: 'Punggol Warehouse',
+            locationName: 'Punggol Warehouse',
             location: {
               connect: {
                 id: 1
@@ -153,26 +153,26 @@ async function main() {
 
   await prisma.ProcurementOrder.create({
     data: {
-      order_date: new Date(),
+      orderDate: new Date(),
       description: 'Procurement Order',
-      total_amount: 20,
-      payment_status: 'PENDING',
-      fulfilment_status: 'CREATED',
-      warehouse_address: 'Blk 303B Punggol Central #05-792',
-      proc_order_items: {
+      totalAmount: 20,
+      paymentStatus: 'PENDING',
+      fulfilmentStatus: 'CREATED',
+      warehouseAddress: 'Blk 303B Punggol Central #05-792',
+      procOrderItems: {
         create: [
           {
             quantity: 20,
-            product_sku: 'SKU123',
-            product_name: 'Nasi Lemak Popcorn',
+            productSku: 'SKU123',
+            productName: 'Nasi Lemak Popcorn',
             rate: 16
           }
         ]
       },
-      supplier_id: 1,
-      supplier_name: 'Wee Kek',
-      supplier_address: 'Blk 117 Ang Mo Kio Ave 4 #08-467',
-      supplier_email: 'tanwk@comp.nus.edu.sg'
+      supplierId: 1,
+      supplierName: 'Wee Kek',
+      supplierAddress: 'Blk 117 Ang Mo Kio Ave 4 #08-467',
+      supplierEmail: 'tanwk@comp.nus.edu.sg'
     }
   });
 }

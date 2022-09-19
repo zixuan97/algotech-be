@@ -17,12 +17,12 @@ const createProduct = async (req) => {
       sku,
       name,
       description,
-      brand_id: brand.id,
+      brandId: brand.id,
       qtyThreshold,
       productCategory: {
         create: categories.map((c) => ({
-          category_name: c.name,
-          product_sku: sku,
+          categoryName: c.name,
+          productSku: sku,
           category: {
             connect: {
               name: c.name
@@ -32,11 +32,11 @@ const createProduct = async (req) => {
       },
       stockQuantity: {
         create: stockQuantity.map((sq) => ({
-          product_name: name,
-          product_sku: sku,
+          productName: name,
+          productSku: sku,
           quantity: sq.quantity,
           price: sq.price,
-          location_name: sq.location.name,
+          locationName: sq.location.name,
           location: {
             connect: {
               id: sq.location.id
@@ -58,7 +58,7 @@ const getAllProducts = async () => {
       },
       stockQuantity: {
         select: {
-          product_id: true,
+          productId: true,
           location: true,
           price: true,
           quantity: true
@@ -89,7 +89,7 @@ const findProductById = async (req) => {
       },
       stockQuantity: {
         select: {
-          product_id: true,
+          productId: true,
           location: true,
           price: true,
           quantity: true
@@ -120,7 +120,7 @@ const findProductBySku = async (req) => {
       },
       stockQuantity: {
         select: {
-          product_id: true,
+          productId: true,
           location: true,
           price: true,
           quantity: true
@@ -151,7 +151,7 @@ const findProductByName = async (req) => {
       },
       stockQuantity: {
         select: {
-          product_id: true,
+          productId: true,
           location: true,
           price: true,
           quantity: true
@@ -185,13 +185,13 @@ const updateProduct = async (req) => {
       sku,
       name,
       description,
-      brand_id: brand.id,
+      brandId: brand.id,
       qtyThreshold,
       productCategory: {
         deleteMany: {},
         create: categories.map((c) => ({
-          category_name: c.name,
-          product_sku: sku,
+          categoryName: c.name,
+          productSku: sku,
           category: {
             connect: {
               name: c.name
@@ -202,11 +202,11 @@ const updateProduct = async (req) => {
       stockQuantity: {
         deleteMany: {},
         create: stockQuantity.map((sq) => ({
-          product_name: name,
-          product_sku: sku,
+          productName: name,
+          productSku: sku,
           quantity: sq.quantity,
           price: sq.price,
-          location_name: sq.location.name,
+          locationName: sq.location.name,
           location: {
             connect: {
               id: sq.location.id
@@ -220,10 +220,10 @@ const updateProduct = async (req) => {
 };
 
 const getAllProductsByBrand = async (req) => {
-  const { brand_id } = req;
+  const { brandId } = req;
   const products = await prisma.product.findMany({
     where: {
-      brand_id: Number(brand_id)
+      brandId: Number(brandId)
     },
     include: {
       productCategory: {
@@ -233,7 +233,7 @@ const getAllProductsByBrand = async (req) => {
       },
       stockQuantity: {
         select: {
-          product_id: true,
+          productId: true,
           location: true,
           price: true,
           quantity: true
@@ -251,13 +251,13 @@ const getAllProductsByBrand = async (req) => {
 };
 
 const getAllProductsByCategory = async (req) => {
-  const { category_id } = req;
+  const { categoryId } = req;
   const products = await prisma.product.findMany({
     where: {
       productCategory: {
         every: {
           category: {
-            id: Number(category_id)
+            id: Number(categoryId)
           }
         }
       }
@@ -270,7 +270,7 @@ const getAllProductsByCategory = async (req) => {
       },
       stockQuantity: {
         select: {
-          product_id: true,
+          productId: true,
           location: true,
           price: true,
           quantity: true
@@ -287,13 +287,13 @@ const getAllProductsByCategory = async (req) => {
   return products;
 };
 const getAllProductsByLocation = async (req) => {
-  const { location_id } = req;
+  const { locationId } = req;
   const products = await prisma.product.findMany({
     where: {
       stockQuantity: {
         every: {
           location: {
-            id: Number(location_id)
+            id: Number(locationId)
           }
         }
       }
@@ -306,7 +306,7 @@ const getAllProductsByLocation = async (req) => {
       },
       stockQuantity: {
         select: {
-          product_id: true,
+          productId: true,
           location: true,
           price: true,
           quantity: true

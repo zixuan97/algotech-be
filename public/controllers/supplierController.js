@@ -5,11 +5,11 @@ const { log } = require('../helpers/logger');
 
 const createSupplier = async (req, res) => {
   const { email, name, address } = req.body;
-  var supplier_emails = []
-  const suppliers = await supplierModel.getAllSuppliers({})
-  suppliers.map(s => supplier_emails.push(s.email))
+  var supplierEmails = [];
+  const suppliers = await supplierModel.getAllSuppliers({});
+  suppliers.map((s) => supplierEmails.push(s.email));
   // if exists throw error
-  if (supplier_emails.includes(email)) {
+  if (supplierEmails.includes(email)) {
     log.error('ERR_PRODUCT_CREATE-SUPPLIER');
     res.status(400).json({ message: 'Supplier already exists' });
   } else {

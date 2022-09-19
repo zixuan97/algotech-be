@@ -13,12 +13,13 @@ CREATE TYPE "FulfilmentStatus" AS ENUM ('CREATED', 'ARRIVED', 'COMPLETED');
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
-    "first_name" TEXT NOT NULL,
-    "last_name" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "role" "UserRole" NOT NULL DEFAULT 'ADMIN',
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -41,12 +42,12 @@ CREATE TABLE "Brand" (
 
 -- CreateTable
 CREATE TABLE "ProductCategory" (
-    "product_id" INTEGER NOT NULL,
-    "product_sku" TEXT NOT NULL,
-    "category_name" TEXT NOT NULL,
-    "category_id" INTEGER NOT NULL,
+    "productId" INTEGER NOT NULL,
+    "productSku" TEXT NOT NULL,
+    "categoryName" TEXT NOT NULL,
+    "categoryId" INTEGER NOT NULL,
 
-    CONSTRAINT "ProductCategory_pkey" PRIMARY KEY ("product_id","category_id")
+    CONSTRAINT "ProductCategory_pkey" PRIMARY KEY ("productId","categoryId")
 );
 
 -- CreateTable
@@ -57,7 +58,7 @@ CREATE TABLE "Product" (
     "description" TEXT,
     "image" TEXT,
     "qtyThreshold" INTEGER,
-    "brand_id" INTEGER NOT NULL,
+    "brandId" INTEGER NOT NULL,
 
     CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
 );
@@ -73,17 +74,17 @@ CREATE TABLE "Location" (
 
 -- CreateTable
 CREATE TABLE "StockQuantity" (
-    "product_id" INTEGER NOT NULL,
-    "product_name" TEXT NOT NULL,
-    "product_sku" TEXT NOT NULL,
-    "product_qtyThreshold" INTEGER,
-    "location_id" INTEGER NOT NULL,
+    "productId" INTEGER NOT NULL,
+    "productName" TEXT NOT NULL,
+    "productSku" TEXT NOT NULL,
+    "locationId" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "locationName" TEXT NOT NULL,
 
-    CONSTRAINT "StockQuantity_pkey" PRIMARY KEY ("product_id","location_id")
+    CONSTRAINT "StockQuantity_pkey" PRIMARY KEY ("productId","locationId")
 );
 
 -- CreateTable
@@ -98,23 +99,27 @@ CREATE TABLE "Bundle" (
 
 -- CreateTable
 CREATE TABLE "BundleProduct" (
-    "bundle_id" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
-    "product_sku" TEXT NOT NULL,
-    "bundle_name" TEXT NOT NULL,
+    "bundleId" INTEGER NOT NULL,
+    "productId" INTEGER NOT NULL,
+    "productSku" TEXT NOT NULL,
+    "bundleName" TEXT NOT NULL,
 
-    CONSTRAINT "BundleProduct_pkey" PRIMARY KEY ("product_id","bundle_id")
+    CONSTRAINT "BundleProduct_pkey" PRIMARY KEY ("productId","bundleId")
 );
 
 -- CreateTable
 CREATE TABLE "ProcurementOrder" (
     "id" SERIAL NOT NULL,
-    "order_date" TIMESTAMP(3) NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
+    "orderDate" TIMESTAMP(3) NOT NULL,
     "description" TEXT NOT NULL,
-    "payment_status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
-    "fulfilment_status" "FulfilmentStatus" NOT NULL DEFAULT 'CREATED',
-    "supplier_id" INTEGER NOT NULL,
+    "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
+    "fulfilmentStatus" "FulfilmentStatus" NOT NULL DEFAULT 'CREATED',
+    "supplierId" INTEGER NOT NULL,
+    "totalAmount" DOUBLE PRECISION NOT NULL,
+    "warehouseAddress" TEXT NOT NULL,
+    "supplierAddress" TEXT NOT NULL,
+    "supplierEmail" TEXT NOT NULL,
+    "supplierName" TEXT NOT NULL,
 
     CONSTRAINT "ProcurementOrder_pkey" PRIMARY KEY ("id")
 );
@@ -122,10 +127,13 @@ CREATE TABLE "ProcurementOrder" (
 -- CreateTable
 CREATE TABLE "ProcurementOrderItem" (
     "quantity" INTEGER NOT NULL,
-    "proc_order_id" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "procOrderId" INTEGER NOT NULL,
+    "id" SERIAL NOT NULL,
+    "productName" TEXT NOT NULL,
+    "productSku" TEXT NOT NULL,
+    "rate" DOUBLE PRECISION NOT NULL,
 
-    CONSTRAINT "ProcurementOrderItem_pkey" PRIMARY KEY ("proc_order_id","product_id")
+    CONSTRAINT "ProcurementOrderItem_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -159,32 +167,29 @@ CREATE UNIQUE INDEX "Location_name_key" ON "Location"("name");
 -- CreateIndex
 CREATE UNIQUE INDEX "Bundle_name_key" ON "Bundle"("name");
 
--- AddForeignKey
-ALTER TABLE "ProductCategory" ADD CONSTRAINT "ProductCategory_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "Supplier_email_key" ON "Supplier"("email");
 
 -- AddForeignKey
-ALTER TABLE "ProductCategory" ADD CONSTRAINT "ProductCategory_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ProductCategory" ADD CONSTRAINT "ProductCategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Product" ADD CONSTRAINT "Product_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "Brand"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ProductCategory" ADD CONSTRAINT "ProductCategory_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StockQuantity" ADD CONSTRAINT "StockQuantity_location_id_fkey" FOREIGN KEY ("location_id") REFERENCES "Location"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Product" ADD CONSTRAINT "Product_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StockQuantity" ADD CONSTRAINT "StockQuantity_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "StockQuantity" ADD CONSTRAINT "StockQuantity_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BundleProduct" ADD CONSTRAINT "BundleProduct_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "StockQuantity" ADD CONSTRAINT "StockQuantity_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BundleProduct" ADD CONSTRAINT "BundleProduct_bundle_id_fkey" FOREIGN KEY ("bundle_id") REFERENCES "Bundle"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BundleProduct" ADD CONSTRAINT "BundleProduct_bundleId_fkey" FOREIGN KEY ("bundleId") REFERENCES "Bundle"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProcurementOrder" ADD CONSTRAINT "ProcurementOrder_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "Supplier"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BundleProduct" ADD CONSTRAINT "BundleProduct_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProcurementOrderItem" ADD CONSTRAINT "ProcurementOrderItem_proc_order_id_fkey" FOREIGN KEY ("proc_order_id") REFERENCES "ProcurementOrder"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ProcurementOrderItem" ADD CONSTRAINT "ProcurementOrderItem_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ProcurementOrderItem" ADD CONSTRAINT "ProcurementOrderItem_procOrderId_fkey" FOREIGN KEY ("procOrderId") REFERENCES "ProcurementOrder"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

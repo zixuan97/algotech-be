@@ -28,8 +28,8 @@ const updateLocations = async (req) => {
       stockQuantity: {
         deleteMany: {},
         create: products.map((p) => ({
-          product_sku: p.sku,
-          product_name: p.name,
+          productSku: p.sku,
+          productName: p.name,
           price: p.price,
           quantity: p.quantity,
           product: {
@@ -83,8 +83,8 @@ const addProductsToLocation = async (req) => {
     data: {
       stockQuantity: {
         create: products.map((p) => ({
-          product_sku: p.sku,
-          product_name: p.name,
+          productSku: p.sku,
+          productName: p.name,
           price: p.price,
           quantity: p.quantity,
           product: {
