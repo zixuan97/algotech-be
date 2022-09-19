@@ -105,10 +105,10 @@ model ProcurementOrder {
   fulfilment_status FulfilmentStatus       @default(CREATED)
   supplier_id       Int
   total_amount      Float
-  supplier_name     String
-  supplier_email    String
-  supplier_address  String
   warehouse_address String
+  supplier_address  String
+  supplier_email    String
+  supplier_name     String
   proc_order_items  ProcurementOrderItem[]
 }
 
