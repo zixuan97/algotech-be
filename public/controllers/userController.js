@@ -89,6 +89,7 @@ const auth = async (req, res) => {
   const user = await userModel.findUserByEmail({
     email
   });
+  console.log('email', email);
   console.log('password', password);
   console.log('user', user);
   console.log('user.password', user.password);
