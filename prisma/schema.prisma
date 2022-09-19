@@ -105,6 +105,7 @@ model ProcurementOrder {
   fulfilmentStatus FulfilmentStatus       @default(CREATED)
   supplierId       Int
   totalAmount      Float
+  warehouseName    String
   warehouseAddress String
   supplierAddress  String
   supplierEmail    String
