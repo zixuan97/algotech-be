@@ -89,7 +89,8 @@ const auth = async (req, res) => {
   const user = await userModel.findUserByEmail({
     email
   });
-  console.log('compare bcrypt', bcrypt.compare(password, user.password));
+  console.log('password', password);
+  console.log('compare bcrypt', await bcrypt.compare(password, user.password));
   console.log('user status', user.status);
   if (
     user &&
