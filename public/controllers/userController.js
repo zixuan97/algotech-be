@@ -90,6 +90,8 @@ const auth = async (req, res) => {
     email
   });
   console.log('password', password);
+  console.log('user', user);
+  console.log('user.password', user.password);
   console.log('compare bcrypt', await bcrypt.compare(password, user.password));
   console.log('user status', user.status);
   if (
