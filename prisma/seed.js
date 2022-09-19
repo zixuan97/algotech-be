@@ -158,6 +158,7 @@ async function main() {
       totalAmount: 20,
       paymentStatus: 'PENDING',
       fulfilmentStatus: 'CREATED',
+      warehouseName: 'Punggol Warehouse',
       warehouseAddress: 'Blk 303B Punggol Central #05-792',
       procOrderItems: {
         create: [
