@@ -109,7 +109,7 @@ const updateBrand = async (req, res) => {
 const deleteBrand = async (req, res) => {
   const { id } = req.params;
   const { data: products, getAllProductsError } = await common.awaitWrap(
-    productModel.getAllProductsByBrand({ brand_id: id })
+    productModel.getAllProductsByBrand({ brandId: id })
   );
 
   if (getAllProductsError) {

@@ -7,7 +7,7 @@ const { log } = require('../helpers/logger');
 const emailHelper = require('../helpers/email');
 
 const createUser = async (req, res) => {
-  const { first_name, last_name, email, role, isVerified } = req.body;
+  const { firstName, lastName, email, role, isVerified } = req.body;
 
   const user = await userModel.findUserByEmail({ email });
   if (user) {
@@ -17,9 +17,9 @@ const createUser = async (req, res) => {
     const password = await common.awaitWrap(userModel.generatePassword());
     const content =
       'Hi ' +
-      first_name +
+      firstName +
       ' ' +
-      last_name +
+      lastName +
       '! Your generated password is ' +
       password.data +
       '.';
@@ -35,8 +35,8 @@ const createUser = async (req, res) => {
     }
     const { error } = await common.awaitWrap(
       userModel.createUser({
-        first_name,
-        last_name,
+        firstName,
+        lastName,
         email,
         password: password.data,
         role,
@@ -59,7 +59,7 @@ const createUser = async (req, res) => {
  */
 const getUser = async (req, res) => {
   try {
-    const user = await userModel.findUserById({ id: req.user.user_id });
+    const user = await userModel.findUserById({ id: req.user.userId });
     delete user.password;
     log.out('OK_USER_GET-USER');
     res.json(user);
@@ -89,6 +89,7 @@ const auth = async (req, res) => {
   const user = await userModel.findUserByEmail({
     email
   });
+
   if (
     user &&
     (await bcrypt.compare(password, user.password)) &&
@@ -96,7 +97,7 @@ const auth = async (req, res) => {
   ) {
     // Create token
     jwt.sign(
-      { user_id: user.id, email, role: user.role },
+      { userId: user.id, email, role: user.role },
       process.env.TOKEN_KEY,
       {
         expiresIn: '2h'
@@ -121,7 +122,7 @@ const getUsers = async (req, res) => {
   try {
     const users = await userModel.getUsers({});
     log.out('OK_USER_GET-USERS');
-    res.json(users.filter((u) => u.id != req.user.user_id));
+    res.json(users.filter((u) => u.id != req.user.userId));
     //res.json(users);
   } catch (error) {
     log.error('ERR_USER_GET-USERS', err.message);
@@ -246,7 +247,9 @@ const verifyPassword = async (req, res) => {
     const { userEmail, currentPassword, newPassword } = req.body;
     if (currentPassword === newPassword) {
       log.out('ERR_USER_VERIFY-PW');
-      res.status(200).json({ message: 'Old and new password cannot be the same' });
+      res
+        .status(200)
+        .json({ message: 'Old and new password cannot be the same' });
     }
     const user = await userModel.findUserByEmail({ email: userEmail });
     if (user) {

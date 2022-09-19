@@ -13,9 +13,7 @@ const createLocation = async (req) => {
 };
 
 const getAllLocations = async () => {
-  const locations = await prisma.location.findMany({
-    include: { stockQuantity: true }
-  });
+  const locations = await prisma.location.findMany({});
   return locations;
 };
 
@@ -30,8 +28,8 @@ const updateLocations = async (req) => {
       stockQuantity: {
         deleteMany: {},
         create: products.map((p) => ({
-          product_sku: p.sku,
-          product_name: p.name,
+          productSku: p.sku,
+          productName: p.name,
           price: p.price,
           quantity: p.quantity,
           product: {
@@ -85,8 +83,8 @@ const addProductsToLocation = async (req) => {
     data: {
       stockQuantity: {
         create: products.map((p) => ({
-          product_sku: p.sku,
-          product_name: p.name,
+          productSku: p.sku,
+          productName: p.name,
           price: p.price,
           quantity: p.quantity,
           product: {
@@ -105,9 +103,6 @@ const findLocationById = async (req) => {
   const location = await prisma.location.findUnique({
     where: {
       id: Number(id)
-    },
-    include: {
-      stockQuantity: true
     }
   });
   return location;
@@ -118,9 +113,6 @@ const findLocationByName = async (req) => {
   const location = await prisma.location.findUnique({
     where: {
       name
-    },
-    include: {
-      stockQuantity: true
     }
   });
   return location;

@@ -2,8 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createBundle = async (req) => {
-  const { name, description, price, products } =
-    req;
+  const { name, description, price, products } = req;
 
   await prisma.bundle.create({
     data: {
@@ -12,23 +11,21 @@ const createBundle = async (req) => {
       price,
       bundleProduct: {
         create: products.map((p) => ({
-            product_sku: p.sku,
-            bundle_name: name,
-            product: {
-              connect: {
-                id: p.id
-              }
+          productSku: p.sku,
+          bundleName: name,
+          product: {
+            connect: {
+              id: p.id
             }
-          }))
+          }
+        }))
       }
     }
   });
 };
 
 const getAllBundles = async () => {
-  const bundles = await prisma.bundle.findMany({
-    include: { bundleProduct : true }
-  });
+  const bundles = await prisma.bundle.findMany({});
   return bundles;
 };
 
@@ -37,8 +34,7 @@ const findBundleById = async (req) => {
   const bundle = await prisma.bundle.findUnique({
     where: {
       id: Number(id)
-    },
-    include: { bundleProduct : true }
+    }
   });
   return bundle;
 };
@@ -48,8 +44,7 @@ const findBundleByName = async (req) => {
   const bundle = await prisma.bundle.findUnique({
     where: {
       name
-    },
-    include: { bundleProduct : true }
+    }
   });
   return bundle;
 };

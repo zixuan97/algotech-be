@@ -4,13 +4,13 @@ const prisma = new PrismaClient();
 const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req) => {
-  const { first_name, last_name, email, password, role, isVerified } = req;
+  const { firstName, lastName, email, password, role, isVerified } = req;
   encryptedPassword = await bcrypt.hash(password, 10);
 
   await prisma.User.create({
     data: {
-      first_name,
-      last_name,
+      firstName,
+      lastName,
       email,
       password: encryptedPassword,
       role,
@@ -61,8 +61,8 @@ const editUser = async (req) => {
   user = await prisma.User.update({
     where: { id: Number(id) },
     data: {
-      first_name: updatedUser.first_name,
-      last_name: updatedUser.last_name,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
       email: updatedUser.email,
       password:
         updatedUser.password !== undefined
@@ -132,7 +132,8 @@ const changeUserRole = async (req) => {
 
 const generatePassword = async (req) => {
   var result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
   for (var i = 0; i < 20; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
