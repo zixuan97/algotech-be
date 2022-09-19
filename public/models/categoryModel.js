@@ -12,9 +12,7 @@ const createCategory = async (req) => {
 };
 
 const getAllCategories = async () => {
-  const categories = await prisma.category.findMany({
-    include: { productCategory: true }
-  });
+  const categories = await prisma.category.findMany({});
   return categories;
 };
 
@@ -71,9 +69,6 @@ const findCategoryById = async (req) => {
   const category = await prisma.category.findUnique({
     where: {
       id: Number(id)
-    },
-    include: {
-      productCategory: true
     }
   });
   return category;
@@ -84,9 +79,6 @@ const findCategoryByName = async (req) => {
   const category = await prisma.category.findUnique({
     where: {
       name
-    },
-    include: {
-      productCategory: true
     }
   });
   return category;

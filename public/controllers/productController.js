@@ -20,9 +20,9 @@ const createProduct = async (req, res) => {
     description,
     image,
     categories,
-    brand_id,
+    brand,
     qtyThreshold,
-    locations
+    stockQuantity
   } = req.body;
   // check if product exists
 
@@ -37,19 +37,6 @@ const createProduct = async (req, res) => {
     log.error('ERR_PRODUCT_CREATE-PRODUCT');
     res.status(400).json({ message: 'Product name already exists' });
   } else {
-    // find or create category
-    // const { error: connectOrCreateCategoryError } = await common.awaitWrap(
-    //   categoryModel.connectOrCreateCategory({ categories })
-    // );
-    // log.out('OK_CATEGORY_CONNECT-CREATE-CATEGORY');
-    // if (connectOrCreateCategoryError) {
-    //   log.error(
-    //     'ERR_CATEGORY_CREATE-CATEGORY',
-    //     connectOrCreateCategoryError.message
-    //   );
-    //   const e = Error.http(connectOrCreateCategoryError);
-    //   res.status(e.code).json(e.message);
-    // }
     //uploadImg to s3
     if (image) {
       try {
@@ -72,9 +59,9 @@ const createProduct = async (req, res) => {
         name,
         description,
         qtyThreshold,
-        brand_id,
+        brand,
         categories,
-        locations
+        stockQuantity
       })
     );
 
@@ -100,7 +87,15 @@ const getAllProducts = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS');
-    res.json(data);
+    const result = await data.map((product) => {
+      product.category = product.productCategory;
+      delete product.productCategory;
+      return {
+        ...product,
+        category: product.category.map((category) => category.category)
+      };
+    });
+    res.json(result);
   }
 };
 
@@ -122,6 +117,11 @@ const getProductById = async (req, res) => {
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       product.image = productImg;
       log.out('OK_PRODUCT_GET-PRODUCT-BY-ID');
+
+      product.category = product.productCategory;
+      delete product.productCategory;
+      product.category = product.category.map((category) => category.category);
+
       res.json(product);
     } else {
       log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
@@ -151,6 +151,9 @@ const getProductByName = async (req, res) => {
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       product.image = productImg;
       log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME');
+      product.category = product.productCategory;
+      delete product.productCategory;
+      product.category = product.category.map((category) => category.category);
       res.json(product);
     } else {
       log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
@@ -182,6 +185,9 @@ const getProductBySku = async (req, res) => {
       }
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
+      product.category = product.productCategory;
+      delete product.productCategory;
+      product.category = product.category.map((category) => category.category);
 
       res.json(product);
     } else {
@@ -194,6 +200,78 @@ const getProductBySku = async (req, res) => {
   }
 };
 
+const getAllProductsByCategory = async (req, res) => {
+  const { category_id } = req.params;
+  const { data, error } = await common.awaitWrap(
+    productModel.getAllProductsByCategory({ category_id })
+  );
+
+  if (error) {
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
+    const result = await data.map((product) => {
+      product.category = product.productCategory;
+      delete product.productCategory;
+      return {
+        ...product,
+        category: product.category.map((category) => category.category)
+      };
+    });
+    res.json(result);
+  }
+};
+
+const getAllProductsByLocation = async (req, res) => {
+  const { location_id } = req.params;
+  const { data, error } = await common.awaitWrap(
+    productModel.getAllProductsByLocation({ location_id })
+  );
+
+  if (error) {
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
+    const result = await data.map((product) => {
+      product.category = product.productCategory;
+      delete product.productCategory;
+      return {
+        ...product,
+        category: product.category.map((category) => category.category)
+      };
+    });
+    res.json(result);
+  }
+};
+
+const getAllProductsByBrand = async (req, res) => {
+  const { brand_id } = req.params;
+  const { data, error } = await common.awaitWrap(
+    productModel.getAllProductsByBrand({ brand_id })
+  );
+
+  if (error) {
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
+    const result = await data.map((product) => {
+      product.category = product.productCategory;
+      delete product.productCategory;
+      return {
+        ...product,
+        category: product.category.map((category) => category.category)
+      };
+    });
+    res.json(result);
+  }
+};
+
 const updateProduct = async (req, res) => {
   const {
     id,
@@ -203,8 +281,8 @@ const updateProduct = async (req, res) => {
     sku,
     categories,
     qtyThreshold,
-    brand_id,
-    locations
+    brand,
+    stockQuantity
   } = req.body;
 
   const productSku = await productModel.findProductBySku({ sku });
@@ -241,8 +319,8 @@ const updateProduct = async (req, res) => {
         sku,
         categories,
         qtyThreshold,
-        brand_id,
-        locations
+        brand,
+        stockQuantity
       })
     );
     if (error) {
@@ -323,3 +401,6 @@ exports.getProductBySku = getProductBySku;
 exports.getProductByName = getProductByName;
 exports.generateExcel = generateExcel;
 exports.alertLowInventory = alertLowInventory;
+exports.getAllProductsByCategory = getAllProductsByCategory;
+exports.getAllProductsByLocation = getAllProductsByLocation;
+exports.getAllProductsByBrand = getAllProductsByBrand;
