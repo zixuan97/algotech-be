@@ -15,6 +15,7 @@ const createProcurementOrder = async (req) => {
   proc_order_items.map((p) => {
     totalAmount += p.quantity * p.rate;
   });
+  console.log(supplier)
   await prisma.ProcurementOrder.create({
     data: {
       order_date,

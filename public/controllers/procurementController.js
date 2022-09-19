@@ -1,5 +1,7 @@
 const procurementModel = require('../models/procurementModel');
 const supplierModel = require('../models/supplierModel');
+const locationModel = require('../models/locationModel');
+const productModel = require('../models/productModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -19,7 +21,6 @@ const createProcurementOrder = async (req, res) => {
   const order_date = new Date();
   const order_formatted = format(order_date, 'dd MMM yyyy');
   const supplier = await supplierModel.findSupplierById({ id: supplier_id });
-
   const { error } = await common.awaitWrap(
     procurementModel.createProcurementOrder({
       order_date,
@@ -90,8 +91,39 @@ const getAllProcurementOrders = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
+    let data_res = []
+    let proc_order_items_pdt = []
+    for (let d of data) {
+      const supplier_id = d.supplier_id;
+      const warehouse_address = d.warehouse_address;
+      const supplier = await supplierModel.findSupplierById({ id: supplier_id });
+      const location = await locationModel.findLocationByName({ name: warehouse_address });
+      for (let p of d.proc_order_items) {
+        const pdt = await productModel.findProductBySku({ sku : p.product_sku });
+        const newEntity = {
+          id: p.id,
+          proc_order_id: p.proc_order_id,
+          product: pdt
+        };
+        proc_order_items_pdt.push(newEntity)
+      }
+      const result = {
+        id: d.id,
+        order_date: d.order_date,
+        description: d.description,
+        payment_status: d.payment_status,
+        fulfilment_status: d.fulfilment_status,
+        total_amount: d.total_amount,
+        supplier: supplier,
+        location: location,
+        proc_order_items: proc_order_items_pdt
+      };
+      data_res.push(result)
+      proc_order_items_pdt = []
+    }
+    console.log(data_res)
     log.out('OK_PROCUREMENTORDER_GET-ALL-PO');
-    res.json(data);
+    res.json(data_res);
   }
 };
 
@@ -99,8 +131,32 @@ const getProcurementOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const po = await procurementModel.findProcurementOrderById({ id });
+    const { order_date, description, payment_status, fulfilment_status, supplier_id, total_amount, warehouse_address, proc_order_items } = po;
+    const supplier = await supplierModel.findSupplierById({ id: supplier_id });
+    const location = await locationModel.findLocationByName({ name: warehouse_address });
+    let proc_order_items_pdt = []
+    for (let p of proc_order_items) {
+      const pdt = await productModel.findProductBySku({ sku : p.product_sku })
+      const newEntity = {
+        id: p.id,
+        proc_order_id: p. proc_order_id,
+        product: pdt
+      };
+      proc_order_items_pdt.push(newEntity)
+    }
     log.out('OK_PROCUREMENTORDER_GET-PO-BY-ID');
-    res.json(po);
+    const result = {
+      id,
+      order_date,
+      description,
+      payment_status,
+      fulfilment_status,
+      total_amount,
+      supplier: supplier,
+      location: location,
+      proc_order_items: proc_order_items_pdt
+    };
+    res.json(result);
   } catch (error) {
     log.error('ERR_PROCUREMENTORDER_GET-PO', error.message);
     res.status(500).send('Server Error');
