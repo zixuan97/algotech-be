@@ -1,13 +1,15 @@
 const procurementModel = require('../models/procurementModel');
 const supplierModel = require('../models/supplierModel');
-const locationModel = require('../models/locationModel');
 const productModel = require('../models/productModel');
+const locationModel = require('../models/locationModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { generateProcurementPdfTemplate } = require('../helpers/pdf');
 const emailHelper = require('../helpers/email');
 const { format } = require('date-fns');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 const createProcurementOrder = async (req, res) => {
   const {
@@ -76,6 +78,55 @@ const updateProcurementOrder = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
+    const location = await locationModel.findLocationByName({ name: warehouse_address });
+    const po = await procurementModel.findProcurementOrderById({ id });
+    const po_items = po.proc_order_items;
+    let pdt_list = [];
+    if (fulfilment_status === "COMPLETED") {
+      for (let p of po_items) {
+        const product = await productModel.findProductBySku({ sku: p.product_sku })
+        pdt_list.push(product)
+        const warehouse_locations = [];
+        for (let s of product.stockQuantity) {
+          warehouse_locations.push(s.location_name)
+          if (s.product_sku === p.product_sku && s.location_name === warehouse_address) {
+            const sPdt = await productModel.findProductBySku({ sku: s.product_sku })
+            const newQuantity = s.quantity + p.quantity;
+            s = await prisma.StockQuantity.update({
+              where: { 
+                product_id_location_id: {
+                  product_id: sPdt.id, location_id: location.id
+                },
+              },
+              data: {
+                quantity: newQuantity
+              }
+            });
+          }
+        };
+        if (!warehouse_locations.includes(warehouse_address)) {
+          await prisma.location.update({
+            where: { id: location.id },
+            data: {
+              stockQuantity: {
+                create: pdt_list.map((x) => ({
+                  product_sku: x.sku,
+                  product_name: x.name,
+                  price: p.rate,
+                  quantity: p.quantity,
+                  product: {
+                    connect: {
+                      id: x.id
+                    }
+                  },
+                  location_name: warehouse_address
+                }))
+              }
+            }
+          });
+        }
+      }
+    }
     log.out('OK_PROCUREMENTORDER_UPDATE-PO');
     res.json({ message: `Updated procurement order with id:${id}` });
   }

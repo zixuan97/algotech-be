@@ -89,6 +89,7 @@ const auth = async (req, res) => {
   const user = await userModel.findUserByEmail({
     email
   });
+
   if (
     user &&
     (await bcrypt.compare(password, user.password)) &&
@@ -246,7 +247,9 @@ const verifyPassword = async (req, res) => {
     const { userEmail, currentPassword, newPassword } = req.body;
     if (currentPassword === newPassword) {
       log.out('ERR_USER_VERIFY-PW');
-      res.status(200).json({ message: 'Old and new password cannot be the same' });
+      res
+        .status(200)
+        .json({ message: 'Old and new password cannot be the same' });
     }
     const user = await userModel.findUserByEmail({ email: userEmail });
     if (user) {
