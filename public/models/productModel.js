@@ -58,6 +58,7 @@ const getAllProducts = async () => {
       },
       stockQuantity: {
         select: {
+          product_id: true,
           location: true,
           price: true,
           quantity: true
@@ -88,6 +89,7 @@ const findProductById = async (req) => {
       },
       stockQuantity: {
         select: {
+          product_id: true,
           location: true,
           price: true,
           quantity: true
@@ -118,6 +120,7 @@ const findProductBySku = async (req) => {
       },
       stockQuantity: {
         select: {
+          product_id: true,
           location: true,
           price: true,
           quantity: true
@@ -148,6 +151,7 @@ const findProductByName = async (req) => {
       },
       stockQuantity: {
         select: {
+          product_id: true,
           location: true,
           price: true,
           quantity: true
@@ -229,6 +233,7 @@ const getAllProductsByBrand = async (req) => {
       },
       stockQuantity: {
         select: {
+          product_id: true,
           location: true,
           price: true,
           quantity: true
@@ -265,6 +270,7 @@ const getAllProductsByCategory = async (req) => {
       },
       stockQuantity: {
         select: {
+          product_id: true,
           location: true,
           price: true,
           quantity: true
@@ -300,6 +306,7 @@ const getAllProductsByLocation = async (req) => {
       },
       stockQuantity: {
         select: {
+          product_id: true,
           location: true,
           price: true,
           quantity: true
