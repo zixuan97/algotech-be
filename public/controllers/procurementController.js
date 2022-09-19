@@ -14,23 +14,23 @@ const prisma = new PrismaClient();
 const createProcurementOrder = async (req, res) => {
   const {
     description,
-    payment_status,
-    fulfilment_status,
-    warehouse_address,
-    proc_order_items,
-    supplier_id
+    paymentStatus,
+    fulfilmentStatus,
+    warehouseAddress,
+    procOrderItems,
+    supplierId
   } = req.body;
-  const order_date = new Date();
-  const order_formatted = format(order_date, 'dd MMM yyyy');
-  const supplier = await supplierModel.findSupplierById({ id: supplier_id });
+  const orderDate = new Date();
+  const orderFormatted = format(orderDate, 'dd MMM yyyy');
+  const supplier = await supplierModel.findSupplierById({ id: supplierId });
   const { error } = await common.awaitWrap(
     procurementModel.createProcurementOrder({
-      order_date,
+      orderDate,
       description,
-      payment_status,
-      fulfilment_status,
-      warehouse_address,
-      proc_order_items,
+      paymentStatus,
+      fulfilmentStatus,
+      warehouseAddress,
+      procOrderItems,
       supplier
     })
   );
@@ -41,10 +41,10 @@ const createProcurementOrder = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     await sendProcurementEmail({
-      order_formatted,
-      supplier_id,
-      warehouse_address,
-      proc_order_items
+      orderFormatted,
+      supplierId,
+      warehouseAddress,
+      procOrderItems
     });
     log.out('OK_PROCUREMENTORDER_CREATE-PO');
     res.json({ message: 'procurement order created' });
@@ -54,23 +54,23 @@ const createProcurementOrder = async (req, res) => {
 const updateProcurementOrder = async (req, res) => {
   const {
     id,
-    order_date,
+    orderDate,
     description,
-    payment_status,
-    fulfilment_status,
-    warehouse_address,
-    proc_order_items
+    paymentStatus,
+    fulfilmentStatus,
+    warehouseAddress,
+    procOrderItems
   } = req.body;
 
   const { error } = await common.awaitWrap(
     procurementModel.updateProcurementOrder({
       id,
-      order_date,
+      orderDate,
       description,
-      payment_status,
-      fulfilment_status,
-      warehouse_address,
-      proc_order_items
+      paymentStatus,
+      fulfilmentStatus,
+      warehouseAddress,
+      procOrderItems
     })
   );
   if (error) {
@@ -78,40 +78,50 @@ const updateProcurementOrder = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    const location = await locationModel.findLocationByName({ name: warehouse_address });
+    const location = await locationModel.findLocationByName({
+      name: warehouseAddress
+    });
     const po = await procurementModel.findProcurementOrderById({ id });
-    const po_items = po.proc_order_items;
-    let pdt_list = [];
-    if (fulfilment_status === "COMPLETED") {
-      for (let p of po_items) {
-        const product = await productModel.findProductBySku({ sku: p.product_sku })
-        pdt_list.push(product)
-        const warehouse_locations = [];
+    const poItems = po.procOrderItems;
+    let pdtList = [];
+    if (fulfilmentStatus === 'COMPLETED') {
+      for (let p of poItems) {
+        const product = await productModel.findProductBySku({
+          sku: p.productSku
+        });
+        pdtList.push(product);
+        const warehouseLocations = [];
         for (let s of product.stockQuantity) {
-          warehouse_locations.push(s.location_name)
-          if (s.product_sku === p.product_sku && s.location_name === warehouse_address) {
-            const sPdt = await productModel.findProductBySku({ sku: s.product_sku })
+          warehouseLocations.push(s.locationName);
+          if (
+            s.productSku === p.productSku &&
+            s.locationName === warehouseAddress
+          ) {
+            const sPdt = await productModel.findProductBySku({
+              sku: s.productSku
+            });
             const newQuantity = s.quantity + p.quantity;
             s = await prisma.StockQuantity.update({
-              where: { 
-                product_id_location_id: {
-                  product_id: sPdt.id, location_id: location.id
-                },
+              where: {
+                productId_locationId: {
+                  productId: sPdt.id,
+                  locationId: location.id
+                }
               },
               data: {
                 quantity: newQuantity
               }
             });
           }
-        };
-        if (!warehouse_locations.includes(warehouse_address)) {
+        }
+        if (!warehouseLocations.includes(warehouseAddress)) {
           await prisma.location.update({
             where: { id: location.id },
             data: {
               stockQuantity: {
-                create: pdt_list.map((x) => ({
-                  product_sku: x.sku,
-                  product_name: x.name,
+                create: pdtList.map((x) => ({
+                  productSku: x.sku,
+                  productName: x.name,
                   price: p.rate,
                   quantity: p.quantity,
                   product: {
@@ -119,7 +129,7 @@ const updateProcurementOrder = async (req, res) => {
                       id: x.id
                     }
                   },
-                  location_name: warehouse_address
+                  locationName: warehouseAddress
                 }))
               }
             }
@@ -142,39 +152,41 @@ const getAllProcurementOrders = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    let data_res = []
-    let proc_order_items_pdt = []
+    let dataRes = [];
+    let procOrderItemsPdt = [];
     for (let d of data) {
-      const supplier_id = d.supplier_id;
-      const warehouse_address = d.warehouse_address;
-      const supplier = await supplierModel.findSupplierById({ id: supplier_id });
-      const location = await locationModel.findLocationByName({ name: warehouse_address });
-      for (let p of d.proc_order_items) {
-        const pdt = await productModel.findProductBySku({ sku : p.product_sku });
+      const supplierId = d.supplierId;
+      const warehouseAddress = d.warehouseAddress;
+      const supplier = await supplierModel.findSupplierById({ id: supplierId });
+      const location = await locationModel.findLocationByName({
+        name: warehouseAddress
+      });
+      for (let p of d.procOrderItems) {
+        const pdt = await productModel.findProductBySku({ sku: p.productSku });
         const newEntity = {
           id: p.id,
-          proc_order_id: p.proc_order_id,
+          procOrderId: p.procOrderId,
           product: pdt
         };
-        proc_order_items_pdt.push(newEntity)
+        procOrderItemsPdt.push(newEntity);
       }
       const result = {
         id: d.id,
-        order_date: d.order_date,
+        orderDate: d.orderDate,
         description: d.description,
-        payment_status: d.payment_status,
-        fulfilment_status: d.fulfilment_status,
-        total_amount: d.total_amount,
+        paymentStatus: d.paymentStatus,
+        fulfilmentStatus: d.fulfilmentStatus,
+        totalAmount: d.totalAmount,
         supplier: supplier,
         location: location,
-        proc_order_items: proc_order_items_pdt
+        procOrderItems: procOrderItemsPdt
       };
-      data_res.push(result)
-      proc_order_items_pdt = []
+      dataRes.push(result);
+      procOrderItemsPdt = [];
     }
-    console.log(data_res)
+    console.log(dataRes);
     log.out('OK_PROCUREMENTORDER_GET-ALL-PO');
-    res.json(data_res);
+    res.json(dataRes);
   }
 };
 
@@ -182,30 +194,41 @@ const getProcurementOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const po = await procurementModel.findProcurementOrderById({ id });
-    const { order_date, description, payment_status, fulfilment_status, supplier_id, total_amount, warehouse_address, proc_order_items } = po;
-    const supplier = await supplierModel.findSupplierById({ id: supplier_id });
-    const location = await locationModel.findLocationByName({ name: warehouse_address });
-    let proc_order_items_pdt = []
-    for (let p of proc_order_items) {
-      const pdt = await productModel.findProductBySku({ sku : p.product_sku })
+    const {
+      orderDate,
+      description,
+      paymentStatus,
+      fulfilmentStatus,
+      supplierId,
+      totalAmount,
+      warehouseAddress,
+      procOrderItems
+    } = po;
+    const supplier = await supplierModel.findSupplierById({ id: supplierId });
+    const location = await locationModel.findLocationByName({
+      name: warehouseAddress
+    });
+    let procOrderItemsPdt = [];
+    for (let p of procOrderItems) {
+      const pdt = await productModel.findProductBySku({ sku: p.productSku });
       const newEntity = {
         id: p.id,
-        proc_order_id: p. proc_order_id,
+        procOrderId: p.procOrderId,
         product: pdt
       };
-      proc_order_items_pdt.push(newEntity)
+      procOrderItemsPdt.push(newEntity);
     }
     log.out('OK_PROCUREMENTORDER_GET-PO-BY-ID');
     const result = {
       id,
-      order_date,
+      orderDate,
       description,
-      payment_status,
-      fulfilment_status,
-      total_amount,
+      paymentStatus,
+      fulfilmentStatus,
+      totalAmount,
       supplier: supplier,
       location: location,
-      proc_order_items: proc_order_items_pdt
+      procOrderItems: procOrderItemsPdt
     };
     res.json(result);
   } catch (error) {
@@ -215,16 +238,16 @@ const getProcurementOrder = async (req, res) => {
 };
 
 const generatePO = async (req, res) => {
-  const po_id = req.params;
-  const po = await procurementModel.findProcurementOrderById(po_id);
-  const { supplier_name, warehouse_address, proc_order_items } = po;
-  const order_date = new Date();
-  const order_formatted = format(order_date, 'dd MMM yyyy');
+  const poId = req.params;
+  const po = await procurementModel.findProcurementOrderById(poId);
+  const { supplierName, warehouseAddress, procOrderItems } = po;
+  const orderDate = new Date();
+  const orderFormatted = format(orderDate, 'dd MMM yyyy');
   await generateProcurementPdfTemplate({
-    order_formatted,
-    warehouse_address,
-    proc_order_items,
-    supplier_name
+    orderFormatted,
+    warehouseAddress,
+    procOrderItems,
+    supplierName
   })
     .then((pdfBuffer) => {
       res
@@ -243,18 +266,14 @@ const generatePO = async (req, res) => {
 
 const sendProcurementEmail = async (req, res) => {
   try {
-    const {
-      order_formatted,
-      supplier_id,
-      warehouse_address,
-      proc_order_items
-    } = req;
-    const supplier = await supplierModel.findSupplierById({ id: supplier_id });
+    const { orderFormatted, supplierId, warehouseAddress, procOrderItems } =
+      req;
+    const supplier = await supplierModel.findSupplierById({ id: supplierId });
     await generateProcurementPdfTemplate({
-      order_formatted,
-      supplier_name: supplier.name,
-      warehouse_address,
-      proc_order_items
+      orderFormatted,
+      supplierName: supplier.name,
+      warehouseAddress,
+      procOrderItems
     }).then(async (pdfBuffer) => {
       const subject = 'Procurement Order';
       const content = 'Attached please find the procurement order.';

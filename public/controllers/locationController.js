@@ -134,7 +134,7 @@ const updateLocationWithoutProducts = async (req, res) => {
 };
 
 const addProductsToLocation = async (req, res) => {
-  const { products, location_id: id } = req.body;
+  const { products, locationId: id } = req.body;
   const { error } = await common.awaitWrap(
     locationModel.addProductsToLocation({ products, id })
   );

@@ -11,8 +11,8 @@ const createBundle = async (req) => {
       price,
       bundleProduct: {
         create: products.map((p) => ({
-          product_sku: p.sku,
-          bundle_name: name,
+          productSku: p.sku,
+          bundleName: name,
           product: {
             connect: {
               id: p.id
