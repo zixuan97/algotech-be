@@ -2,6 +2,7 @@ const bundleModel = require('../models/bundleModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const productModel = require('../models/productModel');
 
 const createBundle = async (req, res) => {
   const { name, description, price, products } = req.body;
@@ -52,6 +53,20 @@ const getBundleById = async (req, res) => {
   try {
     const { id } = req.params;
     const bundle = await bundleModel.findBundleById({ id });
+    if (bundle) {
+      const { data } = await common.awaitWrap(
+        productModel.getAllProductsByBundle({ bundleId: id })
+      );
+      const result = await data.map((product) => {
+        product.category = product.productCategory;
+        delete product.productCategory;
+        return {
+          ...product,
+          category: product.category.map((category) => category.category)
+        };
+      });
+      bundle.products = result;
+    }
     log.out('OK_BUNDLE_GET-BUNDLE-BY-ID');
     res.json(bundle);
   } catch (error) {
@@ -64,6 +79,20 @@ const getBundleByName = async (req, res) => {
   try {
     const { name } = req.body;
     const bundle = await bundleModel.findBundleByName({ name });
+    if (bundle) {
+      const { data } = await common.awaitWrap(
+        productModel.getAllProductsByBundle({ bundleId: id })
+      );
+      const result = await data.map((product) => {
+        product.category = product.productCategory;
+        delete product.productCategory;
+        return {
+          ...product,
+          category: product.category.map((category) => category.category)
+        };
+      });
+      bundle.products = result;
+    }
     log.out('OK_BUNDLE_GET-BUNDLE-BY-NAME');
     res.json(bundle);
   } catch (error) {
