@@ -130,6 +130,12 @@ model Supplier {
   address String
 }
 
+model Keys {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String @unique
+}
+
 enum UserRole {
   ADMIN
   INTERN

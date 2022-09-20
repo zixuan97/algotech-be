@@ -1,11 +1,10 @@
 const productModel = require('../models/productModel');
-const categoryModel = require('../models/categoryModel');
 const buffer = require('buffer');
 globalThis.Blob = buffer.Blob;
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
+const { uploadS3, getS3 } = require('../helpers/s3');
 const {
   generateInventoryExcel,
   generateLowStockExcel
