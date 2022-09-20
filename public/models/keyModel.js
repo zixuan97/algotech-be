@@ -18,10 +18,10 @@ const getAllKeys = async () => {
 };
 
 const updateKeys = async (req) => {
-  const { id, key, value } = req;
+  const { key, value } = req;
 
   const newKey = await prisma.keys.update({
-    where: { id },
+    where: { key },
     data: {
       key,
       value

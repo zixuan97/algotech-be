@@ -18,7 +18,7 @@ const createKey = async (req, res) => {
   }
 };
 
-const refreshToken = async (req) => {
+const refreshToken = async (req, res) => {
   const { data: refresh_token, error } = await common.awaitWrap(
     keyModel.findKeyByName({ key: 'refresh_token' })
   );
@@ -28,7 +28,24 @@ const refreshToken = async (req) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_SHOPEE_GET-REFRESH-KEY');
-    console.log('refresh_token', refresh_token);
+    const response = await shopeeApi.refreshToken({
+      refresh_token: refresh_token.value
+    });
+    try {
+      await keyModel.updateKeys({
+        key: 'access_token',
+        value: response.access_token
+      });
+      await keyModel.updateKeys({
+        key: 'refresh_token',
+        value: response.refresh_token
+      });
+      res.json('Updated Shopee Keys');
+    } catch (err) {
+      log.error('ERR_SHOPEE_UPDATE-REFRESH-KEY', err.message);
+      const e = Error.http(err);
+      res.status(e.code).json(e.message);
+    }
   }
 };
 
