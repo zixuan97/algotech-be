@@ -2,14 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const connectOrCreateStockQuantity = async (req) => {
-    const { productId,
-      productName,
-      productSku,
-      locationId,   
-      quantity,
-      price,
-      locationName } = req;
-      console.log(locationId)
+    const { productId, productName, productSku, locationId, quantity, price, locationName } = req;
     await prisma.StockQuantity.upsert({
           where: {
             productId_locationId: {

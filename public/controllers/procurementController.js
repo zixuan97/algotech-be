@@ -82,13 +82,10 @@ const updateProcurementOrder = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    console.log(fulfilmentStatus)
     if (fulfilmentStatus === "COMPLETED") {
       const po = await procurementModel.findProcurementOrderById({ id });
       const po_items = po.procOrderItems;
-      console.log("Po warehouse name", po.warehouseName);
       const location = await locationModel.findLocationByName({ name: po.warehouseName });
-      console.log("location", location)
       for (let p of po_items) {
         const pdt = await productModel.findProductBySku({ sku: p.productSku });
         await stockQuantityModel.connectOrCreateStockQuantity({ productId: pdt.id, productName: pdt.name, productSku: pdt.sku, locationId: location.id, quantity: p.quantity, price: 0, locationName: po.warehouseName })
@@ -113,17 +110,23 @@ const getAllProcurementOrders = async (req, res) => {
     let procOrderItemsPdt = [];
     for (let d of data) {
       const supplierId = d.supplierId;
-      const warehouseAddress = d.warehouseAddress;
+      const warehouseName = d.warehouseName;
       const supplier = await supplierModel.findSupplierById({ id: supplierId });
       const location = await locationModel.findLocationByName({
-        name: warehouseAddress
+        name: warehouseName
       });
       for (let p of d.procOrderItems) {
         const pdt = await productModel.findProductBySku({ sku: p.productSku });
+        pdt.category = pdt.productCategory;
+        delete pdt.productCategory;
         const newEntity = {
           id: p.id,
           procOrderId: p.procOrderId,
-          product: pdt
+          quantity: p.quantity,
+          product: {
+            ...pdt,
+            category: pdt.category.map((category) => category.category)
+          }
         };
         procOrderItemsPdt.push(newEntity);
       }
@@ -141,7 +144,6 @@ const getAllProcurementOrders = async (req, res) => {
       dataRes.push(result);
       procOrderItemsPdt = [];
     }
-    console.log(dataRes);
     log.out('OK_PROCUREMENTORDER_GET-ALL-PO');
     res.json(dataRes);
   }
@@ -158,21 +160,26 @@ const getProcurementOrder = async (req, res) => {
       fulfilmentStatus,
       supplierId,
       totalAmount,
-      warehouseAddress,
+      warehouseName,
       procOrderItems
     } = po;
     const supplier = await supplierModel.findSupplierById({ id: supplierId });
     const location = await locationModel.findLocationByName({
-      name: warehouseAddress
+      name: warehouseName
     });
     let procOrderItemsPdt = [];
     for (let p of procOrderItems) {
       const pdt = await productModel.findProductBySku({ sku: p.productSku });
+      pdt.category = pdt.productCategory;
+      delete pdt.productCategory;
       const newEntity = {
         id: p.id,
         procOrderId: p.procOrderId,
         quantity: p.quantity,
-        product: pdt
+        product: {
+          ...pdt,
+          category: pdt.category.map((category) => category.category)
+        }
       };
       procOrderItemsPdt.push(newEntity);
     }
@@ -187,7 +194,7 @@ const getProcurementOrder = async (req, res) => {
       supplier: supplier,
       location: location,
       procOrderItems: procOrderItemsPdt
-    };
+    }; 
     res.json(result);
   } catch (error) {
     log.error('ERR_PROCUREMENTORDER_GET-PO', error.message);
