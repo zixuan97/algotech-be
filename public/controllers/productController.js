@@ -223,6 +223,30 @@ const getAllProductsByCategory = async (req, res) => {
   }
 };
 
+const getAllProductsByBundle = async (req, res) => {
+  const { bundleId } = req.params;
+  const { data, error } = await common.awaitWrap(
+    productModel.getAllProductsByBundle({ bundleId })
+  );
+
+  if (error) {
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE');
+    const result = await data.map((product) => {
+      product.category = product.productCategory;
+      delete product.productCategory;
+      return {
+        ...product,
+        category: product.category.map((category) => category.category)
+      };
+    });
+    res.json(result);
+  }
+};
+
 const getAllProductsByLocation = async (req, res) => {
   const { locationId } = req.params;
   const { data, error } = await common.awaitWrap(
@@ -401,5 +425,6 @@ exports.getProductByName = getProductByName;
 exports.generateExcel = generateExcel;
 exports.alertLowInventory = alertLowInventory;
 exports.getAllProductsByCategory = getAllProductsByCategory;
+exports.getAllProductsByBundle = getAllProductsByBundle;
 exports.getAllProductsByLocation = getAllProductsByLocation;
 exports.getAllProductsByBrand = getAllProductsByBrand;
