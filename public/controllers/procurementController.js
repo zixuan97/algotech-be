@@ -2,6 +2,7 @@ const procurementModel = require('../models/procurementModel');
 const supplierModel = require('../models/supplierModel');
 const productModel = require('../models/productModel');
 const locationModel = require('../models/locationModel');
+const stockQuantityModel = require('../models/stockQuantityModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -16,6 +17,7 @@ const createProcurementOrder = async (req, res) => {
     description,
     paymentStatus,
     fulfilmentStatus,
+    warehouseName,
     warehouseAddress,
     procOrderItems,
     supplierId
@@ -29,6 +31,7 @@ const createProcurementOrder = async (req, res) => {
       description,
       paymentStatus,
       fulfilmentStatus,
+      warehouseName,
       warehouseAddress,
       procOrderItems,
       supplier
@@ -58,10 +61,10 @@ const updateProcurementOrder = async (req, res) => {
     description,
     paymentStatus,
     fulfilmentStatus,
+    warehouseName,
     warehouseAddress,
     procOrderItems
   } = req.body;
-
   const { error } = await common.awaitWrap(
     procurementModel.updateProcurementOrder({
       id,
@@ -69,6 +72,7 @@ const updateProcurementOrder = async (req, res) => {
       description,
       paymentStatus,
       fulfilmentStatus,
+      warehouseName,
       warehouseAddress,
       procOrderItems
     })
@@ -78,63 +82,16 @@ const updateProcurementOrder = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    const location = await locationModel.findLocationByName({
-      name: warehouseAddress
-    });
-    const po = await procurementModel.findProcurementOrderById({ id });
-    const poItems = po.procOrderItems;
-    let pdtList = [];
-    if (fulfilmentStatus === 'COMPLETED') {
-      for (let p of poItems) {
-        const product = await productModel.findProductBySku({
-          sku: p.productSku
-        });
-        pdtList.push(product);
-        const warehouseLocations = [];
-        for (let s of product.stockQuantity) {
-          warehouseLocations.push(s.locationName);
-          if (
-            s.productSku === p.productSku &&
-            s.locationName === warehouseAddress
-          ) {
-            const sPdt = await productModel.findProductBySku({
-              sku: s.productSku
-            });
-            const newQuantity = s.quantity + p.quantity;
-            s = await prisma.StockQuantity.update({
-              where: {
-                productId_locationId: {
-                  productId: sPdt.id,
-                  locationId: location.id
-                }
-              },
-              data: {
-                quantity: newQuantity
-              }
-            });
-          }
-        }
-        if (!warehouseLocations.includes(warehouseAddress)) {
-          await prisma.location.update({
-            where: { id: location.id },
-            data: {
-              stockQuantity: {
-                create: pdtList.map((x) => ({
-                  productSku: x.sku,
-                  productName: x.name,
-                  price: p.rate,
-                  quantity: p.quantity,
-                  product: {
-                    connect: {
-                      id: x.id
-                    }
-                  },
-                  locationName: warehouseAddress
-                }))
-              }
-            }
-          });
-        }
+    console.log(fulfilmentStatus)
+    if (fulfilmentStatus === "COMPLETED") {
+      const po = await procurementModel.findProcurementOrderById({ id });
+      const po_items = po.procOrderItems;
+      console.log("Po warehouse name", po.warehouseName);
+      const location = await locationModel.findLocationByName({ name: po.warehouseName });
+      console.log("location", location)
+      for (let p of po_items) {
+        const pdt = await productModel.findProductBySku({ sku: p.productSku });
+        await stockQuantityModel.connectOrCreateStockQuantity({ productId: pdt.id, productName: pdt.name, productSku: pdt.sku, locationId: location.id, quantity: p.quantity, price: 0, locationName: po.warehouseName })
       }
     }
     log.out('OK_PROCUREMENTORDER_UPDATE-PO');
@@ -214,6 +171,7 @@ const getProcurementOrder = async (req, res) => {
       const newEntity = {
         id: p.id,
         procOrderId: p.procOrderId,
+        quantity: p.quantity,
         product: pdt
       };
       procOrderItemsPdt.push(newEntity);

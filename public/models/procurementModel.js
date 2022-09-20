@@ -7,6 +7,7 @@ const createProcurementOrder = async (req) => {
     description,
     paymentStatus,
     fulfilmentStatus,
+    warehouseName,
     warehouseAddress,
     procOrderItems,
     supplier
@@ -22,6 +23,7 @@ const createProcurementOrder = async (req) => {
       totalAmount: totalAmount,
       paymentStatus,
       fulfilmentStatus,
+      warehouseName,
       warehouseAddress,
       procOrderItems: {
         create: procOrderItems.map((p) => ({
