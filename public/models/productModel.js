@@ -250,6 +250,43 @@ const getAllProductsByBrand = async (req) => {
   return products;
 };
 
+const getAllProductsByBundle = async (req) => {
+  const { bundleId } = req;
+  const products = await prisma.product.findMany({
+    where: {
+      bundleProduct: {
+        every: {
+          bundle: {
+            id: Number(bundleId)
+          }
+        }
+      }
+    },
+    include: {
+      productCategory: {
+        select: {
+          category: true
+        }
+      },
+      stockQuantity: {
+        select: {
+          productId: true,
+          location: true,
+          price: true,
+          quantity: true
+        }
+      },
+      brand: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    }
+  });
+  return products;
+};
+
 const getAllProductsByCategory = async (req) => {
   const { categoryId } = req;
   const products = await prisma.product.findMany({
@@ -357,4 +394,5 @@ exports.findProductBySku = findProductBySku;
 exports.findProductByName = findProductByName;
 exports.getAllProductsByBrand = getAllProductsByBrand;
 exports.getAllProductsByCategory = getAllProductsByCategory;
+exports.getAllProductsByBundle = getAllProductsByBundle;
 exports.getAllProductsByLocation = getAllProductsByLocation;
