@@ -78,11 +78,11 @@ const getAllProducts = async (req, res) => {
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS');
     const result = await data.map((product) => {
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
       return {
         ...product,
-        category: product.category.map((category) => category.category)
+        categories: product.categories.map((category) => category.category)
       };
     });
     res.json(result);
@@ -108,9 +108,11 @@ const getProductById = async (req, res) => {
       product.image = productImg;
       log.out('OK_PRODUCT_GET-PRODUCT-BY-ID');
 
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
-      product.category = product.category.map((category) => category.category);
+      product.categories = product.categories.map(
+        (category) => category.category
+      );
 
       res.json(product);
     } else {
@@ -141,9 +143,11 @@ const getProductByName = async (req, res) => {
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       product.image = productImg;
       log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME');
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
-      product.category = product.category.map((category) => category.category);
+      product.categories = product.categories.map(
+        (category) => category.category
+      );
       res.json(product);
     } else {
       log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
@@ -175,9 +179,11 @@ const getProductBySku = async (req, res) => {
       }
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
-      product.category = product.category.map((category) => category.category);
+      product.categories = product.categories.map(
+        (category) => category.category
+      );
 
       res.json(product);
     } else {
@@ -203,11 +209,11 @@ const getAllProductsByCategory = async (req, res) => {
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
       return {
         ...product,
-        category: product.category.map((category) => category.category)
+        categories: product.categories.map((category) => category.category)
       };
     });
     res.json(result);
@@ -251,11 +257,11 @@ const getAllProductsByLocation = async (req, res) => {
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
       return {
         ...product,
-        category: product.category.map((category) => category.category)
+        categories: product.categories.map((category) => category.category)
       };
     });
     res.json(result);
@@ -275,11 +281,11 @@ const getAllProductsByBrand = async (req, res) => {
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
       return {
         ...product,
-        category: product.category.map((category) => category.category)
+        categories: product.categories.map((category) => category.category)
       };
     });
     res.json(result);
