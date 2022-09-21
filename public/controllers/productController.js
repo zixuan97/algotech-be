@@ -13,16 +13,8 @@ const { format } = require('date-fns');
 const emailHelper = require('../helpers/email');
 
 const createProduct = async (req, res) => {
-  const {
-    sku,
-    name,
-    description,
-    image,
-    categories,
-    brand,
-    qtyThreshold,
-    stockQuantity
-  } = req.body;
+  const { sku, name, image, categories, brand, qtyThreshold, stockQuantity } =
+    req.body;
   // check if product exists
 
   const productSku = await productModel.findProductBySku({ sku });
@@ -56,7 +48,6 @@ const createProduct = async (req, res) => {
       productModel.createProduct({
         sku,
         name,
-        description,
         qtyThreshold,
         brand,
         categories,
@@ -299,7 +290,6 @@ const updateProduct = async (req, res) => {
   const {
     id,
     name,
-    description,
     image,
     sku,
     categories,
@@ -338,7 +328,6 @@ const updateProduct = async (req, res) => {
       productModel.updateProduct({
         id,
         name,
-        description,
         sku,
         categories,
         qtyThreshold,

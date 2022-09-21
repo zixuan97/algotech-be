@@ -5,7 +5,7 @@ const { log } = require('../helpers/logger');
 const productModel = require('../models/productModel');
 
 const createBundle = async (req, res) => {
-  const { name, description, price, products } = req.body;
+  const { name, description, products } = req.body;
   // check if bundle name exists
   const { data: bundleName } = await common.awaitWrap(
     bundleModel.findBundleByName({ name })
@@ -20,7 +20,6 @@ const createBundle = async (req, res) => {
       bundleModel.createBundle({
         name,
         description,
-        price,
         products
       })
     );
@@ -102,7 +101,7 @@ const getBundleByName = async (req, res) => {
 };
 
 const updateBundle = async (req, res) => {
-  const { id, name, description, price } = req.body;
+  const { id, name, description } = req.body;
   const { data: bundle } = await common.awaitWrap(
     bundleModel.findBundleByName({ name })
   );
@@ -116,8 +115,7 @@ const updateBundle = async (req, res) => {
       bundleModel.updateBundle({
         id,
         name,
-        description,
-        price
+        description
       })
     );
     if (error) {

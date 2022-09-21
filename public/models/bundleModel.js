@@ -2,13 +2,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createBundle = async (req) => {
-  const { name, description, price, products } = req;
+  const { name, description, products } = req;
 
   await prisma.bundle.create({
     data: {
       name,
       description,
-      price,
       bundleProduct: {
         create: products.map((p) => ({
           productSku: p.sku,
@@ -50,13 +49,12 @@ const findBundleByName = async (req) => {
 };
 
 const updateBundle = async (req) => {
-  const { id, name, description, price } = req;
+  const { id, name, description } = req;
   bundle = await prisma.bundle.update({
     where: { id },
     data: {
       name,
-      description,
-      price
+      description
     }
   });
   return bundle;

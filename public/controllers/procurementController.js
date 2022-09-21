@@ -24,7 +24,9 @@ const createProcurementOrder = async (req, res) => {
   } = req.body;
   const orderDate = new Date();
   const orderFormatted = format(orderDate, 'dd MMM yyyy');
-  const location = await locationModel.findLocationByName({ name: warehouseName });
+  const location = await locationModel.findLocationByName({
+    name: warehouseName
+  });
   const supplier = await supplierModel.findSupplierById({ id: supplierId });
   const { data, error } = await common.awaitWrap(
     procurementModel.createProcurementOrder({
@@ -49,7 +51,9 @@ const createProcurementOrder = async (req, res) => {
       warehouseAddress,
       procOrderItems
     });
-    const procOrderItemsPdt = await procurementModel.procOrderStructure({ procOrderItems });
+    const procOrderItemsPdt = await procurementModel.procOrderStructure({
+      procOrderItems
+    });
     log.out('OK_PROCUREMENTORDER_CREATE-PO');
     const result = {
       id: data.id,
@@ -63,7 +67,7 @@ const createProcurementOrder = async (req, res) => {
       procOrderItems: procOrderItemsPdt
     };
     // res.json({ message: 'procurement order created' });
-    res.json(result)
+    res.json(result);
   }
 };
 
@@ -95,17 +99,28 @@ const updateProcurementOrder = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    let result = {}
+    let result = {};
     const supplier = await supplierModel.findSupplierById({ id: supplierId });
     const po = await procurementModel.findProcurementOrderById({ id });
     const po_items = po.procOrderItems;
-    if (fulfilmentStatus === "COMPLETED") {
-      const location = await locationModel.findLocationByName({ name: po.warehouseName });
+    if (fulfilmentStatus === 'COMPLETED') {
+      const location = await locationModel.findLocationByName({
+        name: po.warehouseName
+      });
       for (let p of po_items) {
         const pdt = await productModel.findProductBySku({ sku: p.productSku });
-        await stockQuantityModel.connectOrCreateStockQuantity({ productId: pdt.id, productName: pdt.name, productSku: pdt.sku, locationId: location.id, quantity: p.quantity, price: 0, locationName: po.warehouseName })
+        await stockQuantityModel.connectOrCreateStockQuantity({
+          productId: pdt.id,
+          productName: pdt.name,
+          productSku: pdt.sku,
+          locationId: location.id,
+          quantity: p.quantity,
+          locationName: po.warehouseName
+        });
       }
-      const procOrderItemsPdt = await procurementModel.procOrderStructure({ procOrderItems: po_items });
+      const procOrderItemsPdt = await procurementModel.procOrderStructure({
+        procOrderItems: po_items
+      });
       result = {
         id,
         orderDate: data.orderDate,
@@ -119,7 +134,7 @@ const updateProcurementOrder = async (req, res) => {
       };
     }
     log.out('OK_PROCUREMENTORDER_UPDATE-PO');
-    res.json(result)
+    res.json(result);
     // res.json({ message: `Updated procurement order with id:${id}` });
   }
 };
@@ -136,11 +151,17 @@ const getAllProcurementOrders = async (req, res) => {
   } else {
     let dataRes = [];
     for (let d of data) {
-      const po = await procurementModel.findProcurementOrderById({ id: d.id })
+      const po = await procurementModel.findProcurementOrderById({ id: d.id });
       const po_items = po.procOrderItems;
-      const supplier = await supplierModel.findSupplierById({ id: d.supplierId });
-      const location = await locationModel.findLocationByName({ name: d.warehouseName });
-      const procOrderItemsPdt = await procurementModel.procOrderStructure({ procOrderItems: po_items });
+      const supplier = await supplierModel.findSupplierById({
+        id: d.supplierId
+      });
+      const location = await locationModel.findLocationByName({
+        name: d.warehouseName
+      });
+      const procOrderItemsPdt = await procurementModel.procOrderStructure({
+        procOrderItems: po_items
+      });
       const result = {
         id: d.id,
         orderDate: d.orderDate,
@@ -177,7 +198,9 @@ const getProcurementOrder = async (req, res) => {
     const location = await locationModel.findLocationByName({
       name: warehouseName
     });
-    const procOrderItemsPdt = await procurementModel.procOrderStructure({ procOrderItems });
+    const procOrderItemsPdt = await procurementModel.procOrderStructure({
+      procOrderItems
+    });
     log.out('OK_PROCUREMENTORDER_GET-PO-BY-ID');
     const result = {
       id,
@@ -189,7 +212,7 @@ const getProcurementOrder = async (req, res) => {
       supplier: supplier,
       location: location,
       procOrderItems: procOrderItemsPdt
-    }; 
+    };
     res.json(result);
   } catch (error) {
     log.error('ERR_PROCUREMENTORDER_GET-PO', error.message);

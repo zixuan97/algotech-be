@@ -30,7 +30,6 @@ const updateLocations = async (req) => {
         create: products.map((p) => ({
           productSku: p.sku,
           productName: p.name,
-          price: p.price,
           quantity: p.quantity,
           product: {
             connect: {
@@ -85,7 +84,6 @@ const addProductsToLocation = async (req) => {
         create: products.map((p) => ({
           productSku: p.sku,
           productName: p.name,
-          price: p.price,
           quantity: p.quantity,
           product: {
             connect: {

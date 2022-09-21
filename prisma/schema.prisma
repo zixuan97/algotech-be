@@ -45,7 +45,6 @@ model Product {
   id              Int               @id @default(autoincrement())
   sku             String            @unique
   name            String            @unique
-  description     String?
   image           String?
   qtyThreshold    Int?
   brandId         Int
@@ -68,7 +67,6 @@ model StockQuantity {
   productSku   String
   locationId   Int
   quantity     Int
-  price        Float
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   locationName String
@@ -82,17 +80,17 @@ model Bundle {
   id            Int             @id @default(autoincrement())
   name          String          @unique
   description   String
-  price         Float
   bundleProduct BundleProduct[]
 }
 
 model BundleProduct {
-  bundleId   Int
-  productId  Int
-  productSku String
-  bundleName String
-  bundle     Bundle  @relation(fields: [bundleId], references: [id])
-  product    Product @relation(fields: [productId], references: [id])
+  bundleId    Int
+  productId   Int
+  productName String
+  productSku  String
+  bundleName  String
+  bundle      Bundle  @relation(fields: [bundleId], references: [id])
+  product     Product @relation(fields: [productId], references: [id])
 
   @@id([productId, bundleId])
 }
