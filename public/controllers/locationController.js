@@ -76,7 +76,7 @@ const getLocationByName = async (req, res) => {
 };
 
 const updateLocation = async (req, res) => {
-  const { id, name, products, address } = req.body;
+  const { id, name, stockQuantity, address } = req.body;
   const { data, error: duplicateLocationNameError } = await common.awaitWrap(
     locationModel.findLocationByName({ name })
   );
@@ -91,7 +91,7 @@ const updateLocation = async (req, res) => {
     );
   } else {
     const { error } = await common.awaitWrap(
-      locationModel.updateLocations({ id, name, products, address })
+      locationModel.updateLocations({ id, name, stockQuantity, address })
     );
     if (error) {
       log.error('ERR_LOCATION_UPDATE-LOCATION', error.message);
