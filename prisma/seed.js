@@ -77,7 +77,6 @@ async function main() {
     data: {
       sku: 'SKU123',
       name: 'Nasi Lemak Popcorn',
-      description: 'Delicious',
       brandId: 1,
       qtyThreshold: 20,
       productCategory: {
@@ -99,7 +98,6 @@ async function main() {
             productName: 'Nasi Lemak Popcorn',
             productSku: 'SKU123',
             quantity: 20,
-            price: 2,
             locationName: 'Punggol Warehouse',
             location: {
               connect: {
@@ -116,7 +114,6 @@ async function main() {
     data: {
       sku: 'SKU124',
       name: 'Curry Popcorn',
-      description: 'Spicy',
       brandId: 1,
       qtyThreshold: 20,
       productCategory: {
@@ -138,7 +135,6 @@ async function main() {
             productName: 'Curry Popcorn',
             productSku: 'SKU124',
             quantity: 50,
-            price: 2,
             locationName: 'Punggol Warehouse',
             location: {
               connect: {
