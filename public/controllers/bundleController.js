@@ -2,9 +2,10 @@ const bundleModel = require('../models/bundleModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const productModel = require('../models/productModel');
 
 const createBundle = async (req, res) => {
-  const { name, description, price, products } = req.body;
+  const { name, description, products } = req.body;
   // check if bundle name exists
   const { data: bundleName } = await common.awaitWrap(
     bundleModel.findBundleByName({ name })
@@ -19,7 +20,6 @@ const createBundle = async (req, res) => {
       bundleModel.createBundle({
         name,
         description,
-        price,
         products
       })
     );
@@ -52,6 +52,20 @@ const getBundleById = async (req, res) => {
   try {
     const { id } = req.params;
     const bundle = await bundleModel.findBundleById({ id });
+    if (bundle) {
+      const { data } = await common.awaitWrap(
+        productModel.getAllProductsByBundle({ bundleId: id })
+      );
+      const result = await data.map((product) => {
+        product.category = product.productCategory;
+        delete product.productCategory;
+        return {
+          ...product,
+          category: product.category.map((category) => category.category)
+        };
+      });
+      bundle.products = result;
+    }
     log.out('OK_BUNDLE_GET-BUNDLE-BY-ID');
     res.json(bundle);
   } catch (error) {
@@ -64,6 +78,20 @@ const getBundleByName = async (req, res) => {
   try {
     const { name } = req.body;
     const bundle = await bundleModel.findBundleByName({ name });
+    if (bundle) {
+      const { data } = await common.awaitWrap(
+        productModel.getAllProductsByBundle({ bundleId: id })
+      );
+      const result = await data.map((product) => {
+        product.category = product.productCategory;
+        delete product.productCategory;
+        return {
+          ...product,
+          category: product.category.map((category) => category.category)
+        };
+      });
+      bundle.products = result;
+    }
     log.out('OK_BUNDLE_GET-BUNDLE-BY-NAME');
     res.json(bundle);
   } catch (error) {
@@ -73,7 +101,7 @@ const getBundleByName = async (req, res) => {
 };
 
 const updateBundle = async (req, res) => {
-  const { id, name, description, price } = req.body;
+  const { id, name, description } = req.body;
   const { data: bundle } = await common.awaitWrap(
     bundleModel.findBundleByName({ name })
   );
@@ -87,8 +115,7 @@ const updateBundle = async (req, res) => {
       bundleModel.updateBundle({
         id,
         name,
-        description,
-        price
+        description
       })
     );
     if (error) {

@@ -1,11 +1,10 @@
 const productModel = require('../models/productModel');
-const categoryModel = require('../models/categoryModel');
 const buffer = require('buffer');
 globalThis.Blob = buffer.Blob;
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
+const { uploadS3, getS3 } = require('../helpers/s3');
 const {
   generateInventoryExcel,
   generateLowStockExcel
@@ -14,16 +13,8 @@ const { format } = require('date-fns');
 const emailHelper = require('../helpers/email');
 
 const createProduct = async (req, res) => {
-  const {
-    sku,
-    name,
-    description,
-    image,
-    categories,
-    brand,
-    qtyThreshold,
-    stockQuantity
-  } = req.body;
+  const { sku, name, image, categories, brand, qtyThreshold, stockQuantity } =
+    req.body;
   // check if product exists
 
   const productSku = await productModel.findProductBySku({ sku });
@@ -57,7 +48,6 @@ const createProduct = async (req, res) => {
       productModel.createProduct({
         sku,
         name,
-        description,
         qtyThreshold,
         brand,
         categories,
@@ -230,6 +220,30 @@ const getAllProductsByCategory = async (req, res) => {
   }
 };
 
+const getAllProductsByBundle = async (req, res) => {
+  const { bundleId } = req.params;
+  const { data, error } = await common.awaitWrap(
+    productModel.getAllProductsByBundle({ bundleId })
+  );
+
+  if (error) {
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE');
+    const result = await data.map((product) => {
+      product.category = product.productCategory;
+      delete product.productCategory;
+      return {
+        ...product,
+        category: product.category.map((category) => category.category)
+      };
+    });
+    res.json(result);
+  }
+};
+
 const getAllProductsByLocation = async (req, res) => {
   const { locationId } = req.params;
   const { data, error } = await common.awaitWrap(
@@ -282,7 +296,6 @@ const updateProduct = async (req, res) => {
   const {
     id,
     name,
-    description,
     image,
     sku,
     categories,
@@ -321,7 +334,6 @@ const updateProduct = async (req, res) => {
       productModel.updateProduct({
         id,
         name,
-        description,
         sku,
         categories,
         qtyThreshold,
@@ -408,5 +420,6 @@ exports.getProductByName = getProductByName;
 exports.generateExcel = generateExcel;
 exports.alertLowInventory = alertLowInventory;
 exports.getAllProductsByCategory = getAllProductsByCategory;
+exports.getAllProductsByBundle = getAllProductsByBundle;
 exports.getAllProductsByLocation = getAllProductsByLocation;
 exports.getAllProductsByBrand = getAllProductsByBrand;
