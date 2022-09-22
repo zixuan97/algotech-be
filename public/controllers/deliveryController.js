@@ -2,22 +2,58 @@ const deliveryModel = require('../models/deliveryModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const { DeliveryType } = require('@prisma/client');
 
 const createDeliveryOrder = async (req, res) => {
-  const { email, name, address } = req.body;
-  const { error } = await common.awaitWrap(
+  const { type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
+  if (type === DeliveryType.SHIPPIT) {
+    await deliveryModel.sendDeliveryOrderToShippit({
+      courier_type: courierType,
+      delivery_address, // take from sales
+      delivery_postcode, // take from sales
+      delivery_state: 'Singapore',
+      delivery_suburb: 'SG',
+      courier_allocation: carrier,
+      qty,
+      weight,
+      email: recipientEmail,
+      first_name, // take from order
+      last_name // take from order
+    });
+    log.out('OK_DELIVERYORDER_CREATE-DO-SHIPPIT');
+  }
+  const { data, error } = await common.awaitWrap(
     deliveryModel.createDeliveryOrder({
-      email,
-      name,
-      address
+    type,
+    recipientEmail,
+    deliveryDate,
+    deliveryPersonnel,
+    shippitTrackingNum,
+    method,
+    carrier,
+    status,
+    salesOrderId
     })
   );
   if (error) {
-    log.error('ERR_DELIVERY_CREATE-DO', error.message);
-    res.json(Error.http(error));
+    log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
-    log.out('OK_DELIVERY_CREATE-DO');
-    res.json({ message: 'DeliveryOrder created' });
+    log.out('OK_DELIVERYORDER_CREATE-DO');
+    const result = {
+      id: data.id,
+      type,
+      recipientEmail,
+      deliveryDate,
+      deliveryPersonnel,
+      shippitTrackingNum,
+      method,
+      carrier,
+      status,
+      salesOrderId // supposed to be sales order
+    };
+    res.json(result);
   }
 };
 
@@ -60,9 +96,9 @@ const getDeliveryOrderByName = async (req, res) => {
 };
 
 const updateDeliveryOrder = async (req, res) => {
-  const { id, email, name, address } = req.body;
+  const { id, type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req.body;
   const { error } = await common.awaitWrap(
-    deliveryModel.updateDeliveryOrder({ id, email, name, address })
+    deliveryModel.updateDeliveryOrder({ id, type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId })
   );
   if (error) {
     log.error('ERR_DELIVERY_UPDATE-DO', error.message);

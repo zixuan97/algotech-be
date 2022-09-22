@@ -128,20 +128,6 @@ model Supplier {
   address String
 }
 
-model DeliveryOrder {
-  id                    Int            @id @default(autoincrement())
-  type                  DeliveryType
-  recipientEmail        String
-  createdAt             DateTime       @default(now())
-  deliveryDate          DateTime
-  deliveryPersonnel     String
-  shippitTrackingNum    String
-  method                DeliveryMode
-  carrier               String
-  status                DeliveryStatus
-  salesOrderId          Int
-}
-
 model Keys {
   id    Int    @id @default(autoincrement())
   key   String @unique
@@ -160,16 +146,32 @@ model SalesOrderItem {
 model SalesOrder {
   id                Int              @id @default(autoincrement())
   orderId           String
-  customerName      String
   customerAddress   String
-  postalCode        String
   customerContactNo String
   customerEmail     String?
-  platformType      PlatformType
-  createdTime       DateTime
   currency          String
   amount            String
+  createdTime       DateTime
+  customerName      String
+  platformType      PlatformType
+  postalCode        String
   salesOrderItems   SalesOrderItem[]
+  deliveryOrder     DeliveryOrder?
+}
+
+model DeliveryOrder {
+  id                    Int            @id @default(autoincrement())
+  type                  DeliveryType
+  recipientEmail        String
+  createdAt             DateTime       @default(now())
+  deliveryDate          DateTime
+  deliveryPersonnel     String?
+  shippitTrackingNum    String?
+  method                DeliveryMode?  @default(STANDARD)
+  carrier               String?
+  status                DeliveryStatus @default(PENDING)
+  salesOrderId          Int            @unique
+  salesOrder            SalesOrder     @relation(fields: [salesOrderId], references: [id])
 }
 
 enum PlatformType {
@@ -211,7 +213,7 @@ enum DeliveryType {
 
 enum DeliveryMode {
   STANDARD
-  EXPORESS
+  EXPRESS
   PRIORITY
 }
 

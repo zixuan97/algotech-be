@@ -1,10 +1,24 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, DeliveryType } = require('@prisma/client');
 const prisma = new PrismaClient();
 const axios = require('axios');
 
-const createDeliveryOrder = async (req) => {
-  const { type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
+// const createDeliveryOrder = async (req) => {
+//   const { recipientEmail, deliveryDate, deliveryPersonnel, carrier, status, salesOrderId } = req;
+//   await prisma.DeliveryOrder.create({
+//     data: {
+//       type: DeliveryType.MANUAL,
+//       recipientEmail,
+//       deliveryDate,
+//       deliveryPersonnel,
+//       carrier,
+//       status,
+//       salesOrderId
+//     }
+//   });
+// };
 
+const createDeliveryOrder = async (req) => {
+  const { recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
   await prisma.DeliveryOrder.create({
     data: {
       type,
@@ -15,9 +29,9 @@ const createDeliveryOrder = async (req) => {
       method,
       carrier,
       status,
-      salesOrderId
+      salesOrderId // supposed to be salesOrder instead of id
     }
-  });
+  })
 };
 
 const getAllDeliveryOrders = async () => {
@@ -154,6 +168,7 @@ const getAllDeliveryOrdersFromShippit = async () => {
 };
 
 exports.createDeliveryOrder = createDeliveryOrder;
+// exports.createDeliveryOrderForShippit = createDeliveryOrderForShippit;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
