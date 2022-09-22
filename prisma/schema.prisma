@@ -86,9 +86,9 @@ model Bundle {
 model BundleProduct {
   bundleId    Int
   productId   Int
-  productName String
   productSku  String
   bundleName  String
+  productName String
   bundle      Bundle  @relation(fields: [bundleId], references: [id])
   product     Product @relation(fields: [productId], references: [id])
 
@@ -128,6 +128,20 @@ model Supplier {
   address String
 }
 
+model DeliveryOrder {
+  id                    Int            @id @default(autoincrement())
+  type                  DeliveryType
+  recipientEmail        String
+  createdAt             DateTime       @default(now())
+  deliveryDate          DateTime
+  deliveryPersonnel     String
+  shippitTrackingNum    String
+  method                DeliveryMode
+  carrier               String
+  status                DeliveryStatus
+  salesOrderId          Int
+}
+
 model Keys {
   id    Int    @id @default(autoincrement())
   key   String @unique
@@ -156,4 +170,22 @@ enum FulfilmentStatus {
   CREATED
   ARRIVED
   COMPLETED
+}
+
+enum DeliveryType {
+  MANUAL
+  SHIPPIT
+}
+
+enum DeliveryMode {
+  STANDARD
+  EXPORESS
+  PRIORITY
+}
+
+enum DeliveryStatus {
+  PENDING
+  DELIVERING
+  COMPLETED
+  CANCELLED
 }
