@@ -134,7 +134,7 @@ model Keys {
   value String @unique
 }
 
-model SalesOrderProduct {
+model SalesOrderItem {
   id           Int        @id @default(autoincrement())
   productName  String
   price        Float
@@ -144,22 +144,26 @@ model SalesOrderProduct {
 }
 
 model SalesOrder {
-  id                Int                 @id @default(autoincrement())
+  id                Int              @id @default(autoincrement())
   orderId           String
+  customerName      String
   customerAddress   String
+  postalCode        String
   customerContactNo String
   customerEmail     String?
-  platform          Platform
-  createdAt         DateTime
+  platformType      PlatformType
+  createdTime       DateTime
   currency          String
-  SalesOrderProduct SalesOrderProduct[]
+  amount            String
+  salesOrderItems   SalesOrderItem[]
 }
 
-enum Platform {
+enum PlatformType {
   SHOPEE
   SHOPIFY
   LAZADA
   REDMART
+  OTHERS
 }
 
 enum UserRole {
