@@ -1,4 +1,5 @@
 const shopeeApi = require('../helpers/shopeeApi');
+const shopifyApi = require('../helpers/shopifyApi');
 const keyModel = require('../models/keyModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
@@ -49,5 +50,100 @@ const refreshToken = async (req, res) => {
   }
 };
 
+const getAllOrders = async (req) => {
+  const { time_from, time_to, page_size } = req;
+  const { data: access_token, error } = await common.awaitWrap(
+    keyModel.findKeyByName({ key: 'access_token' })
+  );
+
+  if (error) {
+    log.error('ERR_SHOPEE_CREATE-KEY', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    try {
+      const orderList = await shopeeApi.getAllOrders({
+        access_token: access_token.value,
+        time_from,
+        time_to,
+        page_size
+      });
+      const orderSN = orderList.response.order_list;
+
+      const orders = await orderSN.map((order) => order.order_sn);
+      const response = await shopeeApi.getOrderDetails({
+        access_token: access_token.value,
+        orders
+      });
+      log.out('OK_GET-ALL-SHOPEE-ORDERS');
+    } catch (err) {
+      log.error('ERR_SHOPEE_GET-ALL-ORDERS', err.message);
+    }
+  }
+};
+
+const addShopeeOrders = async (req, res) => {};
+
+const getTrackingInfo = async (req, res) => {
+  const { data: access_token, error } = await common.awaitWrap(
+    keyModel.findKeyByName({ key: 'access_token' })
+  );
+
+  if (error) {
+    log.error('ERR_SHOPEE_CREATE-KEY', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    try {
+      const order = '220921CRN7HCJW';
+
+      const response = await shopeeApi.getTrackingInfo({
+        access_token: access_token.value,
+        order
+      });
+
+      res.json(response);
+    } catch (err) {
+      log.error('ERR_SHOPEE_GET-ALL-ORDERS', err.message);
+      const e = Error.http(err);
+      res.status(e.code).json(e.message);
+    }
+  }
+};
+
+const downloadShippingDocument = async (req, res) => {
+  const { data: access_token, error } = await common.awaitWrap(
+    keyModel.findKeyByName({ key: 'access_token' })
+  );
+
+  if (error) {
+    log.error('ERR_SHOPEE_CREATE-KEY', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    try {
+      const order = '220921CRN7HCJW';
+      const here = await shopeeApi.createShippingDocument({
+        access_token: access_token.value,
+        order
+      });
+      console.log(here);
+      const response = await shopeeApi.downloadShippingDocument({
+        access_token: access_token.value,
+        order
+      });
+
+      res.json(response);
+    } catch (err) {
+      log.error('ERR_SHOPEE_GET-ALL-ORDERS', err.message);
+      const e = Error.http(err);
+      res.status(e.code).json(e.message);
+    }
+  }
+};
+
 exports.createKey = createKey;
 exports.refreshToken = refreshToken;
+exports.getAllOrders = getAllOrders;
+exports.downloadShippingDocument = downloadShippingDocument;
+exports.getTrackingInfo = getTrackingInfo;
