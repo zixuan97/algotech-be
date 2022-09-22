@@ -2,20 +2,20 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createBundle = async (req) => {
-  const { name, description, price, products } = req;
+  const { name, description, bundleProduct } = req;
 
   await prisma.bundle.create({
     data: {
       name,
       description,
-      price,
       bundleProduct: {
-        create: products.map((p) => ({
-          productSku: p.sku,
+        create: bundleProduct.map((bp) => ({
+          productSku: bp.product.sku,
+          productName: bp.product.name,
           bundleName: name,
           product: {
             connect: {
-              id: p.id
+              id: bp.product.id
             }
           }
         }))
@@ -25,7 +25,16 @@ const createBundle = async (req) => {
 };
 
 const getAllBundles = async () => {
-  const bundles = await prisma.bundle.findMany({});
+  const bundles = await prisma.bundle.findMany({
+    include: {
+      bundleProduct: {
+        select: {
+          product: true,
+          productId: true
+        }
+      }
+    }
+  });
   return bundles;
 };
 
@@ -34,6 +43,14 @@ const findBundleById = async (req) => {
   const bundle = await prisma.bundle.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      bundleProduct: {
+        select: {
+          product: true,
+          productId: true
+        }
+      }
     }
   });
   return bundle;
@@ -44,19 +61,38 @@ const findBundleByName = async (req) => {
   const bundle = await prisma.bundle.findUnique({
     where: {
       name
+    },
+    include: {
+      bundleProduct: {
+        select: {
+          product: true,
+          productId: true
+        }
+      }
     }
   });
   return bundle;
 };
 
 const updateBundle = async (req) => {
-  const { id, name, description, price } = req;
+  const { id, name, description, bundleProduct } = req;
   bundle = await prisma.bundle.update({
     where: { id },
     data: {
       name,
       description,
-      price
+      bundleProduct: {
+        create: bundleProduct.map((bp) => ({
+          productSku: bp.product.sku,
+          productName: bp.product.name,
+          bundleName: name,
+          product: {
+            connect: {
+              id: bp.product.id
+            }
+          }
+        }))
+      }
     }
   });
   return bundle;

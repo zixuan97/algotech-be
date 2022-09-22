@@ -2,21 +2,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createProduct = async (req) => {
-  const {
-    sku,
-    name,
-    description,
-    categories,
-    brand,
-    qtyThreshold,
-    stockQuantity
-  } = req;
+  const { sku, name, categories, brand, qtyThreshold, stockQuantity } = req;
 
   await prisma.product.create({
     data: {
       sku,
       name,
-      description,
       brandId: brand.id,
       qtyThreshold,
       productCategory: {
@@ -35,7 +26,6 @@ const createProduct = async (req) => {
           productName: name,
           productSku: sku,
           quantity: sq.quantity,
-          price: sq.price,
           locationName: sq.location.name,
           location: {
             connect: {
@@ -60,7 +50,6 @@ const getAllProducts = async () => {
         select: {
           productId: true,
           location: true,
-          price: true,
           quantity: true
         }
       },
@@ -91,7 +80,6 @@ const findProductById = async (req) => {
         select: {
           productId: true,
           location: true,
-          price: true,
           quantity: true
         }
       },
@@ -122,7 +110,6 @@ const findProductBySku = async (req) => {
         select: {
           productId: true,
           location: true,
-          price: true,
           quantity: true
         }
       },
@@ -153,7 +140,6 @@ const findProductByName = async (req) => {
         select: {
           productId: true,
           location: true,
-          price: true,
           quantity: true
         }
       },
@@ -169,22 +155,12 @@ const findProductByName = async (req) => {
 };
 
 const updateProduct = async (req) => {
-  const {
-    id,
-    sku,
-    name,
-    description,
-    categories,
-    brand,
-    qtyThreshold,
-    stockQuantity
-  } = req;
+  const { id, sku, name, categories, brand, qtyThreshold, stockQuantity } = req;
   const product = await prisma.product.update({
     where: { id },
     data: {
       sku,
       name,
-      description,
       brandId: brand.id,
       qtyThreshold,
       productCategory: {
@@ -205,7 +181,6 @@ const updateProduct = async (req) => {
           productName: name,
           productSku: sku,
           quantity: sq.quantity,
-          price: sq.price,
           locationName: sq.location.name,
           location: {
             connect: {
@@ -235,7 +210,6 @@ const getAllProductsByBrand = async (req) => {
         select: {
           productId: true,
           location: true,
-          price: true,
           quantity: true
         }
       },
@@ -272,7 +246,6 @@ const getAllProductsByBundle = async (req) => {
         select: {
           productId: true,
           location: true,
-          price: true,
           quantity: true
         }
       },
@@ -309,7 +282,6 @@ const getAllProductsByCategory = async (req) => {
         select: {
           productId: true,
           location: true,
-          price: true,
           quantity: true
         }
       },
@@ -345,7 +317,6 @@ const getAllProductsByLocation = async (req) => {
         select: {
           productId: true,
           location: true,
-          price: true,
           quantity: true
         }
       },

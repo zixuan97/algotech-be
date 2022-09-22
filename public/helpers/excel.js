@@ -12,7 +12,6 @@ const generateInventoryExcel = async (req) => {
         name: product.name,
         sku: product.sku,
         quantity: stockqty.quantity,
-        price: stockqty.price,
         location: stockqty.locationName
       };
       objects[count] = obj;
@@ -40,12 +39,6 @@ const generateInventoryExcel = async (req) => {
       column: 'Quantity',
       type: Number,
       value: (product) => product.quantity
-    },
-    {
-      column: 'Price',
-      type: Number,
-      format: '#,##0.00',
-      value: (product) => product.price
     }
   ];
 

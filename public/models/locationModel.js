@@ -13,12 +13,22 @@ const createLocation = async (req) => {
 };
 
 const getAllLocations = async () => {
-  const locations = await prisma.location.findMany({});
+  const locations = await prisma.location.findMany({
+    include: {
+      stockQuantity: {
+        select: {
+          locationId: true,
+          product: true,
+          quantity: true
+        }
+      }
+    }
+  });
   return locations;
 };
 
 const updateLocations = async (req) => {
-  const { id, name, products, address } = req;
+  const { id, name, stockQuantity, address } = req;
 
   location = await prisma.location.update({
     where: { id },
@@ -27,14 +37,14 @@ const updateLocations = async (req) => {
       address,
       stockQuantity: {
         deleteMany: {},
-        create: products.map((p) => ({
-          productSku: p.sku,
-          productName: p.name,
-          price: p.price,
-          quantity: p.quantity,
+        create: stockQuantity.map((sq) => ({
+          productName: sq.product.name,
+          productSku: sq.product.sku,
+          quantity: sq.quantity,
+          locationName: name,
           product: {
             connect: {
-              id: p.id
+              id: sq.product.id
             }
           }
         }))
@@ -85,7 +95,6 @@ const addProductsToLocation = async (req) => {
         create: products.map((p) => ({
           productSku: p.sku,
           productName: p.name,
-          price: p.price,
           quantity: p.quantity,
           product: {
             connect: {
@@ -103,6 +112,15 @@ const findLocationById = async (req) => {
   const location = await prisma.location.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      stockQuantity: {
+        select: {
+          locationId: true,
+          product: true,
+          quantity: true
+        }
+      }
     }
   });
   return location;
@@ -113,6 +131,15 @@ const findLocationByName = async (req) => {
   const location = await prisma.location.findUnique({
     where: {
       name
+    },
+    include: {
+      stockQuantity: {
+        select: {
+          locationId: true,
+          product: true,
+          quantity: true
+        }
+      }
     }
   });
   return location;

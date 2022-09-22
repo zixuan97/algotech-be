@@ -1,11 +1,10 @@
 const productModel = require('../models/productModel');
-const categoryModel = require('../models/categoryModel');
 const buffer = require('buffer');
 globalThis.Blob = buffer.Blob;
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
+const { uploadS3, getS3 } = require('../helpers/s3');
 const {
   generateInventoryExcel,
   generateLowStockExcel
@@ -14,16 +13,8 @@ const { format } = require('date-fns');
 const emailHelper = require('../helpers/email');
 
 const createProduct = async (req, res) => {
-  const {
-    sku,
-    name,
-    description,
-    image,
-    categories,
-    brand,
-    qtyThreshold,
-    stockQuantity
-  } = req.body;
+  const { sku, name, image, categories, brand, qtyThreshold, stockQuantity } =
+    req.body;
   // check if product exists
 
   const productSku = await productModel.findProductBySku({ sku });
@@ -57,7 +48,6 @@ const createProduct = async (req, res) => {
       productModel.createProduct({
         sku,
         name,
-        description,
         qtyThreshold,
         brand,
         categories,
@@ -88,11 +78,11 @@ const getAllProducts = async (req, res) => {
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS');
     const result = await data.map((product) => {
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
       return {
         ...product,
-        category: product.category.map((category) => category.category)
+        categories: product.categories.map((category) => category.category)
       };
     });
     res.json(result);
@@ -118,9 +108,11 @@ const getProductById = async (req, res) => {
       product.image = productImg;
       log.out('OK_PRODUCT_GET-PRODUCT-BY-ID');
 
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
-      product.category = product.category.map((category) => category.category);
+      product.categories = product.categories.map(
+        (category) => category.category
+      );
 
       res.json(product);
     } else {
@@ -151,9 +143,11 @@ const getProductByName = async (req, res) => {
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       product.image = productImg;
       log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME');
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
-      product.category = product.category.map((category) => category.category);
+      product.categories = product.categories.map(
+        (category) => category.category
+      );
       res.json(product);
     } else {
       log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
@@ -185,9 +179,11 @@ const getProductBySku = async (req, res) => {
       }
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
-      product.category = product.category.map((category) => category.category);
+      product.categories = product.categories.map(
+        (category) => category.category
+      );
 
       res.json(product);
     } else {
@@ -213,11 +209,11 @@ const getAllProductsByCategory = async (req, res) => {
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
       return {
         ...product,
-        category: product.category.map((category) => category.category)
+        categories: product.categories.map((category) => category.category)
       };
     });
     res.json(result);
@@ -261,11 +257,11 @@ const getAllProductsByLocation = async (req, res) => {
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
       return {
         ...product,
-        category: product.category.map((category) => category.category)
+        categories: product.categories.map((category) => category.category)
       };
     });
     res.json(result);
@@ -285,11 +281,11 @@ const getAllProductsByBrand = async (req, res) => {
   } else {
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
-      product.category = product.productCategory;
+      product.categories = product.productCategory;
       delete product.productCategory;
       return {
         ...product,
-        category: product.category.map((category) => category.category)
+        categories: product.categories.map((category) => category.category)
       };
     });
     res.json(result);
@@ -300,7 +296,6 @@ const updateProduct = async (req, res) => {
   const {
     id,
     name,
-    description,
     image,
     sku,
     categories,
@@ -339,7 +334,6 @@ const updateProduct = async (req, res) => {
       productModel.updateProduct({
         id,
         name,
-        description,
         sku,
         categories,
         qtyThreshold,
