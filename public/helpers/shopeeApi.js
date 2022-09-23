@@ -1,10 +1,10 @@
 const axios = require('axios').default;
 const CryptoJS = require('crypto-js');
 const host = 'https://partner.shopeemobile.com';
-// const host = 'https://partner.test-stable.shopeemobile.com'
+// const host = 'https://partner.test-stable.shopeemobile.com'; // test
 const partner_id = 2004004;
 const shop_id = 2421911;
-const shop_test_id = 52362;
+// const shop_id = 52362; //test
 const redirect_url = 'https://www.google.com/';
 
 const timestamp = Math.floor(new Date().getTime() / 1000);
@@ -54,7 +54,7 @@ const refreshToken = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 };
 
@@ -72,10 +72,91 @@ const getAllOrders = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 };
 
+const getOrderDetails = async (req) => {
+  const { access_token, orders } = req;
+  const path = '/api/v2/order/get_order_detail';
+  const baseString = partner_id + path + timestamp + access_token + shop_id;
+  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  response_optional_fields =
+    'item_list,recipient_address,total_amount,invoice_data';
+  url = `${host}${path}?timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&order_sn_list=${orders}&partner_id=${partner_id}&response_optional_fields=${response_optional_fields}`;
+  return await axios
+    .get(url)
+    .then((res) => {
+      const response = res.data;
+      return response;
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+const getTrackingInfo = async (req) => {
+  const { access_token, order } = req;
+  const path = '/api/v2/order/get_tracking_info';
+  const baseString = partner_id + path + timestamp + access_token + shop_id;
+  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  url = `${host}${path}?partner_id=${partner_id}&timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&order_sn=${order}`;
+
+  return await axios
+    .get(url)
+    .then((res) => {
+      const response = res.data;
+      return response;
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+const createShippingDocument = async (req) => {
+  const { access_token, order } = req;
+  const path = '/api/v2/logistics/create_shipping_document';
+  const baseString = partner_id + path + timestamp + access_token + shop_id;
+  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  url = `${host}${path}?timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&partner_id=${partner_id}`;
+  const body = {
+    order_list: [{ order_sn: order }]
+  };
+  console.log(body);
+  return await axios
+    .post(url, body)
+    .then((res) => {
+      const response = res.data;
+      return response;
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+const downloadShippingDocument = async (req) => {
+  const { access_token, order } = req;
+  const path = '/api/v2/logistics/download_shipping_document';
+  const baseString = partner_id + path + timestamp + access_token + shop_id;
+  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  url = `${host}${path}?timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&partner_id=${partner_id}`;
+  const body = {
+    order_list: [{ order_sn: order }]
+  };
+  return await axios
+    .post(url, body)
+    .then((res) => {
+      const response = res.data;
+      return response;
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
 exports.generateLink = generateLink;
 exports.refreshToken = refreshToken;
 exports.getAllOrders = getAllOrders;
+exports.getOrderDetails = getOrderDetails;
+exports.downloadShippingDocument = downloadShippingDocument;
+exports.createShippingDocument = createShippingDocument;
+exports.getTrackingInfo = getTrackingInfo;
