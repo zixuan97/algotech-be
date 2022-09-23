@@ -9,10 +9,13 @@ const addShopifyOrders = async (req, res) => {
   try {
     const data = await shopifyApi.getOrders({ last_date, latestId, limit });
     if (data) {
-      Promise.allSettled(
-        data.map(
-          async (salesOrder) =>
-            await salesOrderModel.createSalesOrder({
+      await Promise.all(
+        data.map(async (salesOrder) => {
+          const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
+            orderId: salesOrder.id.toString()
+          });
+          if (!salesOrderDB) {
+            return await salesOrderModel.createSalesOrder({
               orderId: salesOrder.id.toString(),
               customerName:
                 salesOrder.customer.first_name + salesOrder.customer.last_name,
@@ -22,6 +25,7 @@ const addShopifyOrders = async (req, res) => {
               customerContactNo: salesOrder.customer.default_address.phone,
               customerEmail: salesOrder.contact_email,
               postalCode: salesOrder.customer.default_address.zip,
+              customerRemarks: salesOrder.note,
               platformType: 'SHOPIFY',
               createdTime: salesOrder.created_at,
               currency: salesOrder.currency,
@@ -33,15 +37,17 @@ const addShopifyOrders = async (req, res) => {
                   quantity: item.quantity
                 };
               })
-            })
-        )
+            });
+          }
+        })
       );
     }
-    log.out('OK_ORDER_GET-SHOPIFY-ORDER');
+    log.out('OK_SHOPIFY_GET-SHOPIFY-ORDER');
     res.json(data);
-  } catch (err) {
-    log.error('ERR_ORDER_GET-SHOPIFY-ORDER', err.message);
-    res.status(400).json(err);
+  } catch (error) {
+    log.error('ERR_SHOPIFY-ADD-ORDERS', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   }
 };
 
