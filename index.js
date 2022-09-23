@@ -42,6 +42,7 @@ app.use('/procurement', require('./public/routes/procurementRoutes'));
 app.use('/bundle', require('./public/routes/bundleRoutes'));
 app.use('/shopee', require('./public/routes/shopeeRoutes'));
 app.use('/delivery', require('./public/routes/deliveryRoutes'));
+app.use('/shopify', require('./public/routes/shopifyRoutes'));
 
 const port = process.env.PORT || 4000;
 

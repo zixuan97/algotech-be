@@ -1,4 +1,5 @@
 const shopeeApi = require('../helpers/shopeeApi');
+const salesOrderModel = require('../models/salesOrderModel');
 const shopifyApi = require('../helpers/shopifyApi');
 const keyModel = require('../models/keyModel');
 const common = require('@kelchy/common');
@@ -76,13 +77,50 @@ const getAllOrders = async (req) => {
         orders
       });
       log.out('OK_GET-ALL-SHOPEE-ORDERS');
+      return response.response.order_list;
     } catch (err) {
       log.error('ERR_SHOPEE_GET-ALL-ORDERS', err.message);
     }
   }
 };
 
-const addShopeeOrders = async (req, res) => {};
+const addShopeeOrders = async (req, res) => {
+  const { time_from, time_to, page_size } = req.body;
+  const epoch_time_from = Math.floor(new Date(time_from).getTime() / 1000);
+  const epoch_time_to = Math.floor(new Date(time_to).getTime() / 1000);
+  const data = await getAllOrders({
+    time_from: epoch_time_from,
+    time_to: epoch_time_to,
+    page_size
+  });
+  if (data) {
+    await Promise.allSettled(
+      data.map(
+        async (salesOrder) =>
+          await salesOrderModel.createSalesOrder({
+            orderId: salesOrder.order_sn,
+            customerName: salesOrder.recipient_address.name,
+            customerAddress: salesOrder.recipient_address.full_address,
+            customerContactNo: salesOrder.recipient_address.phone,
+            postalCode: salesOrder.recipient_address.zipcode,
+            platformType: 'SHOPEE',
+            createdTime: new Date(salesOrder.create_time * 1000),
+            currency: salesOrder.currency,
+            amount: salesOrder.total_amount,
+            salesOrderItems: salesOrder.item_list.map((item) => {
+              return {
+                productName: item.item_name.replace(/ *\[[^\]]*]/g, ''),
+                price: item.model_discounted_price,
+                quantity: item.model_quantity_purchased
+              };
+            })
+          })
+      )
+    );
+  }
+
+  res.json({ message: 'Sales Orders for Shopee created', data });
+};
 
 const getTrackingInfo = async (req, res) => {
   const { data: access_token, error } = await common.awaitWrap(
@@ -127,7 +165,7 @@ const downloadShippingDocument = async (req, res) => {
         access_token: access_token.value,
         order
       });
-      console.log(here);
+
       const response = await shopeeApi.downloadShippingDocument({
         access_token: access_token.value,
         order
@@ -144,6 +182,6 @@ const downloadShippingDocument = async (req, res) => {
 
 exports.createKey = createKey;
 exports.refreshToken = refreshToken;
-exports.getAllOrders = getAllOrders;
+exports.addShopeeOrders = addShopeeOrders;
 exports.downloadShippingDocument = downloadShippingDocument;
 exports.getTrackingInfo = getTrackingInfo;
