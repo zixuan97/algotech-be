@@ -145,29 +145,34 @@ model SalesOrderItem {
 
 model SalesOrder {
   id                Int              @id @default(autoincrement())
-  orderId           String
+  orderId           String           @unique
   customerAddress   String
   customerContactNo String
   customerEmail     String?
   currency          String
+  customerName      String
+  platformType      PlatformType
+  postalCode        String
   amount            Float
-  salesOrderItems   SalesOrderItem[]
+  createdTime       DateTime
+  customerRemarks   String?
+  orderStatus       OrderStatus      @default(PAID)
   deliveryOrder     DeliveryOrder?
+  salesOrderItems   SalesOrderItem[]
 }
 
 model DeliveryOrder {
-  id                    Int            @id @default(autoincrement())
-  type                  DeliveryType
-  recipientEmail        String
-  createdAt             DateTime       @default(now())
-  deliveryDate          DateTime
-  deliveryPersonnel     String?
-  shippitTrackingNum    String?
-  method                DeliveryMode?  @default(STANDARD)
-  carrier               String?
-  status                DeliveryStatus @default(PENDING)
-  salesOrderId          Int            @unique
-  salesOrder            SalesOrder     @relation(fields: [salesOrderId], references: [id])
+  id                 Int            @id @default(autoincrement())
+  type               DeliveryType   @default(MANUAL)
+  createdAt          DateTime       @default(now())
+  deliveryDate       DateTime
+  deliveryPersonnel  String?
+  shippitTrackingNum String?
+  method             DeliveryMode?  @default(STANDARD)
+  carrier            String?
+  status             DeliveryStatus @default(READY_FOR_DELIVERY)
+  salesOrderId       Int            @unique
+  salesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
 }
 
 enum PlatformType {
@@ -202,6 +207,14 @@ enum FulfilmentStatus {
   COMPLETED
 }
 
+enum OrderStatus {
+  CREATED
+  PAID
+  PREPARED
+  SHIPPED
+  COMPLETED
+}
+
 enum DeliveryType {
   MANUAL
   SHIPPIT
@@ -214,8 +227,8 @@ enum DeliveryMode {
 }
 
 enum DeliveryStatus {
-  PENDING
-  DELIVERING
-  COMPLETED
+  READY_FOR_DELIVERY
+  DELIVERY_IN_PROGRESS
+  DELIVERED
   CANCELLED
 }

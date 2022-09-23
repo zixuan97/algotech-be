@@ -1,41 +1,44 @@
 const deliveryModel = require('../models/deliveryModel');
+const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { DeliveryType } = require('@prisma/client');
+const { DeliveryType, DeliveryMode, DeliveryStatus } = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req, res) => {
-  const { type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
-  if (type === DeliveryType.SHIPPIT) {
-    await deliveryModel.sendDeliveryOrderToShippit({
+  const { type, courierType, deliveryDate, deliveryPersonnel, method, carrier, status, parcelQty, parcelWeight, salesOrderId } = req.body;
+  const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
+  const name = salesOrder.customerName.split(" ");
+  if (type === DeliveryType.SHIPPIT && salesOrder.deliveryOrder === null) {
+    soShippit = await deliveryModel.sendDeliveryOrderToShippit({
       courier_type: courierType,
-      delivery_address, // take from sales
-      delivery_postcode, // take from sales
-      delivery_state: 'Singapore',
-      delivery_suburb: 'SG',
+      delivery_address: salesOrder.customerAddress,
+      delivery_postcode: salesOrder.postalCode,
+      delivery_state: "Singapore",
+      delivery_suburb: "SG",
       courier_allocation: carrier,
-      qty,
-      weight,
-      email: recipientEmail,
-      first_name, // take from order
-      last_name // take from order
+      parcelQty,
+      parcelWeight,
+      email: salesOrder.customerEmail === null ? "zac@thekettlegourmet.com" : salesOrder.customerEmail,
+      first_name: name[0],
+      last_name: name[1] === "" ? "" : name[1]
     });
     log.out('OK_DELIVERYORDER_CREATE-DO-SHIPPIT');
   }
   const { data, error } = await common.awaitWrap(
     deliveryModel.createDeliveryOrder({
     type,
-    recipientEmail,
     deliveryDate,
     deliveryPersonnel,
-    shippitTrackingNum,
+    shippitTrackingNum: type === DeliveryType.SHIPPIT ? soShippit.response.tracking_number : null,
     method,
     carrier,
     status,
     salesOrderId
     })
   );
+  console.log(data)
   if (error) {
     log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
     const e = Error.http(error);
@@ -45,14 +48,12 @@ const createDeliveryOrder = async (req, res) => {
     const result = {
       id: data.id,
       type,
-      recipientEmail,
       deliveryDate,
       deliveryPersonnel,
-      shippitTrackingNum,
       method,
       carrier,
       status,
-      salesOrderId // supposed to be sales order
+      salesOrderId
     };
     res.json(result);
   }
@@ -84,29 +85,27 @@ const getDeliveryOrder = async (req, res) => {
   }
 };
 
-const getDeliveryOrderByName = async (req, res) => {
-  try {
-    const { name } = req.body;
-    const deliveryOrder = await deliveryModel.findDeliveryOrderByName({ name });
-    log.out('OK_DELIVERY_GET-DO-BY-ID');
-    res.json(deliveryOrder);
-  } catch (error) {
-    log.error('ERR_DELIVERY_GET-DO', error.message);
-    res.status(500).send('Server Error');
-  }
-};
-
 const updateDeliveryOrder = async (req, res) => {
-  const { id, type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req.body;
-  const { error } = await common.awaitWrap(
-    deliveryModel.updateDeliveryOrder({ id, type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId })
+  const { id, type, deliveryDate, deliveryPersonnel, method, carrier, status, salesOrderId } = req.body;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.updateDeliveryOrder({ id, type, deliveryDate, deliveryPersonnel, method, carrier, status })
   );
   if (error) {
     log.error('ERR_DELIVERY_UPDATE-DO', error.message);
     res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_UPDATE-DO');
-    res.json({ message: `Updated DeliveryOrder with id:${id}` });
+    const result = {
+      id: data.id,
+      type,
+      deliveryDate,
+      deliveryPersonnel,
+      method,
+      carrier,
+      status,
+      salesOrderId
+    };
+    res.json(result);
   }
 };
 
@@ -121,6 +120,20 @@ const deleteDeliveryOrder = async (req, res) => {
   } else {
     log.out('OK_DELIVERY_DELETE-DO');
     res.json({ message: `Deleted DeliveryOrder with id:${id}` });
+  }
+};
+
+const cancelShippitOrder = async (req, res) => {
+  try {
+    const { trackingNumber } = req.params;
+    const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
+    await deliveryModel.cancelShippitOrder({ trackingNumber });
+    await deliveryModel.updateDeliveryOrder({ id: deliveryOrder.id, status: DeliveryStatus.CANCELLED });
+    log.out('OK_DELIVERY_CANCEL-SHIPPIT-ORDER');
+    res.json({ message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}` });
+  } catch (error) {
+    log.error('ERR_DELIVERY_CANCEL-SHIPPIT-ORDER', error.message);
+    res.status(500).send('Server Error');
   }
 };
 
@@ -182,8 +195,21 @@ const getAllShippitOrders = async (req, res) => {
     log.error('ERR_DELIVERY_GET-ALL-DO', error.message);
     res.json(Error.http(error));
   } else {
+    let dataRes = [];
+    for (let d of data) {
+      const result = {
+        shippitTrackingNum: d.trackingNumber,
+        type: DeliveryType.SHIPPIT,
+        deliveryDate: d.scheduledDeliveryDate,
+        deliveryPersonnel: "Shippit",
+        method: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+        recipient: d.recipient,
+        deliveryAddress: d.deliveryAddress
+      };
+      dataRes.push(result);
+    }
     log.out('OK_DELIVERY_GET-ALL-DO');
-    res.json(data);
+    res.json(dataRes);
   }
 };
 
@@ -205,9 +231,9 @@ exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.getDeliveryOrder = getDeliveryOrder;
-exports.getDeliveryOrderByName = getDeliveryOrderByName;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
 exports.getAllShippitOrders = getAllShippitOrders;
 exports.getToken = getToken;
+exports.cancelShippitOrder = cancelShippitOrder;

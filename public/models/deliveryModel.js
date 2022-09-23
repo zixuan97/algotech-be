@@ -4,8 +4,8 @@ const axios = require('axios');
 const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req) => {
-  const { recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
-  await prisma.DeliveryOrder.create({
+  const { type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
+  return await prisma.DeliveryOrder.create({
     data: {
       type,
       recipientEmail,
@@ -15,18 +15,13 @@ const createDeliveryOrder = async (req) => {
       method,
       carrier,
       status,
-      salesOrderId // supposed to be salesOrder instead of id
+      salesOrderId
     }
   })
 };
 
 const getAllDeliveryOrders = async () => {
-  const manualOrders = await prisma.DeliveryOrder.findMany({
-    where: {
-      type: 'MANUAL',
-    }
-  });
-
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({});
   return deliveryOrders;
 };
 
@@ -41,24 +36,27 @@ const findDeliveryOrderById = async (req) => {
   return deliveryOrder;
 };
 
-const findDeliveryOrderByName = async (req) => {
-  const { name } = req;
-  const deliveryOrder = await prisma.DeliveryOrder.findUnique({
+const findDeliveryOrderByShippitTrackingNum = async (req) => {
+  const { trackingNumber } = req;
+  const deliveryOrder = await prisma.DeliveryOrder.findMany({
     where: {
-      name
+      shippitTrackingNum: trackingNumber
     }
   });
-  return deliveryOrder;
+  return deliveryOrder[0];
 };
 
 const updateDeliveryOrder = async (req) => {
-  const { id, email, name, address } = req;
-  deliveryOrder = await prisma.DeliveryOrder.update({
+  const { id, type, deliveryDate, deliveryPersonnel, method, carrier, status } = req;
+  const deliveryOrder = await prisma.DeliveryOrder.update({
     where: { id },
     data: {
-      email,
-      name,
-      address
+      type,
+      deliveryDate,
+      deliveryPersonnel,
+      method,
+      carrier,
+      status
     }
   });
   return deliveryOrder;
@@ -97,7 +95,6 @@ const sendDeliveryOrderToShippit = async (req) => {
     }
   });
   const path = 'https://app.shippit.com/api/3/orders';
-  //const path = 'https://app.staging.shippit.com/api/3/orders';
   const options = {
     headers: {
       'Content-Type': 'application/json',
@@ -118,7 +115,7 @@ const sendDeliveryOrderToShippit = async (req) => {
 
 const trackShippitOrder = async (req) => {
   const { trackingNum } = req;
-  const api_path = 'https://app.shippit.com/api/3/orders/' + trackingNum + '/tracking';
+  const api_path = `https://app.shippit.com/api/3/orders/${trackingNum}/tracking`;
   const options = {
     headers: {
       'Authorization': 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
@@ -155,12 +152,32 @@ const getAllDeliveryOrdersFromShippit = async () => {
     });
 };
 
+const cancelShippitOrder = async (req, res) => {
+  const { trackingNumber } = req;
+  const api_path = `https://app.shippit.com/api/3/orders/${trackingNumber}`;
+  const options = {
+    headers: {
+      'Authorization': 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
+    },
+  };
+  return await axios
+    .delete(api_path, options)
+    .then((res) => {
+      const response = res.data;
+      return response.response;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.findDeliveryOrderById = findDeliveryOrderById;
-exports.findDeliveryOrderByName = findDeliveryOrderByName;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
+exports.cancelShippitOrder = cancelShippitOrder;
+exports.findDeliveryOrderByShippitTrackingNum = findDeliveryOrderByShippitTrackingNum;
