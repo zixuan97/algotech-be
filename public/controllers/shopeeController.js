@@ -1,5 +1,6 @@
 const shopeeApi = require('../helpers/shopeeApi');
 const salesOrderModel = require('../models/salesOrderModel');
+const shopifyApi = require('../helpers/shopifyApi');
 const keyModel = require('../models/keyModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
@@ -164,6 +165,7 @@ const downloadShippingDocument = async (req, res) => {
         access_token: access_token.value,
         order
       });
+
       const response = await shopeeApi.downloadShippingDocument({
         access_token: access_token.value,
         order

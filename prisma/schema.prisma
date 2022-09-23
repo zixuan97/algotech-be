@@ -134,6 +134,38 @@ model Keys {
   value String @unique
 }
 
+model SalesOrderItem {
+  id           Int        @id @default(autoincrement())
+  productName  String
+  price        Float
+  quantity     Int
+  salesOrderId Int
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
+}
+
+model SalesOrder {
+  id                Int              @id @default(autoincrement())
+  orderId           String
+  customerName      String
+  customerAddress   String
+  postalCode        String
+  customerContactNo String
+  customerEmail     String?
+  platformType      PlatformType
+  createdTime       DateTime
+  currency          String
+  amount            Float
+  salesOrderItems   SalesOrderItem[]
+}
+
+enum PlatformType {
+  SHOPEE
+  SHOPIFY
+  LAZADA
+  REDMART
+  OTHERS
+}
+
 enum UserRole {
   ADMIN
   INTERN
