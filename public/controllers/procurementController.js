@@ -9,8 +9,6 @@ const { log } = require('../helpers/logger');
 const { generateProcurementPdfTemplate } = require('../helpers/pdf');
 const emailHelper = require('../helpers/email');
 const { format } = require('date-fns');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
 
 const createProcurementOrder = async (req, res) => {
   const {

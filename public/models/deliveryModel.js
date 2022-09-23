@@ -27,7 +27,6 @@ const getAllDeliveryOrders = async () => {
 
 const findDeliveryOrderById = async (req) => {
   const { id } = req;
-
   const deliveryOrder = await prisma.DeliveryOrder.findUnique({
     where: {
       id: Number(id)

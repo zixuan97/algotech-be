@@ -10,7 +10,9 @@ const createDeliveryOrder = async (req, res) => {
   const { type, courierType, deliveryDate, deliveryPersonnel, method, carrier, status, parcelQty, parcelWeight, salesOrderId } = req.body;
   const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
   const name = salesOrder.customerName.split(" ");
-  if (type === DeliveryType.SHIPPIT && salesOrder.deliveryOrder === null) {
+  let soShippit;
+  // may need an additional field in salesOrder called 'deliveryAssigned' so that cannot have 2 delivery orders assigned to same sales order
+  if (type === DeliveryType.SHIPPIT) {
     soShippit = await deliveryModel.sendDeliveryOrderToShippit({
       courier_type: courierType,
       delivery_address: salesOrder.customerAddress,
@@ -38,7 +40,6 @@ const createDeliveryOrder = async (req, res) => {
     salesOrderId
     })
   );
-  console.log(data)
   if (error) {
     log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
     const e = Error.http(error);
@@ -53,7 +54,8 @@ const createDeliveryOrder = async (req, res) => {
       method,
       carrier,
       status,
-      salesOrderId
+      salesOrderId,
+      trackingNumber: data.shippitTrackingNum
     };
     res.json(result);
   }
