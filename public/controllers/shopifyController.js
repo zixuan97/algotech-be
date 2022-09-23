@@ -8,7 +8,6 @@ const addShopifyOrders = async (req, res) => {
   const { last_date, latestId, limit } = req.body;
   try {
     const data = await shopifyApi.getOrders({ last_date, latestId, limit });
-
     if (data) {
       await Promise.all(
         data.map(async (salesOrder) => {
@@ -43,6 +42,7 @@ const addShopifyOrders = async (req, res) => {
         })
       );
     }
+    log.out('OK_ORDER_GET-SHOPIFY-ORDER');
     res.json(data);
   } catch (error) {
     log.error('ERR_SHOPEE-ADD-ORDERS', error.message);

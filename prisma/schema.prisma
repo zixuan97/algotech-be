@@ -86,9 +86,9 @@ model Bundle {
 model BundleProduct {
   bundleId    Int
   productId   Int
-  productName String
   productSku  String
   bundleName  String
+  productName String
   bundle      Bundle  @relation(fields: [bundleId], references: [id])
   product     Product @relation(fields: [productId], references: [id])
 
@@ -148,12 +148,12 @@ model SalesOrder {
   orderId           String           @unique
   customerName      String
   customerAddress   String
-  postalCode        String
   customerContactNo String
   customerEmail     String?
-  platformType      PlatformType
-  createdTime       DateTime
   currency          String
+  platformType      PlatformType
+  postalCode        String
+  createdTime       DateTime
   amount            Float
   orderStatus       OrderStatus      @default(PAID)
   customerRemarks   String?

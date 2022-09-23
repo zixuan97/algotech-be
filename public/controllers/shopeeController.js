@@ -58,9 +58,7 @@ const getAllOrders = async (req) => {
   );
 
   if (error) {
-    log.error('ERR_SHOPEE_CREATE-KEY', error.message);
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    log.error('ERR_SHOPEE_GET-ALL-SHOPEE-ORDERS', error.message);
   } else {
     const orderList = await shopeeApi.getAllOrders({
       access_token: access_token.value,
@@ -75,7 +73,7 @@ const getAllOrders = async (req) => {
       access_token: access_token.value,
       orders
     });
-    log.out('OK_GET-ALL-SHOPEE-ORDERS');
+    log.out('OK_SHOPEE_GET-ALL-SHOPEE-ORDERS');
     return response.response.order_list;
   }
 };
@@ -142,15 +140,14 @@ const getTrackingInfo = async (req, res) => {
   } else {
     try {
       const order = '220921CRN7HCJW';
-
       const response = await shopeeApi.getTrackingInfo({
         access_token: access_token.value,
         order
       });
-
+      log.out('OK_SHOPEE_GET-TRACKING-INFO');
       res.json(response);
     } catch (err) {
-      log.error('ERR_SHOPEE_GET-ALL-ORDERS', err.message);
+      log.error('ERR_SHOPEE_GET-TRACKING-INFO', err.message);
       const e = Error.http(err);
       res.status(e.code).json(e.message);
     }
@@ -173,15 +170,14 @@ const downloadShippingDocument = async (req, res) => {
         access_token: access_token.value,
         order
       });
-
       const response = await shopeeApi.downloadShippingDocument({
         access_token: access_token.value,
         order
       });
-
+      log.out('OK_SHOPEE_DOWNLOAD-SHIPPING-DOCUMENT');
       res.json(response);
     } catch (err) {
-      log.error('ERR_SHOPEE_GET-ALL-ORDERS', err.message);
+      log.error('ERR_SHOPEE_DOWNLOAD-SHIPPING-DOCUMENT', err.message);
       const e = Error.http(err);
       res.status(e.code).json(e.message);
     }

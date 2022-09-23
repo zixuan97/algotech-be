@@ -1,5 +1,6 @@
 const axios = require('axios').default;
 const CryptoJS = require('crypto-js');
+const { log } = require('../helpers/logger');
 const host = 'https://partner.shopeemobile.com';
 // const host = 'https://partner.test-stable.shopeemobile.com'; // test
 const partner_id = 2004004;
@@ -11,6 +12,7 @@ const generateSign = async (partner_key, secret) => {
   const key = CryptoJS.enc.Utf8.parse(partner_key);
   const msg = CryptoJS.enc.Utf8.parse(secret);
   const token = CryptoJS.enc.Hex.stringify(CryptoJS.HmacSHA256(msg, key));
+  log.out('OK_SIGN-GENERATE-SHOPEE-SIGN');
   return token;
 };
 
@@ -24,7 +26,7 @@ const generateLink = async (req) => {
     host +
     v2_path +
     `?partner_id=${partner_id}&timestamp=${timestamp}&sign=${token}&redirect=${redirect_url}`;
-
+    log.out('OK_LINK_GENERATE-SHOPEE-LINK');
   return url;
 };
 
@@ -51,9 +53,11 @@ const refreshToken = async (req) => {
     .then((res) => {
       console.log(res.data);
       const response = res.data;
+      log.out('OK_TOKEN_REFRESH-SHOPEE-TOKEN');
       return response;
     })
     .catch((err) => {
+      log.error('ERR_REFRESH-SHOPEE-TOKEN', err.message);
       throw err;
     });
 };
@@ -70,9 +74,11 @@ const getAllOrders = async (req) => {
     .get(url)
     .then((res) => {
       const response = res.data;
+      log.out('OK_ORDER_GET-ALL-SHOPEE-ORDERS');
       return response;
     })
     .catch((err) => {
+      log.error('ERR_GET-ALL-SHOPEE-ORDERS', err.message);
       throw err;
     });
 };
@@ -90,9 +96,11 @@ const getOrderDetails = async (req) => {
     .get(url)
     .then((res) => {
       const response = res.data;
+      log.out('OK_ORDER_GET-ALL-SHOPEE-ORDER-DETAILS');
       return response;
     })
     .catch((err) => {
+      log.error('ERR_ORDER_GET-SHOPEE-ORDER-DETAILS', err.message);
       throw err;
     });
 };
@@ -108,10 +116,12 @@ const getTrackingInfo = async (req) => {
   return await axios
     .get(url)
     .then((res) => {
+      log.out('OK_ORDER_GET-SHOPEE-TRACKING-INFO');
       const response = res.data;
       return response;
     })
     .catch((err) => {
+      log.error('ERR_ORDER_GET-SHOPEE-TRACKING-INFO', err.message);
       throw err;
     });
 };
@@ -130,10 +140,12 @@ const createShippingDocument = async (req) => {
   return await axios
     .post(url, body)
     .then((res) => {
+      log.out('OK_ORDER_CREATE-SHOPEE-SHIPPING-DOCUMENT');
       const response = res.data;
       return response;
     })
     .catch((err) => {
+      log.error('ERR_ORDER_CREATE-SHOPEE-SHIPPING-DOCUMENT', err.message);
       throw err;
     });
 };
@@ -150,10 +162,12 @@ const downloadShippingDocument = async (req) => {
   return await axios
     .post(url, body)
     .then((res) => {
+      log.out('OK_ORDER_DOWNLOAD-SHOPEE-SHIPPING-DOCUMENT');
       const response = res.data;
       return response;
     })
     .catch((err) => {
+      log.error('ERR_ORDER_DOWNLOAD-SHOPEE-oSHIPPING-DOCUMENT', err.message);
       throw err;
     });
 };
