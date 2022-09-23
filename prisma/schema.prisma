@@ -157,7 +157,7 @@ model SalesOrder {
   createdTime       DateTime
   customerRemarks   String?
   orderStatus       OrderStatus      @default(PAID)
-  deliveryOrder     DeliveryOrder?
+  DeliveryOrder     DeliveryOrder?
   salesOrderItems   SalesOrderItem[]
 }
 
@@ -172,7 +172,15 @@ model DeliveryOrder {
   carrier            String?
   status             DeliveryStatus @default(READY_FOR_DELIVERY)
   salesOrderId       Int            @unique
-  salesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
+  SalesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
+}
+
+enum OrderStatus {
+  CREATED
+  PAID
+  PREPARED
+  SHIPPED
+  COMPLETED
 }
 
 enum PlatformType {
@@ -207,19 +215,6 @@ enum FulfilmentStatus {
   COMPLETED
 }
 
-enum OrderStatus {
-  CREATED
-  PAID
-  PREPARED
-  SHIPPED
-  COMPLETED
-}
-
-enum DeliveryType {
-  MANUAL
-  SHIPPIT
-}
-
 enum DeliveryMode {
   STANDARD
   EXPRESS
@@ -231,4 +226,9 @@ enum DeliveryStatus {
   DELIVERY_IN_PROGRESS
   DELIVERED
   CANCELLED
+}
+
+enum DeliveryType {
+  MANUAL
+  SHIPPIT
 }
