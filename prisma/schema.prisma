@@ -145,7 +145,7 @@ model SalesOrderItem {
 
 model SalesOrder {
   id                Int              @id @default(autoincrement())
-  orderId           String
+  orderId           String           @unique
   customerName      String
   customerAddress   String
   postalCode        String
@@ -155,7 +155,17 @@ model SalesOrder {
   createdTime       DateTime
   currency          String
   amount            Float
+  orderStatus       OrderStatus      @default(PAID)
+  customerRemarks   String?
   salesOrderItems   SalesOrderItem[]
+}
+
+enum OrderStatus {
+  CREATED
+  PAID
+  PREPARED
+  SHIPPED
+  COMPLETED
 }
 
 enum PlatformType {

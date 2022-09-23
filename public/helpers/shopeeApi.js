@@ -7,8 +7,6 @@ const shop_id = 2421911;
 // const shop_id = 52362; //test
 const redirect_url = 'https://www.google.com/';
 
-const timestamp = Math.floor(new Date().getTime() / 1000);
-
 const generateSign = async (partner_key, secret) => {
   const key = CryptoJS.enc.Utf8.parse(partner_key);
   const msg = CryptoJS.enc.Utf8.parse(secret);
@@ -18,6 +16,7 @@ const generateSign = async (partner_key, secret) => {
 
 // generate an authorized link
 const generateLink = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const v2_path = '/api/v2/shop/auth_partner';
   const baseString = partner_id + v2_path + timestamp;
   const token = await generateSign(process.env.PARTNER_KEY, baseString);
@@ -30,6 +29,7 @@ const generateLink = async (req) => {
 };
 
 const refreshToken = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { refresh_token } = req;
 
   const path = '/api/v2/auth/access_token/get';
@@ -59,6 +59,7 @@ const refreshToken = async (req) => {
 };
 
 const getAllOrders = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { access_token, time_from, time_to, page_size } = req;
   const path = '/api/v2/order/get_order_list';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
@@ -77,6 +78,7 @@ const getAllOrders = async (req) => {
 };
 
 const getOrderDetails = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { access_token, orders } = req;
   const path = '/api/v2/order/get_order_detail';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
@@ -96,6 +98,7 @@ const getOrderDetails = async (req) => {
 };
 
 const getTrackingInfo = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { access_token, order } = req;
   const path = '/api/v2/order/get_tracking_info';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
@@ -114,6 +117,7 @@ const getTrackingInfo = async (req) => {
 };
 
 const createShippingDocument = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { access_token, order } = req;
   const path = '/api/v2/logistics/create_shipping_document';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
