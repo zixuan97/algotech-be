@@ -86,9 +86,9 @@ model Bundle {
 model BundleProduct {
   bundleId    Int
   productId   Int
-  productName String
   productSku  String
   bundleName  String
+  productName String
   bundle      Bundle  @relation(fields: [bundleId], references: [id])
   product     Product @relation(fields: [productId], references: [id])
 
@@ -146,15 +146,15 @@ model SalesOrderItem {
 model SalesOrder {
   id                Int              @id @default(autoincrement())
   orderId           String
-  customerName      String
   customerAddress   String
-  postalCode        String
   customerContactNo String
   customerEmail     String?
-  platformType      PlatformType
-  createdTime       DateTime
   currency          String
+  customerName      String
+  platformType      PlatformType
+  postalCode        String
   amount            Float
+  createdTime       DateTime
   salesOrderItems   SalesOrderItem[]
 }
 
