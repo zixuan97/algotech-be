@@ -14,10 +14,12 @@ const getOrders = async (req) => {
   return await axios
     .get(url)
     .then((res) => {
+      log.out('OK_ORDER_GET-ALL-SHOPIFY-ORDERS');
       const response = res.data.orders;
       return response;
     })
     .catch((err) => {
+      log.error('ERR_GET-ALL-SHOPIFY-ORDERS', err.message);
       throw err;
     });
 };
