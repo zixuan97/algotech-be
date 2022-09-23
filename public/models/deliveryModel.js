@@ -1,21 +1,7 @@
 const { PrismaClient, DeliveryType } = require('@prisma/client');
 const prisma = new PrismaClient();
 const axios = require('axios');
-
-// const createDeliveryOrder = async (req) => {
-//   const { recipientEmail, deliveryDate, deliveryPersonnel, carrier, status, salesOrderId } = req;
-//   await prisma.DeliveryOrder.create({
-//     data: {
-//       type: DeliveryType.MANUAL,
-//       recipientEmail,
-//       deliveryDate,
-//       deliveryPersonnel,
-//       carrier,
-//       status,
-//       salesOrderId
-//     }
-//   });
-// };
+const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req) => {
   const { recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
@@ -151,9 +137,12 @@ const trackShippitOrder = async (req) => {
 
 const getAllDeliveryOrdersFromShippit = async () => {
   const api_path = 'https://app.shippit.com/api/5/orders';
+  const token = await shippitApi.getToken({});
+  console.log("token", token);
+  const headerToken = 'Bearer ' + token;
   const options = {
     headers: {
-      'Authorization': 'Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJhcHAuc2hpcHBpdC5jb20iLCJzdWIiOiIyMTAyMjVmMy01ODk4LTRjMzctODNhNS1jODgyNzMzOTk4Y2IiLCJleHAiOjE2NjM4MzcyOTMsInVzZXIiOiIyMTAyMjVmMy01ODk4LTRjMzctODNhNS1jODgyNzMzOTk4Y2IiLCJlbWFpbCI6Im1lcnlsc2Vvd3dAZ21haWwuY29tIiwicm9sZXMiOlsibWVyY2hhbnQiXSwidmVyc2lvbiI6InYwLjEuMiIsImZwcl9oYXNoIjoiY2Q4MjgxOWNmOTkyZWIxZGY1MDVhODk4ZTlhMTRkOGVmY2U5NTJjNmVhNDMwNDdiYjM0NmRmNGUwMTdkNGRjOSJ9.NrvZF2vEjH_qjFOaQ5fWjfiCPvF2JGwBGN-E18dtC9sduaGRZe7O3N5rZ7QQlabLYoWZ6FmMU3FNIF_8RYvybhn181HWCVPm7eXcl-kkKhZAfjY8IuUpDKP0WoO2TwDBlwLNY_97AahhTt6AvvGk_UT4PopLO_ayf13FUkfkyPaQRLOUrue2wbiqEEMGicZ3kSWMayIcAoueaJ1PcPC1gFtogXebd2Hoe8WQVaD7Ep2txg2O7YoEFNxLathUHENKH8TDfV_or3IJ6PfxaeFyyYGVt-MlqiYIABkqYA-iJiddMj-SQ4mLWIpSR2atUfawy5w0TkTyTO2KB0YJROhbdw'
+      'Authorization': headerToken
     },
   };
   return await axios
@@ -168,7 +157,6 @@ const getAllDeliveryOrdersFromShippit = async () => {
 };
 
 exports.createDeliveryOrder = createDeliveryOrder;
-// exports.createDeliveryOrderForShippit = createDeliveryOrderForShippit;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;

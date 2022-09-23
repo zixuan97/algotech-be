@@ -3,6 +3,7 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { DeliveryType } = require('@prisma/client');
+const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req, res) => {
   const { type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
@@ -178,10 +179,23 @@ const getAllShippitOrders = async (req, res) => {
     deliveryModel.getAllDeliveryOrdersFromShippit({})
   );
   if (error) {
-    log.error('OK_DELIVERY_GET-ALL-DO', error.message);
+    log.error('ERR_DELIVERY_GET-ALL-DO', error.message);
     res.json(Error.http(error));
   } else {
-    log.out('ERR_DELIVERY_GET-ALL-DO');
+    log.out('OK_DELIVERY_GET-ALL-DO');
+    res.json(data);
+  }
+};
+
+const getToken = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    shippitApi.getToken({})
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-TOKEN', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-TOKEN');
     res.json(data);
   }
 };
@@ -196,3 +210,4 @@ exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
 exports.getAllShippitOrders = getAllShippitOrders;
+exports.getToken = getToken;

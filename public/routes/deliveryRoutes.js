@@ -10,5 +10,6 @@ router.post('/shippit', deliveryController.sendDeliveryOrderToShippit);
 router.get('/shippit/:trackingNum', deliveryController.trackShippitOrder);
 router.get('/shippit/latest/:trackingNum', deliveryController.getLastestTrackingInfoOfOrder);
 router.get('/shippit/orders/all', deliveryController.getAllShippitOrders);
+router.get('/shippit/auth/token', deliveryController.getToken);
 
 module.exports = router;
