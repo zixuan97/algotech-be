@@ -54,7 +54,7 @@ const refreshToken = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 };
 
@@ -72,7 +72,7 @@ const getAllOrders = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 };
 
@@ -81,7 +81,8 @@ const getOrderDetails = async (req) => {
   const path = '/api/v2/order/get_order_detail';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
   const token = await generateSign(process.env.PARTNER_KEY, baseString);
-  response_optional_fields = 'item_list,recipient_address';
+  response_optional_fields =
+    'item_list,recipient_address,total_amount,invoice_data';
   url = `${host}${path}?timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&order_sn_list=${orders}&partner_id=${partner_id}&response_optional_fields=${response_optional_fields}`;
   return await axios
     .get(url)
@@ -90,7 +91,7 @@ const getOrderDetails = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 };
 
@@ -99,9 +100,8 @@ const getTrackingInfo = async (req) => {
   const path = '/api/v2/order/get_tracking_info';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
   const token = await generateSign(process.env.PARTNER_KEY, baseString);
-  response_optional_fields = 'item_list,recipient_address';
-  url = `${host}${path}?timestamp=${timestamp}&partner_id=${partner_id}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&order_sn=${order}`;
-  console.log(url);
+  url = `${host}${path}?partner_id=${partner_id}&timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&order_sn=${order}`;
+
   return await axios
     .get(url)
     .then((res) => {
@@ -109,7 +109,7 @@ const getTrackingInfo = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 };
 
@@ -130,7 +130,7 @@ const createShippingDocument = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 };
 
@@ -150,7 +150,7 @@ const downloadShippingDocument = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      throw err;
     });
 };
 exports.generateLink = generateLink;

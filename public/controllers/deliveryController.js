@@ -196,7 +196,7 @@ const getToken = async (req, res) => {
     res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-TOKEN');
-    res.json(data);
+    res.json({ "token" : data });
   }
 };
 

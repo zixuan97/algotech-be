@@ -138,7 +138,6 @@ const trackShippitOrder = async (req) => {
 const getAllDeliveryOrdersFromShippit = async () => {
   const api_path = 'https://app.shippit.com/api/5/orders';
   const token = await shippitApi.getToken({});
-  console.log("token", token);
   const headerToken = 'Bearer ' + token;
   const options = {
     headers: {

@@ -150,11 +150,7 @@ model SalesOrder {
   customerContactNo String
   customerEmail     String?
   currency          String
-  amount            String
-  createdTime       DateTime
-  customerName      String
-  platformType      PlatformType
-  postalCode        String
+  amount            Float
   salesOrderItems   SalesOrderItem[]
   deliveryOrder     DeliveryOrder?
 }
