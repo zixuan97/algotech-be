@@ -103,9 +103,11 @@ const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
   }
   log.out('ERR_SALESORDER_GET-SO-BY-DAY-TIMEFILTER');
   res.json(
-    JSON.stringify(
-      data,
-      (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+    JSON.parse(
+      JSON.stringify(
+        data,
+        (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+      )
     )
   );
 };
@@ -126,10 +128,12 @@ const getRevenueByDayWithTimeFilter = async (req, res) => {
   } else {
   }
   log.out('ERR_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER');
-  res.json(
-    JSON.stringify(
-      data,
-      (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+  const str = res.json(
+    JSON.parse(
+      JSON.stringify(
+        data,
+        (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+      )
     )
   );
 };
