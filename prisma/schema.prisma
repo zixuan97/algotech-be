@@ -146,18 +146,33 @@ model SalesOrderItem {
 model SalesOrder {
   id                Int              @id @default(autoincrement())
   orderId           String           @unique
-  customerName      String
   customerAddress   String
   customerContactNo String
   customerEmail     String?
   currency          String
+  customerName      String
   platformType      PlatformType
   postalCode        String
-  createdTime       DateTime
   amount            Float
-  orderStatus       OrderStatus      @default(PAID)
+  createdTime       DateTime
   customerRemarks   String?
+  orderStatus       OrderStatus      @default(PAID)
+  DeliveryOrder     DeliveryOrder?
   salesOrderItems   SalesOrderItem[]
+}
+
+model DeliveryOrder {
+  id                 Int            @id @default(autoincrement())
+  type               DeliveryType   @default(MANUAL)
+  createdAt          DateTime       @default(now())
+  deliveryDate       DateTime
+  deliveryPersonnel  String?
+  shippitTrackingNum String?
+  method             DeliveryMode?  @default(STANDARD)
+  carrier            String?
+  status             DeliveryStatus @default(READY_FOR_DELIVERY)
+  salesOrderId       Int            @unique
+  SalesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
 }
 
 enum OrderStatus {
@@ -198,4 +213,22 @@ enum FulfilmentStatus {
   CREATED
   ARRIVED
   COMPLETED
+}
+
+enum DeliveryMode {
+  STANDARD
+  EXPRESS
+  PRIORITY
+}
+
+enum DeliveryStatus {
+  READY_FOR_DELIVERY
+  DELIVERY_IN_PROGRESS
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryType {
+  MANUAL
+  SHIPPIT
 }

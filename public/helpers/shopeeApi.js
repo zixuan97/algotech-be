@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const CryptoJS = require('crypto-js');
-const { log } = require('../helpers/logger');
+const { log } = require('./logger');
 const host = 'https://partner.shopeemobile.com';
 // const host = 'https://partner.test-stable.shopeemobile.com'; // test
 const partner_id = 2004004;
@@ -26,7 +26,7 @@ const generateLink = async (req) => {
     host +
     v2_path +
     `?partner_id=${partner_id}&timestamp=${timestamp}&sign=${token}&redirect=${redirect_url}`;
-    log.out('OK_LINK_GENERATE-SHOPEE-LINK');
+  log.out('OK_LINK_GENERATE-SHOPEE-LINK');
   return url;
 };
 

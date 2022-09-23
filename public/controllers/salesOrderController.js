@@ -66,21 +66,76 @@ const getAllSalesOrders = async (req, res) => {
   res.json(data);
 };
 
-const getAllSalesOrdersWithinTimePeriod = async (req, res) => {
+const getAllSalesOrdersWithTimeFilter = async (req, res) => {
   const { time_from, time_to } = req.body;
   const { data, error } = await common.awaitWrap(
-    salesOrderModel.getAllSalesOrders({ time_from })
+    salesOrderModel.getAllSalesOrdersWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
   );
 
   if (error) {
-    log.error('ERR_SALESORDER_GET-ALL-SO', error.message);
+    log.error('ERR_SALESORDER_GET-ALL-SO-TIMEFILTER', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
   }
-  log.out('ERR_SALESORDER_GET-ALL-SO');
+  log.out('ERR_SALESORDER_GET-ALL-SO-TIMEFILTER');
+  console.log(data.length);
   res.json(data);
+};
+
+const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getSalesOrdersByDayWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+
+  if (error) {
+    log.error('ERR_SALESORDER_GET-SO-BY-DAY-TIMEFILTER', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+  }
+  log.out('ERR_SALESORDER_GET-SO-BY-DAY-TIMEFILTER');
+  res.json(
+    JSON.stringify(
+      data,
+      (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+    )
+  );
+};
+
+const getRevenueByDayWithTimeFilter = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getRevenueByDayWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+
+  if (error) {
+    log.error('ERR_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+  }
+  log.out('ERR_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER');
+  res.json(
+    JSON.stringify(
+      data,
+      (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+    )
+  );
 };
 
 exports.createSalesOrder = createSalesOrder;
 exports.getAllSalesOrders = getAllSalesOrders;
+exports.getAllSalesOrdersWithTimeFilter = getAllSalesOrdersWithTimeFilter;
+exports.getSalesOrdersByDayWithTimeFilter = getSalesOrdersByDayWithTimeFilter;
+exports.getRevenueByDayWithTimeFilter = getRevenueByDayWithTimeFilter;

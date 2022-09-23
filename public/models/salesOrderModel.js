@@ -50,6 +50,34 @@ const getAllSalesOrders = async () => {
   return salesOrders;
 };
 
+const getAllSalesOrdersWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const salesOrders = await prisma.salesOrder.findMany({
+    where: {
+      createdTime: {
+        lte: time_to, //last date
+        gte: time_from //first date
+      }
+    },
+    include: { salesOrderItems: true }
+  });
+  return salesOrders;
+};
+
+const getSalesOrdersByDayWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const salesOrdersCount =
+    await prisma.$queryRaw`select count("orderId") as salesOrders, DATE("createdTime") as createdDate from "public"."SalesOrder" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by DATE("createdTime")`;
+  return salesOrdersCount;
+};
+
+const getRevenueByDayWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const revenue =
+    await prisma.$queryRaw`select SUM("amount") as revenue, DATE("createdTime") as createdDate from "public"."SalesOrder" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by DATE("createdTime")`;
+  return revenue;
+};
+
 const findSalesOrderById = async (req) => {
   const { id } = req;
   const salesOrder = await prisma.salesOrder.findUnique({
@@ -139,3 +167,6 @@ exports.findSalesOrderByOrderId = findSalesOrderByOrderId;
 exports.updateSalesOrder = updateSalesOrder;
 exports.updateSalesOrderStatus = updateSalesOrderStatus;
 exports.getAllSalesOrders = getAllSalesOrders;
+exports.getAllSalesOrdersWithTimeFilter = getAllSalesOrdersWithTimeFilter;
+exports.getSalesOrdersByDayWithTimeFilter = getSalesOrdersByDayWithTimeFilter;
+exports.getRevenueByDayWithTimeFilter = getRevenueByDayWithTimeFilter;

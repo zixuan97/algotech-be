@@ -42,10 +42,10 @@ const addShopifyOrders = async (req, res) => {
         })
       );
     }
-    log.out('OK_ORDER_GET-SHOPIFY-ORDER');
+    log.out('OK_SHOPIFY_GET-SHOPIFY-ORDER');
     res.json(data);
   } catch (error) {
-    log.error('ERR_SHOPEE-ADD-ORDERS', error.message);
+    log.error('ERR_SHOPIFY-ADD-ORDERS', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
