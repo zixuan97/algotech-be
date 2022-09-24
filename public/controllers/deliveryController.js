@@ -3,13 +3,31 @@ const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { DeliveryType, DeliveryMode, DeliveryStatus } = require('@prisma/client');
+const {
+  DeliveryType,
+  DeliveryMode,
+  DeliveryStatus
+} = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
+const axios = require('axios');
 
 const createDeliveryOrder = async (req, res) => {
-  const { type, courierType, deliveryDate, deliveryPersonnel, method, carrier, status, parcelQty, parcelWeight, salesOrderId } = req.body;
-  const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
-  const name = salesOrder.customerName.split(" ");
+  const {
+    type,
+    courierType,
+    deliveryDate,
+    deliveryPersonnel,
+    method,
+    carrier,
+    status,
+    parcelQty,
+    parcelWeight,
+    salesOrderId
+  } = req.body;
+  const salesOrder = await salesOrderModel.findSalesOrderById({
+    id: salesOrderId
+  });
+  const name = salesOrder.customerName.split(' ');
   let soShippit;
   // may need an additional field in salesOrder called 'deliveryAssigned' so that cannot have 2 delivery orders assigned to same sales order
   if (type === DeliveryType.SHIPPIT) {
@@ -17,27 +35,33 @@ const createDeliveryOrder = async (req, res) => {
       courier_type: courierType,
       delivery_address: salesOrder.customerAddress,
       delivery_postcode: salesOrder.postalCode,
-      delivery_state: "Singapore",
-      delivery_suburb: "SG",
+      delivery_state: 'Singapore',
+      delivery_suburb: 'SG',
       courier_allocation: carrier,
       parcelQty,
       parcelWeight,
-      email: salesOrder.customerEmail === null ? "zac@thekettlegourmet.com" : salesOrder.customerEmail,
+      email:
+        salesOrder.customerEmail === null
+          ? 'zac@thekettlegourmet.com'
+          : salesOrder.customerEmail,
       first_name: name[0],
-      last_name: name[1] === "" ? "" : name[1]
+      last_name: name[1] === '' ? '' : name[1]
     });
     log.out('OK_DELIVERYORDER_CREATE-DO-SHIPPIT');
   }
   const { data, error } = await common.awaitWrap(
     deliveryModel.createDeliveryOrder({
-    type,
-    deliveryDate,
-    deliveryPersonnel,
-    shippitTrackingNum: type === DeliveryType.SHIPPIT ? soShippit.response.tracking_number : null,
-    method,
-    carrier,
-    status,
-    salesOrderId
+      type,
+      deliveryDate,
+      deliveryPersonnel,
+      shippitTrackingNum:
+        type === DeliveryType.SHIPPIT
+          ? soShippit.response.tracking_number
+          : null,
+      method,
+      carrier,
+      status,
+      salesOrderId
     })
   );
   if (error) {
@@ -88,9 +112,26 @@ const getDeliveryOrder = async (req, res) => {
 };
 
 const updateDeliveryOrder = async (req, res) => {
-  const { id, type, deliveryDate, deliveryPersonnel, method, carrier, status, salesOrderId } = req.body;
+  const {
+    id,
+    type,
+    deliveryDate,
+    deliveryPersonnel,
+    method,
+    carrier,
+    status,
+    salesOrderId
+  } = req.body;
   const { data, error } = await common.awaitWrap(
-    deliveryModel.updateDeliveryOrder({ id, type, deliveryDate, deliveryPersonnel, method, carrier, status })
+    deliveryModel.updateDeliveryOrder({
+      id,
+      type,
+      deliveryDate,
+      deliveryPersonnel,
+      method,
+      carrier,
+      status
+    })
   );
   if (error) {
     log.error('ERR_DELIVERY_UPDATE-DO', error.message);
@@ -128,11 +169,19 @@ const deleteDeliveryOrder = async (req, res) => {
 const cancelShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
-    const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
+    const deliveryOrder =
+      await deliveryModel.findDeliveryOrderByShippitTrackingNum({
+        trackingNumber
+      });
     await deliveryModel.cancelShippitOrder({ trackingNumber });
-    await deliveryModel.updateDeliveryOrder({ id: deliveryOrder.id, status: DeliveryStatus.CANCELLED });
+    await deliveryModel.updateDeliveryOrder({
+      id: deliveryOrder.id,
+      status: DeliveryStatus.CANCELLED
+    });
     log.out('OK_DELIVERY_CANCEL-SHIPPIT-ORDER');
-    res.json({ message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}` });
+    res.json({
+      message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}`
+    });
   } catch (error) {
     log.error('ERR_DELIVERY_CANCEL-SHIPPIT-ORDER', error.message);
     res.status(500).send('Server Error');
@@ -140,7 +189,19 @@ const cancelShippitOrder = async (req, res) => {
 };
 
 const sendDeliveryOrderToShippit = async (req, res) => {
-  const { courierType, deliveryAddress, deliveryPostcode, deliveryState, deliverySuburb, courierAllocation, parcelQty, parcelWeight, recipientEmail, firstName, lastName } = req.body;
+  const {
+    courierType,
+    deliveryAddress,
+    deliveryPostcode,
+    deliveryState,
+    deliverySuburb,
+    courierAllocation,
+    parcelQty,
+    parcelWeight,
+    recipientEmail,
+    firstName,
+    lastName
+  } = req.body;
   const { data, error } = await common.awaitWrap(
     deliveryModel.sendDeliveryOrderToShippit({
       courier_type: courierType,
@@ -203,8 +264,11 @@ const getAllShippitOrders = async (req, res) => {
         shippitTrackingNum: d.trackingNumber,
         type: DeliveryType.SHIPPIT,
         deliveryDate: d.scheduledDeliveryDate,
-        deliveryPersonnel: "Shippit",
-        method: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+        deliveryPersonnel: 'Shippit',
+        method:
+          d.serviceLevel === 'standard'
+            ? DeliveryMode.STANDARD
+            : DeliveryMode.EXPRESS,
         recipient: d.recipient,
         deliveryAddress: d.deliveryAddress
       };
@@ -216,16 +280,30 @@ const getAllShippitOrders = async (req, res) => {
 };
 
 const getToken = async (req, res) => {
-  const { data, error } = await common.awaitWrap(
-    shippitApi.getToken({})
-  );
+  const { data, error } = await common.awaitWrap(shippitApi.getToken({}));
   if (error) {
     log.error('ERR_DELIVERY_GET-TOKEN', error.message);
     res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-TOKEN');
-    res.json({ "token" : data });
+    res.json({ token: data });
   }
+};
+
+const getLatLong = async (req, res) => {
+  const { postalCode } = req.body;
+  const url = `https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+  return await axios
+    .get(url)
+    .then((response) => {
+      log.out('OK_DELIVERY_GET-LAT-LONG');
+      res.json(response.data);
+    })
+    .catch((error) => {
+      log.error('ERR_DELIVERY_GET-LAT-LONG', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    });
 };
 
 exports.createDeliveryOrder = createDeliveryOrder;
@@ -239,3 +317,4 @@ exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
 exports.getAllShippitOrders = getAllShippitOrders;
 exports.getToken = getToken;
 exports.cancelShippitOrder = cancelShippitOrder;
+exports.getLatLong = getLatLong;
