@@ -140,6 +140,7 @@ model SalesOrderItem {
   price        Float
   quantity     Int
   salesOrderId Int
+  createdTime  DateTime
   salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
 }
 
