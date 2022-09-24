@@ -11,4 +11,8 @@ router.get(
   '/timefilterbyday/revenue',
   salesOrderController.getRevenueByDayWithTimeFilter
 );
+router.get(
+  '/timefilterbyday/bestseller',
+  salesOrderController.getBestSellerByDayWithTimeFilter
+);
 module.exports = router;

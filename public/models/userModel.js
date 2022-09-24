@@ -149,7 +149,8 @@ const verifyPassword = async (req) => {
     user = await prisma.User.update({
       where: { id: user.id },
       data: {
-        password: await bcrypt.hash(newPassword, 10)
+        password: await bcrypt.hash(newPassword, 10),
+        isVerified: true
       }
     });
   }

@@ -35,7 +35,8 @@ const createSalesOrder = async (req) => {
         create: salesOrderItems.map((so) => ({
           quantity: so.quantity,
           productName: so.productName,
-          price: Number(so.price)
+          price: Number(so.price),
+          createdTime
         }))
       }
     }
@@ -76,6 +77,13 @@ const getRevenueByDayWithTimeFilter = async (req) => {
   const revenue =
     await prisma.$queryRaw`select SUM("amount") as revenue, DATE("createdTime") as createdDate from "public"."SalesOrder" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by DATE("createdTime")`;
   return revenue;
+};
+
+const getBestSellerByDayWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const bestSeller =
+    await prisma.$queryRaw`select SUM("quantity") as quantity, "productName" as productName from "public"."SalesOrderItem" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by "productName"`;
+  return bestSeller;
 };
 
 const findSalesOrderById = async (req) => {
@@ -170,3 +178,4 @@ exports.getAllSalesOrders = getAllSalesOrders;
 exports.getAllSalesOrdersWithTimeFilter = getAllSalesOrdersWithTimeFilter;
 exports.getSalesOrdersByDayWithTimeFilter = getSalesOrdersByDayWithTimeFilter;
 exports.getRevenueByDayWithTimeFilter = getRevenueByDayWithTimeFilter;
+exports.getBestSellerByDayWithTimeFilter = getBestSellerByDayWithTimeFilter;
