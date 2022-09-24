@@ -4,7 +4,17 @@ const axios = require('axios');
 const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req) => {
-  const { type, recipientEmail, deliveryDate, deliveryPersonnel, shippitTrackingNum, method, carrier, status, salesOrderId } = req;
+  const {
+    type,
+    recipientEmail,
+    deliveryDate,
+    deliveryPersonnel,
+    shippitTrackingNum,
+    method,
+    carrier,
+    status,
+    salesOrderId
+  } = req;
   return await prisma.DeliveryOrder.create({
     data: {
       type,
@@ -17,11 +27,15 @@ const createDeliveryOrder = async (req) => {
       status,
       salesOrderId
     }
-  })
+  });
 };
 
 const getAllDeliveryOrders = async () => {
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({});
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    include: {
+      salesOrder: true
+    }
+  });
   return deliveryOrders;
 };
 
@@ -30,6 +44,9 @@ const findDeliveryOrderById = async (req) => {
   const deliveryOrder = await prisma.DeliveryOrder.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      salesOrder: true
     }
   });
   return deliveryOrder;
@@ -40,13 +57,17 @@ const findDeliveryOrderByShippitTrackingNum = async (req) => {
   const deliveryOrder = await prisma.DeliveryOrder.findMany({
     where: {
       shippitTrackingNum: trackingNumber
+    },
+    include: {
+      salesOrder: true
     }
   });
   return deliveryOrder[0];
 };
 
 const updateDeliveryOrder = async (req) => {
-  const { id, type, deliveryDate, deliveryPersonnel, method, carrier, status } = req;
+  const { id, type, deliveryDate, deliveryPersonnel, method, carrier, status } =
+    req;
   const deliveryOrder = await prisma.DeliveryOrder.update({
     where: { id },
     data: {
@@ -71,7 +92,19 @@ const deleteDeliveryOrder = async (req) => {
 };
 
 const sendDeliveryOrderToShippit = async (req) => {
-  const { courier_type, delivery_address, delivery_postcode, delivery_state, delivery_suburb, courier_allocation, qty, weight, email, first_name, last_name } = req;
+  const {
+    courier_type,
+    delivery_address,
+    delivery_postcode,
+    delivery_state,
+    delivery_suburb,
+    courier_allocation,
+    qty,
+    weight,
+    email,
+    first_name,
+    last_name
+  } = req;
   const data = JSON.stringify({
     order: {
       courier_type,
@@ -98,8 +131,8 @@ const sendDeliveryOrderToShippit = async (req) => {
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': data.length,
-      'Authorization': 'Bearer 0plMDNxpYCU1o5WlhLw2BA',
-    },
+      Authorization: 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
+    }
   };
   return await axios
     .post(path, data, options)
@@ -117,8 +150,8 @@ const trackShippitOrder = async (req) => {
   const api_path = `https://app.shippit.com/api/3/orders/${trackingNum}/tracking`;
   const options = {
     headers: {
-      'Authorization': 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
-    },
+      Authorization: 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
+    }
   };
   return await axios
     .get(api_path, options)
@@ -137,8 +170,8 @@ const getAllDeliveryOrdersFromShippit = async () => {
   const headerToken = 'Bearer ' + token;
   const options = {
     headers: {
-      'Authorization': headerToken
-    },
+      Authorization: headerToken
+    }
   };
   return await axios
     .get(api_path, options)
@@ -156,8 +189,8 @@ const cancelShippitOrder = async (req, res) => {
   const api_path = `https://app.shippit.com/api/3/orders/${trackingNumber}`;
   const options = {
     headers: {
-      'Authorization': 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
-    },
+      Authorization: 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
+    }
   };
   return await axios
     .delete(api_path, options)
@@ -179,4 +212,5 @@ exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.cancelShippitOrder = cancelShippitOrder;
-exports.findDeliveryOrderByShippitTrackingNum = findDeliveryOrderByShippitTrackingNum;
+exports.findDeliveryOrderByShippitTrackingNum =
+  findDeliveryOrderByShippitTrackingNum;
