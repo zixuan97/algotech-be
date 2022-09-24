@@ -100,16 +100,16 @@ const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-  }
-  log.out('ERR_SALESORDER_GET-SO-BY-DAY-TIMEFILTER');
-  res.json(
-    JSON.parse(
-      JSON.stringify(
-        data,
-        (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+    log.out('OK_SALESORDER_GET-SO-BY-DAY-TIMEFILTER');
+    res.json(
+      JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+        )
       )
-    )
-  );
+    );
+  }
 };
 
 const getRevenueByDayWithTimeFilter = async (req, res) => {
@@ -126,16 +126,45 @@ const getRevenueByDayWithTimeFilter = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-  }
-  log.out('ERR_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER');
-  const str = res.json(
-    JSON.parse(
-      JSON.stringify(
-        data,
-        (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+    log.out('OK_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER');
+    const str = res.json(
+      JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+        )
       )
-    )
+    );
+  }
+};
+
+const getBestSellerByDayWithTimeFilter = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getBestSellerByDayWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
   );
+
+  if (error) {
+    log.error(
+      'ERR_SALESORDER_GET-BEST-SELLER-BY-DAY-TIMEFILTER',
+      error.message
+    );
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SALESORDER_GET-BEST-SELLER-BY-DAY-TIMEFILTER');
+    const str = res.json(
+      JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+        )
+      )
+    );
+  }
 };
 
 exports.createSalesOrder = createSalesOrder;
@@ -143,3 +172,4 @@ exports.getAllSalesOrders = getAllSalesOrders;
 exports.getAllSalesOrdersWithTimeFilter = getAllSalesOrdersWithTimeFilter;
 exports.getSalesOrdersByDayWithTimeFilter = getSalesOrdersByDayWithTimeFilter;
 exports.getRevenueByDayWithTimeFilter = getRevenueByDayWithTimeFilter;
+exports.getBestSellerByDayWithTimeFilter = getBestSellerByDayWithTimeFilter;
