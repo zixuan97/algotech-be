@@ -1,5 +1,6 @@
 const axios = require('axios').default;
 const CryptoJS = require('crypto-js');
+const { log } = require('./logger');
 const host = 'https://partner.shopeemobile.com';
 // const host = 'https://partner.test-stable.shopeemobile.com'; // test
 const partner_id = 2004004;
@@ -7,17 +8,17 @@ const shop_id = 2421911;
 // const shop_id = 52362; //test
 const redirect_url = 'https://www.google.com/';
 
-const timestamp = Math.floor(new Date().getTime() / 1000);
-
 const generateSign = async (partner_key, secret) => {
   const key = CryptoJS.enc.Utf8.parse(partner_key);
   const msg = CryptoJS.enc.Utf8.parse(secret);
   const token = CryptoJS.enc.Hex.stringify(CryptoJS.HmacSHA256(msg, key));
+  log.out('OK_SIGN-GENERATE-SHOPEE-SIGN');
   return token;
 };
 
 // generate an authorized link
 const generateLink = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const v2_path = '/api/v2/shop/auth_partner';
   const baseString = partner_id + v2_path + timestamp;
   const token = await generateSign(process.env.PARTNER_KEY, baseString);
@@ -25,11 +26,12 @@ const generateLink = async (req) => {
     host +
     v2_path +
     `?partner_id=${partner_id}&timestamp=${timestamp}&sign=${token}&redirect=${redirect_url}`;
-
+  log.out('OK_LINK_GENERATE-SHOPEE-LINK');
   return url;
 };
 
 const refreshToken = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { refresh_token } = req;
 
   const path = '/api/v2/auth/access_token/get';
@@ -51,14 +53,17 @@ const refreshToken = async (req) => {
     .then((res) => {
       console.log(res.data);
       const response = res.data;
+      log.out('OK_TOKEN_REFRESH-SHOPEE-TOKEN');
       return response;
     })
     .catch((err) => {
+      log.error('ERR_REFRESH-SHOPEE-TOKEN', err.message);
       throw err;
     });
 };
 
 const getAllOrders = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { access_token, time_from, time_to, page_size } = req;
   const path = '/api/v2/order/get_order_list';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
@@ -69,14 +74,17 @@ const getAllOrders = async (req) => {
     .get(url)
     .then((res) => {
       const response = res.data;
+      log.out('OK_ORDER_GET-ALL-SHOPEE-ORDERS');
       return response;
     })
     .catch((err) => {
+      log.error('ERR_GET-ALL-SHOPEE-ORDERS', err.message);
       throw err;
     });
 };
 
 const getOrderDetails = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { access_token, orders } = req;
   const path = '/api/v2/order/get_order_detail';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
@@ -88,14 +96,17 @@ const getOrderDetails = async (req) => {
     .get(url)
     .then((res) => {
       const response = res.data;
+      log.out('OK_ORDER_GET-ALL-SHOPEE-ORDER-DETAILS');
       return response;
     })
     .catch((err) => {
+      log.error('ERR_ORDER_GET-SHOPEE-ORDER-DETAILS', err.message);
       throw err;
     });
 };
 
 const getTrackingInfo = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { access_token, order } = req;
   const path = '/api/v2/order/get_tracking_info';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
@@ -105,15 +116,18 @@ const getTrackingInfo = async (req) => {
   return await axios
     .get(url)
     .then((res) => {
+      log.out('OK_ORDER_GET-SHOPEE-TRACKING-INFO');
       const response = res.data;
       return response;
     })
     .catch((err) => {
+      log.error('ERR_ORDER_GET-SHOPEE-TRACKING-INFO', err.message);
       throw err;
     });
 };
 
 const createShippingDocument = async (req) => {
+  const timestamp = Math.floor(new Date().getTime() / 1000);
   const { access_token, order } = req;
   const path = '/api/v2/logistics/create_shipping_document';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
@@ -126,10 +140,12 @@ const createShippingDocument = async (req) => {
   return await axios
     .post(url, body)
     .then((res) => {
+      log.out('OK_ORDER_CREATE-SHOPEE-SHIPPING-DOCUMENT');
       const response = res.data;
       return response;
     })
     .catch((err) => {
+      log.error('ERR_ORDER_CREATE-SHOPEE-SHIPPING-DOCUMENT', err.message);
       throw err;
     });
 };
@@ -146,10 +162,12 @@ const downloadShippingDocument = async (req) => {
   return await axios
     .post(url, body)
     .then((res) => {
+      log.out('OK_ORDER_DOWNLOAD-SHOPEE-SHIPPING-DOCUMENT');
       const response = res.data;
       return response;
     })
     .catch((err) => {
+      log.error('ERR_ORDER_DOWNLOAD-SHOPEE-oSHIPPING-DOCUMENT', err.message);
       throw err;
     });
 };
