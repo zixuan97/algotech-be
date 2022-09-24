@@ -7,12 +7,11 @@ const { DeliveryType, DeliveryMode, DeliveryStatus } = require('@prisma/client')
 const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req, res) => {
-  const { type, courierType, deliveryDate, deliveryPersonnel, method, carrier, status, parcelQty, parcelWeight, salesOrderId } = req.body;
+  const { shippingType, courierType, shippingDate, deliveryPersonnel, method, carrier, deliveryStatus, parcelQty, parcelWeight, salesOrderId } = req.body;
   const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
   const name = salesOrder.customerName.split(" ");
   let soShippit;
-  // may need an additional field in salesOrder called 'deliveryAssigned' so that cannot have 2 delivery orders assigned to same sales order
-  if (type === DeliveryType.SHIPPIT) {
+  if (shippingType === DeliveryType.SHIPPIT) {
     soShippit = await deliveryModel.sendDeliveryOrderToShippit({
       courier_type: courierType,
       delivery_address: salesOrder.customerAddress,
@@ -30,13 +29,13 @@ const createDeliveryOrder = async (req, res) => {
   }
   const { data, error } = await common.awaitWrap(
     deliveryModel.createDeliveryOrder({
-    type,
-    deliveryDate,
+    shippingType,
+    shippingDate,
     deliveryPersonnel,
-    shippitTrackingNum: type === DeliveryType.SHIPPIT ? soShippit.response.tracking_number : null,
+    shippitTrackingNum: shippingType === DeliveryType.SHIPPIT ? soShippit.response.tracking_number : null,
     method,
     carrier,
-    status,
+    deliveryStatus,
     salesOrderId
     })
   );
@@ -48,12 +47,12 @@ const createDeliveryOrder = async (req, res) => {
     log.out('OK_DELIVERYORDER_CREATE-DO');
     const result = {
       id: data.id,
-      type,
-      deliveryDate,
+      shippingType,
+      shippingDate,
       deliveryPersonnel,
       method,
       carrier,
-      status,
+      deliveryStatus,
       salesOrderId,
       trackingNumber: data.shippitTrackingNum
     };
@@ -88,9 +87,9 @@ const getDeliveryOrder = async (req, res) => {
 };
 
 const updateDeliveryOrder = async (req, res) => {
-  const { id, type, deliveryDate, deliveryPersonnel, method, carrier, status, salesOrderId } = req.body;
+  const { id, shippingType, shippingDate, deliveryPersonnel, method, carrier, deliveryStatus, salesOrderId } = req.body;
   const { data, error } = await common.awaitWrap(
-    deliveryModel.updateDeliveryOrder({ id, type, deliveryDate, deliveryPersonnel, method, carrier, status })
+    deliveryModel.updateDeliveryOrder({ id, shippingType, shippingDate, deliveryPersonnel, method, carrier, deliveryStatus })
   );
   if (error) {
     log.error('ERR_DELIVERY_UPDATE-DO', error.message);
@@ -99,12 +98,12 @@ const updateDeliveryOrder = async (req, res) => {
     log.out('OK_DELIVERY_UPDATE-DO');
     const result = {
       id: data.id,
-      type,
-      deliveryDate,
+      shippingType,
+      shippingDate,
       deliveryPersonnel,
       method,
       carrier,
-      status,
+      deliveryStatus,
       salesOrderId
     };
     res.json(result);
@@ -228,6 +227,49 @@ const getToken = async (req, res) => {
   }
 };
 
+const confirmShippitOrder = async (req, res) => {
+  try {
+    const { trackingNumber } = req.params;
+    const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
+    await deliveryModel.confirmShippitOrder({ trackingNumber });
+    await deliveryModel.updateDeliveryOrder({ id: deliveryOrder.id, status: DeliveryStatus.DELIVERY_IN_PROGRESS });
+    log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
+    res.json({ message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}` });
+  } catch (error) {
+    log.error('ERR_DELIVERY_CONFIRM-SHIPPIT-ORDER', error.message);
+    res.json(Error.http(error));
+  }
+};
+
+const getShippitOrderLabel = async (req, res) => {
+  const { trackingNumber } = req.params;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.getShippitOrderLabel({ trackingNumber })
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-SHIPPIT-ORDER-LABEL', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-SHIPPIT-ORDER-LABEL');
+    res.json(data);
+  }
+};
+
+const bookShippitDelivery = async (req, res) => {
+  const { trackingNumber } = req.params;
+  try {
+    let deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
+    const deliveryBooking = await deliveryModel.bookShippitDelivery({ trackingNumber });
+    await deliveryModel.updateDeliveryOrder({ id: deliveryOrder.id, status: DeliveryStatus.DELIVERY_IN_PROGRESS });
+    log.out('OK_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY');
+    res.json(deliveryBooking);
+  } catch (error) {
+    log.error('ERR_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
@@ -239,3 +281,6 @@ exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
 exports.getAllShippitOrders = getAllShippitOrders;
 exports.getToken = getToken;
 exports.cancelShippitOrder = cancelShippitOrder;
+exports.confirmShippitOrder = confirmShippitOrder;
+exports.getShippitOrderLabel = getShippitOrderLabel;
+exports.bookShippitDelivery = bookShippitDelivery;
