@@ -86,9 +86,9 @@ model Bundle {
 model BundleProduct {
   bundleId    Int
   productId   Int
-  productName String
   productSku  String
   bundleName  String
+  productName String
   bundle      Bundle  @relation(fields: [bundleId], references: [id])
   product     Product @relation(fields: [productId], references: [id])
 
@@ -140,22 +140,48 @@ model SalesOrderItem {
   price        Float
   quantity     Int
   salesOrderId Int
+  createdTime  DateTime
   salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
 }
 
 model SalesOrder {
   id                Int              @id @default(autoincrement())
-  orderId           String
-  customerName      String
+  orderId           String           @unique
   customerAddress   String
-  postalCode        String
   customerContactNo String
   customerEmail     String?
-  platformType      PlatformType
-  createdTime       DateTime
   currency          String
+  customerName      String
+  platformType      PlatformType
+  postalCode        String
   amount            Float
+  createdTime       DateTime
+  customerRemarks   String?
+  orderStatus       OrderStatus      @default(PAID)
+  DeliveryOrder     DeliveryOrder?
   salesOrderItems   SalesOrderItem[]
+}
+
+model DeliveryOrder {
+  id                 Int            @id @default(autoincrement())
+  type               DeliveryType   @default(MANUAL)
+  createdAt          DateTime       @default(now())
+  deliveryDate       DateTime
+  deliveryPersonnel  String?
+  shippitTrackingNum String?
+  method             DeliveryMode?  @default(STANDARD)
+  carrier            String?
+  status             DeliveryStatus @default(READY_FOR_DELIVERY)
+  salesOrderId       Int            @unique
+  SalesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
+}
+
+enum OrderStatus {
+  CREATED
+  PAID
+  PREPARED
+  SHIPPED
+  COMPLETED
 }
 
 enum PlatformType {
@@ -188,4 +214,22 @@ enum FulfilmentStatus {
   CREATED
   ARRIVED
   COMPLETED
+}
+
+enum DeliveryMode {
+  STANDARD
+  EXPRESS
+  PRIORITY
+}
+
+enum DeliveryStatus {
+  READY_FOR_DELIVERY
+  DELIVERY_IN_PROGRESS
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryType {
+  MANUAL
+  SHIPPIT
 }

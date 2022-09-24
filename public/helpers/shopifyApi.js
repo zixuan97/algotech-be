@@ -1,6 +1,7 @@
 const host_name = 'TheKettleGourmet.myshopify.com';
 const version = '2022-04';
 const axios = require('axios').default;
+const { log } = require('./logger');
 
 const getOrders = async (req) => {
   const { last_date, latestId, limit } = req;
@@ -14,10 +15,12 @@ const getOrders = async (req) => {
   return await axios
     .get(url)
     .then((res) => {
+      log.out('OK_ORDER_GET-ALL-SHOPIFY-ORDERS');
       const response = res.data.orders;
       return response;
     })
     .catch((err) => {
+      log.error('ERR_GET-ALL-SHOPIFY-ORDERS', err.message);
       throw err;
     });
 };
