@@ -173,7 +173,7 @@ model DeliveryOrder {
   deliveryMode       DeliveryMode?  @default(STANDARD)
   carrier            String?
   salesOrderId       Int            @unique
-  SalesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
+  salesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
 }
 
 enum OrderStatus {

@@ -17,11 +17,15 @@ const createDeliveryOrder = async (req) => {
       carrier,
       salesOrderId
     }
-  })
+  });
 };
 
 const getAllDeliveryOrders = async () => {
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({});
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    include: {
+      salesOrder: true
+    }
+  });
   return deliveryOrders;
 };
 
@@ -30,6 +34,9 @@ const findDeliveryOrderById = async (req) => {
   const deliveryOrder = await prisma.DeliveryOrder.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      salesOrder: true
     }
   });
   return deliveryOrder;
@@ -40,6 +47,9 @@ const findDeliveryOrderByShippitTrackingNum = async (req) => {
   const deliveryOrder = await prisma.DeliveryOrder.findMany({
     where: {
       shippitTrackingNum: trackingNumber
+    },
+    include: {
+      salesOrder: true
     }
   });
   return deliveryOrder[0];
@@ -71,7 +81,19 @@ const deleteDeliveryOrder = async (req) => {
 };
 
 const sendDeliveryOrderToShippit = async (req) => {
-  const { courier_type, delivery_address, delivery_postcode, delivery_state, delivery_suburb, courier_allocation, qty, weight, email, first_name, last_name } = req;
+  const {
+    courier_type,
+    delivery_address,
+    delivery_postcode,
+    delivery_state,
+    delivery_suburb,
+    courier_allocation,
+    qty,
+    weight,
+    email,
+    first_name,
+    last_name
+  } = req;
   const data = JSON.stringify({
     order: {
       courier_type,
@@ -139,8 +161,8 @@ const getAllDeliveryOrdersFromShippit = async () => {
   const headerToken = `Bearer ${token}`;
   const options = {
     headers: {
-      'Authorization': headerToken
-    },
+      Authorization: headerToken
+    }
   };
   return await axios
     .get(api_path, options)

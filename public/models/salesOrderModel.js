@@ -146,23 +146,23 @@ const updateSalesOrder = async (req) => {
       id: Number(id)
     },
     data: {
-      orderId,
       customerName,
       customerAddress,
       customerContactNo,
       customerEmail,
       postalCode,
       platformType,
-      createdTime,
       currency,
       customerRemarks,
       orderStatus,
       amount: Number(amount),
       salesOrderItems: {
+        deleteMany: {},
         create: salesOrderItems.map((so) => ({
           quantity: so.quantity,
           productName: so.productName,
-          price: Number(so.price)
+          price: Number(so.price),
+          createdTime
         }))
       }
     }
