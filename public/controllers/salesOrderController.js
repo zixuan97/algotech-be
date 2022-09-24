@@ -167,9 +167,95 @@ const getBestSellerByDayWithTimeFilter = async (req, res) => {
   }
 };
 
+const findSalesOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const salesOrder = await salesOrderModel.findSalesOrderById({ id });
+    log.out('OK_SALESORDER_GET-SALESORDER-BY-ID');
+    res.json(salesOrder);
+  } catch (error) {
+    log.error('ERR_SALESORDER_GET-SALESORDER-BY-ID', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const findSalesOrderByOrderId = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const salesOrder = await salesOrderModel.findSalesOrderByOrderId({
+      orderId
+    });
+    log.out('OK_SALESORDER_GET-SALESORDER-BY-ORDER-ID');
+    res.json(salesOrder);
+  } catch (error) {
+    log.error('ERR_SALESORDER_GET-SALESORDER-BY-ORDER-ID', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+const updateSalesOrderStatus = async (req, res) => {
+  try {
+    const { id, orderStatus } = req.body;
+    const salesOrder = await salesOrderModel.updateSalesOrderStatus({
+      id,
+      orderStatus
+    });
+    log.out('OK_SALESORDER_UPDATE-SALESORDER-STATUS');
+    res.json(salesOrder);
+  } catch (error) {
+    log.error('ERR_SALESORDER_UPDATE-SALESORDER-STATUS', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const updateSalesOrder = async (req, res) => {
+  try {
+    const {
+      id,
+      orderId,
+      customerName,
+      customerAddress,
+      customerContactNo,
+      customerEmail,
+      postalCode,
+      createdTime,
+      currency,
+      amount,
+      customerRemarks,
+      salesOrderItems
+    } = req.body;
+    const salesOrder = await salesOrderModel.updateSalesOrder({
+      id,
+      orderId,
+      customerName,
+      customerAddress,
+      customerContactNo,
+      customerEmail,
+      postalCode,
+      createdTime,
+      currency,
+      amount,
+      customerRemarks,
+      salesOrderItems
+    });
+    log.out('OK_SALESORDER_UPDATE-SALESORDER');
+    res.json(salesOrder);
+  } catch (error) {
+    log.error('ERR_SALESORDER_UPDATE-SALESORDER', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
 exports.createSalesOrder = createSalesOrder;
 exports.getAllSalesOrders = getAllSalesOrders;
 exports.getAllSalesOrdersWithTimeFilter = getAllSalesOrdersWithTimeFilter;
 exports.getSalesOrdersByDayWithTimeFilter = getSalesOrdersByDayWithTimeFilter;
 exports.getRevenueByDayWithTimeFilter = getRevenueByDayWithTimeFilter;
 exports.getBestSellerByDayWithTimeFilter = getBestSellerByDayWithTimeFilter;
+exports.findSalesOrderById = findSalesOrderById;
+exports.findSalesOrderByOrderId = findSalesOrderByOrderId;
+exports.updateSalesOrder = updateSalesOrder;
+exports.updateSalesOrderStatus = updateSalesOrderStatus;
