@@ -173,7 +173,7 @@ model DeliveryOrder {
   carrier            String?
   status             DeliveryStatus @default(READY_FOR_DELIVERY)
   salesOrderId       Int            @unique
-  SalesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
+  salesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
 }
 
 enum OrderStatus {
