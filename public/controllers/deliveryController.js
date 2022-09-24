@@ -3,15 +3,15 @@ const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { DeliveryType, DeliveryMode, DeliveryStatus } = require('@prisma/client');
+const { ShippingType, DeliveryMode, OrderStatus } = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req, res) => {
-  const { shippingType, courierType, shippingDate, deliveryPersonnel, method, carrier, deliveryStatus, parcelQty, parcelWeight, salesOrderId } = req.body;
-  const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
+  const { shippingType, courierType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier, parcelQty, parcelWeight, salesOrderId } = req.body;
+  let salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
   const name = salesOrder.customerName.split(" ");
   let soShippit;
-  if (shippingType === DeliveryType.SHIPPIT) {
+  if (shippingType === ShippingType.SHIPPIT) {
     soShippit = await deliveryModel.sendDeliveryOrderToShippit({
       courier_type: courierType,
       delivery_address: salesOrder.customerAddress,
@@ -31,14 +31,15 @@ const createDeliveryOrder = async (req, res) => {
     deliveryModel.createDeliveryOrder({
     shippingType,
     shippingDate,
+    deliveryDate,
     deliveryPersonnel,
-    shippitTrackingNum: shippingType === DeliveryType.SHIPPIT ? soShippit.response.tracking_number : null,
-    method,
+    shippitTrackingNum: shippingType === ShippingType.SHIPPIT ? soShippit.response.tracking_number : null,
+    deliveryMode,
     carrier,
-    deliveryStatus,
     salesOrderId
     })
   );
+  await salesOrderModel.updateSalesOrderStatus({ id: salesOrder.id, orderStatus: OrderStatus.READY_FOR_DELIVERY });
   if (error) {
     log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
     const e = Error.http(error);
@@ -49,10 +50,11 @@ const createDeliveryOrder = async (req, res) => {
       id: data.id,
       shippingType,
       shippingDate,
+      deliveryDate,
       deliveryPersonnel,
-      method,
+      deliveryMode,
       carrier,
-      deliveryStatus,
+      orderStatus: OrderStatus.READY_FOR_DELIVERY,
       salesOrderId,
       trackingNumber: data.shippitTrackingNum
     };
@@ -87,9 +89,10 @@ const getDeliveryOrder = async (req, res) => {
 };
 
 const updateDeliveryOrder = async (req, res) => {
-  const { id, shippingType, shippingDate, deliveryPersonnel, method, carrier, deliveryStatus, salesOrderId } = req.body;
+  const { id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier, salesOrderId, orderStatus } = req.body;
+  await salesOrderModel.updateSalesOrderStatus({ id: salesOrderId, orderStatus });
   const { data, error } = await common.awaitWrap(
-    deliveryModel.updateDeliveryOrder({ id, shippingType, shippingDate, deliveryPersonnel, method, carrier, deliveryStatus })
+    deliveryModel.updateDeliveryOrder({ id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier })
   );
   if (error) {
     log.error('ERR_DELIVERY_UPDATE-DO', error.message);
@@ -101,9 +104,9 @@ const updateDeliveryOrder = async (req, res) => {
       shippingType,
       shippingDate,
       deliveryPersonnel,
-      method,
+      deliveryMode,
+      orderStatus,
       carrier,
-      deliveryStatus,
       salesOrderId
     };
     res.json(result);
@@ -129,7 +132,7 @@ const cancelShippitOrder = async (req, res) => {
     const { trackingNumber } = req.params;
     const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
     await deliveryModel.cancelShippitOrder({ trackingNumber });
-    await deliveryModel.updateDeliveryOrder({ id: deliveryOrder.id, status: DeliveryStatus.CANCELLED });
+    await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.CANCELLED });
     log.out('OK_DELIVERY_CANCEL-SHIPPIT-ORDER');
     res.json({ message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}` });
   } catch (error) {
@@ -200,10 +203,10 @@ const getAllShippitOrders = async (req, res) => {
     for (let d of data) {
       const result = {
         shippitTrackingNum: d.trackingNumber,
-        type: DeliveryType.SHIPPIT,
+        type: ShippingType.SHIPPIT,
         deliveryDate: d.scheduledDeliveryDate,
         deliveryPersonnel: "Shippit",
-        method: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+        deliveryMode: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
         recipient: d.recipient,
         deliveryAddress: d.deliveryAddress
       };
@@ -232,7 +235,7 @@ const confirmShippitOrder = async (req, res) => {
     const { trackingNumber } = req.params;
     const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
     await deliveryModel.confirmShippitOrder({ trackingNumber });
-    await deliveryModel.updateDeliveryOrder({ id: deliveryOrder.id, status: DeliveryStatus.DELIVERY_IN_PROGRESS });
+    await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.SHIPPED });
     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
     res.json({ message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}` });
   } catch (error) {
@@ -260,7 +263,7 @@ const bookShippitDelivery = async (req, res) => {
   try {
     let deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
     const deliveryBooking = await deliveryModel.bookShippitDelivery({ trackingNumber });
-    await deliveryModel.updateDeliveryOrder({ id: deliveryOrder.id, status: DeliveryStatus.DELIVERY_IN_PROGRESS });
+    await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.DELIVERED });
     log.out('OK_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY');
     res.json(deliveryBooking);
   } catch (error) {

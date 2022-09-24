@@ -14,7 +14,8 @@ const getToken = async (req) => {
       return response.token;
     })
     .catch((err) => { 
-      console.log(err);
+      log.error('ERR_GET-SHIPPIT-TOKEN', err.message);
+      throw err;
     });
 };
 

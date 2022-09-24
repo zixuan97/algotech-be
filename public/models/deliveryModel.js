@@ -1,20 +1,20 @@
-const { PrismaClient, DeliveryType } = require('@prisma/client');
+const { PrismaClient, ShippingType } = require('@prisma/client');
 const prisma = new PrismaClient();
 const axios = require('axios');
 const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req) => {
-  const { shippingType, recipientEmail, shippingDate, deliveryPersonnel, shippitTrackingNum, method, carrier, deliveryStatus, salesOrderId } = req;
+  const { shippingType, recipientEmail, shippingDate, deliveryDate, deliveryPersonnel, shippitTrackingNum, deliveryMode, carrier, salesOrderId } = req;
   return await prisma.DeliveryOrder.create({
     data: {
       shippingType,
       recipientEmail,
       shippingDate,
+      deliveryDate,
       deliveryPersonnel,
       shippitTrackingNum,
-      method,
+      deliveryMode,
       carrier,
-      deliveryStatus,
       salesOrderId
     }
   })
@@ -46,16 +46,16 @@ const findDeliveryOrderByShippitTrackingNum = async (req) => {
 };
 
 const updateDeliveryOrder = async (req) => {
-  const { id, shippingType, shippingDate, deliveryPersonnel, method, carrier, deliveryStatus } = req;
+  const { id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier } = req;
   const deliveryOrder = await prisma.DeliveryOrder.update({
     where: { id },
     data: {
       shippingType,
       shippingDate,
+      deliveryDate,
       deliveryPersonnel,
-      method,
-      carrier,
-      deliveryStatus
+      deliveryMode,
+      carrier
     }
   });
   return deliveryOrder;
@@ -108,7 +108,8 @@ const sendDeliveryOrderToShippit = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_SEND-SHIPPIT-ORDER', err.message);
+      throw err;
     });
 };
 
@@ -127,7 +128,8 @@ const trackShippitOrder = async (req) => {
       return response.response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_TRACK-SHIPPIT-ORDER', err.message);
+      throw err;
     });
 };
 
@@ -144,11 +146,11 @@ const getAllDeliveryOrdersFromShippit = async () => {
     .get(api_path, options)
     .then((res) => {
       const response = res.data;
-      console.log(response)
       return response.data;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_GET-ALL-SHIPPIT-ORDER', err.message);
+      throw err;
     });
 };
 
@@ -167,7 +169,8 @@ const cancelShippitOrder = async (req, res) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_CANCEL-SHIPPIT-ORDER', err.message);
+      throw err;
     });
 };
 
@@ -189,7 +192,8 @@ const confirmShippitOrder = async (req, res) => {
       return response.response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_CONFIRM-SHIPPIT-ORDER', err.message);
+      throw err;
     });
 };
 
@@ -208,7 +212,8 @@ const getShippitOrderLabel = async (req, res) => {
       return response.response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_GET-SHIPPIT-ORDER-LABEL', err.message);
+      throw err;
     });
 };
 
@@ -232,7 +237,8 @@ const bookShippitDelivery = async (req, res) => {
       return response.response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_BOOK-SHIPPIT-DELIVERY', err.message);
+      throw err;
     });
 };
 
