@@ -89,7 +89,7 @@ const createOrderWebhook = async (req, res) => {
         platformType: 'SHOPIFY',
         createdTime: salesOrder.created_at,
         currency: salesOrder.currency,
-        amount: salesOrder.current_total_price,
+        amount: salesOrder.current_total_price_set,
         salesOrderItems: salesOrder.line_items.map((item) => {
           return {
             productName: item.name.replace(/ *\[[^\]]*]/g, ''),
