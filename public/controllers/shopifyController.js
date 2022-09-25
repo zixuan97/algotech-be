@@ -63,16 +63,48 @@ const verifyWebhook = (req) => {
 };
 
 const createOrderWebhook = async (req, res) => {
-  const data = req.data;
+  const salesOrder = req.body;
 
   const verified = verifyWebhook({
     data,
     hmac_header: req.headers['X-Shopify-Hmac-SHA256']
   });
-  console.log(Object.keys(req));
-  console.log(req.params, 'params');
-  console.log(req.body, 'body');
-  res.json('ok');
+  try {
+    const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
+      orderId: salesOrder.id.toString()
+    });
+    if (!salesOrderDB) {
+      return await salesOrderModel.createSalesOrder({
+        orderId: salesOrder.id.toString(),
+        customerName:
+          salesOrder.customer.first_name + salesOrder.customer.last_name,
+        customerAddress:
+          salesOrder.customer.default_address.address1 +
+          salesOrder.customer.default_address.address2,
+        customerContactNo: salesOrder.customer.default_address.phone,
+        customerEmail: salesOrder.contact_email,
+        postalCode: salesOrder.customer.default_address.zip,
+        customerRemarks: salesOrder.note,
+        platformType: 'SHOPIFY',
+        createdTime: salesOrder.created_at,
+        currency: salesOrder.currency,
+        amount: salesOrder.current_total_price,
+        salesOrderItems: salesOrder.line_items.map((item) => {
+          return {
+            productName: item.name.replace(/ *\[[^\]]*]/g, ''),
+            price: item.price,
+            quantity: item.quantity
+          };
+        })
+      });
+    }
+    log.ok('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
+    res.json({ message: 'Added order from webhook' });
+  } catch (error) {
+    log.error('ERR_SHOPIFY_ADD-ORDER-WEBHOOK', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
 };
 
 exports.addShopifyOrders = addShopifyOrders;
