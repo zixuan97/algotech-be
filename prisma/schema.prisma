@@ -163,25 +163,28 @@ model SalesOrder {
 }
 
 model DeliveryOrder {
-  id                 Int            @id @default(autoincrement())
-  type               DeliveryType   @default(MANUAL)
-  createdAt          DateTime       @default(now())
-  deliveryDate       DateTime
+  id                 Int           @id @default(autoincrement())
+  shippingType       ShippingType  @default(MANUAL)
+  createdAt          DateTime      @default(now())
+  shippingDate       DateTime
+  deliveryDate       DateTime?
   deliveryPersonnel  String?
   shippitTrackingNum String?
-  method             DeliveryMode?  @default(STANDARD)
+  deliveryMode       DeliveryMode? @default(STANDARD)
   carrier            String?
-  status             DeliveryStatus @default(READY_FOR_DELIVERY)
-  salesOrderId       Int            @unique
-  salesOrder         SalesOrder     @relation(fields: [salesOrderId], references: [id])
+  salesOrderId       Int           @unique
+  salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
 }
 
 enum OrderStatus {
   CREATED
   PAID
+  PREPARING
   PREPARED
+  READY_FOR_DELIVERY
   SHIPPED
-  COMPLETED
+  DELIVERED
+  CANCELLED
 }
 
 enum PlatformType {
@@ -222,14 +225,7 @@ enum DeliveryMode {
   PRIORITY
 }
 
-enum DeliveryStatus {
-  READY_FOR_DELIVERY
-  DELIVERY_IN_PROGRESS
-  DELIVERED
-  CANCELLED
-}
-
-enum DeliveryType {
+enum ShippingType {
   MANUAL
   SHIPPIT
 }

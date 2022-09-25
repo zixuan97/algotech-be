@@ -202,7 +202,9 @@ const updateSalesOrderStatus = async (req, res) => {
       orderStatus
     });
     log.out('OK_SALESORDER_UPDATE-SALESORDER-STATUS');
-    res.json(salesOrder);
+    res.json({
+      message: `Successfully updated sales order status with id: ${id}`
+    });
   } catch (error) {
     log.error('ERR_SALESORDER_UPDATE-SALESORDER-STATUS', error.message);
     const e = Error.http(error);
@@ -241,7 +243,7 @@ const updateSalesOrder = async (req, res) => {
       salesOrderItems
     });
     log.out('OK_SALESORDER_UPDATE-SALESORDER');
-    res.json(salesOrder);
+    res.json({ message: `Successfully updated sales order with id: ${id}` });
   } catch (error) {
     log.error('ERR_SALESORDER_UPDATE-SALESORDER', error.message);
     const e = Error.http(error);
