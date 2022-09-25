@@ -2,6 +2,8 @@ const { PrismaClient, ShippingType } = require('@prisma/client');
 const prisma = new PrismaClient();
 const axios = require('axios');
 const shippitApi = require('../helpers/shippitApi');
+const salesOrderModel = require('../models/salesOrderModel');
+const { log } = require('../helpers/logger');
 
 const createDeliveryOrder = async (req) => {
   const { shippingType, recipientEmail, shippingDate, deliveryDate, deliveryPersonnel, shippitTrackingNum, deliveryMode, carrier, salesOrderId } = req;
@@ -264,6 +266,20 @@ const bookShippitDelivery = async (req, res) => {
     });
 };
 
+const findSalesOrderPostalCodeForManualDeliveries = async (res) => {
+  let salesOrderPostalCodes = [];
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippingType: ShippingType.MANUAL
+    }
+  });
+  for (let d of deliveryOrders) {
+    const salesOrder = await salesOrderModel.findSalesOrderById({ id: d.salesOrderId });
+    salesOrderPostalCodes.push(salesOrder.postalCode);
+  }
+  return salesOrderPostalCodes;
+};
+
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
@@ -277,3 +293,4 @@ exports.findDeliveryOrderByShippitTrackingNum = findDeliveryOrderByShippitTracki
 exports.confirmShippitOrder = confirmShippitOrder;
 exports.getShippitOrderLabel = getShippitOrderLabel;
 exports.bookShippitDelivery = bookShippitDelivery;
+exports.findSalesOrderPostalCodeForManualDeliveries = findSalesOrderPostalCodeForManualDeliveries;
