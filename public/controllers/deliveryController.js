@@ -59,8 +59,8 @@ const createDeliveryOrder = async (req, res) => {
       deliveryMode,
       carrier,
       orderStatus: OrderStatus.READY_FOR_DELIVERY,
-      salesOrderId,
-      trackingNumber: data.shippitTrackingNum
+      trackingNumber: data.shippitTrackingNum,
+      salesOrder
     };
     res.json(result);
   }
@@ -94,7 +94,9 @@ const getDeliveryOrder = async (req, res) => {
 
 const updateDeliveryOrder = async (req, res) => {
   const { id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier, salesOrderId, orderStatus } = req.body;
+  const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
   await salesOrderModel.updateSalesOrderStatus({ id: salesOrderId, orderStatus });
+  
   const { data, error } = await common.awaitWrap(
     deliveryModel.updateDeliveryOrder({ id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier })
   );
@@ -111,7 +113,7 @@ const updateDeliveryOrder = async (req, res) => {
       deliveryMode,
       orderStatus,
       carrier,
-      salesOrderId
+      salesOrder
     };
     res.json(result);
   }
@@ -293,19 +295,23 @@ const bookShippitDelivery = async (req, res) => {
 };
 
 const getLatLong = async (req, res) => {
-  const { postalCode } = req.body;
-  const url = `https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
-  return await axios
-    .get(url)
-    .then((response) => {
-      log.out('OK_DELIVERY_GET-LAT-LONG');
-      res.json(response.data);
-    })
-    .catch((error) => {
-      log.error('ERR_DELIVERY_GET-LAT-LONG', error.message);
-      const e = Error.http(error);
-      res.status(e.code).json(e.message);
-    });
+  const salesOrderPostalCodes = await deliveryModel.findSalesOrderPostalCodeForManualDeliveries({});
+  let dataRes = [];
+  console.log(await deliveryModel.findSalesOrderPostalCodeForManualDeliveries({}))
+  Promise.allSettled(salesOrderPostalCodes.map(async (p) => {
+      const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+      return await axios
+        .get(url)
+        .then((response) => {
+          log.out('OK_DELIVERY_GET-LAT-LONG');
+          dataRes.push(response.data.results[0]);
+        })
+        .catch((error) => {
+          log.error('ERR_DELIVERY_GET-LAT-LONG', error.message);
+          const e = Error.http(error);
+          res.status(e.code).json(e.message);
+        });
+    })).then(() => res.json(dataRes));
 };
 
 exports.createDeliveryOrder = createDeliveryOrder;
