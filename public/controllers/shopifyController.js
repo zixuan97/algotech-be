@@ -69,7 +69,7 @@ const createOrderWebhook = async (req, res) => {
     data,
     hmac_header: req.headers['X-Shopify-Hmac-SHA256']
   });
-  console.log(req);
+  console.log(req.root);
   res.json('ok');
 };
 
