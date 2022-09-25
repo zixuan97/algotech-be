@@ -63,8 +63,9 @@ const verifyWebhook = (req) => {
 };
 
 const createOrderWebhook = async (req) => {
-  const data = req.get_data();
   console.log('req' + req);
+  const data = req.data;
+
   await verifyWebhook({ data, hmac_header: req.headers });
   const verified = console.log('here');
   console.log(data);
