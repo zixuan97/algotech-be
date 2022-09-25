@@ -56,7 +56,7 @@ const verifyWebhook = (req) => {
   const key = CryptoJS.enc.Utf8.parse(process.env.SHOPIFY_API_KEY);
   const msg = CryptoJS.enc.Utf8.parse(data);
   const token = CryptoJS.enc.Hex.stringify(CryptoJS.HmacSHA256(msg, key));
-  console.log(token);
+  console.log('my signature', token);
   const hmac = CryptoJS.enc.Utf8.parse(hmac_header);
   console.log(hmac);
   return;
@@ -64,6 +64,7 @@ const verifyWebhook = (req) => {
 
 const createOrderWebhook = async (req) => {
   const data = req.get_data();
+  console.log('req' + req);
   const verified = console.log('here');
   console.log(data);
 };
