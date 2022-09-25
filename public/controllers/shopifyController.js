@@ -51,4 +51,22 @@ const addShopifyOrders = async (req, res) => {
   }
 };
 
+const verifyWebhook = (req) => {
+  const { data, hmac_header } = req;
+  const key = CryptoJS.enc.Utf8.parse(process.env.SHOPIFY_API_KEY);
+  const msg = CryptoJS.enc.Utf8.parse(data);
+  const token = CryptoJS.enc.Hex.stringify(CryptoJS.HmacSHA256(msg, key));
+  console.log(token);
+  const hmac = CryptoJS.enc.Utf8.parse(hmac_header);
+  console.log(hmac);
+  return;
+};
+
+const createOrderWebhook = async (req) => {
+  const data = req.get_data();
+  const verified = console.log('here');
+  console.log(data);
+};
+
 exports.addShopifyOrders = addShopifyOrders;
+exports.createOrderWebhook = createOrderWebhook;
