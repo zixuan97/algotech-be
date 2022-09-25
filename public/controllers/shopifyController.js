@@ -3,6 +3,7 @@ const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const CryptoJS = require('crypto-js');
 
 const addShopifyOrders = async (req, res) => {
   const { last_date, latestId, limit } = req.body;
@@ -64,6 +65,7 @@ const verifyWebhook = (req) => {
 
 const createOrderWebhook = async (req) => {
   console.log('req' + req);
+  log.out('test', req);
   const data = req.data;
 
   await verifyWebhook({ data, hmac_header: req.headers });
