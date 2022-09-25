@@ -69,9 +69,6 @@ const createOrderWebhook = async (req, res) => {
     salesOrder,
     hmac_header: req.headers['X-Shopify-Hmac-SHA256']
   });
-  console.log(Object.keys(salesOrder));
-  console.log(salesOrder.total_price_set);
-  console.log(salesOrder.total_price);
   try {
     const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
       orderId: salesOrder.id.toString()
@@ -101,7 +98,7 @@ const createOrderWebhook = async (req, res) => {
         })
       });
     }
-    log.ok('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
+    log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
     res.json({ message: 'Added order from webhook' });
   } catch (error) {
     log.error('ERR_SHOPIFY_ADD-ORDER-WEBHOOK', error.message);
