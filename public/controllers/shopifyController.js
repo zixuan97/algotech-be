@@ -56,10 +56,10 @@ const verifyWebhook = (req) => {
   const { data, hmac_header } = req;
   const key = CryptoJS.enc.Utf8.parse(process.env.SHOPIFY_API_KEY);
   const msg = CryptoJS.enc.Utf8.parse(data);
-  const token = CryptoJS.HmacSHA256(msg, key);
-  const hmac = CryptoJS.enc.Utf8.parse(hmac_header);
-  console.log(token === hmac);
-  return token === hmac;
+  const token = CryptoJS.enc.Hex.stringify(CryptoJS.HmacSHA256(msg, key));
+
+  console.log(token === hmac_header);
+  return token === hmac_header;
 };
 
 const createOrderWebhook = async (req, res) => {
