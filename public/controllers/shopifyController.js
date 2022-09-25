@@ -62,7 +62,7 @@ const verifyWebhook = (req) => {
   return token === hmac;
 };
 
-const createOrderWebhook = async (req) => {
+const createOrderWebhook = async (req, res) => {
   const data = req.data;
 
   const verified = verifyWebhook({
@@ -70,8 +70,7 @@ const createOrderWebhook = async (req) => {
     hmac_header: req.headers['X-Shopify-Hmac-SHA256']
   });
 
-  console.log(req.params);
-
+  console.log(data);
   res.json('ok');
 };
 
