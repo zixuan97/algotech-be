@@ -1,30 +1,20 @@
-const { PrismaClient, DeliveryType } = require('@prisma/client');
+const { PrismaClient, ShippingType } = require('@prisma/client');
 const prisma = new PrismaClient();
 const axios = require('axios');
 const shippitApi = require('../helpers/shippitApi');
 
 const createDeliveryOrder = async (req) => {
-  const {
-    type,
-    recipientEmail,
-    deliveryDate,
-    deliveryPersonnel,
-    shippitTrackingNum,
-    method,
-    carrier,
-    status,
-    salesOrderId
-  } = req;
+  const { shippingType, recipientEmail, shippingDate, deliveryDate, deliveryPersonnel, shippitTrackingNum, deliveryMode, carrier, salesOrderId } = req;
   return await prisma.DeliveryOrder.create({
     data: {
-      type,
+      shippingType,
       recipientEmail,
+      shippingDate,
       deliveryDate,
       deliveryPersonnel,
       shippitTrackingNum,
-      method,
+      deliveryMode,
       carrier,
-      status,
       salesOrderId
     }
   });
@@ -66,17 +56,16 @@ const findDeliveryOrderByShippitTrackingNum = async (req) => {
 };
 
 const updateDeliveryOrder = async (req) => {
-  const { id, type, deliveryDate, deliveryPersonnel, method, carrier, status } =
-    req;
+  const { id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier } = req;
   const deliveryOrder = await prisma.DeliveryOrder.update({
     where: { id },
     data: {
-      type,
+      shippingType,
+      shippingDate,
       deliveryDate,
       deliveryPersonnel,
-      method,
-      carrier,
-      status
+      deliveryMode,
+      carrier
     }
   });
   return deliveryOrder;
@@ -126,13 +115,13 @@ const sendDeliveryOrderToShippit = async (req) => {
       }
     }
   });
-  const path = 'https://app.shippit.com/api/3/orders';
+  const path = 'https://app.staging.shippit.com/api/3/orders';
   const options = {
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': data.length,
-      Authorization: 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
-    }
+      'Authorization': process.env.SHIPPIT_API_KEY,
+    },
   };
   return await axios
     .post(path, data, options)
@@ -141,17 +130,18 @@ const sendDeliveryOrderToShippit = async (req) => {
       return response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_SEND-SHIPPIT-ORDER', err.message);
+      throw err;
     });
 };
 
 const trackShippitOrder = async (req) => {
   const { trackingNum } = req;
-  const api_path = `https://app.shippit.com/api/3/orders/${trackingNum}/tracking`;
+  const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNum}/tracking`;
   const options = {
     headers: {
-      Authorization: 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
-    }
+      'Authorization': process.env.SHIPPIT_API_KEY
+    },
   };
   return await axios
     .get(api_path, options)
@@ -160,14 +150,15 @@ const trackShippitOrder = async (req) => {
       return response.response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_TRACK-SHIPPIT-ORDER', err.message);
+      throw err;
     });
 };
 
 const getAllDeliveryOrdersFromShippit = async () => {
-  const api_path = 'https://app.shippit.com/api/5/orders';
+  const api_path = 'https://app.staging.shippit.com/api/5/orders';
   const token = await shippitApi.getToken({});
-  const headerToken = 'Bearer ' + token;
+  const headerToken = `Bearer ${token}`;
   const options = {
     headers: {
       Authorization: headerToken
@@ -180,26 +171,96 @@ const getAllDeliveryOrdersFromShippit = async () => {
       return response.data;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_GET-ALL-SHIPPIT-ORDER', err.message);
+      throw err;
     });
 };
 
 const cancelShippitOrder = async (req, res) => {
   const { trackingNumber } = req;
-  const api_path = `https://app.shippit.com/api/3/orders/${trackingNumber}`;
+  const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNumber}`;
   const options = {
     headers: {
-      Authorization: 'Bearer 0plMDNxpYCU1o5WlhLw2BA'
-    }
+      'Authorization': process.env.SHIPPIT_API_KEY
+    },
   };
   return await axios
     .delete(api_path, options)
     .then((res) => {
       const response = res.data;
+      return response;
+    })
+    .catch((err) => {
+      log.error('ERR_CANCEL-SHIPPIT-ORDER', err.message);
+      throw err;
+    });
+};
+
+const confirmShippitOrder = async (req, res) => {
+  const { trackingNumber } = req;
+  const data = {};
+  const api_path = `https://app.staging.shippit.com/api/5/orders/${trackingNumber}/confirm`;
+  const token = await shippitApi.getToken({});
+  const headerToken = `Bearer ${token}`;
+  const options = {
+    headers: {
+      'Authorization': headerToken
+    },
+  };
+  return await axios
+    .put(api_path, data, options)
+    .then((res) => {
+      const response = res.data;
       return response.response;
     })
     .catch((err) => {
-      console.log(err);
+      log.error('ERR_CONFIRM-SHIPPIT-ORDER', err.message);
+      throw err;
+    });
+};
+
+const getShippitOrderLabel = async (req, res) => {
+  const { trackingNumber } = req;
+  const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNumber}/label`;
+  const options = {
+    headers: {
+      'Authorization': process.env.SHIPPIT_API_KEY
+    },
+  };
+  return await axios
+    .get(api_path, options)
+    .then((res) => {
+      const response = res.data;
+      return response.response;
+    })
+    .catch((err) => {
+      log.error('ERR_GET-SHIPPIT-ORDER-LABEL', err.message);
+      throw err;
+    });
+};
+
+const bookShippitDelivery = async (req, res) => {
+  const { trackingNumber } = req;
+  const api_path = `https://app.staging.shippit.com/api/3/book`;
+  const data = {
+    orders: [
+      trackingNumber
+    ]
+  }
+  const options = {
+    headers: {
+      'Authorization': process.env.SHIPPIT_API_KEY
+    },
+  };
+  return await axios
+    .post(api_path, data, options)
+    .then((res) => {
+      const response = res.data;
+      return response.response;
+    })
+    .catch((err) => {
+      log.error('ERR_BOOK-SHIPPIT-DELIVERY', err.message);
+      throw err;
     });
 };
 
@@ -212,5 +273,7 @@ exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.cancelShippitOrder = cancelShippitOrder;
-exports.findDeliveryOrderByShippitTrackingNum =
-  findDeliveryOrderByShippitTrackingNum;
+exports.findDeliveryOrderByShippitTrackingNum = findDeliveryOrderByShippitTrackingNum;
+exports.confirmShippitOrder = confirmShippitOrder;
+exports.getShippitOrderLabel = getShippitOrderLabel;
+exports.bookShippitDelivery = bookShippitDelivery;
