@@ -56,21 +56,23 @@ const verifyWebhook = (req) => {
   const { data, hmac_header } = req;
   const key = CryptoJS.enc.Utf8.parse(process.env.SHOPIFY_API_KEY);
   const msg = CryptoJS.enc.Utf8.parse(data);
-  const token = CryptoJS.enc.Hex.stringify(CryptoJS.HmacSHA256(msg, key));
-  console.log('my signature', token);
+  const token = CryptoJS.HmacSHA256(msg, key);
   const hmac = CryptoJS.enc.Utf8.parse(hmac_header);
-  console.log(hmac);
-  return;
+  console.log(token === hmac);
+  return token === hmac;
 };
 
 const createOrderWebhook = async (req) => {
-  console.log('req' + req);
-  log.out('test', req);
   const data = req.data;
 
-  await verifyWebhook({ data, hmac_header: req.headers });
-  const verified = console.log('here');
-  console.log(data);
+  const verified = verifyWebhook({
+    data,
+    hmac_header: req.headers['X-Shopify-Hmac-SHA256']
+  });
+
+  console.log(verified);
+
+  console.log(req.data);
 };
 
 exports.addShopifyOrders = addShopifyOrders;
