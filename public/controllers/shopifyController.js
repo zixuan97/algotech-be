@@ -70,6 +70,8 @@ const createOrderWebhook = async (req, res) => {
     hmac_header: req.headers['X-Shopify-Hmac-SHA256']
   });
   console.log(Object.keys(salesOrder));
+  console.log(salesOrder.total_price_set);
+  console.log(salesOrder.total_price);
   try {
     const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
       orderId: salesOrder.id.toString()
@@ -89,7 +91,7 @@ const createOrderWebhook = async (req, res) => {
         platformType: 'SHOPIFY',
         createdTime: salesOrder.created_at,
         currency: salesOrder.currency,
-        amount: salesOrder.total_price_set,
+        amount: salesOrder.total_price,
         salesOrderItems: salesOrder.line_items.map((item) => {
           return {
             productName: item.name.replace(/ *\[[^\]]*]/g, ''),
