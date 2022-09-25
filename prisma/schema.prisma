@@ -164,27 +164,27 @@ model SalesOrder {
 
 model DeliveryOrder {
   id                 Int           @id @default(autoincrement())
+  shippingType       ShippingType  @default(MANUAL)
   createdAt          DateTime      @default(now())
-  deliveryPersonnel  String?
-  shippitTrackingNum String?
-  carrier            String?
-  salesOrderId       Int           @unique
   shippingDate       DateTime
   deliveryDate       DateTime?
+  deliveryPersonnel  String?
+  shippitTrackingNum String?
   deliveryMode       DeliveryMode? @default(STANDARD)
-  shippingType       ShippingType  @default(MANUAL)
+  carrier            String?
+  salesOrderId       Int           @unique
   salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
 }
 
 enum OrderStatus {
   CREATED
   PAID
-  PREPARED
-  SHIPPED
-  COMPLETED
   PREPARING
+  PREPARED
   READY_FOR_DELIVERY
+  SHIPPED
   DELIVERED
+  CANCELLED
 }
 
 enum PlatformType {
