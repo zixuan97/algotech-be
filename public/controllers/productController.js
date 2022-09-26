@@ -225,7 +225,6 @@ const getAllProductsByBundle = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     productModel.getAllProductsByBundle({ bundleId })
   );
-
   if (error) {
     log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE', error.message);
     const e = Error.http(error);
