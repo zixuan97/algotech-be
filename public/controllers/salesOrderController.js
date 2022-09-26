@@ -101,11 +101,12 @@ const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-SO-BY-DAY-TIMEFILTER');
+
     res.json(
       JSON.parse(
         JSON.stringify(
           data,
-          (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
         )
       )
     );
@@ -127,21 +128,47 @@ const getRevenueByDayWithTimeFilter = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER');
-    const str = res.json(
+    res.json(
       JSON.parse(
         JSON.stringify(
           data,
-          (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
         )
       )
     );
   }
 };
 
-const getBestSellerByDayWithTimeFilter = async (req, res) => {
+const getBestSellerWithTimeFilter = async (req, res) => {
   const { time_from, time_to } = req.body;
   const { data, error } = await common.awaitWrap(
-    salesOrderModel.getBestSellerByDayWithTimeFilter({
+    salesOrderModel.getBestSellerWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+
+  if (error) {
+    log.error('ERR_SALESORDER_GET-BEST-SELLER-TIMEFILTER', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SALESORDER_GET-BEST-SELLER-TIMEFILTER');
+    res.json(
+      JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    );
+  }
+};
+
+const getOrdersByPlatformWithTimeFilter = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getOrdersByPlatformWithTimeFilter({
       time_from: new Date(time_from),
       time_to: new Date(time_to)
     })
@@ -149,18 +176,18 @@ const getBestSellerByDayWithTimeFilter = async (req, res) => {
 
   if (error) {
     log.error(
-      'ERR_SALESORDER_GET-BEST-SELLER-BY-DAY-TIMEFILTER',
+      'ERR_SALESORDER_GET-ORDERS-BY-PLATFORM-TIMEFILTER',
       error.message
     );
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_SALESORDER_GET-BEST-SELLER-BY-DAY-TIMEFILTER');
-    const str = res.json(
+    log.out('OK_SALESORDER_GET-ORDERS-BY-PLATFORM-TIMEFILTER');
+    res.json(
       JSON.parse(
         JSON.stringify(
           data,
-          (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
         )
       )
     );
@@ -256,8 +283,9 @@ exports.getAllSalesOrders = getAllSalesOrders;
 exports.getAllSalesOrdersWithTimeFilter = getAllSalesOrdersWithTimeFilter;
 exports.getSalesOrdersByDayWithTimeFilter = getSalesOrdersByDayWithTimeFilter;
 exports.getRevenueByDayWithTimeFilter = getRevenueByDayWithTimeFilter;
-exports.getBestSellerByDayWithTimeFilter = getBestSellerByDayWithTimeFilter;
+exports.getBestSellerWithTimeFilter = getBestSellerWithTimeFilter;
 exports.findSalesOrderById = findSalesOrderById;
 exports.findSalesOrderByOrderId = findSalesOrderByOrderId;
 exports.updateSalesOrder = updateSalesOrder;
 exports.updateSalesOrderStatus = updateSalesOrderStatus;
+exports.getOrdersByPlatformWithTimeFilter = getOrdersByPlatformWithTimeFilter;
