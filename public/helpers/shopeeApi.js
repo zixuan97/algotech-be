@@ -21,7 +21,7 @@ const generateLink = async (req) => {
   const timestamp = Math.floor(new Date().getTime() / 1000);
   const v2_path = '/api/v2/shop/auth_partner';
   const baseString = partner_id + v2_path + timestamp;
-  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  const token = await generateSign(process.env.SHOPEE_PARTNER_KEY, baseString);
   const url =
     host +
     v2_path +
@@ -41,7 +41,7 @@ const refreshToken = async (req) => {
     partner_id: parseInt(partner_id)
   };
   const baseString = partner_id + path + timestamp;
-  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  const token = await generateSign(process.env.SHOPEE_PARTNER_KEY, baseString);
 
   const url =
     host +
@@ -67,7 +67,7 @@ const getAllOrders = async (req) => {
   const { access_token, time_from, time_to, page_size } = req;
   const path = '/api/v2/order/get_order_list';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
-  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  const token = await generateSign(process.env.SHOPEE_PARTNER_KEY, baseString);
   const time_range_field = 'create_time';
   url = `${host}${path}?timestamp=${timestamp}&time_range_field=${time_range_field}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&time_from=${time_from}&time_to=${time_to}&page_size=${page_size}&partner_id=${partner_id}`;
   return await axios
@@ -88,7 +88,7 @@ const getOrderDetails = async (req) => {
   const { access_token, orders } = req;
   const path = '/api/v2/order/get_order_detail';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
-  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  const token = await generateSign(process.env.SHOPEE_PARTNER_KEY, baseString);
   response_optional_fields =
     'item_list,recipient_address,total_amount,invoice_data';
   url = `${host}${path}?timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&order_sn_list=${orders}&partner_id=${partner_id}&response_optional_fields=${response_optional_fields}`;
@@ -110,7 +110,7 @@ const getTrackingInfo = async (req) => {
   const { access_token, order } = req;
   const path = '/api/v2/order/get_tracking_info';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
-  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  const token = await generateSign(process.env.SHOPEE_PARTNER_KEY, baseString);
   url = `${host}${path}?partner_id=${partner_id}&timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&order_sn=${order}`;
 
   return await axios
@@ -131,7 +131,7 @@ const createShippingDocument = async (req) => {
   const { access_token, order } = req;
   const path = '/api/v2/logistics/create_shipping_document';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
-  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  const token = await generateSign(process.env.SHOPEE_PARTNER_KEY, baseString);
   url = `${host}${path}?timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&partner_id=${partner_id}`;
   const body = {
     order_list: [{ order_sn: order }]
@@ -154,7 +154,7 @@ const downloadShippingDocument = async (req) => {
   const { access_token, order } = req;
   const path = '/api/v2/logistics/download_shipping_document';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
-  const token = await generateSign(process.env.PARTNER_KEY, baseString);
+  const token = await generateSign(process.env.SHOPEE_PARTNER_KEY, baseString);
   url = `${host}${path}?timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&partner_id=${partner_id}`;
   const body = {
     order_list: [{ order_sn: order }]
