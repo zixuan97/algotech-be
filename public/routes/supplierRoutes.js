@@ -7,5 +7,7 @@ router.get('/:id', supplierController.getSupplier);
 router.get('/', supplierController.getSupplierByName);
 router.put('/', supplierController.updateSupplier);
 router.delete('/:id', supplierController.deleteSupplier);
+router.post('/addProduct', supplierController.addProductToSupplier);
+router.get('/products/all', supplierController.getAllSupplierProducts);
 
 module.exports = router;

@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  firstName  String
-  lastName   String
-  email      String     @unique
-  password   String
-  role       UserRole   @default(ADMIN)
-  status     UserStatus @default(ACTIVE)
-  isVerified Boolean    @default(false)
+  id              Int        @id @default(autoincrement())
+  firstName       String
+  lastName        String
+  email           String     @unique
+  password        String
+  role            UserRole   @default(ADMIN)
+  status          UserStatus @default(ACTIVE)
+  isVerified      Boolean    @default(false)
+  deliveryOrders  DeliveryOrder[]
 }
 
 model Category {
@@ -42,16 +43,17 @@ model ProductCategory {
 }
 
 model Product {
-  id              Int               @id @default(autoincrement())
-  sku             String            @unique
-  name            String            @unique
-  image           String?
-  qtyThreshold    Int?
-  brandId         Int
-  brand           Brand             @relation(fields: [brandId], references: [id])
-  bundleProduct   BundleProduct[]
-  productCategory ProductCategory[]
-  stockQuantity   StockQuantity[]
+  id               Int               @id @default(autoincrement())
+  sku              String            @unique
+  name             String            @unique
+  image            String?
+  qtyThreshold     Int?
+  brandId          Int
+  brand            Brand             @relation(fields: [brandId], references: [id])
+  bundleProduct    BundleProduct[]
+  productCategory  ProductCategory[]
+  stockQuantity    StockQuantity[]
+  supplierProducts SupplierProduct[]
 }
 
 model Location {
@@ -122,10 +124,21 @@ model ProcurementOrderItem {
 }
 
 model Supplier {
-  id      Int    @id @default(autoincrement())
-  email   String @unique
-  name    String
-  address String
+  id        Int    @id @default(autoincrement())
+  email     String @unique
+  name      String
+  address   String
+  products  SupplierProduct[]
+}
+
+model SupplierProduct {
+  supplierId    Int
+  productId     Int
+  rate          Float
+  supplier      Supplier  @relation(fields: [supplierId], references: [id])
+  product       Product   @relation(fields: [productId], references: [id])
+
+  @@id([supplierId, productId])
 }
 
 model Keys {
@@ -168,12 +181,13 @@ model DeliveryOrder {
   createdAt          DateTime      @default(now())
   shippingDate       DateTime
   deliveryDate       DateTime?
-  deliveryPersonnel  String?
   shippitTrackingNum String?
   deliveryMode       DeliveryMode? @default(STANDARD)
   carrier            String?
   salesOrderId       Int           @unique
   salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
+  assignedUserId     Int
+  assignedUser       User?         @relation(fields: [assignedUserId], references: [id])
 }
 
 enum OrderStatus {

@@ -96,7 +96,6 @@ const updateDeliveryOrder = async (req, res) => {
   const { id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier, salesOrderId, orderStatus } = req.body;
   const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
   await salesOrderModel.updateSalesOrderStatus({ id: salesOrderId, orderStatus });
-  
   const { data, error } = await common.awaitWrap(
     deliveryModel.updateDeliveryOrder({ id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier })
   );
@@ -256,6 +255,7 @@ const confirmShippitOrder = async (req, res) => {
     const { trackingNumber } = req.params;
     const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
     await deliveryModel.confirmShippitOrder({ trackingNumber });
+    console.log(deliveryOrder);
     await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.SHIPPED });
     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
     res.json({ message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}` });
@@ -295,9 +295,9 @@ const bookShippitDelivery = async (req, res) => {
 };
 
 const getLatLong = async (req, res) => {
+  const { time_from, time_to } = req.body;
   const salesOrderPostalCodes = await deliveryModel.findSalesOrderPostalCodeForManualDeliveries({});
   let dataRes = [];
-  console.log(await deliveryModel.findSalesOrderPostalCodeForManualDeliveries({}))
   Promise.allSettled(salesOrderPostalCodes.map(async (p) => {
       const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
       return await axios

@@ -61,9 +61,41 @@ const deleteSupplier = async (req) => {
   });
 };
 
+const connectOrCreateSupplierProduct = async (req) => {
+  const {
+    supplierId,
+    productId,
+    rate
+  } = req;
+  const supplierProduct = await prisma.SupplierProduct.upsert({
+    where: {
+      supplierId_productId: {
+        supplierId,
+        productId
+      }
+    },
+    update: {
+      rate
+    },
+    create: {
+      supplierId,
+      productId,
+      rate
+    }
+  });
+  return supplierProduct;
+};
+
+const getAllSupplierProducts = async () => {
+  const supplierProducts = await prisma.SupplierProduct.findMany({});
+  return supplierProducts;
+};
+
 exports.createSupplier = createSupplier;
 exports.getAllSuppliers = getAllSuppliers;
 exports.updateSupplier = updateSupplier;
 exports.deleteSupplier = deleteSupplier;
 exports.findSupplierById = findSupplierById;
 exports.findSupplierByName = findSupplierByName;
+exports.connectOrCreateSupplierProduct = connectOrCreateSupplierProduct;
+exports.getAllSupplierProducts = getAllSupplierProducts;
