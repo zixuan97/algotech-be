@@ -99,12 +99,11 @@ const deleteSupplier = async (req, res) => {
 
 const addProductToSupplier = async (req, res) => {
   const { supplierId, productId, rate } = req.body;
-  console.log("Reached")
   const supplier = supplierModel.findSupplierById({ id: supplierId });
   const product = productModel.findProductById({ id: productId });
   if (!supplier || !product) {
     log.error('ERR_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', error.message);
-    res.json({ "message": "Supplier or product does not exist." });
+    res.json({ "message" : "Supplier or product does not exist." });
   }
   const { data, error } = await common.awaitWrap(
     supplierModel.connectOrCreateSupplierProduct({ supplierId, productId, rate })

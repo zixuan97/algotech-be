@@ -6,7 +6,7 @@ const salesOrderModel = require('../models/salesOrderModel');
 const { log } = require('../helpers/logger');
 
 const createDeliveryOrder = async (req) => {
-  const { shippingType, recipientEmail, shippingDate, deliveryDate, deliveryPersonnel, shippitTrackingNum, deliveryMode, carrier, salesOrderId } = req;
+  const { shippingType, recipientEmail, shippingDate, deliveryDate, deliveryPersonnel, shippitTrackingNum, deliveryMode, carrier, salesOrderId, assignedUserId } = req;
   return await prisma.DeliveryOrder.create({
     data: {
       shippingType,
@@ -17,7 +17,8 @@ const createDeliveryOrder = async (req) => {
       shippitTrackingNum,
       deliveryMode,
       carrier,
-      salesOrderId
+      salesOrderId,
+      assignedUserId
     }
   });
 };
@@ -25,7 +26,34 @@ const createDeliveryOrder = async (req) => {
 const getAllDeliveryOrders = async () => {
   const deliveryOrders = await prisma.DeliveryOrder.findMany({
     include: {
-      salesOrder: true
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  return deliveryOrders;
+};
+
+const getAllManualDeliveryOrders = async () => {
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippingType: ShippingType.MANUAL
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  return deliveryOrders;
+};
+
+const getAllGrabDeliveryOrders = async () => {
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippingType: ShippingType.GRAB
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
     }
   });
   return deliveryOrders;
@@ -38,7 +66,8 @@ const findDeliveryOrderById = async (req) => {
       id: Number(id)
     },
     include: {
-      salesOrder: true
+      salesOrder: true,
+      assignedUser: true
     }
   });
   return deliveryOrder;
@@ -51,23 +80,26 @@ const findDeliveryOrderByShippitTrackingNum = async (req) => {
       shippitTrackingNum: trackingNumber
     },
     include: {
-      salesOrder: true
+      salesOrder: true,
+      assignedUser: true
     }
   });
   return deliveryOrder[0];
 };
 
 const updateDeliveryOrder = async (req) => {
-  const { id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier } = req;
+  const { id, shippingType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, assignedUserId } = req;
   const deliveryOrder = await prisma.DeliveryOrder.update({
     where: { id },
     data: {
       shippingType,
       shippingDate,
       deliveryDate,
-      deliveryPersonnel,
       deliveryMode,
-      carrier
+      carrier,
+      comments,
+      eta,
+      assignedUserId
     }
   });
   return deliveryOrder;
@@ -273,17 +305,26 @@ const bookShippitDelivery = async (req) => {
     });
 };
 
+const findDeliveriesWithTimeAndTypeFilter = async (req) => {
+  const { time_from, time_to, shippingType } = req;
+  let enumShippingType = ShippingType.SHIPPIT;
+  if (shippingType === "MANUAL") {
+    enumShippingType = ShippingType.MANUAL;
+  } else if (shippingType === "GRAB") {
+    enumShippingType = ShippingType.GRAB;
+  }
+  const deliveryOrders =
+    await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === enumShippingType);
+  return filteredDeliveryOrders;
+};
+
 const findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = async (req) => {
   const { time_from, time_to } = req;
   const deliveryOrders =
     await prisma.$queryRaw`select "id", "shippingType", "salesOrderId" from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
   let salesOrderPostalCodes = [];
   const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.MANUAL);
-  // await prisma.DeliveryOrder.findMany({
-  //   where: {
-  //     shippingType: ShippingType.MANUAL
-  //   }
-  // });
   for (let d of filteredDeliveryOrders) {
     const salesOrder = await salesOrderModel.findSalesOrderById({ id: d.salesOrderId });
     salesOrderPostalCodes.push(salesOrder.postalCode);
@@ -293,12 +334,14 @@ const findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = async (req) =>
 
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
+exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
+exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
+exports.getAllGrabDeliveryOrders = getAllGrabDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.findDeliveryOrderById = findDeliveryOrderById;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
-exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.cancelShippitOrder = cancelShippitOrder;
 exports.findDeliveryOrderByShippitTrackingNum = findDeliveryOrderByShippitTrackingNum;
 exports.confirmShippitOrder = confirmShippitOrder;
@@ -306,3 +349,4 @@ exports.getShippitOrderLabel = getShippitOrderLabel;
 exports.bookShippitDelivery = bookShippitDelivery;
 exports.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter;
 exports.findDeliveriesBasedOnTimeFilter = findDeliveriesBasedOnTimeFilter;
+exports.findDeliveriesWithTimeAndTypeFilter = findDeliveriesWithTimeAndTypeFilter;

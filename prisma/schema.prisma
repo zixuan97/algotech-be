@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-  id              Int        @id @default(autoincrement())
-  firstName       String
-  lastName        String
-  email           String     @unique
-  password        String
-  role            UserRole   @default(ADMIN)
-  status          UserStatus @default(ACTIVE)
-  isVerified      Boolean    @default(false)
-  deliveryOrders  DeliveryOrder[]
+  id             Int             @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  email          String          @unique
+  password       String
+  role           UserRole        @default(ADMIN)
+  status         UserStatus      @default(ACTIVE)
+  isVerified     Boolean         @default(false)
+  deliveryOrders DeliveryOrder[]
 }
 
 model Category {
@@ -171,11 +171,13 @@ model DeliveryOrder {
   deliveryDate       DateTime?
   shippitTrackingNum String?
   carrier            String?
+  comments           String?
+  eta                DateTime?
   salesOrderId       Int           @unique
   deliveryMode       DeliveryMode? @default(STANDARD)
   shippingDate       DateTime
   shippingType       ShippingType  @default(MANUAL)
-  assignedUserId     Int
+  assignedUserId     Int?
   assignedUser       User?         @relation(fields: [assignedUserId], references: [id])
   salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
 }
@@ -242,4 +244,5 @@ enum DeliveryMode {
 enum ShippingType {
   MANUAL
   SHIPPIT
+  GRAB
 }
