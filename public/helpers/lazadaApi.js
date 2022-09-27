@@ -1,11 +1,11 @@
 const LazadaAPI = require('lazada-open-platform-sdk');
-const aLazadaAPI = new LazadaAPI(
-  process.env.LAZADA_APP_KEY,
-  process.env.LAZADA_APP_SECRET,
-  'SINGAPORE'
-);
 
 const refreshToken = async (req) => {
+  const aLazadaAPI = new LazadaAPI(
+    process.env.LAZADA_APP_KEY,
+    process.env.LAZADA_APP_SECRET,
+    'SINGAPORE'
+  );
   const { refresh_token } = req;
   return await aLazadaAPI
     .refreshAccessToken({ refresh_token })

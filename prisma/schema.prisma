@@ -43,17 +43,17 @@ model ProductCategory {
 }
 
 model Product {
-  id               Int               @id @default(autoincrement())
-  sku              String            @unique
-  name             String            @unique
-  image            String?
-  qtyThreshold     Int?
-  brandId          Int
-  brand            Brand             @relation(fields: [brandId], references: [id])
-  bundleProduct    BundleProduct[]
-  productCategory  ProductCategory[]
-  stockQuantity    StockQuantity[]
-  supplierProducts SupplierProduct[]
+  id              Int               @id @default(autoincrement())
+  sku             String            @unique
+  name            String            @unique
+  image           String?
+  qtyThreshold    Int?
+  brandId         Int
+  brand           Brand             @relation(fields: [brandId], references: [id])
+  bundleProduct   BundleProduct[]
+  productCategory ProductCategory[]
+  stockQuantity   StockQuantity[]
+  supplierProduct SupplierProduct[]
 }
 
 model Location {
@@ -124,21 +124,11 @@ model ProcurementOrderItem {
 }
 
 model Supplier {
-  id        Int    @id @default(autoincrement())
-  email     String @unique
-  name      String
-  address   String
-  products  SupplierProduct[]
-}
-
-model SupplierProduct {
-  supplierId    Int
-  productId     Int
-  rate          Float
-  supplier      Supplier  @relation(fields: [supplierId], references: [id])
-  product       Product   @relation(fields: [productId], references: [id])
-
-  @@id([supplierId, productId])
+  id              Int               @id @default(autoincrement())
+  email           String            @unique
+  name            String
+  address         String
+  supplierProduct SupplierProduct[]
 }
 
 model Keys {
@@ -177,17 +167,27 @@ model SalesOrder {
 
 model DeliveryOrder {
   id                 Int           @id @default(autoincrement())
-  shippingType       ShippingType  @default(MANUAL)
   createdAt          DateTime      @default(now())
-  shippingDate       DateTime
   deliveryDate       DateTime?
   shippitTrackingNum String?
-  deliveryMode       DeliveryMode? @default(STANDARD)
   carrier            String?
   salesOrderId       Int           @unique
-  salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
+  deliveryMode       DeliveryMode? @default(STANDARD)
+  shippingDate       DateTime
+  shippingType       ShippingType  @default(MANUAL)
   assignedUserId     Int
   assignedUser       User?         @relation(fields: [assignedUserId], references: [id])
+  salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
+}
+
+model SupplierProduct {
+  supplierId Int
+  productId  Int
+  rate       Float
+  Product    Product  @relation(fields: [productId], references: [id])
+  Supplier   Supplier @relation(fields: [supplierId], references: [id])
+
+  @@id([supplierId, productId])
 }
 
 enum OrderStatus {
