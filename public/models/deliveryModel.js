@@ -73,6 +73,13 @@ const updateDeliveryOrder = async (req) => {
   return deliveryOrder;
 };
 
+const findDeliveriesBasedOnTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const deliveryOrders =
+    await prisma.$queryRaw`select "id" from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  return deliveryOrders;
+};
+
 const deleteDeliveryOrder = async (req) => {
   const { id } = req;
   await prisma.DeliveryOrder.delete({
@@ -178,7 +185,7 @@ const getAllDeliveryOrdersFromShippit = async () => {
     });
 };
 
-const cancelShippitOrder = async (req, res) => {
+const cancelShippitOrder = async (req) => {
   const { trackingNumber } = req;
   const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNumber}`;
   const options = {
@@ -198,7 +205,7 @@ const cancelShippitOrder = async (req, res) => {
     });
 };
 
-const confirmShippitOrder = async (req, res) => {
+const confirmShippitOrder = async (req) => {
   const { trackingNumber } = req;
   const data = {};
   const api_path = `https://app.staging.shippit.com/api/5/orders/${trackingNumber}/confirm`;
@@ -221,7 +228,7 @@ const confirmShippitOrder = async (req, res) => {
     });
 };
 
-const getShippitOrderLabel = async (req, res) => {
+const getShippitOrderLabel = async (req) => {
   const { trackingNumber } = req;
   const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNumber}/label`;
   const options = {
@@ -241,7 +248,7 @@ const getShippitOrderLabel = async (req, res) => {
     });
 };
 
-const bookShippitDelivery = async (req, res) => {
+const bookShippitDelivery = async (req) => {
   const { trackingNumber } = req;
   const api_path = `https://app.staging.shippit.com/api/3/book`;
   const data = {
@@ -266,14 +273,18 @@ const bookShippitDelivery = async (req, res) => {
     });
 };
 
-const findSalesOrderPostalCodeForManualDeliveries = async (res) => {
+const findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const deliveryOrders =
+    await prisma.$queryRaw`select "id", "shippingType", "salesOrderId" from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
   let salesOrderPostalCodes = [];
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({
-    where: {
-      shippingType: ShippingType.MANUAL
-    }
-  });
-  for (let d of deliveryOrders) {
+  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.MANUAL);
+  // await prisma.DeliveryOrder.findMany({
+  //   where: {
+  //     shippingType: ShippingType.MANUAL
+  //   }
+  // });
+  for (let d of filteredDeliveryOrders) {
     const salesOrder = await salesOrderModel.findSalesOrderById({ id: d.salesOrderId });
     salesOrderPostalCodes.push(salesOrder.postalCode);
   }
@@ -293,4 +304,5 @@ exports.findDeliveryOrderByShippitTrackingNum = findDeliveryOrderByShippitTracki
 exports.confirmShippitOrder = confirmShippitOrder;
 exports.getShippitOrderLabel = getShippitOrderLabel;
 exports.bookShippitDelivery = bookShippitDelivery;
-exports.findSalesOrderPostalCodeForManualDeliveries = findSalesOrderPostalCodeForManualDeliveries;
+exports.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter;
+exports.findDeliveriesBasedOnTimeFilter = findDeliveriesBasedOnTimeFilter;

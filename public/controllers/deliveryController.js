@@ -296,7 +296,7 @@ const bookShippitDelivery = async (req, res) => {
 
 const getLatLong = async (req, res) => {
   const { time_from, time_to } = req.body;
-  const salesOrderPostalCodes = await deliveryModel.findSalesOrderPostalCodeForManualDeliveries({});
+  const salesOrderPostalCodes = await deliveryModel.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter({ time_from, time_to });
   let dataRes = [];
   Promise.allSettled(salesOrderPostalCodes.map(async (p) => {
       const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;

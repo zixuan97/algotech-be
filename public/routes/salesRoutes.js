@@ -16,7 +16,11 @@ router.post(
 );
 router.post(
   '/timefilterbyday/bestseller',
-  salesOrderController.getBestSellerByDayWithTimeFilter
+  salesOrderController.getBestSellerWithTimeFilter
+);
+router.post(
+  '/timefilterbyday/ordersbyplatform',
+  salesOrderController.getOrdersByPlatformWithTimeFilter
 );
 router.post('/', salesOrderController.createSalesOrder);
 router.get('/id/:id', salesOrderController.findSalesOrderById);
