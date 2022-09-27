@@ -100,7 +100,7 @@ const updateBundle = async (req) => {
 
 const deleteBundle = async (req) => {
   const { id } = req;
-  await prisma.bundle.delete({
+  await prisma.bundle.update({
     where: {
       id: Number(id)
     },
@@ -108,6 +108,11 @@ const deleteBundle = async (req) => {
       bundleProduct: {
         deleteMany: {}
       }
+    }
+  });
+  await prisma.bundle.delete({
+    where: {
+      id: Number(id)
     }
   });
 };

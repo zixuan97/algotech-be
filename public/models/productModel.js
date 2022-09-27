@@ -229,7 +229,7 @@ const getAllProductsByBundle = async (req) => {
   const products = await prisma.product.findMany({
     where: {
       bundleProduct: {
-        every: {
+        some: {
           bundle: {
             id: Number(bundleId)
           }
@@ -265,7 +265,7 @@ const getAllProductsByCategory = async (req) => {
   const products = await prisma.product.findMany({
     where: {
       productCategory: {
-        every: {
+        some: {
           category: {
             id: Number(categoryId)
           }
@@ -300,7 +300,7 @@ const getAllProductsByLocation = async (req) => {
   const products = await prisma.product.findMany({
     where: {
       stockQuantity: {
-        every: {
+        some: {
           location: {
             id: Number(locationId)
           }
