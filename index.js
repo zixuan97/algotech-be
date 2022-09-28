@@ -20,7 +20,7 @@ app.use(
         callback(null);
       }
     },
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token'],
     credentials: true
   })
 );
