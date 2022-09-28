@@ -61,20 +61,61 @@ const verifyWebhook = (req) => {
   console.log(token === hmac_header);
   return token === hmac_header;
 };
+const clients = [];
 
-const createOrderWebhook = async (req, res) => {
+const sendOrderWebhook = async (req, res) => {
+  const headers = {
+    'Content-Type': 'text/event-stream',
+    Connection: 'keep-alive',
+    'Cache-Control': 'no-cache',
+    'Access-Control-Allow-Origin': req.headers.origin,
+    'Access-Control-Expose-Headers': '*',
+    'Access-Control-Allow-Credentials': true
+  };
+  res.writeHead(200, headers);
+  setInterval(() => {
+    log.out('writing data');
+    res.write('event: message\n'); // message event
+    res.write('data:' + JSON.stringify({ test: 'test1' }));
+    res.write('\n\n');
+  }, 10000);
+
+  // const clientId = Date.now();
+
+  // const newClient = {
+  //   id: clientId,
+  //   res
+  // };
+
+  // clients.push(newClient);
+  // log.out('New Client established', newClient.id);
+
+  // req.on('close', () => {
+  //   console.log(`${clientId} Connection closed`);
+  //   clients = clients.filter((client) => client.id !== clientId);
+  // });
+};
+
+const sendEventsToAll = (salesOrderData) => {
+  clients.forEach((client) => {
+    log.out('OK_SHOPIFY_WEBHOOK-SENT-ORDER');
+    client.res.write(`data: ${JSON.stringify(salesOrderData)}\n\n`);
+  });
+};
+
+const createOrderWebhook = async (req, res, next) => {
   const salesOrder = req.body;
 
-  const verified = verifyWebhook({
-    salesOrder,
-    hmac_header: req.headers['X-Shopify-Hmac-SHA256']
-  });
+  // const verified = verifyWebhook({
+  //   salesOrder,
+  //   hmac_header: req.headers['X-Shopify-Hmac-SHA256']
+  // });
   try {
     const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
       orderId: salesOrder.id.toString()
     });
     if (!salesOrderDB) {
-      return await salesOrderModel.createSalesOrder({
+      const salesOrderData = await salesOrderModel.createSalesOrder({
         orderId: salesOrder.id.toString(),
         customerName:
           salesOrder.customer.first_name + salesOrder.customer.last_name,
@@ -97,9 +138,13 @@ const createOrderWebhook = async (req, res) => {
           };
         })
       });
+      log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
+      res.json({ message: 'order received' });
+
+      // return sendEventsToAll(salesOrderData);
+    } else {
+      res.json({ message: 'order already exists' });
     }
-    log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
-    res.json({ message: 'Added order from webhook' });
   } catch (error) {
     log.error('ERR_SHOPIFY_ADD-ORDER-WEBHOOK', error.message);
     const e = Error.http(error);
@@ -109,3 +154,4 @@ const createOrderWebhook = async (req, res) => {
 
 exports.addShopifyOrders = addShopifyOrders;
 exports.createOrderWebhook = createOrderWebhook;
+exports.sendOrderWebhook = sendOrderWebhook;
