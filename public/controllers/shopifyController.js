@@ -69,19 +69,19 @@ const sendOrderWebhook = async (req, res) => {
     Connection: 'keep-alive',
     'Cache-Control': 'no-cache'
   };
-  response.writeHead(200, headers);
+  res.writeHead(200, headers);
 
   const clientId = Date.now();
 
   const newClient = {
     id: clientId,
-    response
+    res
   };
 
   clients.push(newClient);
   log.out('New Client established', newClient.id);
 
-  request.on('close', () => {
+  req.on('close', () => {
     console.log(`${clientId} Connection closed`);
     clients = clients.filter((client) => client.id !== clientId);
   });
