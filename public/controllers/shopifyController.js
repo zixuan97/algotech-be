@@ -90,7 +90,7 @@ const sendOrderWebhook = async (req, res) => {
 const sendEventsToAll = (salesOrderData) => {
   clients.forEach((client) => {
     log.out('OK_SHOPIFY_WEBHOOK-SENT-ORDER');
-    client.response.write(`data: ${JSON.stringify(salesOrderData)}\n\n`);
+    client.res.write(`data: ${JSON.stringify(salesOrderData)}\n\n`);
   });
 };
 

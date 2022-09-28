@@ -15,12 +15,10 @@ app.use(
       if (corsWhitelist.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        console.log(origin);
         //log.out('Domain not allowed by CORS', origin); // replace to fix logging spam
         callback(null);
       }
     },
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token'],
     credentials: true
   })
 );
