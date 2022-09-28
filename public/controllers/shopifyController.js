@@ -74,7 +74,7 @@ const createOrderWebhook = async (req, res) => {
       orderId: salesOrder.id.toString()
     });
     if (!salesOrderDB) {
-      return await salesOrderModel.createSalesOrder({
+      const salesOrderData = await salesOrderModel.createSalesOrder({
         orderId: salesOrder.id.toString(),
         customerName:
           salesOrder.customer.first_name + salesOrder.customer.last_name,
@@ -97,9 +97,18 @@ const createOrderWebhook = async (req, res) => {
           };
         })
       });
+      log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
+      console.log(salesOrderData);
+      res.writeHead(200, {
+        Connection: 'keep-alive',
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache'
+      });
+      log.out('OK_SHOPIFY_WEBHOOK-SENT-ORDER');
+      res.write('data:' + JSON.stringify(salesOrderData));
+      res.write('\\n\\n');
     }
-    log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
-    res.json({ message: 'Added order from webhook' });
+    res.json({ message: 'order already exists' });
   } catch (error) {
     log.error('ERR_SHOPIFY_ADD-ORDER-WEBHOOK', error.message);
     const e = Error.http(error);
