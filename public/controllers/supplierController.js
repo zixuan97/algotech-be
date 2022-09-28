@@ -83,11 +83,11 @@ const updateSupplier = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_BUNDLE_UPDATE-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_UPDATE-SUPPLIER', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BUNDLE_UPDATE-SUPPLIER');
+    log.out('OK_SUPPLIER_UPDATE-SUPPLIER');
     res.json(data);
   }
 };
@@ -98,11 +98,11 @@ const deleteSupplier = async (req, res) => {
     supplierModel.findProductsFromSupplier({ id })
   );
   if (getAllProductsFromSupplierError) {
-    log.error('ERR_BRAND_GET-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BRAND_GET-ALL-PRODUCTS-FROM-SUPPLIER');
+    log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER');
   }
   const { error: deleteProductsError } = await common.awaitWrap(
     Promise.allSettled(
@@ -112,17 +112,17 @@ const deleteSupplier = async (req, res) => {
     )
   );
   if (deleteProductsError) {
-    log.error('ERR_PRODUCT_DELETE-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_DELETE-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
   const { error } = await common.awaitWrap(supplierModel.deleteSupplier({ id }));
   if (error) {
-    log.error('ERR_BRAND_DELETE-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_DELETE-SUPPLIER', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BRAND_DELETE-SUPPLIER');
+    log.out('OK_SUPPLIER_DELETE-SUPPLIER');
     res.json({ message: `Deleted supplier with id:${id}` });
   }
 };

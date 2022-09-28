@@ -114,7 +114,6 @@ const findProductsFromSupplier = async (req) => {
 
 const deleteProductBySupplier = async (req) => {
   const { supplierId, productId } = req;
-  console.log(req)
   await prisma.SupplierProduct.delete({
     where: {
       supplierId_productId: {
