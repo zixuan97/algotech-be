@@ -61,14 +61,46 @@ const verifyWebhook = (req) => {
   console.log(token === hmac_header);
   return token === hmac_header;
 };
+const clients = [];
+
+const sendOrderWebhook = async (req, res) => {
+  const headers = {
+    'Content-Type': 'text/event-stream',
+    Connection: 'keep-alive',
+    'Cache-Control': 'no-cache'
+  };
+  response.writeHead(200, headers);
+
+  const clientId = Date.now();
+
+  const newClient = {
+    id: clientId,
+    response
+  };
+
+  clients.push(newClient);
+  log.out('New Client established', newClient.id);
+
+  request.on('close', () => {
+    console.log(`${clientId} Connection closed`);
+    clients = clients.filter((client) => client.id !== clientId);
+  });
+};
+
+const sendEventsToAll = (salesOrderData) => {
+  clients.forEach((client) => {
+    log.out('OK_SHOPIFY_WEBHOOK-SENT-ORDER');
+    client.response.write(`data: ${JSON.stringify(salesOrderData)}\n\n`);
+  });
+};
 
 const createOrderWebhook = async (req, res) => {
   const salesOrder = req.body;
 
-  const verified = verifyWebhook({
-    salesOrder,
-    hmac_header: req.headers['X-Shopify-Hmac-SHA256']
-  });
+  // const verified = verifyWebhook({
+  //   salesOrder,
+  //   hmac_header: req.headers['X-Shopify-Hmac-SHA256']
+  // });
   try {
     const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
       orderId: salesOrder.id.toString()
@@ -98,15 +130,9 @@ const createOrderWebhook = async (req, res) => {
         })
       });
       log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
-      console.log(salesOrderData);
-      res.writeHead(200, {
-        Connection: 'keep-alive',
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache'
-      });
-      log.out('OK_SHOPIFY_WEBHOOK-SENT-ORDER');
-      res.write('data:' + JSON.stringify(salesOrderData));
-      res.write('\\n\\n');
+      res.json({ message: 'order received' });
+
+      return sendEventsToAll(salesOrderData);
     } else {
       res.json({ message: 'order already exists' });
     }
@@ -119,3 +145,4 @@ const createOrderWebhook = async (req, res) => {
 
 exports.addShopifyOrders = addShopifyOrders;
 exports.createOrderWebhook = createOrderWebhook;
+exports.sendOrderWebhook = sendOrderWebhook;
