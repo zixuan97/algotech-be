@@ -16,7 +16,7 @@ app.use(
         callback(null, true);
       } else {
         console.log(origin);
-        log.out('Domain not allowed by CORS', origin); // replace to fix logging spam
+        //log.out('Domain not allowed by CORS', origin); // replace to fix logging spam
         callback(null);
       }
     },
