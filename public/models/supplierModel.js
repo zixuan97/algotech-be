@@ -39,7 +39,7 @@ const findSupplierByEmail = async (req) => {
 };
 
 const updateSupplier = async (req) => {
-  const { id, email, name, address, supplierProduct } = req;
+  const { id, email, name, address, supplierProducts } = req;
   supplier = await prisma.supplier.update({
     where: { id },
     data: {
@@ -48,7 +48,7 @@ const updateSupplier = async (req) => {
       address,
       supplierProduct: {
         deleteMany: {},
-        create: supplierProduct.map(p => ({
+        create: supplierProducts.map(p => ({
           productId: p.product.id,
           rate: p.rate,
         }))
@@ -114,6 +114,7 @@ const findProductsFromSupplier = async (req) => {
 
 const deleteProductBySupplier = async (req) => {
   const { supplierId, productId } = req;
+  console.log(req)
   await prisma.SupplierProduct.delete({
     where: {
       supplierId_productId: {
