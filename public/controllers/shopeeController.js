@@ -128,7 +128,7 @@ const addShopeeOrders = async (req, res) => {
   }
 };
 
-const getTrackingInfo = async (req, res) => {
+const getShopPerformance = async (req, res) => {
   const { data: access_token, error } = await common.awaitWrap(
     keyModel.findKeyByName({ key: 'shopee_access_token' })
   );
@@ -139,15 +139,13 @@ const getTrackingInfo = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     try {
-      const order = '220921CRN7HCJW';
-      const response = await shopeeApi.getTrackingInfo({
-        access_token: access_token.value,
-        order
+      const response = await shopeeApi.getShopPerformance({
+        access_token: access_token.value
       });
-      log.out('OK_SHOPEE_GET-TRACKING-INFO');
+      log.out('OK_SHOPEE_GET-SHOP-PERFORMANCE');
       res.json(response);
     } catch (err) {
-      log.error('ERR_SHOPEE_GET-TRACKING-INFO', err.message);
+      log.error('ERR_SHOPEE_GET-SHOP-PERFORMANCE', err.message);
       const e = Error.http(err);
       res.status(e.code).json(e.message);
     }
@@ -188,4 +186,4 @@ exports.createKey = createKey;
 exports.refreshToken = refreshToken;
 exports.addShopeeOrders = addShopeeOrders;
 exports.downloadShippingDocument = downloadShippingDocument;
-exports.getTrackingInfo = getTrackingInfo;
+exports.getShopPerformance = getShopPerformance;

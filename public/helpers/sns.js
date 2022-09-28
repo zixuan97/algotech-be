@@ -1,25 +1,31 @@
 const AWS = require('aws-sdk');
 
-const SNS_CONFIG = {
+const sns = new AWS.SNS({
   accessKeyId: process.env.ACCESS_KEY_ID,
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
-  region: 'us-east-1'
+  region: 'ap-southeast-1'
+});
+
+const sendOTP = (req) => {
+  // const { number, message } = req;
+  const params = {
+    Message: 'testing hello',
+    TopicArn:
+      'arn:aws:sns:ap-southeast-1:407923579514:TheKettleGourmet:475f0b15-2c88-46d8-a5e9-ce07c692fcd2'
+  };
+  var phonenumPromise = sns
+    .checkIfPhoneNumberIsOptedOut({
+      phoneNumber: '+6591114685'
+    })
+    .promise();
+  console.log(phonenumPromise);
+  return sns
+    .publish(params)
+    .promise()
+    .then(console.log('sent'))
+    .catch((err) => {
+      return err;
+    });
 };
 
-//   const AWS_SNS = new AWS.SNS(SNS_CONFIG);
-
-//   const sendOTP=(req)=>{
-//     var mobileNo = “+6591114685”;
-
-//     var params = {
-//     Message: “Welcome! your mobile verification code is: “ + OTP +”     Mobile Number is:” +mobileNo, /* required */
-//       PhoneNumber: mobileNo,
-//       };
-//       return new AWS.SNS({apiVersion: ‘2010–03–31’}).publish(params).promise()
-//  .then(message => {
-//  console.log(“OTP SEND SUCCESS”);
-//  })
-//  .catch(err => {
-//  console.log(“Error “+err)
-//  return err;});
-//  }
+exports.sendOTP = sendOTP;
