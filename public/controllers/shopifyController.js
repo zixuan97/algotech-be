@@ -76,7 +76,7 @@ const sendOrderWebhook = async (req, res) => {
   setInterval(() => {
     log.out('writing data');
     res.write('event: message\n'); // message event
-    res.write('data:' + JSON.stringify({ test: 'test' }));
+    res.write('data:' + JSON.stringify({ test: 'test1' }));
     res.write('\n\n');
   }, 10000);
 
