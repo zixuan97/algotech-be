@@ -100,6 +100,20 @@ const getAllManualDeliveryOrders = async (req, res) => {
   }
 };
 
+const getAllShippitDeliveryOrders = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.getAllShippitDeliveryOrders({})
+  );
+
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-SHIPPIT-DO', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DO');
+    res.json(data);
+  }
+};
+
 const getAllGrabDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllGrabDeliveryOrders({})
@@ -268,7 +282,7 @@ const getLastestTrackingInfoOfOrder = async (req, res) => {
   }
 };
 
-const getAllShippitOrders = async (req, res) => {
+const getAllShippitOrdersFromWebsite = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllDeliveryOrdersFromShippit({})
   );
@@ -376,6 +390,7 @@ const getLatLong = async (req, res) => {
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
+exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
 exports.getAllGrabDeliveryOrders = getAllGrabDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
@@ -383,7 +398,7 @@ exports.getDeliveryOrder = getDeliveryOrder;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
-exports.getAllShippitOrders = getAllShippitOrders;
+exports.getAllShippitOrdersFromWebsite = getAllShippitOrdersFromWebsite;
 exports.getToken = getToken;
 exports.cancelShippitOrder = cancelShippitOrder;
 exports.confirmShippitOrder = confirmShippitOrder;

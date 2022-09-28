@@ -1,4 +1,4 @@
-const { PrismaClient, ShippingType } = require('@prisma/client');
+const { PrismaClient, ShippingType, DeliveryMode } = require('@prisma/client');
 const prisma = new PrismaClient();
 const axios = require('axios');
 const shippitApi = require('../helpers/shippitApi');
@@ -57,6 +57,59 @@ const getAllGrabDeliveryOrders = async () => {
     }
   });
   return deliveryOrders;
+};
+
+const getAllShippitDeliveryOrders = async () => {
+  let filterOrders = [];
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippingType: ShippingType.SHIPPIT
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  for (let dor of deliveryOrders) {
+    const data = {
+      shippitTrackingNum: dor.shippitTrackingNum,
+      deliveryDate: dor.deliveryDate,
+      comments: dor.comments,
+      eta: dor.eta,
+      deliveryMode: dor.deliveryMode === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+      shippingDate: dor.shippingDate,
+      shippingType: ShippingType.SHIPPIT,
+      recipient: {
+        name: dor.salesOrder.customerName,
+        email: dor.salesOrder.customerEmail,
+        phone: dor.salesOrder.customerContactNo
+      },
+      deliveryAddress: {
+        addressLine: dor.salesOrder.customerAddress,
+        countryCode: "SG",
+        postcode: dor.salesOrder.postalCode,
+        state: "Singapore",
+        suburb: "Sg"
+      }
+    };
+    filterOrders.push(data);
+  }
+  const ordersFromShippitWebsite = await getAllDeliveryOrdersFromShippit({});
+  for (let d of ordersFromShippitWebsite) {
+    const data = {
+      shippitTrackingNum: d.trackingNumber,
+      deliveryDate: d.scheduledDeliveryDate,
+      comments: d.description,
+      eta: d.estimatedDeliveryDatetime,
+      deliveryMode: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+      shippingDate: d.scheduledDeliveryDate,
+      shippingType: ShippingType.SHIPPIT,
+      recipient: d.recipient,
+      deliveryAddress: d.deliveryAddress
+    };
+    filterOrders.push(data);
+  }
+  return filterOrders;
 };
 
 const findDeliveryOrderById = async (req) => {
@@ -335,8 +388,9 @@ const findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = async (req) =>
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
-exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
+exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
 exports.getAllGrabDeliveryOrders = getAllGrabDeliveryOrders;
+exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.findDeliveryOrderById = findDeliveryOrderById;
