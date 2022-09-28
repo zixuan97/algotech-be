@@ -70,21 +70,25 @@ const sendOrderWebhook = async (req, res) => {
     'Cache-Control': 'no-cache'
   };
   res.writeHead(200, headers);
+  setInterval(() => {
+    res.write('data:' + JSON.stringify('test'));
+    res.write('\\n\\n');
+  }, 10000);
 
-  const clientId = Date.now();
+  // const clientId = Date.now();
 
-  const newClient = {
-    id: clientId,
-    res
-  };
+  // const newClient = {
+  //   id: clientId,
+  //   res
+  // };
 
-  clients.push(newClient);
-  log.out('New Client established', newClient.id);
+  // clients.push(newClient);
+  // log.out('New Client established', newClient.id);
 
-  req.on('close', () => {
-    console.log(`${clientId} Connection closed`);
-    clients = clients.filter((client) => client.id !== clientId);
-  });
+  // req.on('close', () => {
+  //   console.log(`${clientId} Connection closed`);
+  //   clients = clients.filter((client) => client.id !== clientId);
+  // });
 };
 
 const sendEventsToAll = (salesOrderData) => {
@@ -132,7 +136,7 @@ const createOrderWebhook = async (req, res, next) => {
       log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
       res.json({ message: 'order received' });
 
-      return sendEventsToAll(salesOrderData);
+      // return sendEventsToAll(salesOrderData);
     } else {
       res.json({ message: 'order already exists' });
     }
