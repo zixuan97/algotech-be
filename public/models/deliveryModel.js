@@ -94,21 +94,21 @@ const getAllShippitDeliveryOrders = async () => {
     };
     filterOrders.push(data);
   }
-  const ordersFromShippitWebsite = await getAllDeliveryOrdersFromShippit({});
-  for (let d of ordersFromShippitWebsite) {
-    const data = {
-      shippitTrackingNum: d.trackingNumber,
-      deliveryDate: d.scheduledDeliveryDate,
-      comments: d.description,
-      eta: d.estimatedDeliveryDatetime,
-      deliveryMode: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
-      shippingDate: d.scheduledDeliveryDate,
-      shippingType: ShippingType.SHIPPIT,
-      recipient: d.recipient,
-      deliveryAddress: d.deliveryAddress
-    };
-    filterOrders.push(data);
-  }
+  // const ordersFromShippitWebsite = await getAllDeliveryOrdersFromShippit({});
+  // for (let d of ordersFromShippitWebsite) {
+  //   const data = {
+  //     shippitTrackingNum: d.trackingNumber,
+  //     deliveryDate: d.scheduledDeliveryDate,
+  //     comments: d.description,
+  //     eta: d.estimatedDeliveryDatetime,
+  //     deliveryMode: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+  //     shippingDate: d.scheduledDeliveryDate,
+  //     shippingType: ShippingType.SHIPPIT,
+  //     recipient: d.recipient,
+  //     deliveryAddress: d.deliveryAddress
+  //   };
+  //   filterOrders.push(data);
+  // }
   return filterOrders;
 };
 
