@@ -149,12 +149,28 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
     shippingType
     })
   );
+  let result = {}
+  for (let d of data) {
+    const salesOrder = await salesOrderModel.findSalesOrderById({ id : d.salesOrderId });
+    const assignedUser = await userModel.findUserById({ id : d.assignedUserId });
+    result = {
+      id: d.id,
+      shippingType: d.shippingType,
+      shippingDate: d.shippingDate,
+      deliveryMode: d.deliveryMode,
+      comments: d.comments,
+      eta: d.eta,
+      carrier: d.carrier,
+      salesOrder,
+      assignedUser
+    };
+  }
   if (error) {
     log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', error.message);
     res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY-DELIVERIES-TIME-TYPE-FILTER');
-    res.json(data);
+    res.json(result);
   }
 };
 
