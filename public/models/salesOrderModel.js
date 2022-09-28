@@ -46,6 +46,9 @@ const createSalesOrder = async (req) => {
 
 const getAllSalesOrders = async () => {
   const salesOrders = await prisma.salesOrder.findMany({
+    orderBy: {
+      createdTime: 'asc'
+    },
     include: { salesOrderItems: true }
   });
   return salesOrders;
@@ -60,6 +63,9 @@ const getAllSalesOrdersWithTimeFilter = async (req) => {
         gte: time_from //first date
       }
     },
+    orderBy: {
+      createdTime: 'asc'
+    },
     include: { salesOrderItems: true }
   });
   return salesOrders;
@@ -68,21 +74,29 @@ const getAllSalesOrdersWithTimeFilter = async (req) => {
 const getSalesOrdersByDayWithTimeFilter = async (req) => {
   const { time_from, time_to } = req;
   const salesOrdersCount =
-    await prisma.$queryRaw`select count("orderId") as salesOrders, DATE("createdTime") as createdDate from "public"."SalesOrder" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by DATE("createdTime")`;
+    await prisma.$queryRaw`select COALESCE(count("orderId"),0) as salesOrders , d.dt as createdDate from (select dt::date FROM generate_series(${time_from},${time_to},'1d')dt)d  left join  "public"."SalesOrder" c on DATE(c."createdTime") = d.dt  group by d.dt order by d.dt`;
   return salesOrdersCount;
 };
 
 const getRevenueByDayWithTimeFilter = async (req) => {
   const { time_from, time_to } = req;
   const revenue =
-    await prisma.$queryRaw`select SUM("amount") as revenue, DATE("createdTime") as createdDate from "public"."SalesOrder" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by DATE("createdTime")`;
+    await prisma.$queryRaw`select COALESCE(SUM(c."amount"),0) as revenue, d.dt as createdDate from (select dt::date FROM generate_series(${time_from},${time_to},'1d')dt)d  left join  "public"."SalesOrder" c on DATE(c."createdTime") = d.dt  group by d.dt order by d.dt`;
+
   return revenue;
 };
 
-const getBestSellerByDayWithTimeFilter = async (req) => {
+const getBestSellerWithTimeFilter = async (req) => {
   const { time_from, time_to } = req;
   const bestSeller =
-    await prisma.$queryRaw`select SUM("quantity") as quantity, "productName" as productName from "public"."SalesOrderItem" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by "productName"`;
+    await prisma.$queryRaw`select SUM("quantity")as quantity, "productName" as productName from "public"."SalesOrderItem" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by "productName"`;
+  return bestSeller;
+};
+
+const getOrdersByPlatformWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const bestSeller =
+    await prisma.$queryRaw`select COUNT("orderId")as salesOrders, "platformType" as platformType from "public"."SalesOrder" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by "platformType"`;
   return bestSeller;
 };
 
@@ -178,4 +192,5 @@ exports.getAllSalesOrders = getAllSalesOrders;
 exports.getAllSalesOrdersWithTimeFilter = getAllSalesOrdersWithTimeFilter;
 exports.getSalesOrdersByDayWithTimeFilter = getSalesOrdersByDayWithTimeFilter;
 exports.getRevenueByDayWithTimeFilter = getRevenueByDayWithTimeFilter;
-exports.getBestSellerByDayWithTimeFilter = getBestSellerByDayWithTimeFilter;
+exports.getBestSellerWithTimeFilter = getBestSellerWithTimeFilter;
+exports.getOrdersByPlatformWithTimeFilter = getOrdersByPlatformWithTimeFilter;

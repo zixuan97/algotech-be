@@ -1,4 +1,4 @@
-const { PrismaClient, ShippingType } = require('@prisma/client');
+const { PrismaClient, ShippingType, DeliveryMode } = require('@prisma/client');
 const prisma = new PrismaClient();
 const axios = require('axios');
 const shippitApi = require('../helpers/shippitApi');
@@ -6,7 +6,7 @@ const salesOrderModel = require('../models/salesOrderModel');
 const { log } = require('../helpers/logger');
 
 const createDeliveryOrder = async (req) => {
-  const { shippingType, recipientEmail, shippingDate, deliveryDate, deliveryPersonnel, shippitTrackingNum, deliveryMode, carrier, salesOrderId } = req;
+  const { shippingType, recipientEmail, shippingDate, deliveryDate, deliveryPersonnel, shippitTrackingNum, deliveryMode, carrier, salesOrderId, assignedUserId } = req;
   return await prisma.DeliveryOrder.create({
     data: {
       shippingType,
@@ -17,7 +17,8 @@ const createDeliveryOrder = async (req) => {
       shippitTrackingNum,
       deliveryMode,
       carrier,
-      salesOrderId
+      salesOrderId,
+      assignedUserId
     }
   });
 };
@@ -25,10 +26,90 @@ const createDeliveryOrder = async (req) => {
 const getAllDeliveryOrders = async () => {
   const deliveryOrders = await prisma.DeliveryOrder.findMany({
     include: {
-      salesOrder: true
+      salesOrder: true,
+      assignedUser: true
     }
   });
   return deliveryOrders;
+};
+
+const getAllManualDeliveryOrders = async () => {
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippingType: ShippingType.MANUAL
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  return deliveryOrders;
+};
+
+const getAllGrabDeliveryOrders = async () => {
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippingType: ShippingType.GRAB
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  return deliveryOrders;
+};
+
+const getAllShippitDeliveryOrders = async () => {
+  let filterOrders = [];
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippingType: ShippingType.SHIPPIT
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  for (let dor of deliveryOrders) {
+    const data = {
+      shippitTrackingNum: dor.shippitTrackingNum,
+      deliveryDate: dor.deliveryDate,
+      comments: dor.comments,
+      eta: dor.eta,
+      deliveryMode: dor.deliveryMode === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+      shippingDate: dor.shippingDate,
+      shippingType: ShippingType.SHIPPIT,
+      recipient: {
+        name: dor.salesOrder.customerName,
+        email: dor.salesOrder.customerEmail,
+        phone: dor.salesOrder.customerContactNo
+      },
+      deliveryAddress: {
+        addressLine: dor.salesOrder.customerAddress,
+        countryCode: "SG",
+        postcode: dor.salesOrder.postalCode,
+        state: "Singapore",
+        suburb: "Sg"
+      }
+    };
+    filterOrders.push(data);
+  }
+  // const ordersFromShippitWebsite = await getAllDeliveryOrdersFromShippit({});
+  // for (let d of ordersFromShippitWebsite) {
+  //   const data = {
+  //     shippitTrackingNum: d.trackingNumber,
+  //     deliveryDate: d.scheduledDeliveryDate,
+  //     comments: d.description,
+  //     eta: d.estimatedDeliveryDatetime,
+  //     deliveryMode: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+  //     shippingDate: d.scheduledDeliveryDate,
+  //     shippingType: ShippingType.SHIPPIT,
+  //     recipient: d.recipient,
+  //     deliveryAddress: d.deliveryAddress
+  //   };
+  //   filterOrders.push(data);
+  // }
+  return filterOrders;
 };
 
 const findDeliveryOrderById = async (req) => {
@@ -38,7 +119,8 @@ const findDeliveryOrderById = async (req) => {
       id: Number(id)
     },
     include: {
-      salesOrder: true
+      salesOrder: true,
+      assignedUser: true
     }
   });
   return deliveryOrder;
@@ -51,26 +133,36 @@ const findDeliveryOrderByShippitTrackingNum = async (req) => {
       shippitTrackingNum: trackingNumber
     },
     include: {
-      salesOrder: true
+      salesOrder: true,
+      assignedUser: true
     }
   });
   return deliveryOrder[0];
 };
 
 const updateDeliveryOrder = async (req) => {
-  const { id, shippingType, shippingDate, deliveryDate, deliveryPersonnel, deliveryMode, carrier } = req;
+  const { id, shippingType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, assignedUserId } = req;
   const deliveryOrder = await prisma.DeliveryOrder.update({
     where: { id },
     data: {
       shippingType,
       shippingDate,
       deliveryDate,
-      deliveryPersonnel,
       deliveryMode,
-      carrier
+      carrier,
+      comments,
+      eta,
+      assignedUserId
     }
   });
   return deliveryOrder;
+};
+
+const findDeliveriesBasedOnTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const deliveryOrders =
+    await prisma.$queryRaw`select "id" from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  return deliveryOrders;
 };
 
 const deleteDeliveryOrder = async (req) => {
@@ -178,7 +270,7 @@ const getAllDeliveryOrdersFromShippit = async () => {
     });
 };
 
-const cancelShippitOrder = async (req, res) => {
+const cancelShippitOrder = async (req) => {
   const { trackingNumber } = req;
   const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNumber}`;
   const options = {
@@ -198,7 +290,7 @@ const cancelShippitOrder = async (req, res) => {
     });
 };
 
-const confirmShippitOrder = async (req, res) => {
+const confirmShippitOrder = async (req) => {
   const { trackingNumber } = req;
   const data = {};
   const api_path = `https://app.staging.shippit.com/api/5/orders/${trackingNumber}/confirm`;
@@ -221,7 +313,7 @@ const confirmShippitOrder = async (req, res) => {
     });
 };
 
-const getShippitOrderLabel = async (req, res) => {
+const getShippitOrderLabel = async (req) => {
   const { trackingNumber } = req;
   const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNumber}/label`;
   const options = {
@@ -241,7 +333,7 @@ const getShippitOrderLabel = async (req, res) => {
     });
 };
 
-const bookShippitDelivery = async (req, res) => {
+const bookShippitDelivery = async (req) => {
   const { trackingNumber } = req;
   const api_path = `https://app.staging.shippit.com/api/3/book`;
   const data = {
@@ -266,14 +358,27 @@ const bookShippitDelivery = async (req, res) => {
     });
 };
 
-const findSalesOrderPostalCodeForManualDeliveries = async (res) => {
+const findDeliveriesWithTimeAndTypeFilter = async (req) => {
+  const { time_from, time_to, shippingType } = req;
+  let enumShippingType = ShippingType.SHIPPIT;
+  if (shippingType === "MANUAL") {
+    enumShippingType = ShippingType.MANUAL;
+  } else if (shippingType === "GRAB") {
+    enumShippingType = ShippingType.GRAB;
+  }
+  const deliveryOrders =
+    await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === enumShippingType);
+  return filteredDeliveryOrders;
+};
+
+const findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const deliveryOrders =
+    await prisma.$queryRaw`select "id", "shippingType", "salesOrderId" from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
   let salesOrderPostalCodes = [];
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({
-    where: {
-      shippingType: ShippingType.MANUAL
-    }
-  });
-  for (let d of deliveryOrders) {
+  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.MANUAL);
+  for (let d of filteredDeliveryOrders) {
     const salesOrder = await salesOrderModel.findSalesOrderById({ id: d.salesOrderId });
     salesOrderPostalCodes.push(salesOrder.postalCode);
   }
@@ -282,15 +387,20 @@ const findSalesOrderPostalCodeForManualDeliveries = async (res) => {
 
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
+exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
+exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
+exports.getAllGrabDeliveryOrders = getAllGrabDeliveryOrders;
+exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.findDeliveryOrderById = findDeliveryOrderById;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
-exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.cancelShippitOrder = cancelShippitOrder;
 exports.findDeliveryOrderByShippitTrackingNum = findDeliveryOrderByShippitTrackingNum;
 exports.confirmShippitOrder = confirmShippitOrder;
 exports.getShippitOrderLabel = getShippitOrderLabel;
 exports.bookShippitDelivery = bookShippitDelivery;
-exports.findSalesOrderPostalCodeForManualDeliveries = findSalesOrderPostalCodeForManualDeliveries;
+exports.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter;
+exports.findDeliveriesBasedOnTimeFilter = findDeliveriesBasedOnTimeFilter;
+exports.findDeliveriesWithTimeAndTypeFilter = findDeliveriesWithTimeAndTypeFilter;

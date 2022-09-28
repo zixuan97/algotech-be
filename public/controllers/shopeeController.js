@@ -21,7 +21,7 @@ const createKey = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   const { data: refresh_token, error } = await common.awaitWrap(
-    keyModel.findKeyByName({ key: 'refresh_token' })
+    keyModel.findKeyByName({ key: 'shopee_refresh_token' })
   );
   if (error) {
     log.error('ERR_SHOPEE_GET-REFRESH-KEY', error.message);
@@ -34,11 +34,11 @@ const refreshToken = async (req, res) => {
     });
     try {
       await keyModel.updateKeys({
-        key: 'access_token',
+        key: 'shopee_access_token',
         value: response.access_token
       });
       await keyModel.updateKeys({
-        key: 'refresh_token',
+        key: 'shopee_refresh_token',
         value: response.refresh_token
       });
       log.out('OK_SHOPEE_UPDATE-SHOPEE-KEY');
@@ -54,7 +54,7 @@ const refreshToken = async (req, res) => {
 const getAllOrders = async (req) => {
   const { time_from, time_to, page_size } = req;
   const { data: access_token, error } = await common.awaitWrap(
-    keyModel.findKeyByName({ key: 'access_token' })
+    keyModel.findKeyByName({ key: 'shopee_access_token' })
   );
 
   if (error) {
@@ -130,7 +130,7 @@ const addShopeeOrders = async (req, res) => {
 
 const getTrackingInfo = async (req, res) => {
   const { data: access_token, error } = await common.awaitWrap(
-    keyModel.findKeyByName({ key: 'access_token' })
+    keyModel.findKeyByName({ key: 'shopee_access_token' })
   );
 
   if (error) {
@@ -156,7 +156,7 @@ const getTrackingInfo = async (req, res) => {
 
 const downloadShippingDocument = async (req, res) => {
   const { data: access_token, error } = await common.awaitWrap(
-    keyModel.findKeyByName({ key: 'access_token' })
+    keyModel.findKeyByName({ key: 'shopee_access_token' })
   );
 
   if (error) {

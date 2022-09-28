@@ -82,6 +82,7 @@ const updateBundle = async (req) => {
       name,
       description,
       bundleProduct: {
+        deleteMany :{},
         create: bundleProduct.map((bp) => ({
           productSku: bp.product.sku,
           productName: bp.product.name,

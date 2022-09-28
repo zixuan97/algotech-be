@@ -7,8 +7,7 @@ const cookieParser = require('cookie-parser');
 const corsWhitelist = [
   'http://localhost:3000',
   'https://algotech-fe.vercel.app',
-  'https://algotech-fe-prod.vercel.app',
-  'https://www.legendkong.com'
+  'https://algotech-fe-prod.vercel.app'
 ];
 app.use(
   cors({
@@ -16,7 +15,7 @@ app.use(
       if (corsWhitelist.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        // log('out', 'Domain not allowed by CORS', origin) // replace to fix logging spam
+        //log.out('Domain not allowed by CORS', origin); // replace to fix logging spam
         callback(null);
       }
     },
@@ -41,6 +40,7 @@ app.use('/supplier', require('./public/routes/supplierRoutes'));
 app.use('/procurement', require('./public/routes/procurementRoutes'));
 app.use('/bundle', require('./public/routes/bundleRoutes'));
 app.use('/shopee', require('./public/routes/shopeeRoutes'));
+app.use('/lazada', require('./public/routes/lazadaRoutes'));
 app.use('/delivery', require('./public/routes/deliveryRoutes'));
 app.use('/shopify', require('./public/routes/shopifyRoutes'));
 app.use('/sales', require('./public/routes/salesRoutes'));

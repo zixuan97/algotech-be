@@ -16,9 +16,14 @@ router.post(
 );
 router.post(
   '/timefilterbyday/bestseller',
-  salesOrderController.getBestSellerByDayWithTimeFilter
+  salesOrderController.getBestSellerWithTimeFilter
+);
+router.post(
+  '/timefilterbyday/ordersbyplatform',
+  salesOrderController.getOrdersByPlatformWithTimeFilter
 );
 router.post('/', salesOrderController.createSalesOrder);
+router.post('/excel', salesOrderController.generateExcel);
 router.get('/id/:id', salesOrderController.findSalesOrderById);
 router.get('/orderid', salesOrderController.findSalesOrderByOrderId);
 router.put('/', salesOrderController.updateSalesOrder);

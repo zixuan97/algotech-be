@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  firstName  String
-  lastName   String
-  email      String     @unique
-  password   String
-  role       UserRole   @default(ADMIN)
-  status     UserStatus @default(ACTIVE)
-  isVerified Boolean    @default(false)
+  id             Int             @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  email          String          @unique
+  password       String
+  role           UserRole        @default(ADMIN)
+  status         UserStatus      @default(ACTIVE)
+  isVerified     Boolean         @default(false)
+  deliveryOrders DeliveryOrder[]
 }
 
 model Category {
@@ -52,6 +53,7 @@ model Product {
   bundleProduct   BundleProduct[]
   productCategory ProductCategory[]
   stockQuantity   StockQuantity[]
+  supplierProduct SupplierProduct[]
 }
 
 model Location {
@@ -122,10 +124,11 @@ model ProcurementOrderItem {
 }
 
 model Supplier {
-  id      Int    @id @default(autoincrement())
-  email   String @unique
-  name    String
-  address String
+  id              Int               @id @default(autoincrement())
+  email           String            @unique
+  name            String
+  address         String
+  supplierProduct SupplierProduct[]
 }
 
 model Keys {
@@ -164,16 +167,29 @@ model SalesOrder {
 
 model DeliveryOrder {
   id                 Int           @id @default(autoincrement())
-  shippingType       ShippingType  @default(MANUAL)
   createdAt          DateTime      @default(now())
-  shippingDate       DateTime
   deliveryDate       DateTime?
-  deliveryPersonnel  String?
   shippitTrackingNum String?
-  deliveryMode       DeliveryMode? @default(STANDARD)
   carrier            String?
+  comments           String?
+  eta                DateTime?
   salesOrderId       Int           @unique
+  deliveryMode       DeliveryMode? @default(STANDARD)
+  shippingDate       DateTime
+  shippingType       ShippingType  @default(MANUAL)
+  assignedUserId     Int?
+  assignedUser       User?         @relation(fields: [assignedUserId], references: [id])
   salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
+}
+
+model SupplierProduct {
+  supplierId Int
+  productId  Int
+  rate       Float
+  Product    Product  @relation(fields: [productId], references: [id])
+  Supplier   Supplier @relation(fields: [supplierId], references: [id])
+
+  @@id([supplierId, productId])
 }
 
 enum OrderStatus {
@@ -228,4 +244,5 @@ enum DeliveryMode {
 enum ShippingType {
   MANUAL
   SHIPPIT
+  GRAB
 }
