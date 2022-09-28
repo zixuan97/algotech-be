@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { log } = require('../helpers/logger');
 
 const getToken = async (req) => {
   const path = 'https://app.staging.shippit.com/api/ui/v1/auth/jwt.json';
