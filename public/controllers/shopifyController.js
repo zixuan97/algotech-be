@@ -98,7 +98,7 @@ const createOrderWebhook = async (req, res) => {
         })
       });
       log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
-
+      console.log(salesOrderData);
       res.writeHead(200, {
         Connection: 'keep-alive',
         'Content-Type': 'text/event-stream',
