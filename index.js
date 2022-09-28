@@ -7,8 +7,7 @@ const cookieParser = require('cookie-parser');
 const corsWhitelist = [
   'http://localhost:3000',
   'https://algotech-fe.vercel.app',
-  'https://algotech-fe-prod.vercel.app',
-  'https://www.legendkong.com'
+  'https://algotech-fe-prod.vercel.app'
 ];
 app.use(
   cors({
@@ -16,7 +15,8 @@ app.use(
       if (corsWhitelist.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        // log('out', 'Domain not allowed by CORS', origin) // replace to fix logging spam
+        console.log(origin);
+        log.out('Domain not allowed by CORS', origin); // replace to fix logging spam
         callback(null);
       }
     },
