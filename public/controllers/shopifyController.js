@@ -107,8 +107,9 @@ const createOrderWebhook = async (req, res) => {
       log.out('OK_SHOPIFY_WEBHOOK-SENT-ORDER');
       res.write('data:' + JSON.stringify(salesOrderData));
       res.write('\\n\\n');
+    } else {
+      res.json({ message: 'order already exists' });
     }
-    res.json({ message: 'order already exists' });
   } catch (error) {
     log.error('ERR_SHOPIFY_ADD-ORDER-WEBHOOK', error.message);
     const e = Error.http(error);
