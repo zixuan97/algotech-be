@@ -67,7 +67,8 @@ const sendOrderWebhook = async (req, res) => {
   const headers = {
     'Content-Type': 'text/event-stream',
     Connection: 'keep-alive',
-    'Cache-Control': 'no-cache'
+    'Cache-Control': 'no-cache',
+    'Access-Control-Allow-Origin': 'https://algotech-fe.vercel.app'
   };
   res.writeHead(200, headers);
 
