@@ -68,7 +68,9 @@ const sendOrderWebhook = async (req, res) => {
     'Content-Type': 'text/event-stream',
     Connection: 'keep-alive',
     'Cache-Control': 'no-cache',
-    'Access-Control-Allow-Origin': '*'
+    'Access-Control-Allow-Origin': req.headers.origin,
+    'Access-Control-Expose-Headers': '*',
+    'Access-Control-Allow-Credentials': true
   };
   res.writeHead(200, headers);
   setInterval(() => {
