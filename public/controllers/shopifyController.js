@@ -72,8 +72,10 @@ const sendOrderWebhook = async (req, res) => {
   };
   res.writeHead(200, headers);
   setInterval(() => {
-    res.write('data:' + JSON.stringify('test'));
-    res.write('\\n\\n');
+    log.out('writing data');
+    res.write('event: message\n'); // message event
+    res.write('data:' + JSON.stringify({ test: 'test' }));
+    res.write('\n\n');
   }, 10000);
 
   // const clientId = Date.now();
