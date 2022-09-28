@@ -149,11 +149,11 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
     shippingType
     })
   );
-  let result = {}
+  let result = [];
   for (let d of data) {
     const salesOrder = await salesOrderModel.findSalesOrderById({ id : d.salesOrderId });
     const assignedUser = await userModel.findUserById({ id : d.assignedUserId });
-    result = {
+    const res = {
       id: d.id,
       shippingType: d.shippingType,
       shippingDate: d.shippingDate,
@@ -164,6 +164,7 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
       salesOrder,
       assignedUser
     };
+    result.push(res)
   }
   if (error) {
     log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', error.message);
