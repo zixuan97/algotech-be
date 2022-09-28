@@ -20,6 +20,7 @@ app.use(
         callback(null);
       }
     },
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   })
 );
