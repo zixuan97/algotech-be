@@ -2,6 +2,8 @@ const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const { generateSalesOrderExcel } = require('../helpers/excel');
+const { format } = require('date-fns');
 
 const createSalesOrder = async (req, res) => {
   const {
@@ -239,6 +241,30 @@ const updateSalesOrderStatus = async (req, res) => {
   }
 };
 
+const generateExcel = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const salesOrders = await salesOrderModel.getAllSalesOrdersWithTimeFilter({
+    time_from: new Date(time_from),
+    time_to: new Date(time_to)
+  });
+  await generateSalesOrderExcel({ salesOrders })
+    .then((blob) => {
+      const timeElapsed = Date.now();
+      const today = new Date(timeElapsed);
+      res.type(blob.type);
+      blob.arrayBuffer().then((buf) => {
+        res.setHeader(
+          'Content-disposition',
+          `attachment; filename = SalesOrder${format(today, 'yyyyMMdd')}.xlsx`
+        );
+        res.send(Buffer.from(buf));
+      });
+    })
+    .catch((error) => {
+      return res.status(400).json(error.message);
+    });
+};
+
 const updateSalesOrder = async (req, res) => {
   try {
     const {
@@ -289,3 +315,4 @@ exports.findSalesOrderByOrderId = findSalesOrderByOrderId;
 exports.updateSalesOrder = updateSalesOrder;
 exports.updateSalesOrderStatus = updateSalesOrderStatus;
 exports.getOrdersByPlatformWithTimeFilter = getOrdersByPlatformWithTimeFilter;
+exports.generateExcel = generateExcel;

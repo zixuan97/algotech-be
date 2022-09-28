@@ -23,6 +23,7 @@ router.post(
   salesOrderController.getOrdersByPlatformWithTimeFilter
 );
 router.post('/', salesOrderController.createSalesOrder);
+router.post('/excel', salesOrderController.generateExcel);
 router.get('/id/:id', salesOrderController.findSalesOrderById);
 router.get('/orderid', salesOrderController.findSalesOrderByOrderId);
 router.put('/', salesOrderController.updateSalesOrder);
