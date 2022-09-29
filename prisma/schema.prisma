@@ -142,8 +142,8 @@ model SalesOrderBundleItem {
   id               Int            @id @default(autoincrement())
   productName      String
   quantity         Int
-  salesOrderItem   SalesOrderItem @relation(fields: [salesOrderItemId], references: [id])
   salesOrderItemId Int
+  salesOrderItem   SalesOrderItem @relation(fields: [salesOrderItemId], references: [id])
 }
 
 model SalesOrderItem {
@@ -153,8 +153,8 @@ model SalesOrderItem {
   quantity              Int
   salesOrderId          Int
   createdTime           DateTime
-  salesOrderBundleItems SalesOrderBundleItem[]
   salesOrder            SalesOrder             @relation(fields: [salesOrderId], references: [id])
+  salesOrderBundleItems SalesOrderBundleItem[]
 }
 
 model SalesOrder {
@@ -181,13 +181,13 @@ model DeliveryOrder {
   deliveryDate       DateTime?
   shippitTrackingNum String?
   carrier            String?
-  comments           String?
-  eta                DateTime?
   salesOrderId       Int           @unique
   deliveryMode       DeliveryMode? @default(STANDARD)
   shippingDate       DateTime
   shippingType       ShippingType  @default(MANUAL)
   assignedUserId     Int?
+  comments           String?
+  eta                DateTime?
   assignedUser       User?         @relation(fields: [assignedUserId], references: [id])
   salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
 }

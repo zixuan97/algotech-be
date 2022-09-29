@@ -13,7 +13,10 @@ const { format } = require('date-fns');
 const createDeliveryOrder = async (req, res) => {
   const { shippingType, courierType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, parcelQty, parcelWeight, salesOrderId, assignedUserId } = req.body;
   let salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
-  const assignedUser = await userModel.findUserById({ id: assignedUserId });
+  let assignedUser = {};
+  if (assignedUserId !== undefined) {
+    assignedUser = await userModel.findUserById({ id: assignedUserId });
+  }
   const name = salesOrder.customerName.split(" ");
   let soShippit;
   if (shippingType === ShippingType.SHIPPIT) {
@@ -406,6 +409,49 @@ const getLatLong = async (req, res) => {
     })).then(() => res.json(dataRes));
 };
 
+const getAllAssignedManualDeliveriesByUser = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAssignedManualDeliveriesByUser({ id })
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER');
+    res.json(data);
+  }
+};
+
+const getAllUnassignedManualDeliveries = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAllUnassignedManualDeliveries({})
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES');
+    res.json(data);
+  }
+};
+
+const getCurrentLocationLatLong = async (req, res) => {
+  const { address } = req.body;
+  const url = `https://developers.onemap.sg/commonapi/search?returnGeom=Y&getAddrDetails=Y&pageNum=1&searchVal=${address}`;
+    return await axios
+      .get(url)
+      .then((response) => {
+        log.out('OK_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG');
+        res.json(response.data.results[0]);
+      })
+      .catch((error) => {
+        log.error('ERR_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG', error.message);
+        const e = Error.http(error);
+        res.status(e.code).json(e.message);
+      });
+};
+
 const generateDO = async (req, res) => {
   const doId = req.params;
   const deliveryOrder = await deliveryModel.findDeliveryOrderById(doId);
@@ -459,3 +505,6 @@ exports.bookShippitDelivery = bookShippitDelivery;
 exports.getLatLong = getLatLong;
 exports.findDeliveriesWithTimeAndTypeFilter = findDeliveriesWithTimeAndTypeFilter;
 exports.generateDO = generateDO;
+exports.getAllAssignedManualDeliveriesByUser = getAllAssignedManualDeliveriesByUser;
+exports.getCurrentLocationLatLong = getCurrentLocationLatLong;
+exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
