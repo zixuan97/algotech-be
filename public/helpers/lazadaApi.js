@@ -86,7 +86,7 @@ const getSellerPerformance = async (req) => {
     .then((res) => {
       log.out('OK_LAZADA_GET-SELLER-PERFORMANCE');
       const response = res.data;
-      return response;
+      return response.data;
     })
     .catch((err) => {
       log.error('ERR_LAZADA_GET-SELLER-PERFORMANCE', err.message);

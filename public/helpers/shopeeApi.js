@@ -118,7 +118,7 @@ const getShopPerformance = async (req) => {
     .then((res) => {
       log.out('OK_ORDER_GET-SHOPEE-TRACKING-INFO');
       const response = res.data;
-      return response;
+      return response.response;
     })
     .catch((err) => {
       log.error('ERR_ORDER_GET-SHOPEE-TRACKING-INFO', err.message);
