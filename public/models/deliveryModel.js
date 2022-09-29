@@ -385,6 +385,36 @@ const findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = async (req) =>
   return salesOrderPostalCodes;
 };
 
+const findAssignedManualDeliveriesByUser = async (req) => {
+  const { id } = req;
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      assignedUserId: Number(id),
+      shippingType: ShippingType.MANUAL
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  return deliveryOrders;
+};
+
+const findAllUnassignedManualDeliveries = async () => {
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      assignedUser: null,
+      shippingType: ShippingType.MANUAL
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  return deliveryOrders;
+};
+
+
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
@@ -404,3 +434,5 @@ exports.bookShippitDelivery = bookShippitDelivery;
 exports.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter;
 exports.findDeliveriesBasedOnTimeFilter = findDeliveriesBasedOnTimeFilter;
 exports.findDeliveriesWithTimeAndTypeFilter = findDeliveriesWithTimeAndTypeFilter;
+exports.findAssignedManualDeliveriesByUser = findAssignedManualDeliveriesByUser;
+exports.findAllUnassignedManualDeliveries = findAllUnassignedManualDeliveries;
