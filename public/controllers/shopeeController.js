@@ -1,5 +1,6 @@
 const shopeeApi = require('../helpers/shopeeApi');
 const salesOrderModel = require('../models/salesOrderModel');
+const bundleModel = require('../models/bundleModel');
 const keyModel = require('../models/keyModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
@@ -67,14 +68,17 @@ const getAllOrders = async (req) => {
       page_size
     });
     const orderSN = orderList.response.order_list;
-
-    const orders = await orderSN.map((order) => order.order_sn);
-    const response = await shopeeApi.getOrderDetails({
-      access_token: access_token.value,
-      orders
-    });
-    log.out('OK_SHOPEE_GET-ALL-SHOPEE-ORDERS');
-    return response.response.order_list;
+    if (orderSN.length > 0) {
+      const orders = await orderSN.map((order) => order.order_sn);
+      const response = await shopeeApi.getOrderDetails({
+        access_token: access_token.value,
+        orders
+      });
+      log.out('OK_SHOPEE_GET-ALL-SHOPEE-ORDERS');
+      return response.response.order_list;
+    } else {
+      return [];
+    }
   }
 };
 
@@ -107,13 +111,24 @@ const addShopeeOrders = async (req, res) => {
               currency: salesOrder.currency,
               amount: salesOrder.total_amount,
               customerRemarks: salesOrder.message_to_seller,
-              salesOrderItems: salesOrder.item_list.map((item) => {
-                return {
-                  productName: item.item_name.replace(/ *\[[^\]]*]/g, ''),
-                  price: item.model_discounted_price,
-                  quantity: item.model_quantity_purchased
-                };
-              })
+              salesOrderItems: await Promise.all(
+                salesOrder.item_list.map(async (item) => {
+                  console.log(item.item_name.replace(/ *\[[^\]]*]/g, ''));
+                  const bundle = await bundleModel.findBundleByName({
+                    name: item.item_name.replace(/ *\[[^\]]*]/g, '')
+                  });
+                  let salesOrderBundleItems = [];
+                  if (bundle) {
+                    salesOrderBundleItems = bundle.bundleProduct;
+                  }
+                  return {
+                    productName: item.item_name.replace(/ *\[[^\]]*]/g, ''),
+                    price: item.model_discounted_price,
+                    quantity: item.model_quantity_purchased,
+                    salesOrderBundleItems
+                  };
+                })
+              )
             });
           }
         })
@@ -128,26 +143,31 @@ const addShopeeOrders = async (req, res) => {
   }
 };
 
-const getTrackingInfo = async (req, res) => {
+const getShopPerformance = async (req, res) => {
   const { data: access_token, error } = await common.awaitWrap(
     keyModel.findKeyByName({ key: 'shopee_access_token' })
   );
 
   if (error) {
-    log.error('ERR_SHOPEE_CREATE-KEY', error.message);
+    log.error('ERR_SHOPEE_GET-KEY', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
     try {
-      const order = '220921CRN7HCJW';
-      const response = await shopeeApi.getTrackingInfo({
-        access_token: access_token.value,
-        order
+      const response = await shopeeApi.getShopPerformance({
+        access_token: access_token.value
       });
-      log.out('OK_SHOPEE_GET-TRACKING-INFO');
-      res.json(response);
+      const sellerPerformance = {
+        overallPerformance: response.overall_performance,
+        listingViolations: response.listing_violations,
+        fulfilment: response.fulfillment,
+        customerService: response.customer_service,
+        customerSatisfaction: response.customer_satisfaction
+      };
+      log.out('OK_SHOPEE_GET-SHOP-PERFORMANCE');
+      res.json(sellerPerformance);
     } catch (err) {
-      log.error('ERR_SHOPEE_GET-TRACKING-INFO', err.message);
+      log.error('ERR_SHOPEE_GET-SHOP-PERFORMANCE', err.message);
       const e = Error.http(err);
       res.status(e.code).json(e.message);
     }
@@ -188,4 +208,4 @@ exports.createKey = createKey;
 exports.refreshToken = refreshToken;
 exports.addShopeeOrders = addShopeeOrders;
 exports.downloadShippingDocument = downloadShippingDocument;
-exports.getTrackingInfo = getTrackingInfo;
+exports.getShopPerformance = getShopPerformance;

@@ -2,7 +2,6 @@ const bundleModel = require('../models/bundleModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const productModel = require('../models/productModel');
 
 const createBundle = async (req, res) => {
   const { name, description, bundleProduct } = req.body;

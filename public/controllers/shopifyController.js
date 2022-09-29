@@ -4,6 +4,8 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const CryptoJS = require('crypto-js');
+const pusherUtil = require('../utils/pusherUtil');
+const bundleModel = require('../models/bundleModel');
 
 const addShopifyOrders = async (req, res) => {
   const { last_date, latestId, limit } = req.body;
@@ -31,13 +33,23 @@ const addShopifyOrders = async (req, res) => {
               createdTime: salesOrder.created_at,
               currency: salesOrder.currency,
               amount: salesOrder.current_total_price,
-              salesOrderItems: salesOrder.line_items.map((item) => {
-                return {
-                  productName: item.name.replace(/ *\[[^\]]*]/g, ''),
-                  price: item.price,
-                  quantity: item.quantity
-                };
-              })
+              salesOrderItems: await Promise.all(
+                salesOrder.line_items.map(async (item) => {
+                  const bundle = await bundleModel.findBundleByName({
+                    name: item.name.replace(/ *\[[^\]]*]/g, '')
+                  });
+                  let salesOrderBundleItems = [];
+                  if (bundle) {
+                    salesOrderBundleItems = bundle.bundleProduct;
+                  }
+                  return {
+                    productName: item.name.replace(/ *\[[^\]]*]/g, ''),
+                    price: item.price,
+                    quantity: item.quantity,
+                    salesOrderBundleItems
+                  };
+                })
+              )
             });
           }
         })
@@ -60,47 +72,6 @@ const verifyWebhook = (req) => {
 
   console.log(token === hmac_header);
   return token === hmac_header;
-};
-const clients = [];
-
-const sendOrderWebhook = async (req, res) => {
-  const headers = {
-    'Content-Type': 'text/event-stream',
-    Connection: 'keep-alive',
-    'Cache-Control': 'no-cache',
-    'Access-Control-Allow-Origin': req.headers.origin,
-    'Access-Control-Expose-Headers': '*',
-    'Access-Control-Allow-Credentials': true
-  };
-  res.writeHead(200, headers);
-  setInterval(() => {
-    log.out('writing data');
-    res.write('event: message\n'); // message event
-    res.write('data:' + JSON.stringify({ test: 'test1' }));
-    res.write('\n\n');
-  }, 10000);
-
-  // const clientId = Date.now();
-
-  // const newClient = {
-  //   id: clientId,
-  //   res
-  // };
-
-  // clients.push(newClient);
-  // log.out('New Client established', newClient.id);
-
-  // req.on('close', () => {
-  //   console.log(`${clientId} Connection closed`);
-  //   clients = clients.filter((client) => client.id !== clientId);
-  // });
-};
-
-const sendEventsToAll = (salesOrderData) => {
-  clients.forEach((client) => {
-    log.out('OK_SHOPIFY_WEBHOOK-SENT-ORDER');
-    client.res.write(`data: ${JSON.stringify(salesOrderData)}\n\n`);
-  });
 };
 
 const createOrderWebhook = async (req, res, next) => {
@@ -130,18 +101,27 @@ const createOrderWebhook = async (req, res, next) => {
         createdTime: salesOrder.created_at,
         currency: salesOrder.currency,
         amount: salesOrder.total_price,
-        salesOrderItems: salesOrder.line_items.map((item) => {
-          return {
-            productName: item.name.replace(/ *\[[^\]]*]/g, ''),
-            price: item.price,
-            quantity: item.quantity
-          };
-        })
+        salesOrderItems: await Promise.all(
+          salesOrder.line_items.map(async (item) => {
+            const bundle = await bundleModel.findBundleByName({
+              name: item.name.replace(/ *\[[^\]]*]/g, '')
+            });
+            let salesOrderBundleItems = [];
+            if (bundle) {
+              salesOrderBundleItems = bundle.bundleProduct;
+            }
+            return {
+              productName: item.name.replace(/ *\[[^\]]*]/g, ''),
+              price: item.price,
+              quantity: item.quantity,
+              salesOrderBundleItems
+            };
+          })
+        )
       });
       log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
       res.json({ message: 'order received' });
-
-      // return sendEventsToAll(salesOrderData);
+      pusherUtil.sendPusherMsg(salesOrderData);
     } else {
       res.json({ message: 'order already exists' });
     }
@@ -154,4 +134,3 @@ const createOrderWebhook = async (req, res, next) => {
 
 exports.addShopifyOrders = addShopifyOrders;
 exports.createOrderWebhook = createOrderWebhook;
-exports.sendOrderWebhook = sendOrderWebhook;

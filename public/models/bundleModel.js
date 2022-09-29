@@ -13,6 +13,7 @@ const createBundle = async (req) => {
           productSku: bp.product.sku,
           productName: bp.product.name,
           bundleName: name,
+          quantity: bp.quantity,
           product: {
             connect: {
               id: bp.product.id
@@ -30,7 +31,8 @@ const getAllBundles = async () => {
       bundleProduct: {
         select: {
           product: true,
-          productId: true
+          productId: true,
+          quantity: true
         }
       }
     }
@@ -48,7 +50,8 @@ const findBundleById = async (req) => {
       bundleProduct: {
         select: {
           product: true,
-          productId: true
+          productId: true,
+          quantity: true
         }
       }
     }
@@ -66,7 +69,8 @@ const findBundleByName = async (req) => {
       bundleProduct: {
         select: {
           product: true,
-          productId: true
+          productId: true,
+          quantity: true
         }
       }
     }
@@ -82,11 +86,12 @@ const updateBundle = async (req) => {
       name,
       description,
       bundleProduct: {
-        deleteMany :{},
+        deleteMany: {},
         create: bundleProduct.map((bp) => ({
           productSku: bp.product.sku,
           productName: bp.product.name,
           bundleName: name,
+          quantity: bp.quantity,
           product: {
             connect: {
               id: bp.product.id
