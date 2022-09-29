@@ -22,9 +22,11 @@ const createSupplier = async (req, res) => {
       log.error('ERR_SUPPLIER_CREATE-SUPPLIER', error.message);
       res.json(Error.http(error));
     } else {
-      supplierProducts.map(async p => {
-        await supplierModel.connectOrCreateSupplierProduct({ supplierId: data.id, productId: p.product.id, rate: p.rate })
-      })
+      if (supplierProducts !== []) {
+        supplierProducts.map(async p => {
+          await supplierModel.connectOrCreateSupplierProduct({ supplierId: data.id, productId: p.product.id, rate: p.rate })
+        })
+      }
       log.out('OK_SUPPLIER_CREATE-SUPPLIER');
       res.json({ message: 'supplier created' });
     }
@@ -70,27 +72,55 @@ const getSupplierByName = async (req, res) => {
 };
 
 const updateSupplier = async (req, res) => {
-  const { id, email, name, address } = req.body;
-  const { error } = await common.awaitWrap(
-    supplierModel.updateSupplier({ id, email, name, address })
+  const { id, email, name, address, supplierProducts } = req.body;
+  const { data, error } = await common.awaitWrap(
+    supplierModel.updateSupplier({
+      id,
+      email,
+      name,
+      address,
+      supplierProducts
+    })
   );
   if (error) {
     log.error('ERR_SUPPLIER_UPDATE-SUPPLIER', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUPPLIER_UPDATE-SUPPLIER');
-    res.json({ message: `Updated supplier with id:${id}` });
+    res.json(data);
   }
 };
 
 const deleteSupplier = async (req, res) => {
   const { id } = req.params;
-  const { error } = await common.awaitWrap(
-    supplierModel.deleteSupplier({ id })
+  const { data, getAllProductsFromSupplierError } = await common.awaitWrap(
+    supplierModel.findProductsFromSupplier({ id })
   );
+  if (getAllProductsFromSupplierError) {
+    log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER');
+  }
+  const { error: deleteProductsError } = await common.awaitWrap(
+    Promise.allSettled(
+      data.map(async (p) => {
+        await supplierModel.deleteProductBySupplier({ supplierId: id, productId: p.productId });
+      })
+    )
+  );
+  if (deleteProductsError) {
+    log.error('ERR_SUPPLIER_DELETE-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+  const { error } = await common.awaitWrap(supplierModel.deleteSupplier({ id }));
   if (error) {
     log.error('ERR_SUPPLIER_DELETE-SUPPLIER', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUPPLIER_DELETE-SUPPLIER');
     res.json({ message: `Deleted supplier with id:${id}` });
