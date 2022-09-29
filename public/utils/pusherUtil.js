@@ -9,10 +9,8 @@ const pusher = new Pusher({
 });
 
 const pushNotification = () =>
-  setInterval(() => {
-    pusher.trigger('my-channel', 'my-event', {
-      message: 'hello world'
-    });
-  }, 15000);
+  pusher.trigger('my-channel', 'my-event', {
+    message: 'hello world'
+  });
 
 exports.pushNotification = pushNotification;
