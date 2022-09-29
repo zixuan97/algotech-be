@@ -8,9 +8,9 @@ const pusher = new Pusher({
   useTLS: true
 });
 
-const pushNotification = () =>
+const sendPusherMsg = (data) =>
   pusher.trigger('my-channel', 'my-event', {
-    message: 'hello world'
+    data: JSON.stringify(data)
   });
 
-exports.pushNotification = pushNotification;
+exports.sendPusherMsg = sendPusherMsg;
