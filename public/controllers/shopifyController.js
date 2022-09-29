@@ -4,6 +4,7 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const CryptoJS = require('crypto-js');
+const pusherUtil = require('../utils/pusherUtil');
 const bundleModel = require('../models/bundleModel');
 
 const addShopifyOrders = async (req, res) => {
@@ -161,6 +162,7 @@ const createOrderWebhook = async (req, res, next) => {
       });
       log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
       res.json({ message: 'order received' });
+      pusherUtil.sendPusherMsg(salesOrderData);
 
       // return sendEventsToAll(salesOrderData);
     } else {

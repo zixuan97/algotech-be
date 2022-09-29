@@ -8,9 +8,9 @@ const pusher = new Pusher({
   useTLS: true
 });
 
-const pushNotification = () =>
-  pusher.trigger('my-channel', 'my-event', {
-    message: 'hello world'
+const sendPusherMsg = (data) =>
+  pusher.trigger('algotech-pusher', 'shopify-webhook', {
+    data: JSON.stringify(data)
   });
 
-exports.pushNotification = pushNotification;
+exports.sendPusherMsg = sendPusherMsg;
