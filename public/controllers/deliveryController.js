@@ -7,6 +7,8 @@ const { log } = require('../helpers/logger');
 const { ShippingType, DeliveryMode, OrderStatus } = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
 const axios = require('axios');
+const { generateDeliveryOrderPdfTemplate } = require('../helpers/pdf');
+const { format } = require('date-fns');
 
 const createDeliveryOrder = async (req, res) => {
   const { shippingType, courierType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, parcelQty, parcelWeight, salesOrderId, assignedUserId } = req.body;
@@ -404,6 +406,39 @@ const getLatLong = async (req, res) => {
     })).then(() => res.json(dataRes));
 };
 
+const generateDO = async (req, res) => {
+  const doId = req.params;
+  const deliveryOrder = await deliveryModel.findDeliveryOrderById(doId);
+  const { deliveryDate, shippingDate, carrier, comments, salesOrderId, deliveryMode, shippingType, assignedUserId } = deliveryOrder;
+  const deliveryDateFormatted = format(deliveryDate, 'dd MMM yyyy');
+  const shippingDateFormatted = format(shippingDate, 'dd MMM yyyy');
+  const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
+  const assignedUser = await userModel.findUserById({ id: assignedUserId });
+  await generateDeliveryOrderPdfTemplate({
+    deliveryDateFormatted,
+    shippingDateFormatted,
+    carrier,
+    comments,
+    deliveryMode,
+    shippingType,
+    salesOrder,
+    assignedUser
+  })
+    .then((pdfBuffer) => {
+      res
+        .writeHead(200, {
+          'Content-Length': Buffer.byteLength(pdfBuffer),
+          'Content-Type': 'application/pdf',
+          'Content-disposition': 'attachment; filename = test.pdf'
+        })
+        .end(pdfBuffer);
+    })
+    .catch((error) => {
+      log.error('ERR_PROCUREMENTORDER_GENERATE-DO-PDF', error.message);
+      return res.status(error).json(error.message);
+    });
+};
+
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
@@ -423,3 +458,4 @@ exports.getShippitOrderLabel = getShippitOrderLabel;
 exports.bookShippitDelivery = bookShippitDelivery;
 exports.getLatLong = getLatLong;
 exports.findDeliveriesWithTimeAndTypeFilter = findDeliveriesWithTimeAndTypeFilter;
+exports.generateDO = generateDO;
