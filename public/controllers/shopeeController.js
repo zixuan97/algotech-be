@@ -1,5 +1,6 @@
 const shopeeApi = require('../helpers/shopeeApi');
 const salesOrderModel = require('../models/salesOrderModel');
+const bundleModel = require('../models/bundleModel');
 const keyModel = require('../models/keyModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
@@ -107,13 +108,24 @@ const addShopeeOrders = async (req, res) => {
               currency: salesOrder.currency,
               amount: salesOrder.total_amount,
               customerRemarks: salesOrder.message_to_seller,
-              salesOrderItems: salesOrder.item_list.map((item) => {
-                return {
-                  productName: item.item_name.replace(/ *\[[^\]]*]/g, ''),
-                  price: item.model_discounted_price,
-                  quantity: item.model_quantity_purchased
-                };
-              })
+              salesOrderItems: await Promise.all(
+                salesOrder.item_list.map(async (item) => {
+                  console.log(item.item_name.replace(/ *\[[^\]]*]/g, ''));
+                  const bundle = await bundleModel.findBundleByName({
+                    name: item.item_name.replace(/ *\[[^\]]*]/g, '')
+                  });
+                  let salesOrderBundleItems = [];
+                  if (bundle) {
+                    salesOrderBundleItems = bundle.bundleProduct;
+                  }
+                  return {
+                    productName: item.item_name.replace(/ *\[[^\]]*]/g, ''),
+                    price: item.model_discounted_price,
+                    quantity: item.model_quantity_purchased,
+                    salesOrderBundleItems
+                  };
+                })
+              )
             });
           }
         })

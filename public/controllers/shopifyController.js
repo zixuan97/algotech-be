@@ -4,6 +4,7 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const CryptoJS = require('crypto-js');
+const bundleModel = require('../models/bundleModel');
 
 const addShopifyOrders = async (req, res) => {
   const { last_date, latestId, limit } = req.body;
@@ -31,13 +32,23 @@ const addShopifyOrders = async (req, res) => {
               createdTime: salesOrder.created_at,
               currency: salesOrder.currency,
               amount: salesOrder.current_total_price,
-              salesOrderItems: salesOrder.line_items.map((item) => {
-                return {
-                  productName: item.name.replace(/ *\[[^\]]*]/g, ''),
-                  price: item.price,
-                  quantity: item.quantity
-                };
-              })
+              salesOrderItems: await Promise.all(
+                salesOrder.line_items.map(async (item) => {
+                  const bundle = await bundleModel.findBundleByName({
+                    name: item.name.replace(/ *\[[^\]]*]/g, '')
+                  });
+                  let salesOrderBundleItems = [];
+                  if (bundle) {
+                    salesOrderBundleItems = bundle.bundleProduct;
+                  }
+                  return {
+                    productName: item.name.replace(/ *\[[^\]]*]/g, ''),
+                    price: item.price,
+                    quantity: item.quantity,
+                    salesOrderBundleItems
+                  };
+                })
+              )
             });
           }
         })
@@ -130,13 +141,23 @@ const createOrderWebhook = async (req, res, next) => {
         createdTime: salesOrder.created_at,
         currency: salesOrder.currency,
         amount: salesOrder.total_price,
-        salesOrderItems: salesOrder.line_items.map((item) => {
-          return {
-            productName: item.name.replace(/ *\[[^\]]*]/g, ''),
-            price: item.price,
-            quantity: item.quantity
-          };
-        })
+        salesOrderItems: await Promise.all(
+          salesOrder.line_items.map(async (item) => {
+            const bundle = await bundleModel.findBundleByName({
+              name: item.name.replace(/ *\[[^\]]*]/g, '')
+            });
+            let salesOrderBundleItems = [];
+            if (bundle) {
+              salesOrderBundleItems = bundle.bundleProduct;
+            }
+            return {
+              productName: item.name.replace(/ *\[[^\]]*]/g, ''),
+              price: item.price,
+              quantity: item.quantity,
+              salesOrderBundleItems
+            };
+          })
+        )
       });
       log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
       res.json({ message: 'order received' });
