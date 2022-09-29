@@ -2,6 +2,9 @@ const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const { generateSalesOrderExcel } = require('../helpers/excel');
+const { format } = require('date-fns');
+const productModel = require('../models/productModel');
 
 const createSalesOrder = async (req, res) => {
   const {
@@ -224,10 +227,30 @@ const findSalesOrderByOrderId = async (req, res) => {
 const updateSalesOrderStatus = async (req, res) => {
   try {
     const { id, orderStatus } = req.body;
-    const salesOrder = await salesOrderModel.updateSalesOrderStatus({
+    await salesOrderModel.updateSalesOrderStatus({
       id,
       orderStatus
     });
+    // if (orderStatus === 'DELIVERED') {
+    //   const salesOrder = await salesOrderModel.findSalesOrderById({ id });
+    //   salesOrder.map(async (so) => {
+    //     so.salesOrderItems.map(async (soi) => {
+    //       if (soi.salesOrderBundleItems.length === 0) {
+    //         const pdt = await productModel.findProductByName({
+    //           name: soi.productName
+    //         });
+    //         await stockQuantityModel.connectOrCreateStockQuantity({
+    //           productId: pdt.id,
+    //           productName: pdt.name,
+    //           productSku: pdt.sku,
+    //           locationId: location.id,
+    //           quantity: p.quantity,
+    //           locationName: po.warehouseName
+    //         });
+    //       }
+    //     });
+    //   });
+    // }
     log.out('OK_SALESORDER_UPDATE-SALESORDER-STATUS');
     res.json({
       message: `Successfully updated sales order status with id: ${id}`
@@ -237,6 +260,30 @@ const updateSalesOrderStatus = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
+};
+
+const generateExcel = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const salesOrders = await salesOrderModel.getAllSalesOrdersWithTimeFilter({
+    time_from: new Date(time_from),
+    time_to: new Date(time_to)
+  });
+  await generateSalesOrderExcel({ salesOrders })
+    .then((blob) => {
+      const timeElapsed = Date.now();
+      const today = new Date(timeElapsed);
+      res.type(blob.type);
+      blob.arrayBuffer().then((buf) => {
+        res.setHeader(
+          'Content-disposition',
+          `attachment; filename = SalesOrder${format(today, 'yyyyMMdd')}.xlsx`
+        );
+        res.send(Buffer.from(buf));
+      });
+    })
+    .catch((error) => {
+      return res.status(400).json(error.message);
+    });
 };
 
 const updateSalesOrder = async (req, res) => {
@@ -289,3 +336,4 @@ exports.findSalesOrderByOrderId = findSalesOrderByOrderId;
 exports.updateSalesOrder = updateSalesOrder;
 exports.updateSalesOrderStatus = updateSalesOrderStatus;
 exports.getOrdersByPlatformWithTimeFilter = getOrdersByPlatformWithTimeFilter;
+exports.generateExcel = generateExcel;

@@ -3,14 +3,14 @@ const prisma = new PrismaClient();
 
 const createSupplier = async (req) => {
   const { email, name, address } = req;
-
-  await prisma.supplier.create({
+  const supplier = await prisma.supplier.create({
     data: {
       email,
       name,
       address
     }
   });
+  return supplier;
 };
 
 const getAllSuppliers = async () => {
@@ -20,7 +20,6 @@ const getAllSuppliers = async () => {
 
 const findSupplierById = async (req) => {
   const { id } = req;
-
   const supplier = await prisma.supplier.findUnique({
     where: {
       id: Number(id)
@@ -29,27 +28,39 @@ const findSupplierById = async (req) => {
   return supplier;
 };
 
-const findSupplierByName = async (req) => {
-  const { name } = req;
+const findSupplierByEmail = async (req) => {
+  const { email } = req;
   const supplier = await prisma.supplier.findUnique({
     where: {
-      name
+      email
     }
   });
   return supplier;
 };
 
 const updateSupplier = async (req) => {
-  const { id, email, name, address } = req;
+  const { id, email, name, address, supplierProducts } = req;
   supplier = await prisma.supplier.update({
     where: { id },
     data: {
       email,
       name,
-      address
+      address,
+      supplierProduct: {
+        deleteMany: {},
+        create: supplierProducts.map(p => ({
+          productId: p.product.id,
+          rate: p.rate,
+        }))
+      }
     }
   });
-  return supplier;
+  const supplierPdts = await findProductsFromSupplier({ id });
+  const updatedSupplier = {
+    ...supplier,
+    supplierProducts: supplierPdts
+  }
+  return updatedSupplier;
 };
 
 const deleteSupplier = async (req) => {
@@ -91,11 +102,35 @@ const getAllSupplierProducts = async () => {
   return supplierProducts;
 };
 
+const findProductsFromSupplier = async (req) => {
+  const { id } = req;
+  const products = await prisma.SupplierProduct.findMany({
+    where: {
+      supplierId: Number(id)
+    }
+  });
+  return products;
+};
+
+const deleteProductBySupplier = async (req) => {
+  const { supplierId, productId } = req;
+  await prisma.SupplierProduct.delete({
+    where: {
+      supplierId_productId: {
+        supplierId: Number(supplierId),
+        productId: Number(productId)
+      }
+    }
+  });
+};
+
 exports.createSupplier = createSupplier;
 exports.getAllSuppliers = getAllSuppliers;
 exports.updateSupplier = updateSupplier;
 exports.deleteSupplier = deleteSupplier;
 exports.findSupplierById = findSupplierById;
-exports.findSupplierByName = findSupplierByName;
+exports.findSupplierByEmail = findSupplierByEmail;
 exports.connectOrCreateSupplierProduct = connectOrCreateSupplierProduct;
 exports.getAllSupplierProducts = getAllSupplierProducts;
+exports.findProductsFromSupplier = findProductsFromSupplier;
+exports.deleteProductBySupplier = deleteProductBySupplier;

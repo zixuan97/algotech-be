@@ -5,16 +5,13 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createSupplier = async (req, res) => {
-  const { email, name, address } = req.body;
-  var supplierEmails = [];
-  const suppliers = await supplierModel.getAllSuppliers({});
-  suppliers.map((s) => supplierEmails.push(s.email));
-  // if exists throw error
-  if (supplierEmails.includes(email)) {
+  const { email, name, address, supplierProducts } = req.body;
+  const supplier = await supplierModel.findSupplierByEmail({ email });
+  if (supplier) {
     log.error('ERR_PRODUCT_CREATE-SUPPLIER');
     res.status(400).json({ message: 'Supplier already exists' });
   } else {
-    const { error } = await common.awaitWrap(
+    const { data, error } = await common.awaitWrap(
       supplierModel.createSupplier({
         email,
         name,
@@ -25,6 +22,11 @@ const createSupplier = async (req, res) => {
       log.error('ERR_SUPPLIER_CREATE-SUPPLIER', error.message);
       res.json(Error.http(error));
     } else {
+      if (supplierProducts !== []) {
+        supplierProducts.map(async p => {
+          await supplierModel.connectOrCreateSupplierProduct({ supplierId: data.id, productId: p.product.id, rate: p.rate })
+        })
+      }
       log.out('OK_SUPPLIER_CREATE-SUPPLIER');
       res.json({ message: 'supplier created' });
     }
@@ -70,27 +72,55 @@ const getSupplierByName = async (req, res) => {
 };
 
 const updateSupplier = async (req, res) => {
-  const { id, email, name, address } = req.body;
-  const { error } = await common.awaitWrap(
-    supplierModel.updateSupplier({ id, email, name, address })
+  const { id, email, name, address, supplierProducts } = req.body;
+  const { data, error } = await common.awaitWrap(
+    supplierModel.updateSupplier({
+      id,
+      email,
+      name,
+      address,
+      supplierProducts
+    })
   );
   if (error) {
     log.error('ERR_SUPPLIER_UPDATE-SUPPLIER', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUPPLIER_UPDATE-SUPPLIER');
-    res.json({ message: `Updated supplier with id:${id}` });
+    res.json(data);
   }
 };
 
 const deleteSupplier = async (req, res) => {
   const { id } = req.params;
-  const { error } = await common.awaitWrap(
-    supplierModel.deleteSupplier({ id })
+  const { data, getAllProductsFromSupplierError } = await common.awaitWrap(
+    supplierModel.findProductsFromSupplier({ id })
   );
+  if (getAllProductsFromSupplierError) {
+    log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER');
+  }
+  const { error: deleteProductsError } = await common.awaitWrap(
+    Promise.allSettled(
+      data.map(async (p) => {
+        await supplierModel.deleteProductBySupplier({ supplierId: id, productId: p.productId });
+      })
+    )
+  );
+  if (deleteProductsError) {
+    log.error('ERR_SUPPLIER_DELETE-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+  const { error } = await common.awaitWrap(supplierModel.deleteSupplier({ id }));
   if (error) {
     log.error('ERR_SUPPLIER_DELETE-SUPPLIER', error.message);
-    res.json(Error.http(error));
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUPPLIER_DELETE-SUPPLIER');
     res.json({ message: `Deleted supplier with id:${id}` });
@@ -121,13 +151,40 @@ const getAllSupplierProducts = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     supplierModel.getAllSupplierProducts({})
   );
-
   if (error) {
     log.error('ERR_SUPPLIER_GET-ALL-SUPPLIER-PRODUCTS', error.message);
     res.json(Error.http(error));
   } else {
     log.out('OK_SUPPLIER_GET-ALL-SUPPLIER=PRODUCTS');
     res.json(data);
+  }
+};
+
+const getAllProductsBySupplier = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await common.awaitWrap(
+    supplierModel.findProductsFromSupplier({ id })
+  );
+  if (error) {
+    log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-BY-SUPPLIER', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-BY-SUPPLIER');
+    res.json(data);
+  }
+};
+
+const deleteProductBySupplier = async (req, res) => {
+  const { supplierId, productId } = req.params;
+  const { error } = await common.awaitWrap(
+    supplierModel.deleteProductBySupplier({ supplierId, productId })
+  );
+  if (error) {
+    log.error('ERR_SUPPLIER_DELETE-PRODUCT-BY-SUPPLIER', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_SUPPLIER_DELETE-PRODUCT-BY-SUPPLIER');
+    res.json({ message: `Deleted product id: ${productId} from supplier id: ${supplierId}` });
   }
 };
 
@@ -139,3 +196,5 @@ exports.getSupplier = getSupplier;
 exports.getSupplierByName = getSupplierByName;
 exports.addProductToSupplier = addProductToSupplier;
 exports.getAllSupplierProducts = getAllSupplierProducts;
+exports.getAllProductsBySupplier = getAllProductsBySupplier;
+exports.deleteProductBySupplier = deleteProductBySupplier;

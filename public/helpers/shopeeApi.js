@@ -105,20 +105,20 @@ const getOrderDetails = async (req) => {
     });
 };
 
-const getTrackingInfo = async (req) => {
+const getShopPerformance = async (req) => {
   const timestamp = Math.floor(new Date().getTime() / 1000);
-  const { access_token, order } = req;
-  const path = '/api/v2/order/get_tracking_info';
+  const { access_token } = req;
+  const path = '/api/v2/account_health/shop_performance';
   const baseString = partner_id + path + timestamp + access_token + shop_id;
   const token = await generateSign(process.env.SHOPEE_PARTNER_KEY, baseString);
-  url = `${host}${path}?partner_id=${partner_id}&timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}&order_sn=${order}`;
+  url = `${host}${path}?partner_id=${partner_id}&timestamp=${timestamp}&sign=${token}&access_token=${access_token}&shop_id=${shop_id}`;
 
   return await axios
     .get(url)
     .then((res) => {
       log.out('OK_ORDER_GET-SHOPEE-TRACKING-INFO');
       const response = res.data;
-      return response;
+      return response.response;
     })
     .catch((err) => {
       log.error('ERR_ORDER_GET-SHOPEE-TRACKING-INFO', err.message);
@@ -177,4 +177,4 @@ exports.getAllOrders = getAllOrders;
 exports.getOrderDetails = getOrderDetails;
 exports.downloadShippingDocument = downloadShippingDocument;
 exports.createShippingDocument = createShippingDocument;
-exports.getTrackingInfo = getTrackingInfo;
+exports.getShopPerformance = getShopPerformance;

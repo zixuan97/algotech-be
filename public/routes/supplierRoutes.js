@@ -9,5 +9,7 @@ router.put('/', supplierController.updateSupplier);
 router.delete('/:id', supplierController.deleteSupplier);
 router.post('/addProduct', supplierController.addProductToSupplier);
 router.get('/products/all', supplierController.getAllSupplierProducts);
+router.get('/products/:id', supplierController.getAllProductsBySupplier);
+router.delete('/:supplierId/:productId', supplierController.deleteProductBySupplier);
 
 module.exports = router;

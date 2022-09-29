@@ -1,12 +1,58 @@
 name: daily-cron
 on:
   schedule:
-    - cron: '0 22 * * 1-5'
+    - cron: '0 22 * * *'
 jobs:
-  cron:
+  cron_1:
     runs-on: ubuntu-latest
     steps:
       - name: Send Email Notification on Low Stocks
         run: |
           curl --request POST \
           --url 'https://algotech-be.vercel.app/product/alerts/excel'
+  cron_2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh Shopee Token
+        run: |
+          curl --request GET \
+          --url 'https://algotech-be.vercel.app/shopee'
+  cron_3:
+    runs-on: ubuntu-latest
+    needs: cron_2
+    steps:
+      - name: Get Shopee Orders
+        run: |
+          curl --location --request POST 'https://algotech-be.vercel.app/shopee/orders' \
+          --header 'Content-Type: application/json' \
+          --data-raw "{
+          \"time_from\": \"$(date +"%y-%m-%dT00:00:00.000Z")\",
+          \"time_to\": \"$(date +"%y-%m-%dT23:59:00.000Z")\",
+          \"page_size\": 20
+          }
+          "
+  cron_4:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Shopify Orders
+        run: |
+          curl https://algotech-be.vercel.app/shopify/orders\
+          --header 'Content-Type: application/json' \
+          --data-raw "{
+          \"last_date\": \"$(date +"%y-%m-%dT00:00:00.000Z")\",
+          \"limit\": 100
+          }
+          "
+  cron_5:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Lazada Orders
+        run: |
+          curl https://algotech-be.vercel.app/lazada/orders\
+          --header 'Content-Type: application/json' \
+          --data-raw "{
+          \"created_after\": \"$(date +"%y-%m-%dT00:00:00.000Z")\",
+          \"created_before\": \"$(date +"%y-%m-%dT23:59:00.000Z")\",
+          \"page_size\": 20
+          }
+          "

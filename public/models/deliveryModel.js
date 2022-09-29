@@ -94,21 +94,21 @@ const getAllShippitDeliveryOrders = async () => {
     };
     filterOrders.push(data);
   }
-  const ordersFromShippitWebsite = await getAllDeliveryOrdersFromShippit({});
-  for (let d of ordersFromShippitWebsite) {
-    const data = {
-      shippitTrackingNum: d.trackingNumber,
-      deliveryDate: d.scheduledDeliveryDate,
-      comments: d.description,
-      eta: d.estimatedDeliveryDatetime,
-      deliveryMode: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
-      shippingDate: d.scheduledDeliveryDate,
-      shippingType: ShippingType.SHIPPIT,
-      recipient: d.recipient,
-      deliveryAddress: d.deliveryAddress
-    };
-    filterOrders.push(data);
-  }
+  // const ordersFromShippitWebsite = await getAllDeliveryOrdersFromShippit({});
+  // for (let d of ordersFromShippitWebsite) {
+  //   const data = {
+  //     shippitTrackingNum: d.trackingNumber,
+  //     deliveryDate: d.scheduledDeliveryDate,
+  //     comments: d.description,
+  //     eta: d.estimatedDeliveryDatetime,
+  //     deliveryMode: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+  //     shippingDate: d.scheduledDeliveryDate,
+  //     shippingType: ShippingType.SHIPPIT,
+  //     recipient: d.recipient,
+  //     deliveryAddress: d.deliveryAddress
+  //   };
+  //   filterOrders.push(data);
+  // }
   return filterOrders;
 };
 
@@ -290,19 +290,39 @@ const cancelShippitOrder = async (req) => {
     });
 };
 
+// const confirmShippitOrder = async (req) => {
+//   const { trackingNumber } = req;
+//   const data = {};
+//   const api_path = `https://app.staging.shippit.com/api/5/orders/${trackingNumber}/confirm`;
+//   const token = await shippitApi.getToken({});
+//   const headerToken = `Bearer ${token}`;
+//   const options = {
+//     headers: {
+//       'Authorization': headerToken
+//     },
+//   };
+//   return await axios
+//     .put(api_path, data, options)
+//     .then((res) => {
+//       const response = res.data;
+//       return response.response;
+//     })
+//     .catch((err) => {
+//       log.error('ERR_CONFIRM-SHIPPIT-ORDER', err.message);
+//       throw err;
+//     });
+// };
+
 const confirmShippitOrder = async (req) => {
   const { trackingNumber } = req;
-  const data = {};
-  const api_path = `https://app.staging.shippit.com/api/5/orders/${trackingNumber}/confirm`;
-  const token = await shippitApi.getToken({});
-  const headerToken = `Bearer ${token}`;
+  const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNumber}/label`;
   const options = {
     headers: {
-      'Authorization': headerToken
+      'Authorization': process.env.SHIPPIT_API_KEY
     },
   };
   return await axios
-    .put(api_path, data, options)
+    .get(api_path, options)
     .then((res) => {
       const response = res.data;
       return response.response;
@@ -325,7 +345,7 @@ const getShippitOrderLabel = async (req) => {
     .get(api_path, options)
     .then((res) => {
       const response = res.data;
-      return response.response;
+      return response.response.qualified_url;
     })
     .catch((err) => {
       log.error('ERR_GET-SHIPPIT-ORDER-LABEL', err.message);
@@ -385,6 +405,36 @@ const findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = async (req) =>
   return salesOrderPostalCodes;
 };
 
+const findAssignedManualDeliveriesByUser = async (req) => {
+  const { id } = req;
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      assignedUserId: Number(id),
+      shippingType: ShippingType.MANUAL
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  return deliveryOrders;
+};
+
+const findAllUnassignedManualDeliveries = async () => {
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      assignedUser: null,
+      shippingType: ShippingType.MANUAL
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  return deliveryOrders;
+};
+
+
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
@@ -404,3 +454,5 @@ exports.bookShippitDelivery = bookShippitDelivery;
 exports.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter = findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter;
 exports.findDeliveriesBasedOnTimeFilter = findDeliveriesBasedOnTimeFilter;
 exports.findDeliveriesWithTimeAndTypeFilter = findDeliveriesWithTimeAndTypeFilter;
+exports.findAssignedManualDeliveriesByUser = findAssignedManualDeliveriesByUser;
+exports.findAllUnassignedManualDeliveries = findAllUnassignedManualDeliveries;
