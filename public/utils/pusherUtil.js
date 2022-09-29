@@ -9,7 +9,7 @@ const pusher = new Pusher({
 });
 
 const sendPusherMsg = (data) =>
-  pusher.trigger('my-channel', 'my-event', {
+  pusher.trigger('algotech-pusher', 'shopify-webhook', {
     data: JSON.stringify(data)
   });
 
