@@ -76,6 +76,8 @@ const sendOrderWebhook = async (req, res) => {
     res.write('event: message\n'); // message event
     res.write('data:' + JSON.stringify({ test: 'test1' }));
     res.write('\n\n');
+    res.flush();
+    res.send(200);
   }, 10000);
 
   // const clientId = Date.now();
