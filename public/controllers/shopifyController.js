@@ -77,11 +77,9 @@ const clients = [];
 const sendOrderWebhook = async (req, res) => {
   const headers = {
     'Content-Type': 'text/event-stream',
+    'Content-Encoding': 'none',
     Connection: 'keep-alive',
-    'Cache-Control': 'no-cache',
-    'Access-Control-Allow-Origin': req.headers.origin,
-    'Access-Control-Expose-Headers': '*',
-    'Access-Control-Allow-Credentials': true
+    'Cache-Control': 'no-cache'
   };
   res.writeHead(200, headers);
   setInterval(() => {
@@ -89,6 +87,8 @@ const sendOrderWebhook = async (req, res) => {
     res.write('event: message\n'); // message event
     res.write('data:' + JSON.stringify({ test: 'test1' }));
     res.write('\n\n');
+    res.flush();
+    res.send(200);
   }, 10000);
 
   // const clientId = Date.now();

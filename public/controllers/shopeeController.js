@@ -68,14 +68,17 @@ const getAllOrders = async (req) => {
       page_size
     });
     const orderSN = orderList.response.order_list;
-
-    const orders = await orderSN.map((order) => order.order_sn);
-    const response = await shopeeApi.getOrderDetails({
-      access_token: access_token.value,
-      orders
-    });
-    log.out('OK_SHOPEE_GET-ALL-SHOPEE-ORDERS');
-    return response.response.order_list;
+    if (orderSN.length > 0) {
+      const orders = await orderSN.map((order) => order.order_sn);
+      const response = await shopeeApi.getOrderDetails({
+        access_token: access_token.value,
+        orders
+      });
+      log.out('OK_SHOPEE_GET-ALL-SHOPEE-ORDERS');
+      return response.response.order_list;
+    } else {
+      return [];
+    }
   }
 };
 

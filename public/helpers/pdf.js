@@ -188,7 +188,7 @@ const generateProcurementPdfTemplate = async (req) => {
 };
 
 const generateDeliveryOrderPdfTemplate = async (req) => {
-  const { id, deliveryDateFormatted, shippingDateFormatted, carrier, comments, deliveryMode, shippingType, salesOrder, assignedUser } = req;
+  const { id, createdAtFormatted, shippingDateFormatted, carrier, comments, deliveryMode, shippingType, salesOrder, assignedUser } = req;
 
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
@@ -240,7 +240,7 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
     .fill('grey')
     .fontSize(10)
     .text('DATE', leftAlign + 390, 225);
-  doc.fill('black').fontSize(8).text(salesOrder.customerAddress, leftAlign, 225);
+  doc.fill('black').fontSize(8).text(salesOrder.customerAddress, leftAlign, 225, { width: 120 });
   doc
     .fill('black')
     .fontSize(8)
@@ -252,7 +252,7 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(8)
-    .text(`POC: ${salesOrder.customerName} (${salesOrder.customerContactNo})`, leftAlign + 130, 240, { width: 90 });
+    .text(`POC: ${salesOrder.customerName} (${salesOrder.customerContactNo})`, leftAlign + 130, 270, { width: 90 });
   doc
     .fill('black')
     .fontSize(8)
@@ -268,7 +268,7 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(8)
-    .text(deliveryDateFormatted, leftAlign + 440, 225, { width: 120 });
+    .text(createdAtFormatted, leftAlign + 440, 225, { width: 120 });
 
   //DO information
   doc.fill('black').fontSize(10).text('SERVICE DATE', leftAlign, 300);
@@ -301,12 +301,12 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
   //table
   const tableTop = 310;
   let currentPosY = tableTop;
-  doc.text(deliveryDateFormatted, leftAlign, currentPosY + 15);
+  doc.text(createdAtFormatted, leftAlign, currentPosY + 15);
   for (let i = 0; i < soList.length; i++) {
     const name = soList[i].name;
     const quantity = soList[i].quantity;
     currentPosY = tableTop + 15 + i * 12;
-    doc.text(name, leftAlign + 150, currentPosY);
+    doc.text(name, leftAlign + 150, currentPosY, { width: 220 });
     doc.text(quantity, leftAlign + 430, currentPosY);
   }
 
