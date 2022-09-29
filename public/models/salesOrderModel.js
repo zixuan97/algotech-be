@@ -36,6 +36,14 @@ const createSalesOrder = async (req) => {
           quantity: so.quantity,
           productName: so.productName,
           price: Number(so.price),
+          salesOrderBundleItems: {
+            create: so.salesOrderBundleItems.map((bi) => {
+              return {
+                productName: bi.product.name,
+                quantity: bi.quantity
+              };
+            })
+          },
           createdTime
         }))
       }
@@ -107,7 +115,16 @@ const findSalesOrderById = async (req) => {
       id: Number(id)
     },
     include: {
-      salesOrderItems: true
+      salesOrderItems: {
+        select: {
+          productName: true,
+          price: true,
+          quantity: true,
+          salesOrderId: true,
+          createdTime: true,
+          salesOrderBundleItems: true
+        }
+      }
     }
   });
   return salesOrder;
@@ -120,7 +137,16 @@ const findSalesOrderByOrderId = async (req) => {
       orderId
     },
     include: {
-      salesOrderItems: true
+      salesOrderItems: {
+        select: {
+          productName: true,
+          price: true,
+          quantity: true,
+          salesOrderId: true,
+          createdTime: true,
+          salesOrderBundleItems: true
+        }
+      }
     }
   });
   return salesOrder;
@@ -176,6 +202,15 @@ const updateSalesOrder = async (req) => {
           quantity: so.quantity,
           productName: so.productName,
           price: Number(so.price),
+          salesOrderBundleItems: {
+            deleteMany: {},
+            create: so.salesOrderBundleItems.map((bi) => {
+              return {
+                productName: bi.product.name,
+                quantity: bi.quantity
+              };
+            })
+          },
           createdTime
         }))
       }
