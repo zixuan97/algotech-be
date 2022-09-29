@@ -12,7 +12,7 @@ const generateInventoryExcel = async (req) => {
         name: product.name,
         sku: product.sku,
         quantity: stockqty.quantity,
-        location: stockqty.locationName
+        location: stockqty.location.name
       };
       objects[count] = obj;
       count++;
