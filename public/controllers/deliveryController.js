@@ -343,6 +343,20 @@ const getToken = async (req, res) => {
   }
 };
 
+// const confirmShippitOrder = async (req, res) => {
+//   try {
+//     const { trackingNumber } = req.params;
+//     const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
+//     await deliveryModel.confirmShippitOrder({ trackingNumber });
+//     await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.SHIPPED });
+//     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
+//     res.json({ message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}` });
+//   } catch (error) {
+//     log.error('ERR_DELIVERY_CONFIRM-SHIPPIT-ORDER', error.message);
+//     res.json(Error.http(error));
+//   }
+// };
+
 const confirmShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
