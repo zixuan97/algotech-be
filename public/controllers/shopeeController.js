@@ -134,7 +134,7 @@ const getShopPerformance = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_SHOPEE_CREATE-KEY', error.message);
+    log.error('ERR_SHOPEE_GET-KEY', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -142,8 +142,15 @@ const getShopPerformance = async (req, res) => {
       const response = await shopeeApi.getShopPerformance({
         access_token: access_token.value
       });
+      const sellerPerformance = {
+        overallPerformance: response.overall_performance,
+        listingViolations: response.listing_violations,
+        fulfilment: response.fulfillment,
+        customerService: response.customer_service,
+        customerSatisfaction: response.customer_satisfaction
+      };
       log.out('OK_SHOPEE_GET-SHOP-PERFORMANCE');
-      res.json(response);
+      res.json(sellerPerformance);
     } catch (err) {
       log.error('ERR_SHOPEE_GET-SHOP-PERFORMANCE', err.message);
       const e = Error.http(err);
