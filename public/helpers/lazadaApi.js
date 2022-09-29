@@ -1,4 +1,7 @@
 const LazadaAPI = require('lazada-open-platform-sdk');
+const CryptoJS = require('crypto-js');
+const axios = require('axios');
+const { log } = require('../helpers/logger');
 
 const refreshToken = async (req) => {
   const aLazadaAPI = new LazadaAPI(
@@ -57,6 +60,41 @@ const getOrderItems = async (req) => {
   }
 };
 
+const generateSign = (path) => {
+  const encryptMessage = CryptoJS.HmacSHA256(
+    path,
+    process.env.LAZADA_APP_SECRET
+  ).toString(CryptoJS.enc.Hex);
+
+  let sign = encryptMessage.toUpperCase();
+
+  return sign;
+};
+
+const getSellerPerformance = async (req) => {
+  const { access_token } = req;
+  const timestamp = new Date().getTime();
+  const path = '/seller/performance/get';
+
+  const stringToSign = `${path}access_token${access_token}app_key${process.env.LAZADA_APP_KEY}sign_methodsha256timestamp${timestamp}`;
+  const sign = generateSign(stringToSign);
+
+  const url = `https://api.lazada.sg/rest${path}?app_key=${process.env.LAZADA_APP_KEY}&access_token=${access_token}&timestamp=${timestamp}&sign_method=sha256&sign=${sign}`;
+  console.log(url);
+  return await axios
+    .get(url)
+    .then((res) => {
+      log.out('OK_LAZADA_GET-SELLER-PERFORMANCE');
+      const response = res.data;
+      return response;
+    })
+    .catch((err) => {
+      log.error('ERR_LAZADA_GET-SELLER-PERFORMANCE', err.message);
+      throw err;
+    });
+};
+
 exports.refreshToken = refreshToken;
 exports.getOrderList = getOrderList;
 exports.getOrderItems = getOrderItems;
+exports.getSellerPerformance = getSellerPerformance;

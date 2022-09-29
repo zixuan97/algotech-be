@@ -103,5 +103,23 @@ const addLazadaOrders = async (req, res) => {
   }
 };
 
+const getSellerPerformance = async (req, res) => {
+  const { data: access_token, error } = await common.awaitWrap(
+    keyModel.findKeyByName({ key: 'lazada_access_token' })
+  );
+  if (error) {
+    log.error('ERR_LAZADA_GET-ACCESS-KEY', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LAZADA_GET-ACCESS-KEY');
+    const response = await lazadaApi.getSellerPerformance({
+      access_token: access_token.value
+    });
+    res.json(response);
+  }
+};
+
 exports.refreshToken = refreshToken;
 exports.addLazadaOrders = addLazadaOrders;
+exports.getSellerPerformance = getSellerPerformance;
