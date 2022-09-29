@@ -1,5 +1,6 @@
 const lazadaApi = require('../helpers/lazadaApi');
 const salesOrderModel = require('../models/salesOrderModel');
+const bundleModel = require('../models/bundleModel');
 const keyModel = require('../models/keyModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
@@ -66,6 +67,7 @@ const addLazadaOrders = async (req, res) => {
           const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
             orderId: salesOrder.order_number.toString()
           });
+          console.log(salesOrderDetails);
           if (!salesOrderDB) {
             return await salesOrderModel.createSalesOrder({
               orderId: salesOrder.order_number.toString(),
@@ -81,13 +83,23 @@ const addLazadaOrders = async (req, res) => {
               currency: 'SGD',
               amount: salesOrder.price,
               customerRemarks: salesOrder.remarks,
-              salesOrderItems: salesOrderDetails.data.map((item) => {
-                return {
-                  productName: item.sku.replace(/ *\[[^\]]*]/g, ''),
-                  price: item.item_price,
-                  quantity: 1
-                };
-              })
+              salesOrderItems: await Promise.all(
+                salesOrderDetails.data.map(async (item) => {
+                  const bundle = await bundleModel.findBundleByName({
+                    name: item.name.replace(/ *\[[^\]]*]/g, '')
+                  });
+                  let salesOrderBundleItems = [];
+                  if (bundle) {
+                    salesOrderBundleItems = bundle.bundleProduct;
+                  }
+                  return {
+                    productName: item.name.replace(/ *\[[^\]]*]/g, ''),
+                    price: item.item_price,
+                    quantity: 1,
+                    salesOrderBundleItems
+                  };
+                })
+              )
             });
           }
         })

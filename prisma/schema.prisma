@@ -91,6 +91,7 @@ model BundleProduct {
   productSku  String
   bundleName  String
   productName String
+  quantity    Int
   bundle      Bundle  @relation(fields: [bundleId], references: [id])
   product     Product @relation(fields: [productId], references: [id])
 
@@ -137,14 +138,23 @@ model Keys {
   value String @unique
 }
 
+model SalesOrderBundleItem {
+  id               Int            @id @default(autoincrement())
+  productName      String
+  quantity         Int
+  salesOrderItem   SalesOrderItem @relation(fields: [salesOrderItemId], references: [id])
+  salesOrderItemId Int
+}
+
 model SalesOrderItem {
-  id           Int        @id @default(autoincrement())
-  productName  String
-  price        Float
-  quantity     Int
-  salesOrderId Int
-  createdTime  DateTime
-  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
+  id                    Int                    @id @default(autoincrement())
+  productName           String
+  price                 Float
+  quantity              Int
+  salesOrderId          Int
+  createdTime           DateTime
+  salesOrderBundleItems SalesOrderBundleItem[]
+  salesOrder            SalesOrder             @relation(fields: [salesOrderId], references: [id])
 }
 
 model SalesOrder {
