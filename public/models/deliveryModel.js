@@ -290,19 +290,39 @@ const cancelShippitOrder = async (req) => {
     });
 };
 
+// const confirmShippitOrder = async (req) => {
+//   const { trackingNumber } = req;
+//   const data = {};
+//   const api_path = `https://app.staging.shippit.com/api/5/orders/${trackingNumber}/confirm`;
+//   const token = await shippitApi.getToken({});
+//   const headerToken = `Bearer ${token}`;
+//   const options = {
+//     headers: {
+//       'Authorization': headerToken
+//     },
+//   };
+//   return await axios
+//     .put(api_path, data, options)
+//     .then((res) => {
+//       const response = res.data;
+//       return response.response;
+//     })
+//     .catch((err) => {
+//       log.error('ERR_CONFIRM-SHIPPIT-ORDER', err.message);
+//       throw err;
+//     });
+// };
+
 const confirmShippitOrder = async (req) => {
   const { trackingNumber } = req;
-  const data = {};
-  const api_path = `https://app.staging.shippit.com/api/5/orders/${trackingNumber}/confirm`;
-  const token = await shippitApi.getToken({});
-  const headerToken = `Bearer ${token}`;
+  const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNumber}/label`;
   const options = {
     headers: {
-      'Authorization': headerToken
+      'Authorization': process.env.SHIPPIT_API_KEY
     },
   };
   return await axios
-    .put(api_path, data, options)
+    .get(api_path, options)
     .then((res) => {
       const response = res.data;
       return response.response;
@@ -325,7 +345,7 @@ const getShippitOrderLabel = async (req) => {
     .get(api_path, options)
     .then((res) => {
       const response = res.data;
-      return response.response;
+      return response.response.qualified_url;
     })
     .catch((err) => {
       log.error('ERR_GET-SHIPPIT-ORDER-LABEL', err.message);
