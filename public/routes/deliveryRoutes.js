@@ -23,5 +23,6 @@ router.get('/shippit/label/:trackingNumber', deliveryController.getShippitOrderL
 router.post('/shippit/book/:trackingNumber', deliveryController.bookShippitDelivery);
 router.post('/latlong', deliveryController.getLatLong);
 router.post('/timefilter/all', deliveryController.findDeliveriesWithTimeAndTypeFilter);
+router.post('/pdf/:id', deliveryController.generateDO);
 
 module.exports = router;
