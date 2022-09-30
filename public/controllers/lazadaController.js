@@ -41,6 +41,7 @@ const refreshToken = async (req, res) => {
 
 const addLazadaOrders = async (req, res) => {
   const { created_before, created_after, limit } = req.body;
+  console.log(req.body);
   const { data: access_token, error } = await common.awaitWrap(
     keyModel.findKeyByName({ key: 'lazada_access_token' })
   );
