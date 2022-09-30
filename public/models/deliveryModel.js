@@ -82,15 +82,20 @@ const getAllShippitDeliveryOrders = async () => {
     }
   });
   for (let dor of deliveryOrders) {
+    let deliveryModeString = '';
+    if (dor.deliveryMode === DeliveryMode.STANDARD) {
+      deliveryModeString = 'STANDARD';
+    } else if (dor.deliveryMode === DeliveryMode.EXPRESS) {
+      deliveryModeString = 'EXPRESS';
+    } else if (dor.deliveryMode === DeliveryMode.PRIORITY) {
+      deliveryModeString = 'PRIORITY';
+    }
     const data = {
       shippitTrackingNum: dor.shippitTrackingNum,
       deliveryDate: dor.deliveryDate,
       comments: dor.comments,
       eta: dor.eta,
-      deliveryMode:
-        dor.deliveryMode === 'standard'
-          ? DeliveryMode.STANDARD
-          : DeliveryMode.EXPRESS,
+      deliveryMode: deliveryModeString,
       shippingDate: dor.shippingDate,
       shippingType: ShippingType.SHIPPIT,
       recipient: {
