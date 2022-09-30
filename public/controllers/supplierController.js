@@ -72,22 +72,27 @@ const getSupplier = async (req, res) => {
   try {
     const { id } = req.params;
     const supplier = await supplierModel.findSupplierById({ id });
-    let data = [];
-    const supplierProduct = supplier.supplierProduct;
-    for (let sp of supplierProduct) {
-      const pdt = await productModel.findProductById({ id: sp.productId });
-      const newEntity = {
-        ...sp,
-        product: pdt
-      };
-      data.push(newEntity);
+    let result = {};
+    if (supplier !== null) {
+      let data = [];
+      const supplierProduct = supplier.supplierProduct;
+      for (let sp of supplierProduct) {
+        const pdt = await productModel.findProductById({ id: sp.productId });
+        const newEntity = {
+          ...sp,
+          product: pdt
+        };
+        data.push(newEntity);
+      }
+      result = {
+        ...supplier,
+        supplierProduct: data
+      }
+      log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID');
+      res.json(result);
+    } else {
+      res.json(null);
     }
-    const result = {
-      ...supplier,
-      supplierProduct: data
-    }
-    log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID');
-    res.json(result);
   } catch (error) {
     log.error('ERR_SUPPLIER_GET-SUPPLIER', error.message);
     res.status(500).send('Server Error');
