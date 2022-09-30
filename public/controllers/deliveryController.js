@@ -248,7 +248,7 @@ const cancelShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
     const deliveryOrder =
-      await deliveryModel.findDeliveryOrderByShippitTrackingNum({
+      await deliveryModel.findDeliveryOrderByTrackingNum({
         trackingNumber
       });
     await deliveryModel.cancelShippitOrder({ trackingNumber });
@@ -389,7 +389,7 @@ const getToken = async (req, res) => {
 const confirmShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
-    const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
+    const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
     await deliveryModel.confirmShippitOrder({ trackingNumber });
     const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: trackingNumber });
     deliveryModel.updateShippitStatus({
@@ -425,7 +425,7 @@ const getShippitOrderLabel = async (req, res) => {
 const bookShippitDelivery = async (req, res) => {
   const { trackingNumber } = req.params;
   try {
-    let deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
+    let deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
     const deliveryBooking = await deliveryModel.bookShippitDelivery({ trackingNumber });
     await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.DELIVERED });
     const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: trackingNumber });
