@@ -122,7 +122,8 @@ const findSalesOrderById = async (req) => {
           quantity: true,
           salesOrderId: true,
           createdTime: true,
-          salesOrderBundleItems: true
+          salesOrderBundleItems: true,
+          id: true
         }
       }
     }
@@ -144,7 +145,8 @@ const findSalesOrderByOrderId = async (req) => {
           quantity: true,
           salesOrderId: true,
           createdTime: true,
-          salesOrderBundleItems: true
+          salesOrderBundleItems: true,
+          id: true
         }
       }
     }
@@ -181,6 +183,14 @@ const updateSalesOrder = async (req) => {
     orderStatus,
     salesOrderItems
   } = req;
+  await Promise.all(
+    salesOrderItems.map(async (so) => {
+      await prisma.salesOrderBundleItem.deleteMany({
+        where: { salesOrderItemId: Number(so.id) }
+      });
+    })
+  );
+
   await prisma.salesOrder.update({
     where: {
       id: Number(id)
@@ -203,10 +213,9 @@ const updateSalesOrder = async (req) => {
           productName: so.productName,
           price: Number(so.price),
           salesOrderBundleItems: {
-            deleteMany: {},
             create: so.salesOrderBundleItems.map((bi) => {
               return {
-                productName: bi.product.name,
+                productName: bi.productName,
                 quantity: bi.quantity
               };
             })
