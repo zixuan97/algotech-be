@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: Get Shopify Orders
         run: |
-          curl https://algotech-be.vercel.app/shopify/orders\
+          curl --location --request POST 'https://algotech-be.vercel.app/shopify/orders' \
           --header 'Content-Type: application/json' \
           --data-raw "{
           \"last_date\": \"$(date —date="yesterday" +"%y-%m-%dT00:00:00.000Z")\",
@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: Get Lazada Orders
         run: |
-          curl https://algotech-be.vercel.app/lazada/orders\
+          curl --location --request POST 'https://algotech-be.vercel.app/lazada/orders' \
           --header 'Content-Type: application/json' \
           --data-raw "{
           \"created_after\": \"$(date —date="yesterday" +"%y-%m-%dT00:00:00.000Z")\",
