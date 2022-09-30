@@ -155,6 +155,21 @@ const findDeliveryOrderByTrackingNumber = async (req) => {
   return deliveryOrder[0];
 };
 
+const findDeliveryOrderBySalesOrderId = async (req) => {
+  const { salesOrderId } = req;
+  const deliveryOrder = await prisma.DeliveryOrder.findMany({
+    where: {
+      salesOrderId: Number(salesOrderId)
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true,
+      deliveryStatus: true
+    }
+  });
+  return deliveryOrder[0];
+};
+
 const updateDeliveryOrder = async (req) => {
   const {
     id,
@@ -530,6 +545,7 @@ exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.findDeliveryOrderById = findDeliveryOrderById;
+exports.findDeliveryOrderBySalesOrderId = findDeliveryOrderBySalesOrderId;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.cancelShippitOrder = cancelShippitOrder;
