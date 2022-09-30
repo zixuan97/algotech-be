@@ -1,7 +1,7 @@
 name: daily-cron
 on:
   schedule:
-    - cron: '0 22 * * *'
+    - cron: '35 12 * * *'
 jobs:
   cron_1:
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
           curl --location --request POST 'https://algotech-be.vercel.app/shopee/orders' \
           --header 'Content-Type: application/json' \
           --data-raw "{
-          \"time_from\": \"$(date +"%y-%m-%dT00:00:00.000Z")\",
+          \"time_from\": \"$(date —date="yesterday" +"%y-%m-%dT00:00:00.000Z")\",
           \"time_to\": \"$(date +"%y-%m-%dT23:59:00.000Z")\",
           \"page_size\": 20
           }
@@ -39,7 +39,7 @@ jobs:
           curl https://algotech-be.vercel.app/shopify/orders\
           --header 'Content-Type: application/json' \
           --data-raw "{
-          \"last_date\": \"$(date +"%y-%m-%dT00:00:00.000Z")\",
+          \"last_date\": \"$(date —date="yesterday" +"%y-%m-%dT00:00:00.000Z")\",
           \"limit\": 100
           }
           "
@@ -51,8 +51,8 @@ jobs:
           curl https://algotech-be.vercel.app/lazada/orders\
           --header 'Content-Type: application/json' \
           --data-raw "{
-          \"created_after\": \"$(date +"%y-%m-%dT00:00:00.000Z")\",
+          \"created_after\": \"$(date —date="yesterday" +"%y-%m-%dT00:00:00.000Z")\",
           \"created_before\": \"$(date +"%y-%m-%dT23:59:00.000Z")\",
-          \"page_size\": 20
+          \"limit\": 100
           }
           "
