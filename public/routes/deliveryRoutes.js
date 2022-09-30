@@ -27,5 +27,6 @@ router.post('/pdf/:id', deliveryController.generateDO);
 router.post('/deliveryAssignment/:id', deliveryController.getAllAssignedManualDeliveriesByUser);
 router.post('/getCurrentLatLng', deliveryController.getCurrentLocationLatLong);
 router.get('/unassigned/user', deliveryController.getAllUnassignedManualDeliveries);
+router.get('/track/:trackingNumber', deliveryController.getDeliveryOrderByTrackingNumber);
 
 module.exports = router;
