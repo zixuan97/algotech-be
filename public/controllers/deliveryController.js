@@ -4,14 +4,70 @@ const userModel = require('../models/userModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { sns } = require('../helpers/sns');
 const { ShippingType, DeliveryMode, OrderStatus } = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
 const axios = require('axios');
 const { generateDeliveryOrderPdfTemplate } = require('../helpers/pdf');
 const { format } = require('date-fns');
 
-const createDeliveryOrder = async (req, res) => {
+const createManualDeliveryOrder = async (req, res) => {
+  const {
+    shippingType,
+    shippingDate,
+    deliveryDate,
+    carrier,
+    comments,
+    eta,
+    salesOrderId,
+    assignedUserId
+  } = req.body;
+  let salesOrder = await salesOrderModel.findSalesOrderById({
+    id: salesOrderId
+  });
+  let assignedUser = {};
+  if (assignedUserId !== undefined) {
+    assignedUser = await userModel.findUserById({ id: assignedUserId });
+  }
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.createDeliveryOrder({
+      shippingType,
+      shippingDate,
+      deliveryDate,
+      comments,
+      eta,
+      shippitTrackingNum: null,
+      carrier,
+      salesOrderId,
+      assignedUserId
+    })
+  );
+  await salesOrderModel.updateSalesOrderStatus({
+    id: salesOrder.id,
+    orderStatus: OrderStatus.READY_FOR_DELIVERY
+  });
+  if (error) {
+    log.error('ERR_DELIVERYORDER_CREATE-MANUAL-DO', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_DELIVERYORDER_CREATE-MANUAL-DO');
+    const result = {
+      id: data.id,
+      shippingType,
+      shippingDate,
+      deliveryDate,
+      eta,
+      comments,
+      carrier,
+      orderStatus: OrderStatus.READY_FOR_DELIVERY,
+      salesOrder,
+      assignedUser
+    };
+    res.json(result);
+  }
+};
+
+const createShippitDeliveryOrder = async (req, res) => {
   const {
     shippingType,
     courierType,
@@ -23,37 +79,29 @@ const createDeliveryOrder = async (req, res) => {
     eta,
     parcelQty,
     parcelWeight,
-    salesOrderId,
-    assignedUserId
+    salesOrderId
   } = req.body;
   let salesOrder = await salesOrderModel.findSalesOrderById({
     id: salesOrderId
   });
-  let assignedUser = {};
-  if (assignedUserId !== undefined) {
-    assignedUser = await userModel.findUserById({ id: assignedUserId });
-  }
   const name = salesOrder.customerName.split(' ');
-  let soShippit;
-  if (shippingType === ShippingType.SHIPPIT) {
-    soShippit = await deliveryModel.sendDeliveryOrderToShippit({
-      courier_type: courierType,
-      delivery_address: salesOrder.customerAddress,
-      delivery_postcode: salesOrder.postalCode,
-      delivery_state: 'Singapore',
-      delivery_suburb: 'SG',
-      courier_allocation: carrier,
-      parcelQty,
-      parcelWeight,
-      email:
-        salesOrder.customerEmail === null
-          ? 'zac@thekettlegourmet.com'
-          : salesOrder.customerEmail,
-      first_name: name[0],
-      last_name: name[1] === '' ? '' : name[1]
-    });
-    log.out('OK_DELIVERYORDER_CREATE-DO-SHIPPIT');
-  }
+  const soShippit = await deliveryModel.sendDeliveryOrderToShippit({
+    courier_type: courierType,
+    delivery_address: salesOrder.customerAddress,
+    delivery_postcode: salesOrder.postalCode,
+    delivery_state: 'Singapore',
+    delivery_suburb: 'SG',
+    courier_allocation: carrier,
+    parcelQty,
+    parcelWeight,
+    email:
+      salesOrder.customerEmail === null
+        ? 'zac@thekettlegourmet.com'
+        : salesOrder.customerEmail,
+    first_name: name[0],
+    last_name: name[1] === '' ? '' : name[1]
+  });
+  log.out('OK_DELIVERYORDER_CREATE-DO-SHIPPIT');
   const { data, error } = await common.awaitWrap(
     deliveryModel.createDeliveryOrder({
       shippingType,
@@ -61,14 +109,10 @@ const createDeliveryOrder = async (req, res) => {
       deliveryDate,
       comments,
       eta,
-      shippitTrackingNum:
-        shippingType === ShippingType.SHIPPIT
-          ? soShippit.response.tracking_number
-          : null,
+      shippitTrackingNum: soShippit.response.tracking_number,
       deliveryMode,
       carrier,
-      salesOrderId,
-      assignedUserId
+      salesOrderId
     })
   );
   await salesOrderModel.updateSalesOrderStatus({
@@ -103,7 +147,6 @@ const createDeliveryOrder = async (req, res) => {
       orderStatus: OrderStatus.READY_FOR_DELIVERY,
       trackingNumber: data.shippitTrackingNum,
       salesOrder,
-      assignedUser,
       deliveryStatus: shippitOrder.track
     };
     res.json(result);
@@ -190,6 +233,22 @@ const getDeliveryOrderByTrackingNumber = async (req, res) => {
     res.json(result);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-DO-BY-TRACKING-NUMBER', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getDeliveryOrderBySalesOrderId = async (req, res) => {
+  try {
+    const { salesOrderId } = req.params;
+    const deliveryOrder = await deliveryModel.findDeliveryOrderBySalesOrderId({ salesOrderId });
+    const result = {
+      ...deliveryOrder,
+      deliveryStatus: deliveryOrder.deliveryStatus[deliveryOrder.deliveryStatus.length - 1]
+    }
+    log.out('OK_DELIVERY_GET-DO-BY-SO-ID');
+    res.json(result);
+  } catch (error) {
+    log.error('ERR_DELIVERY_GET-DO-BY-SO-ID', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -703,7 +762,8 @@ const generateDO = async (req, res) => {
     });
 };
 
-exports.createDeliveryOrder = createDeliveryOrder;
+exports.createManualDeliveryOrder = createManualDeliveryOrder;
+exports.createShippitDeliveryOrder = createShippitDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
 exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
@@ -711,6 +771,7 @@ exports.getAllGrabDeliveryOrders = getAllGrabDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.getDeliveryOrder = getDeliveryOrder;
+exports.getDeliveryOrderBySalesOrderId = getDeliveryOrderBySalesOrderId;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
