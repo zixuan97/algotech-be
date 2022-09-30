@@ -155,20 +155,6 @@ const findDeliveryOrderByTrackingNumber = async (req) => {
   return deliveryOrder[0];
 };
 
-const findDeliveryOrderByShippitTrackingNum = async (req) => {
-  const { trackingNumber } = req;
-  const deliveryOrder = await prisma.DeliveryOrder.findMany({
-    where: {
-      shippitTrackingNum: trackingNumber
-    },
-    include: {
-      salesOrder: true,
-      assignedUser: true
-    }
-  });
-  return deliveryOrder[0];
-};
-
 const updateDeliveryOrder = async (req) => {
   const {
     id,
@@ -547,8 +533,6 @@ exports.findDeliveryOrderById = findDeliveryOrderById;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.cancelShippitOrder = cancelShippitOrder;
-exports.findDeliveryOrderByShippitTrackingNum =
-  findDeliveryOrderByShippitTrackingNum;
 exports.confirmShippitOrder = confirmShippitOrder;
 exports.getShippitOrderLabel = getShippitOrderLabel;
 exports.bookShippitDelivery = bookShippitDelivery;
