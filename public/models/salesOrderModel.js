@@ -206,7 +206,7 @@ const updateSalesOrder = async (req) => {
             deleteMany: {},
             create: so.salesOrderBundleItems.map((bi) => {
               return {
-                productName: bi.product.name,
+                productName: bi.productName,
                 quantity: bi.quantity
               };
             })
