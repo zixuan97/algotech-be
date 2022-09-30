@@ -126,6 +126,21 @@ const findDeliveryOrderById = async (req) => {
   return deliveryOrder;
 };
 
+const findDeliveryOrderByTrackingNumber = async (req) => {
+  const { trackingNumber } = req;
+  const deliveryOrder = await prisma.DeliveryOrder.findUnique({
+    where: {
+      shippitTrackingNum: trackingNumber
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true,
+      deliveryStatus: true
+    }
+  });
+  return deliveryOrder;
+};
+
 const findDeliveryOrderByShippitTrackingNum = async (req) => {
   const { trackingNumber } = req;
   const deliveryOrder = await prisma.DeliveryOrder.findMany({
@@ -141,7 +156,7 @@ const findDeliveryOrderByShippitTrackingNum = async (req) => {
 };
 
 const updateDeliveryOrder = async (req) => {
-  const { id, shippingType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, assignedUserId } = req;
+  const { id, shippingType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, assignedUserId, deliveryStatus } = req;
   const deliveryOrder = await prisma.DeliveryOrder.update({
     where: { id },
     data: {
@@ -152,7 +167,8 @@ const updateDeliveryOrder = async (req) => {
       carrier,
       comments,
       eta,
-      assignedUserId
+      assignedUserId,
+      deliveryStatus
     }
   });
   return deliveryOrder;
@@ -434,6 +450,30 @@ const findAllUnassignedManualDeliveries = async () => {
   return deliveryOrders;
 };
 
+const updateShippitStatus = async (req) => {
+  const {
+    status,
+    statusOwner,
+    date,
+    timestamp,
+    deliveryOrderId
+  } = req;
+  const withUpdatedDeliveryStatus = await prisma.DeliveryStatus.create({
+    data: {
+      status,
+      statusOwner,
+      date,
+      timestamp,
+      deliveryOrder: {
+        connect: {
+          id: deliveryOrderId
+        }
+      }
+    }
+  });
+  return withUpdatedDeliveryStatus;
+};
+
 
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
@@ -456,3 +496,5 @@ exports.findDeliveriesBasedOnTimeFilter = findDeliveriesBasedOnTimeFilter;
 exports.findDeliveriesWithTimeAndTypeFilter = findDeliveriesWithTimeAndTypeFilter;
 exports.findAssignedManualDeliveriesByUser = findAssignedManualDeliveriesByUser;
 exports.findAllUnassignedManualDeliveries = findAllUnassignedManualDeliveries;
+exports.findDeliveryOrderByTrackingNumber = findDeliveryOrderByTrackingNumber;
+exports.updateShippitStatus = updateShippitStatus;

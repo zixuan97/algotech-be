@@ -59,6 +59,14 @@ const createDeliveryOrder = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_DELIVERYORDER_CREATE-DO');
+    const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: data.shippitTrackingNum });
+    deliveryModel.updateShippitStatus({
+      status: shippitOrder.track[0].status,
+      statusOwner: shippitOrder.track[0].status_owner,
+      date: shippitOrder.track[0].date,
+      timestamp: shippitOrder.track[0].timestamp,
+      deliveryOrderId: data.id
+    });
     const result = {
       id: data.id,
       shippingType,
@@ -71,7 +79,8 @@ const createDeliveryOrder = async (req, res) => {
       orderStatus: OrderStatus.READY_FOR_DELIVERY,
       trackingNumber: data.shippitTrackingNum,
       salesOrder,
-      assignedUser
+      assignedUser,
+      deliveryStatus: shippitOrder.track
     };
     res.json(result);
   }
@@ -141,6 +150,18 @@ const getDeliveryOrder = async (req, res) => {
     res.json(deliveryOrder);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-DO', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getDeliveryOrderByTrackingNumber = async (req, res) => {
+  try {
+    const { trackingNumber } = req.params;
+    const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
+    log.out('OK_DELIVERY_GET-DO-BY-TRACKING-NUMBER');
+    res.json(deliveryOrder);
+  } catch (error) {
+    log.error('ERR_DELIVERY_GET-DO-BY-TRACKING-NUMBER', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -231,6 +252,14 @@ const cancelShippitOrder = async (req, res) => {
         trackingNumber
       });
     await deliveryModel.cancelShippitOrder({ trackingNumber });
+    const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: trackingNumber });
+    deliveryModel.updateShippitStatus({
+      status: shippitOrder.track[0].status,
+      statusOwner: shippitOrder.track[0].status_owner,
+      date: shippitOrder.track[0].date,
+      timestamp: shippitOrder.track[0].timestamp,
+      deliveryOrderId: deliveryOrder.id
+    });
     await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.CANCELLED });
     log.out('OK_DELIVERY_CANCEL-SHIPPIT-ORDER');
     res.json({
@@ -362,6 +391,14 @@ const confirmShippitOrder = async (req, res) => {
     const { trackingNumber } = req.params;
     const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
     await deliveryModel.confirmShippitOrder({ trackingNumber });
+    const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: trackingNumber });
+    deliveryModel.updateShippitStatus({
+      status: shippitOrder.track[0].status,
+      statusOwner: shippitOrder.track[0].status_owner,
+      date: shippitOrder.track[0].date,
+      timestamp: shippitOrder.track[0].timestamp,
+      deliveryOrderId: deliveryOrder.id
+    });
     await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.SHIPPED });
     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
     res.json({ message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}` });
@@ -391,6 +428,14 @@ const bookShippitDelivery = async (req, res) => {
     let deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
     const deliveryBooking = await deliveryModel.bookShippitDelivery({ trackingNumber });
     await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.DELIVERED });
+    const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: trackingNumber });
+    deliveryModel.updateShippitStatus({
+      status: shippitOrder.track[0].status,
+      statusOwner: shippitOrder.track[0].status_owner,
+      date: shippitOrder.track[0].date,
+      timestamp: shippitOrder.track[0].timestamp,
+      deliveryOrderId: deliveryOrder.id
+    });
     log.out('OK_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY');
     res.json(deliveryBooking);
   } catch (error) {
@@ -523,3 +568,4 @@ exports.generateDO = generateDO;
 exports.getAllAssignedManualDeliveriesByUser = getAllAssignedManualDeliveriesByUser;
 exports.getCurrentLocationLatLong = getCurrentLocationLatLong;
 exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
+exports.getDeliveryOrderByTrackingNumber = getDeliveryOrderByTrackingNumber;

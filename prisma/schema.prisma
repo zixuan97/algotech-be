@@ -171,7 +171,7 @@ model SalesOrder {
   createdTime       DateTime
   customerRemarks   String?
   orderStatus       OrderStatus      @default(PAID)
-  DeliveryOrder     DeliveryOrder?
+  deliveryOrder     DeliveryOrder?
   salesOrderItems   SalesOrderItem[]
 }
 
@@ -183,23 +183,35 @@ model DeliveryOrder {
   carrier            String?
   salesOrderId       Int           @unique
   deliveryMode       DeliveryMode? @default(STANDARD)
-  shippingDate       DateTime
+  shippingDate       DateTime?
   shippingType       ShippingType  @default(MANUAL)
   assignedUserId     Int?
   comments           String?
   eta                DateTime?
   assignedUser       User?         @relation(fields: [assignedUserId], references: [id])
   salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
+  deliveryStatus     DeliveryStatus[]
 }
 
 model SupplierProduct {
   supplierId Int
   productId  Int
   rate       Float
-  Product    Product  @relation(fields: [productId], references: [id])
-  Supplier   Supplier @relation(fields: [supplierId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
 
   @@id([supplierId, productId])
+}
+
+model DeliveryStatus {
+  status           String
+  statusOwner      String
+  date             String
+  timestamp        String
+  deliveryOrderId  Int
+  deliveryOrder    DeliveryOrder  @relation(fields: [deliveryOrderId], references: [id]) 
+  
+  @@id([deliveryOrderId, date, timestamp])
 }
 
 enum OrderStatus {

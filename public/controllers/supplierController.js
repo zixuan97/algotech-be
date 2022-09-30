@@ -82,8 +82,12 @@ const getSupplier = async (req, res) => {
       };
       data.push(newEntity);
     }
+    const result = {
+      ...supplier,
+      supplierProduct: data
+    }
     log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID');
-    res.json(data);
+    res.json(result);
   } catch (error) {
     log.error('ERR_SUPPLIER_GET-SUPPLIER', error.message);
     res.status(500).send('Server Error');
