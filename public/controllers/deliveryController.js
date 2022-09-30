@@ -4,6 +4,7 @@ const userModel = require('../models/userModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const { sns } = require('../helpers/sns');
 const { ShippingType, DeliveryMode, OrderStatus } = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
 const axios = require('axios');
@@ -158,8 +159,12 @@ const getDeliveryOrderByTrackingNumber = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
     const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
+    const result = {
+      ...deliveryOrder,
+      deliveryStatus: deliveryOrder.deliveryStatus[deliveryOrder.deliveryStatus.length - 1]
+    }
     log.out('OK_DELIVERY_GET-DO-BY-TRACKING-NUMBER');
-    res.json(deliveryOrder);
+    res.json(result);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-DO-BY-TRACKING-NUMBER', error.message);
     res.status(500).send('Server Error');
@@ -248,7 +253,7 @@ const cancelShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
     const deliveryOrder =
-      await deliveryModel.findDeliveryOrderByTrackingNum({
+      await deliveryModel.findDeliveryOrderByTrackingNumber({
         trackingNumber
       });
     await deliveryModel.cancelShippitOrder({ trackingNumber });
