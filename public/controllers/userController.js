@@ -5,6 +5,7 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const emailHelper = require('../helpers/email');
+const { UserStatus } = require('@prisma/client');
 
 const createUser = async (req, res) => {
   const { firstName, lastName, email, role, isVerified } = req.body;
@@ -89,11 +90,12 @@ const auth = async (req, res) => {
   const user = await userModel.findUserByEmail({
     email
   });
-
-  if (
+  if (user.status === UserStatus.DISABLED) {
+    res.status(400).send('User has been disabled.');
+  } else if (
     user &&
     (await bcrypt.compare(password, user.password)) &&
-    user.status === 'ACTIVE'
+    user.status === UserStatus.ACTIVE
   ) {
     // Create token
     jwt.sign(

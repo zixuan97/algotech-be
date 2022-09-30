@@ -469,13 +469,14 @@ const getCurrentLocationLatLong = async (req, res) => {
 const generateDO = async (req, res) => {
   const doId = req.params;
   const deliveryOrder = await deliveryModel.findDeliveryOrderById(doId);
-  const { deliveryDate, shippingDate, carrier, comments, salesOrderId, deliveryMode, shippingType, assignedUserId } = deliveryOrder;
-  const deliveryDateFormatted = format(deliveryDate, 'dd MMM yyyy');
+  const { id, createdAt, deliveryDate, shippingDate, carrier, comments, salesOrderId, deliveryMode, shippingType, assignedUserId } = deliveryOrder;
+  const createdAtFormatted = format(createdAt, 'dd MMM yyyy');
   const shippingDateFormatted = format(shippingDate, 'dd MMM yyyy');
   const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
   const assignedUser = await userModel.findUserById({ id: assignedUserId });
   await generateDeliveryOrderPdfTemplate({
-    deliveryDateFormatted,
+    id,
+    createdAtFormatted,
     shippingDateFormatted,
     carrier,
     comments,

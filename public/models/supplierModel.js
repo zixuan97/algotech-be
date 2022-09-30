@@ -14,7 +14,11 @@ const createSupplier = async (req) => {
 };
 
 const getAllSuppliers = async () => {
-  const suppliers = await prisma.supplier.findMany({});
+  const suppliers = await prisma.supplier.findMany({
+    include: {
+      supplierProduct: true
+    }
+  });
   return suppliers;
 };
 
@@ -23,6 +27,9 @@ const findSupplierById = async (req) => {
   const supplier = await prisma.supplier.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      supplierProduct: true
     }
   });
   return supplier;
