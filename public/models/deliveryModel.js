@@ -128,7 +128,7 @@ const findDeliveryOrderById = async (req) => {
 
 const findDeliveryOrderByTrackingNumber = async (req) => {
   const { trackingNumber } = req;
-  const deliveryOrder = await prisma.DeliveryOrder.findUnique({
+  const deliveryOrder = await prisma.DeliveryOrder.findMany({
     where: {
       shippitTrackingNum: trackingNumber
     },
@@ -138,7 +138,7 @@ const findDeliveryOrderByTrackingNumber = async (req) => {
       deliveryStatus: true
     }
   });
-  return deliveryOrder;
+  return deliveryOrder[0];
 };
 
 const findDeliveryOrderByShippitTrackingNum = async (req) => {
