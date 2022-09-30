@@ -3,7 +3,6 @@ const app = express();
 const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const pusherUtil = require('./public/utils/pusherUtil');
 
 const corsWhitelist = [
   'http://localhost:3000',
@@ -51,7 +50,5 @@ const port = process.env.PORT || 4000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
-pusherUtil.pushNotification();
 
 module.exports = app;

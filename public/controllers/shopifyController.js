@@ -4,6 +4,7 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const CryptoJS = require('crypto-js');
+const pusherUtil = require('../utils/pusherUtil');
 const bundleModel = require('../models/bundleModel');
 
 const addShopifyOrders = async (req, res) => {
@@ -72,47 +73,6 @@ const verifyWebhook = (req) => {
   console.log(token === hmac_header);
   return token === hmac_header;
 };
-const clients = [];
-
-const sendOrderWebhook = async (req, res) => {
-  const headers = {
-    'Content-Type': 'text/event-stream',
-    'Content-Encoding': 'none',
-    Connection: 'keep-alive',
-    'Cache-Control': 'no-cache'
-  };
-  res.writeHead(200, headers);
-  setInterval(() => {
-    log.out('writing data');
-    res.write('event: message\n'); // message event
-    res.write('data:' + JSON.stringify({ test: 'test1' }));
-    res.write('\n\n');
-    res.flush();
-    res.send(200);
-  }, 10000);
-
-  // const clientId = Date.now();
-
-  // const newClient = {
-  //   id: clientId,
-  //   res
-  // };
-
-  // clients.push(newClient);
-  // log.out('New Client established', newClient.id);
-
-  // req.on('close', () => {
-  //   console.log(`${clientId} Connection closed`);
-  //   clients = clients.filter((client) => client.id !== clientId);
-  // });
-};
-
-const sendEventsToAll = (salesOrderData) => {
-  clients.forEach((client) => {
-    log.out('OK_SHOPIFY_WEBHOOK-SENT-ORDER');
-    client.res.write(`data: ${JSON.stringify(salesOrderData)}\n\n`);
-  });
-};
 
 const createOrderWebhook = async (req, res, next) => {
   const salesOrder = req.body;
@@ -161,8 +121,7 @@ const createOrderWebhook = async (req, res, next) => {
       });
       log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
       res.json({ message: 'order received' });
-
-      // return sendEventsToAll(salesOrderData);
+      pusherUtil.sendPusherMsg(salesOrderData);
     } else {
       res.json({ message: 'order already exists' });
     }
@@ -175,4 +134,3 @@ const createOrderWebhook = async (req, res, next) => {
 
 exports.addShopifyOrders = addShopifyOrders;
 exports.createOrderWebhook = createOrderWebhook;
-exports.sendOrderWebhook = sendOrderWebhook;
