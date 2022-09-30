@@ -90,7 +90,7 @@ const auth = async (req, res) => {
   const user = await userModel.findUserByEmail({
     email
   });
-  if (user.status === UserStatus.DISABLED) {
+  if (user && user.status === UserStatus.DISABLED) {
     res.status(400).send('User has been disabled.');
   } else if (
     user &&
