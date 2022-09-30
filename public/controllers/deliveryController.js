@@ -267,11 +267,15 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
-    const assignedUser = await userModel.findUserById({ id: d.assignedUserId });
+    let assignedUser = {};
+    if (d.assignedUserId !== null) {
+      assignedUser = await userModel.findUserById({ id: d.assignedUserId });
+    }
     const res = {
       id: d.id,
       shippingType: d.shippingType,
       shippingDate: d.shippingDate,
+      deliveryDate: d.deliveryDate,
       deliveryMode: d.deliveryMode,
       comments: d.comments,
       eta: d.eta,
@@ -280,14 +284,14 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
       assignedUser
     };
     result.push(res);
-  }
-  if (error) {
-    log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', error.message);
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY-DELIVERIES-TIME-TYPE-FILTER');
-    res.json(result);
-  }
+    }
+    if (error) {
+      log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', error.message);
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_DELIVERY-DELIVERIES-TIME-TYPE-FILTER');
+      res.json(result);
+    }
 };
 
 const updateDeliveryOrder = async (req, res) => {
@@ -307,7 +311,10 @@ const updateDeliveryOrder = async (req, res) => {
   const salesOrder = await salesOrderModel.findSalesOrderById({
     id: salesOrderId
   });
-  const assignedUser = await userModel.findUserById({ id: assignedUserId });
+  let assignedUser = {};
+  if (assignedUserId !== undefined) {
+    assignedUser = await userModel.findUserById({ id: assignedUserId });
+  }
   await salesOrderModel.updateSalesOrderStatus({
     id: salesOrderId,
     orderStatus
@@ -735,7 +742,10 @@ const generateDO = async (req, res) => {
   const salesOrder = await salesOrderModel.findSalesOrderById({
     id: salesOrderId
   });
-  const assignedUser = await userModel.findUserById({ id: assignedUserId });
+  let assignedUser = {};
+  if (d.assignedUserId !== undefined) {
+    assignedUser = await userModel.findUserById({ id: assignedUserId });
+  }
   await generateDeliveryOrderPdfTemplate({
     id,
     createdAtFormatted,

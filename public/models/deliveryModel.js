@@ -8,28 +8,28 @@ const { log } = require('../helpers/logger');
 const createDeliveryOrder = async (req) => {
   const {
     shippingType,
-    recipientEmail,
     shippingDate,
     deliveryDate,
-    deliveryPersonnel,
     shippitTrackingNum,
     deliveryMode,
     carrier,
+    comments,
+    eta,
     salesOrderId,
     assignedUserId
   } = req;
   return await prisma.DeliveryOrder.create({
     data: {
-      shippingType,
-      recipientEmail,
-      shippingDate,
       deliveryDate,
-      deliveryPersonnel,
       shippitTrackingNum,
-      deliveryMode,
       carrier,
       salesOrderId,
-      assignedUserId
+      deliveryMode,
+      shippingDate,
+      shippingType,
+      assignedUserId,
+      comments,
+      eta
     }
   });
 };
