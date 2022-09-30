@@ -15,18 +15,50 @@ router.get(
   '/shippit/latest/:trackingNum',
   deliveryController.getLastestTrackingInfoOfOrder
 );
-router.get('/shippit/orders/all', deliveryController.getAllShippitOrdersFromWebsite);
+router.get(
+  '/shippit/orders/all',
+  deliveryController.getAllShippitOrdersFromWebsite
+);
 router.get('/shippit/auth/token', deliveryController.getToken);
 router.post('/cancel/:trackingNumber', deliveryController.cancelShippitOrder);
-router.post('/shippit/confirm/:trackingNumber', deliveryController.confirmShippitOrder);
-router.get('/shippit/label/:trackingNumber', deliveryController.getShippitOrderLabel);
-router.post('/shippit/book/:trackingNumber', deliveryController.bookShippitDelivery);
+router.post(
+  '/shippit/confirm/:trackingNumber',
+  deliveryController.confirmShippitOrder
+);
+router.get(
+  '/shippit/label/:trackingNumber',
+  deliveryController.getShippitOrderLabel
+);
+router.post(
+  '/shippit/book/:trackingNumber',
+  deliveryController.bookShippitDelivery
+);
 router.post('/latlong', deliveryController.getLatLong);
-router.post('/timefilter/all', deliveryController.findDeliveriesWithTimeAndTypeFilter);
+router.post(
+  '/latlong/unassigned',
+  deliveryController.getLatLongForUnassignedOrders
+);
+router.post(
+  '/latlong/assigned',
+  deliveryController.getLatLongForAssignedOrders
+);
+router.post(
+  '/timefilter/all',
+  deliveryController.findDeliveriesWithTimeAndTypeFilter
+);
 router.post('/pdf/:id', deliveryController.generateDO);
-router.post('/deliveryAssignment/:id', deliveryController.getAllAssignedManualDeliveriesByUser);
+router.post(
+  '/deliveryAssignment/:id',
+  deliveryController.getAllAssignedManualDeliveriesByUser
+);
 router.post('/getCurrentLatLng', deliveryController.getCurrentLocationLatLong);
-router.get('/unassigned/user', deliveryController.getAllUnassignedManualDeliveries);
-router.get('/track/:trackingNumber', deliveryController.getDeliveryOrderByTrackingNumber);
+router.get(
+  '/unassigned/user',
+  deliveryController.getAllUnassignedManualDeliveries
+);
+router.get(
+  '/track/:trackingNumber',
+  deliveryController.getDeliveryOrderByTrackingNumber
+);
 
 module.exports = router;

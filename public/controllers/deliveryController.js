@@ -11,13 +11,28 @@ const { generateDeliveryOrderPdfTemplate } = require('../helpers/pdf');
 const { format } = require('date-fns');
 
 const createDeliveryOrder = async (req, res) => {
-  const { shippingType, courierType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, parcelQty, parcelWeight, salesOrderId, assignedUserId } = req.body;
-  let salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
+  const {
+    shippingType,
+    courierType,
+    shippingDate,
+    deliveryDate,
+    deliveryMode,
+    carrier,
+    comments,
+    eta,
+    parcelQty,
+    parcelWeight,
+    salesOrderId,
+    assignedUserId
+  } = req.body;
+  let salesOrder = await salesOrderModel.findSalesOrderById({
+    id: salesOrderId
+  });
   let assignedUser = {};
   if (assignedUserId !== undefined) {
     assignedUser = await userModel.findUserById({ id: assignedUserId });
   }
-  const name = salesOrder.customerName.split(" ");
+  const name = salesOrder.customerName.split(' ');
   let soShippit;
   if (shippingType === ShippingType.SHIPPIT) {
     soShippit = await deliveryModel.sendDeliveryOrderToShippit({
@@ -40,26 +55,34 @@ const createDeliveryOrder = async (req, res) => {
   }
   const { data, error } = await common.awaitWrap(
     deliveryModel.createDeliveryOrder({
-    shippingType,
-    shippingDate,
-    deliveryDate,
-    comments,
-    eta,
-    shippitTrackingNum: shippingType === ShippingType.SHIPPIT ? soShippit.response.tracking_number : null,
-    deliveryMode,
-    carrier,
-    salesOrderId,
-    assignedUserId
+      shippingType,
+      shippingDate,
+      deliveryDate,
+      comments,
+      eta,
+      shippitTrackingNum:
+        shippingType === ShippingType.SHIPPIT
+          ? soShippit.response.tracking_number
+          : null,
+      deliveryMode,
+      carrier,
+      salesOrderId,
+      assignedUserId
     })
   );
-  await salesOrderModel.updateSalesOrderStatus({ id: salesOrder.id, orderStatus: OrderStatus.READY_FOR_DELIVERY });
+  await salesOrderModel.updateSalesOrderStatus({
+    id: salesOrder.id,
+    orderStatus: OrderStatus.READY_FOR_DELIVERY
+  });
   if (error) {
     log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_DELIVERYORDER_CREATE-DO');
-    const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: data.shippitTrackingNum });
+    const shippitOrder = await deliveryModel.trackShippitOrder({
+      trackingNum: data.shippitTrackingNum
+    });
     deliveryModel.updateShippitStatus({
       status: shippitOrder.track[0].status,
       statusOwner: shippitOrder.track[0].status_owner,
@@ -157,7 +180,9 @@ const getDeliveryOrder = async (req, res) => {
 const getDeliveryOrderByTrackingNumber = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
-    const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
+    const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber(
+      { trackingNumber }
+    );
     log.out('OK_DELIVERY_GET-DO-BY-TRACKING-NUMBER');
     res.json(deliveryOrder);
   } catch (error) {
@@ -170,15 +195,17 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
   const { time_from, time_to, shippingType } = req.body;
   const { data, error } = await common.awaitWrap(
     deliveryModel.findDeliveriesWithTimeAndTypeFilter({
-    time_from: new Date(time_from),
-    time_to: new Date(time_to),
-    shippingType
+      time_from: new Date(time_from),
+      time_to: new Date(time_to),
+      shippingType
     })
   );
   let result = [];
   for (let d of data) {
-    const salesOrder = await salesOrderModel.findSalesOrderById({ id : d.salesOrderId });
-    const assignedUser = await userModel.findUserById({ id : d.assignedUserId });
+    const salesOrder = await salesOrderModel.findSalesOrderById({
+      id: d.salesOrderId
+    });
+    const assignedUser = await userModel.findUserById({ id: d.assignedUserId });
     const res = {
       id: d.id,
       shippingType: d.shippingType,
@@ -190,7 +217,7 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
       salesOrder,
       assignedUser
     };
-    result.push(res)
+    result.push(res);
   }
   if (error) {
     log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', error.message);
@@ -202,12 +229,39 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
 };
 
 const updateDeliveryOrder = async (req, res) => {
-  const { id, shippingType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, salesOrderId, assignedUserId, orderStatus } = req.body;
-  const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
+  const {
+    id,
+    shippingType,
+    shippingDate,
+    deliveryDate,
+    deliveryMode,
+    carrier,
+    comments,
+    eta,
+    salesOrderId,
+    assignedUserId,
+    orderStatus
+  } = req.body;
+  const salesOrder = await salesOrderModel.findSalesOrderById({
+    id: salesOrderId
+  });
   const assignedUser = await userModel.findUserById({ id: assignedUserId });
-  await salesOrderModel.updateSalesOrderStatus({ id: salesOrderId, orderStatus });
+  await salesOrderModel.updateSalesOrderStatus({
+    id: salesOrderId,
+    orderStatus
+  });
   const { data, error } = await common.awaitWrap(
-    deliveryModel.updateDeliveryOrder({ id, shippingType, shippingDate, deliveryDate, deliveryMode, carrier, comments, eta, assignedUserId })
+    deliveryModel.updateDeliveryOrder({
+      id,
+      shippingType,
+      shippingDate,
+      deliveryDate,
+      deliveryMode,
+      carrier,
+      comments,
+      eta,
+      assignedUserId
+    })
   );
   if (error) {
     log.error('ERR_DELIVERY_UPDATE-DO', error.message);
@@ -247,12 +301,13 @@ const deleteDeliveryOrder = async (req, res) => {
 const cancelShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
-    const deliveryOrder =
-      await deliveryModel.findDeliveryOrderByTrackingNum({
-        trackingNumber
-      });
+    const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNum({
+      trackingNumber
+    });
     await deliveryModel.cancelShippitOrder({ trackingNumber });
-    const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: trackingNumber });
+    const shippitOrder = await deliveryModel.trackShippitOrder({
+      trackingNum: trackingNumber
+    });
     deliveryModel.updateShippitStatus({
       status: shippitOrder.track[0].status,
       statusOwner: shippitOrder.track[0].status_owner,
@@ -260,7 +315,10 @@ const cancelShippitOrder = async (req, res) => {
       timestamp: shippitOrder.track[0].timestamp,
       deliveryOrderId: deliveryOrder.id
     });
-    await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.CANCELLED });
+    await salesOrderModel.updateSalesOrderStatus({
+      id: deliveryOrder.salesOrderId,
+      orderStatus: OrderStatus.CANCELLED
+    });
     log.out('OK_DELIVERY_CANCEL-SHIPPIT-ORDER');
     res.json({
       message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}`
@@ -348,7 +406,10 @@ const getAllShippitOrdersFromWebsite = async (req, res) => {
         deliveryDate: d.scheduledDeliveryDate,
         comments: d.description,
         eta: d.estimatedDeliveryDatetime,
-        deliveryMode: d.serviceLevel === "standard" ? DeliveryMode.STANDARD : DeliveryMode.EXPRESS,
+        deliveryMode:
+          d.serviceLevel === 'standard'
+            ? DeliveryMode.STANDARD
+            : DeliveryMode.EXPRESS,
         shippingDate: d.scheduledDeliveryDate,
         shippingType: ShippingType.SHIPPIT,
         recipient: d.recipient,
@@ -389,9 +450,13 @@ const getToken = async (req, res) => {
 const confirmShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
-    const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
+    const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber(
+      { trackingNumber }
+    );
     await deliveryModel.confirmShippitOrder({ trackingNumber });
-    const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: trackingNumber });
+    const shippitOrder = await deliveryModel.trackShippitOrder({
+      trackingNum: trackingNumber
+    });
     deliveryModel.updateShippitStatus({
       status: shippitOrder.track[0].status,
       statusOwner: shippitOrder.track[0].status_owner,
@@ -399,9 +464,14 @@ const confirmShippitOrder = async (req, res) => {
       timestamp: shippitOrder.track[0].timestamp,
       deliveryOrderId: deliveryOrder.id
     });
-    await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.SHIPPED });
+    await salesOrderModel.updateSalesOrderStatus({
+      id: deliveryOrder.salesOrderId,
+      orderStatus: OrderStatus.SHIPPED
+    });
     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
-    res.json({ message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}` });
+    res.json({
+      message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}`
+    });
   } catch (error) {
     log.error('ERR_DELIVERY_CONFIRM-SHIPPIT-ORDER', error.message);
     res.json(Error.http(error));
@@ -425,10 +495,19 @@ const getShippitOrderLabel = async (req, res) => {
 const bookShippitDelivery = async (req, res) => {
   const { trackingNumber } = req.params;
   try {
-    let deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
-    const deliveryBooking = await deliveryModel.bookShippitDelivery({ trackingNumber });
-    await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.DELIVERED });
-    const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum: trackingNumber });
+    let deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({
+      trackingNumber
+    });
+    const deliveryBooking = await deliveryModel.bookShippitDelivery({
+      trackingNumber
+    });
+    await salesOrderModel.updateSalesOrderStatus({
+      id: deliveryOrder.salesOrderId,
+      orderStatus: OrderStatus.DELIVERED
+    });
+    const shippitOrder = await deliveryModel.trackShippitOrder({
+      trackingNum: trackingNumber
+    });
     deliveryModel.updateShippitStatus({
       status: shippitOrder.track[0].status,
       statusOwner: shippitOrder.track[0].status_owner,
@@ -447,17 +526,22 @@ const bookShippitDelivery = async (req, res) => {
 
 const getLatLong = async (req, res) => {
   const { time_from, time_to } = req.body;
-  const salesOrderPostalCodes = await deliveryModel.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter({
-      time_from: new Date(time_from),
-      time_to: new Date(time_to)
-  });
+  const salesOrders =
+    await deliveryModel.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter(
+      {
+        time_from: new Date(time_from),
+        time_to: new Date(time_to)
+      }
+    );
   let dataRes = [];
-  Promise.allSettled(salesOrderPostalCodes.map(async (p) => {
-      const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+  Promise.allSettled(
+    salesOrders.map(async (p) => {
+      const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p.postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
       return await axios
         .get(url)
         .then((response) => {
           log.out('OK_DELIVERY_GET-LAT-LONG');
+          response.data.results[0].orders = p;
           dataRes.push(response.data.results[0]);
         })
         .catch((error) => {
@@ -465,9 +549,66 @@ const getLatLong = async (req, res) => {
           const e = Error.http(error);
           res.status(e.code).json(e.message);
         });
-    })).then(() => res.json(dataRes));
+    })
+  ).then(() => res.json(dataRes));
 };
 
+const getLatLongForAssignedOrders = async (req, res) => {
+  const { time_from, time_to, id } = req.body;
+  const salesOrders =
+    await deliveryModel.findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter(
+      {
+        time_from: new Date(time_from),
+        time_to: new Date(time_to),
+        id
+      }
+    );
+  let dataRes = [];
+  Promise.allSettled(
+    salesOrders.map(async (p) => {
+      const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p.postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+      return await axios
+        .get(url)
+        .then((response) => {
+          log.out('OK_DELIVERY_GET-LAT-LONG');
+          response.data.results[0].orders = p;
+          dataRes.push(response.data.results[0]);
+        })
+        .catch((error) => {
+          log.error('ERR_DELIVERY_GET-LAT-LONG', error.message);
+          const e = Error.http(error);
+          res.status(e.code).json(e.message);
+        });
+    })
+  ).then(() => res.json(dataRes));
+};
+
+const getLatLongForUnassignedOrders = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const salesOrders =
+    await deliveryModel.findSalesOrderPostalCodeForUnassignedManualDeliveries({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    });
+  let dataRes = [];
+  Promise.allSettled(
+    salesOrders.map(async (p) => {
+      const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p.postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+      return await axios
+        .get(url)
+        .then((response) => {
+          log.out('OK_DELIVERY_GET-LAT-LONG');
+          response.data.results[0].orders = p;
+          dataRes.push(response.data.results[0]);
+        })
+        .catch((error) => {
+          log.error('ERR_DELIVERY_GET-LAT-LONG', error.message);
+          const e = Error.http(error);
+          res.status(e.code).json(e.message);
+        });
+    })
+  ).then(() => res.json(dataRes));
+};
 const getAllAssignedManualDeliveriesByUser = async (req, res) => {
   const { id } = req.params;
   const { data, error } = await common.awaitWrap(
@@ -498,26 +639,39 @@ const getAllUnassignedManualDeliveries = async (req, res) => {
 const getCurrentLocationLatLong = async (req, res) => {
   const { address } = req.body;
   const url = `https://developers.onemap.sg/commonapi/search?returnGeom=Y&getAddrDetails=Y&pageNum=1&searchVal=${address}`;
-    return await axios
-      .get(url)
-      .then((response) => {
-        log.out('OK_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG');
-        res.json(response.data.results[0]);
-      })
-      .catch((error) => {
-        log.error('ERR_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG', error.message);
-        const e = Error.http(error);
-        res.status(e.code).json(e.message);
-      });
+  return await axios
+    .get(url)
+    .then((response) => {
+      log.out('OK_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG');
+      res.json(response.data.results[0]);
+    })
+    .catch((error) => {
+      log.error('ERR_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    });
 };
 
 const generateDO = async (req, res) => {
   const doId = req.params;
   const deliveryOrder = await deliveryModel.findDeliveryOrderById(doId);
-  const { id, createdAt, deliveryDate, shippingDate, carrier, comments, salesOrderId, deliveryMode, shippingType, assignedUserId } = deliveryOrder;
+  const {
+    id,
+    createdAt,
+    deliveryDate,
+    shippingDate,
+    carrier,
+    comments,
+    salesOrderId,
+    deliveryMode,
+    shippingType,
+    assignedUserId
+  } = deliveryOrder;
   const createdAtFormatted = format(createdAt, 'dd MMM yyyy');
   const shippingDateFormatted = format(shippingDate, 'dd MMM yyyy');
-  const salesOrder = await salesOrderModel.findSalesOrderById({ id: salesOrderId });
+  const salesOrder = await salesOrderModel.findSalesOrderById({
+    id: salesOrderId
+  });
   const assignedUser = await userModel.findUserById({ id: assignedUserId });
   await generateDeliveryOrderPdfTemplate({
     id,
@@ -563,9 +717,13 @@ exports.confirmShippitOrder = confirmShippitOrder;
 exports.getShippitOrderLabel = getShippitOrderLabel;
 exports.bookShippitDelivery = bookShippitDelivery;
 exports.getLatLong = getLatLong;
-exports.findDeliveriesWithTimeAndTypeFilter = findDeliveriesWithTimeAndTypeFilter;
+exports.findDeliveriesWithTimeAndTypeFilter =
+  findDeliveriesWithTimeAndTypeFilter;
 exports.generateDO = generateDO;
-exports.getAllAssignedManualDeliveriesByUser = getAllAssignedManualDeliveriesByUser;
+exports.getAllAssignedManualDeliveriesByUser =
+  getAllAssignedManualDeliveriesByUser;
 exports.getCurrentLocationLatLong = getCurrentLocationLatLong;
 exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
 exports.getDeliveryOrderByTrackingNumber = getDeliveryOrderByTrackingNumber;
+exports.getLatLongForUnassignedOrders = getLatLongForUnassignedOrders;
+exports.getLatLongForAssignedOrders = getLatLongForAssignedOrders;
