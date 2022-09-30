@@ -5,7 +5,7 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createSupplier = async (req, res) => {
-  const { email, name, address, supplierProducts } = req.body;
+  const { email, name, address, supplierProduct } = req.body;
   const supplier = await supplierModel.findSupplierByEmail({ email });
   if (supplier) {
     log.error('ERR_PRODUCT_CREATE-SUPPLIER');
@@ -22,8 +22,8 @@ const createSupplier = async (req, res) => {
       log.error('ERR_SUPPLIER_CREATE-SUPPLIER', error.message);
       res.json(Error.http(error));
     } else {
-      if (supplierProducts !== []) {
-        supplierProducts.map(async p => {
+      if (supplierProduct !== []) {
+        supplierProduct.map(async p => {
           await supplierModel.connectOrCreateSupplierProduct({ supplierId: data.id, productId: p.product.id, rate: p.rate })
         })
       }
@@ -37,13 +37,34 @@ const getAllSuppliers = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     supplierModel.getAllSuppliers({})
   );
-
   if (error) {
     log.error('ERR_SUPPLIER_GET-ALL-SUPPLIERS', error.message);
     res.json(Error.http(error));
   } else {
+    let finalRes = [];
+    for (let d of data) {
+      const supplierProduct = d.supplierProduct;
+      let supplierProducts = [];
+      for (let sp of supplierProduct) {
+        const pdt = await productModel.findProductById({ id: sp.productId });
+        const newEntity = {
+          ...sp,
+          product: pdt
+        };
+        supplierProducts.push(newEntity);
+      }
+      const result = {
+        id: d.id,
+        email: d.email,
+        name: d.name,
+        address: d.address,
+        supplierProduct: supplierProducts
+      };
+      finalRes.push(result);
+      supplierProducts = [];
+    }
     log.out('OK_SUPPLIER_GET-ALL-SUPPLIERS');
-    res.json(data);
+    res.json(finalRes);
   }
 };
 
@@ -51,8 +72,27 @@ const getSupplier = async (req, res) => {
   try {
     const { id } = req.params;
     const supplier = await supplierModel.findSupplierById({ id });
-    log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID');
-    res.json(supplier);
+    let result = {};
+    if (supplier !== null) {
+      let data = [];
+      const supplierProduct = supplier.supplierProduct;
+      for (let sp of supplierProduct) {
+        const pdt = await productModel.findProductById({ id: sp.productId });
+        const newEntity = {
+          ...sp,
+          product: pdt
+        };
+        data.push(newEntity);
+      }
+      result = {
+        ...supplier,
+        supplierProduct: data
+      }
+      log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID');
+      res.json(result);
+    } else {
+      res.json(null);
+    }
   } catch (error) {
     log.error('ERR_SUPPLIER_GET-SUPPLIER', error.message);
     res.status(500).send('Server Error');
@@ -72,14 +112,14 @@ const getSupplierByName = async (req, res) => {
 };
 
 const updateSupplier = async (req, res) => {
-  const { id, email, name, address, supplierProducts } = req.body;
+  const { id, email, name, address, supplierProduct } = req.body;
   const { data, error } = await common.awaitWrap(
     supplierModel.updateSupplier({
       id,
       email,
       name,
       address,
-      supplierProducts
+      supplierProduct
     })
   );
   if (error) {

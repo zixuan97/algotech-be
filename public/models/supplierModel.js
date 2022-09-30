@@ -14,7 +14,11 @@ const createSupplier = async (req) => {
 };
 
 const getAllSuppliers = async () => {
-  const suppliers = await prisma.supplier.findMany({});
+  const suppliers = await prisma.supplier.findMany({
+    include: {
+      supplierProduct: true
+    }
+  });
   return suppliers;
 };
 
@@ -23,6 +27,9 @@ const findSupplierById = async (req) => {
   const supplier = await prisma.supplier.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      supplierProduct: true
     }
   });
   return supplier;
@@ -39,7 +46,7 @@ const findSupplierByEmail = async (req) => {
 };
 
 const updateSupplier = async (req) => {
-  const { id, email, name, address, supplierProducts } = req;
+  const { id, email, name, address, supplierProduct } = req;
   supplier = await prisma.supplier.update({
     where: { id },
     data: {
@@ -48,7 +55,7 @@ const updateSupplier = async (req) => {
       address,
       supplierProduct: {
         deleteMany: {},
-        create: supplierProducts.map(p => ({
+        create: supplierProduct.map(p => ({
           productId: p.product.id,
           rate: p.rate,
         }))
@@ -58,7 +65,7 @@ const updateSupplier = async (req) => {
   const supplierPdts = await findProductsFromSupplier({ id });
   const updatedSupplier = {
     ...supplier,
-    supplierProducts: supplierPdts
+    supplierProduct: supplierPdts
   }
   return updatedSupplier;
 };
