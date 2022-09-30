@@ -37,13 +37,34 @@ const getAllSuppliers = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     supplierModel.getAllSuppliers({})
   );
-
   if (error) {
     log.error('ERR_SUPPLIER_GET-ALL-SUPPLIERS', error.message);
     res.json(Error.http(error));
   } else {
+    let finalRes = [];
+    for (let d of data) {
+      const supplierProduct = d.supplierProduct;
+      let supplierProducts = [];
+      for (let sp of supplierProduct) {
+        const pdt = await productModel.findProductById({ id: sp.productId });
+        const newEntity = {
+          ...sp,
+          product: pdt
+        };
+        supplierProducts.push(newEntity);
+      }
+      const result = {
+        id: d.id,
+        email: d.email,
+        name: d.name,
+        address: d.address,
+        supplierProduct: supplierProducts
+      };
+      finalRes.push(result);
+      supplierProducts = [];
+    }
     log.out('OK_SUPPLIER_GET-ALL-SUPPLIERS');
-    res.json(data);
+    res.json(finalRes);
   }
 };
 
@@ -51,8 +72,18 @@ const getSupplier = async (req, res) => {
   try {
     const { id } = req.params;
     const supplier = await supplierModel.findSupplierById({ id });
+    let data = [];
+    const supplierProduct = supplier.supplierProduct;
+    for (let sp of supplierProduct) {
+      const pdt = await productModel.findProductById({ id: sp.productId });
+      const newEntity = {
+        ...sp,
+        product: pdt
+      };
+      data.push(newEntity);
+    }
     log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID');
-    res.json(supplier);
+    res.json(data);
   } catch (error) {
     log.error('ERR_SUPPLIER_GET-SUPPLIER', error.message);
     res.status(500).send('Server Error');
