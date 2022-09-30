@@ -25,7 +25,7 @@ router.post(
 router.post('/', salesOrderController.createSalesOrder);
 router.post('/excel', salesOrderController.generateExcel);
 router.get('/id/:id', salesOrderController.findSalesOrderById);
-router.get('/orderid', salesOrderController.findSalesOrderByOrderId);
+router.get('/orderid/:orderId', salesOrderController.findSalesOrderByOrderId);
 router.put('/', salesOrderController.updateSalesOrder);
 router.put('/status', salesOrderController.updateSalesOrderStatus);
 module.exports = router;
