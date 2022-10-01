@@ -176,20 +176,20 @@ model SalesOrder {
 }
 
 model DeliveryOrder {
-  id                 Int           @id @default(autoincrement())
-  createdAt          DateTime      @default(now())
+  id                 Int              @id @default(autoincrement())
+  createdAt          DateTime         @default(now())
   deliveryDate       DateTime?
   shippitTrackingNum String?
   carrier            String?
-  salesOrderId       Int           @unique
-  deliveryMode       DeliveryMode? @default(STANDARD)
+  salesOrderId       Int              @unique
+  deliveryMode       DeliveryMode?    @default(STANDARD)
   shippingDate       DateTime?
-  shippingType       ShippingType  @default(MANUAL)
+  shippingType       ShippingType     @default(MANUAL)
   assignedUserId     Int?
   comments           String?
   eta                DateTime?
-  assignedUser       User?         @relation(fields: [assignedUserId], references: [id])
-  salesOrder         SalesOrder    @relation(fields: [salesOrderId], references: [id])
+  assignedUser       User?            @relation(fields: [assignedUserId], references: [id])
+  salesOrder         SalesOrder       @relation(fields: [salesOrderId], references: [id])
   deliveryStatus     DeliveryStatus[]
 }
 
@@ -204,13 +204,13 @@ model SupplierProduct {
 }
 
 model DeliveryStatus {
-  status           String
-  statusOwner      String
-  date             String
-  timestamp        String
-  deliveryOrderId  Int
-  deliveryOrder    DeliveryOrder  @relation(fields: [deliveryOrderId], references: [id]) 
-  
+  status          String
+  statusOwner     String
+  date            String
+  timestamp       String
+  deliveryOrderId Int
+  deliveryOrder   DeliveryOrder @relation(fields: [deliveryOrderId], references: [id])
+
   @@id([deliveryOrderId, date, timestamp, status])
 }
 

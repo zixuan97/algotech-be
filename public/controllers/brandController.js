@@ -148,3 +148,4 @@ exports.updateBrand = updateBrand;
 exports.deleteBrand = deleteBrand;
 exports.getBrand = getBrand;
 exports.getBrandByName = getBrandByName;
+//test
