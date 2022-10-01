@@ -92,7 +92,7 @@ const createOrderWebhook = async (req, res, next) => {
           salesOrder.customer.first_name + salesOrder.customer.last_name,
         customerAddress:
           salesOrder.customer.default_address.address1 +
-          salesOrder.customer.default_address.address2,
+            salesOrder.customer.default_address.address2 ?? '',
         customerContactNo: salesOrder.customer.default_address.phone,
         customerEmail: salesOrder.contact_email,
         postalCode: salesOrder.customer.default_address.zip,
