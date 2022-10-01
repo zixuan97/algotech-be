@@ -84,7 +84,6 @@ const createShippitDeliveryOrder = async (req, res) => {
   let salesOrder = await salesOrderModel.findSalesOrderById({
     id: salesOrderId
   });
-  const name = salesOrder.customerName.split(' ');
   const soShippit = await deliveryModel.sendDeliveryOrderToShippit({
     courier_type: courierType,
     delivery_address: salesOrder.customerAddress,
@@ -98,8 +97,8 @@ const createShippitDeliveryOrder = async (req, res) => {
       salesOrder.customerEmail === null
         ? 'zac@thekettlegourmet.com'
         : salesOrder.customerEmail,
-    first_name: name[0],
-    last_name: name[1] === '' ? '' : name[1]
+    first_name: salesOrder.customerName.split(' ')[0],
+    last_name: salesOrder.customerName.split(' ')[1] === '' ? '' : salesOrder.customerName.split(' ')[1]
   });
   log.out('OK_DELIVERYORDER_CREATE-DO-SHIPPIT');
   const { data, error } = await common.awaitWrap(
@@ -115,41 +114,47 @@ const createShippitDeliveryOrder = async (req, res) => {
       salesOrderId
     })
   );
-  await salesOrderModel.updateSalesOrderStatus({
-    id: salesOrder.id,
-    orderStatus: OrderStatus.READY_FOR_DELIVERY
-  });
   if (error) {
     log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_DELIVERYORDER_CREATE-DO');
-    const shippitOrder = await deliveryModel.trackShippitOrder({
-      trackingNum: data.shippitTrackingNum
+    await salesOrderModel.updateSalesOrderStatus({
+      id: salesOrder.id,
+      orderStatus: OrderStatus.READY_FOR_DELIVERY
     });
-    deliveryModel.updateShippitStatus({
-      status: shippitOrder.track[0].status,
-      statusOwner: shippitOrder.track[0].status_owner,
-      date: shippitOrder.track[0].date,
-      timestamp: shippitOrder.track[0].timestamp,
-      deliveryOrderId: data.id
-    });
-    const result = {
-      id: data.id,
-      shippingType,
-      shippingDate,
-      deliveryDate,
-      deliveryMode,
-      eta,
-      comments,
-      carrier,
-      orderStatus: OrderStatus.READY_FOR_DELIVERY,
-      trackingNumber: data.shippitTrackingNum,
-      salesOrder,
-      deliveryStatus: shippitOrder.track
-    };
-    res.json(result);
+    try {
+      const shippitOrder = await deliveryModel.trackShippitOrder({
+        trackingNum: soShippit.response.tracking_number
+      });
+      console.log(shippitOrder)
+      await deliveryModel.updateShippitStatus({
+        status: shippitOrder.track[0].status,
+        statusOwner: shippitOrder.track[0].status_owner,
+        date: shippitOrder.track[0].date,
+        timestamp: shippitOrder.track[0].timestamp,
+        deliveryOrderId: data.id
+      });
+      const result = {
+        id: data.id,
+        shippingType,
+        shippingDate,
+        deliveryDate,
+        deliveryMode,
+        eta,
+        comments,
+        carrier,
+        orderStatus: OrderStatus.READY_FOR_DELIVERY,
+        trackingNumber: data.shippitTrackingNum,
+        salesOrder,
+        deliveryStatus: shippitOrder.track
+      };
+      res.json(result);
+      log.out('OK_DELIVERYORDER_CREATE-DO');
+    } catch (error) {
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    }
   }
 };
 
