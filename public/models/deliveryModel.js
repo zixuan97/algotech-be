@@ -509,7 +509,6 @@ const findSalesOrderPostalCodeForUnassignedManualDeliveries = async (req) => {
   const deliveryOrders =
     await prisma.$queryRaw`select "id", "shippingType", "salesOrderId","assignedUserId" from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
   let salesOrders = [];
-  console.log(deliveryOrders);
   const filteredDeliveryOrders = deliveryOrders.filter(
     (x) => x.shippingType === ShippingType.MANUAL && x.assignedUserId === null
   );
@@ -552,45 +551,54 @@ const findAllUnassignedManualDeliveries = async () => {
 };
 
 const findAllAssignedManualDeliveriesByDate = async (req) => {
-  const { deliveryDate } = req;
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({
-    where: {
-      shippingType: ShippingType.MANUAL,
-    },
-    include: {
-      salesOrder: true,
-      assignedUser: true
-    }
-  });
-  let res = [];
-  await deliveryOrders.map(d => {
-    if ((d.deliveryDate.toDateString() === deliveryDate.toDateString()) && d.assignedUserId != null) {
-      res.push(d);
-    }
-  });
-  return res;
+  // const { deliveryDate } = req;
+  // const deliveryOrders = await prisma.DeliveryOrder.findMany({
+  //   where: {
+  //     shippingType: ShippingType.MANUAL,
+  //   },
+  //   include: {
+  //     salesOrder: true,
+  //     assignedUser: true
+  //   }
+  // });
+  // let res = [];
+  // await deliveryOrders.map(d => {
+  //   if ((d.deliveryDate.toDateString() === deliveryDate.toDateString()) && d.assignedUserId != null) {
+  //     res.push(d);
+  //   }
+  // });
+  // return res;
+  const { time_from, time_to } = req;
+  const deliveryOrders =
+    await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.MANUAL && x.assignedUserId !== null);
+  return filteredDeliveryOrders;
 };
 
 const findAllUnassignedManualDeliveriesByDate = async (req) => {
-  const { deliveryDate } = req;
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({
-    where: {
-      assignedUser: null,
-      shippingType: ShippingType.MANUAL,
-    },
-    include: {
-      salesOrder: true,
-      assignedUser: true
-    }
-  });
-  let res = [];
-  console.log("tgt", deliveryDate.toDateString());
-  await deliveryOrders.map(d => {
-    if (d.deliveryDate.toDateString() === deliveryDate.toDateString()) {
-      res.push(d);
-    }
-  });
-  return res;
+  // const { deliveryDate } = req;
+  // const deliveryOrders = await prisma.DeliveryOrder.findMany({
+  //   where: {
+  //     assignedUser: null,
+  //     shippingType: ShippingType.MANUAL,
+  //   },
+  //   include: {
+  //     salesOrder: true,
+  //     assignedUser: true
+  //   }
+  // });
+  // let res = [];
+  // await deliveryOrders.map(d => {
+  //   if (d.deliveryDate.toDateString() === deliveryDate.toDateString()) {
+  //     res.push(d);
+  //   }
+  // });
+  // return res;
+  const { time_from, time_to } = req;
+  const deliveryOrders =
+    await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.MANUAL && x.assignedUserId === null);
+  return filteredDeliveryOrders;
 };
 
 const updateShippitStatus = async (req) => {
