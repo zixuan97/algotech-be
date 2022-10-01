@@ -212,7 +212,7 @@ const findSalesOrderById = async (req, res) => {
 
 const findSalesOrderByOrderId = async (req, res) => {
   try {
-    const { orderId } = req.body;
+    const { orderId } = req.params;
     const salesOrder = await salesOrderModel.findSalesOrderByOrderId({
       orderId
     });

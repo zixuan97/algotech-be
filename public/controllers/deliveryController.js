@@ -4,14 +4,71 @@ const userModel = require('../models/userModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { sns } = require('../helpers/sns');
-const { ShippingType, DeliveryMode, OrderStatus } = require('@prisma/client');
+const { ShippingType, DeliveryMode, OrderStatus, PrismaClient } = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
 const axios = require('axios');
 const { generateDeliveryOrderPdfTemplate } = require('../helpers/pdf');
 const { format } = require('date-fns');
+const prisma = new PrismaClient();
 
-const createDeliveryOrder = async (req, res) => {
+const createManualDeliveryOrder = async (req, res) => {
+  const {
+    shippingType,
+    shippingDate,
+    deliveryDate,
+    carrier,
+    comments,
+    eta,
+    salesOrderId,
+    assignedUserId
+  } = req.body;
+  let salesOrder = await salesOrderModel.findSalesOrderById({
+    id: salesOrderId
+  });
+  let assignedUser = {};
+  if (assignedUserId !== undefined) {
+    assignedUser = await userModel.findUserById({ id: assignedUserId });
+  }
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.createDeliveryOrder({
+      shippingType,
+      shippingDate,
+      deliveryDate,
+      comments,
+      eta,
+      shippitTrackingNum: null,
+      carrier,
+      salesOrderId,
+      assignedUserId
+    })
+  );
+  await salesOrderModel.updateSalesOrderStatus({
+    id: salesOrder.id,
+    orderStatus: OrderStatus.READY_FOR_DELIVERY
+  });
+  if (error) {
+    log.error('ERR_DELIVERYORDER_CREATE-MANUAL-DO', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_DELIVERYORDER_CREATE-MANUAL-DO');
+    const result = {
+      id: data.id,
+      shippingType,
+      shippingDate,
+      deliveryDate,
+      eta,
+      comments,
+      carrier,
+      orderStatus: OrderStatus.READY_FOR_DELIVERY,
+      salesOrder,
+      assignedUser
+    };
+    res.json(result);
+  }
+};
+
+const createShippitDeliveryOrder = async (req, res) => {
   const {
     shippingType,
     courierType,
@@ -23,37 +80,28 @@ const createDeliveryOrder = async (req, res) => {
     eta,
     parcelQty,
     parcelWeight,
-    salesOrderId,
-    assignedUserId
+    salesOrderId
   } = req.body;
   let salesOrder = await salesOrderModel.findSalesOrderById({
     id: salesOrderId
   });
-  let assignedUser = {};
-  if (assignedUserId !== undefined) {
-    assignedUser = await userModel.findUserById({ id: assignedUserId });
-  }
-  const name = salesOrder.customerName.split(' ');
-  let soShippit;
-  if (shippingType === ShippingType.SHIPPIT) {
-    soShippit = await deliveryModel.sendDeliveryOrderToShippit({
-      courier_type: courierType,
-      delivery_address: salesOrder.customerAddress,
-      delivery_postcode: salesOrder.postalCode,
-      delivery_state: 'Singapore',
-      delivery_suburb: 'SG',
-      courier_allocation: carrier,
-      parcelQty,
-      parcelWeight,
-      email:
-        salesOrder.customerEmail === null
-          ? 'zac@thekettlegourmet.com'
-          : salesOrder.customerEmail,
-      first_name: name[0],
-      last_name: name[1] === '' ? '' : name[1]
-    });
-    log.out('OK_DELIVERYORDER_CREATE-DO-SHIPPIT');
-  }
+  const soShippit = await deliveryModel.sendDeliveryOrderToShippit({
+    courier_type: courierType,
+    delivery_address: salesOrder.customerAddress,
+    delivery_postcode: salesOrder.postalCode,
+    delivery_state: 'Singapore',
+    delivery_suburb: 'SG',
+    courier_allocation: carrier,
+    parcelQty,
+    parcelWeight,
+    email:
+      salesOrder.customerEmail === null
+        ? 'zac@thekettlegourmet.com'
+        : salesOrder.customerEmail,
+    first_name: salesOrder.customerName.split(' ')[0],
+    last_name: salesOrder.customerName.split(' ')[1] === '' ? '' : salesOrder.customerName.split(' ')[1]
+  });
+  log.out('OK_DELIVERYORDER_CREATE-DO-SHIPPIT');
   const { data, error } = await common.awaitWrap(
     deliveryModel.createDeliveryOrder({
       shippingType,
@@ -61,52 +109,55 @@ const createDeliveryOrder = async (req, res) => {
       deliveryDate,
       comments,
       eta,
-      shippitTrackingNum:
-        shippingType === ShippingType.SHIPPIT
-          ? soShippit.response.tracking_number
-          : null,
+      shippitTrackingNum: soShippit.response.tracking_number,
       deliveryMode,
       carrier,
-      salesOrderId,
-      assignedUserId
+      salesOrderId
     })
   );
-  await salesOrderModel.updateSalesOrderStatus({
-    id: salesOrder.id,
-    orderStatus: OrderStatus.READY_FOR_DELIVERY
-  });
   if (error) {
     log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_DELIVERYORDER_CREATE-DO');
-    const shippitOrder = await deliveryModel.trackShippitOrder({
-      trackingNum: data.shippitTrackingNum
+    await salesOrderModel.updateSalesOrderStatus({
+      id: salesOrder.id,
+      orderStatus: OrderStatus.READY_FOR_DELIVERY
     });
-    deliveryModel.updateShippitStatus({
-      status: shippitOrder.track[0].status,
-      statusOwner: shippitOrder.track[0].status_owner,
-      date: shippitOrder.track[0].date,
-      timestamp: shippitOrder.track[0].timestamp,
-      deliveryOrderId: data.id
-    });
-    const result = {
-      id: data.id,
-      shippingType,
-      shippingDate,
-      deliveryDate,
-      deliveryMode,
-      eta,
-      comments,
-      carrier,
-      orderStatus: OrderStatus.READY_FOR_DELIVERY,
-      trackingNumber: data.shippitTrackingNum,
-      salesOrder,
-      assignedUser,
-      deliveryStatus: shippitOrder.track
-    };
-    res.json(result);
+    try {
+      await deliveryModel.updateShippitStatus({
+        status: "order_placed",
+        statusOwner: "",
+        date: new Date(Date.now()).toDateString(),
+        timestamp: new Date(Date.now()).toTimeString(),
+        deliveryOrderId: data.id
+      });
+      const result = {
+        id: data.id,
+        shippingType,
+        shippingDate,
+        deliveryDate,
+        deliveryMode,
+        eta,
+        comments,
+        carrier,
+        orderStatus: OrderStatus.READY_FOR_DELIVERY,
+        trackingNumber: data.shippitTrackingNum,
+        salesOrder,
+        deliveryStatus: {
+          status: "order_placed",
+          statusOwner: "",
+          date: new Date(Date.now()).toDateString(),
+          timestamp: new Date(Date.now()).toTimeString(),
+          deliveryOrderId: data.id
+        }
+      };
+      res.json(result);
+      log.out('OK_DELIVERYORDER_CREATE-DO');
+    } catch (error) {
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    }
   }
 };
 
@@ -181,6 +232,7 @@ const getDeliveryOrder = async (req, res) => {
 const getDeliveryOrderByTrackingNumber = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
+    await deliveryModel.fetchLatestStatusFromShippitAndAddToStatus({ trackingNum: trackingNumber });
     const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
     const result = {
       ...deliveryOrder,
@@ -190,6 +242,22 @@ const getDeliveryOrderByTrackingNumber = async (req, res) => {
     res.json(result);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-DO-BY-TRACKING-NUMBER', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getDeliveryOrderBySalesOrderId = async (req, res) => {
+  try {
+    const { salesOrderId } = req.params;
+    const deliveryOrder = await deliveryModel.findDeliveryOrderBySalesOrderId({ salesOrderId });
+    const result = {
+      ...deliveryOrder,
+      deliveryStatus: deliveryOrder.deliveryStatus[deliveryOrder.deliveryStatus.length - 1]
+    }
+    log.out('OK_DELIVERY_GET-DO-BY-SO-ID');
+    res.json(result);
+  } catch (error) {
+    log.error('ERR_DELIVERY_GET-DO-BY-SO-ID', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -208,11 +276,15 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
-    const assignedUser = await userModel.findUserById({ id: d.assignedUserId });
+    let assignedUser = {};
+    if (d.assignedUserId !== null) {
+      assignedUser = await userModel.findUserById({ id: d.assignedUserId });
+    }
     const res = {
       id: d.id,
       shippingType: d.shippingType,
       shippingDate: d.shippingDate,
+      deliveryDate: d.deliveryDate,
       deliveryMode: d.deliveryMode,
       comments: d.comments,
       eta: d.eta,
@@ -221,14 +293,14 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
       assignedUser
     };
     result.push(res);
-  }
-  if (error) {
-    log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', error.message);
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY-DELIVERIES-TIME-TYPE-FILTER');
-    res.json(result);
-  }
+    }
+    if (error) {
+      log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', error.message);
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_DELIVERY-DELIVERIES-TIME-TYPE-FILTER');
+      res.json(result);
+    }
 };
 
 const updateDeliveryOrder = async (req, res) => {
@@ -248,7 +320,10 @@ const updateDeliveryOrder = async (req, res) => {
   const salesOrder = await salesOrderModel.findSalesOrderById({
     id: salesOrderId
   });
-  const assignedUser = await userModel.findUserById({ id: assignedUserId });
+  let assignedUser = {};
+  if (assignedUserId !== undefined) {
+    assignedUser = await userModel.findUserById({ id: assignedUserId });
+  }
   await salesOrderModel.updateSalesOrderStatus({
     id: salesOrderId,
     orderStatus
@@ -309,14 +384,11 @@ const cancelShippitOrder = async (req, res) => {
         trackingNumber
       });
     await deliveryModel.cancelShippitOrder({ trackingNumber });
-    const shippitOrder = await deliveryModel.trackShippitOrder({
-      trackingNum: trackingNumber
-    });
     deliveryModel.updateShippitStatus({
-      status: shippitOrder.track[0].status,
-      statusOwner: shippitOrder.track[0].status_owner,
-      date: shippitOrder.track[0].date,
-      timestamp: shippitOrder.track[0].timestamp,
+      status: "cancelled",
+      statusOwner: "",
+      date: new Date(Date.now()).toDateString(),
+      timestamp: new Date(Date.now()).toTimeString(),
       deliveryOrderId: deliveryOrder.id
     });
     await salesOrderModel.updateSalesOrderStatus({
@@ -458,19 +530,16 @@ const confirmShippitOrder = async (req, res) => {
       { trackingNumber }
     );
     await deliveryModel.confirmShippitOrder({ trackingNumber });
-    const shippitOrder = await deliveryModel.trackShippitOrder({
-      trackingNum: trackingNumber
-    });
-    deliveryModel.updateShippitStatus({
-      status: shippitOrder.track[0].status,
-      statusOwner: shippitOrder.track[0].status_owner,
-      date: shippitOrder.track[0].date,
-      timestamp: shippitOrder.track[0].timestamp,
-      deliveryOrderId: deliveryOrder.id
-    });
     await salesOrderModel.updateSalesOrderStatus({
       id: deliveryOrder.salesOrderId,
       orderStatus: OrderStatus.SHIPPED
+    });
+    await deliveryModel.updateShippitStatus({
+      status: "despatch_in_progress",
+      statusOwner: "",
+      date: new Date(Date.now()).toDateString(),
+      timestamp: new Date(Date.now()).toTimeString(),
+      deliveryOrderId: deliveryOrder.id
     });
     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
     res.json({
@@ -509,16 +578,14 @@ const bookShippitDelivery = async (req, res) => {
       id: deliveryOrder.salesOrderId,
       orderStatus: OrderStatus.DELIVERED
     });
-    const shippitOrder = await deliveryModel.trackShippitOrder({
-      trackingNum: trackingNumber
-    });
     deliveryModel.updateShippitStatus({
-      status: shippitOrder.track[0].status,
-      statusOwner: shippitOrder.track[0].status_owner,
-      date: shippitOrder.track[0].date,
-      timestamp: shippitOrder.track[0].timestamp,
+      status: "ready_for_pickup",
+      statusOwner: deliveryBooking[0].manifest_pdf,
+      date: new Date(Date.now()).toDateString(),
+      timestamp: new Date(Date.now()).toTimeString(),
       deliveryOrderId: deliveryOrder.id
     });
+    bookingManifestLabelLink = deliveryBooking.manifest_pdf;
     log.out('OK_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY');
     res.json(deliveryBooking);
   } catch (error) {
@@ -527,6 +594,18 @@ const bookShippitDelivery = async (req, res) => {
     res.status(e.code).json(e.message);
   }
 };
+
+const getBookingLabelLink = async (req, res) => {
+  const { trackingNumber } = req.params;
+  const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
+  const deliveryBooking = await prisma.DeliveryStatus.findMany({
+    where: {
+      deliveryOrderId: deliveryOrder.id,
+      status: "ready_for_pickup"
+    }
+  });
+  return res.json(deliveryBooking[0].statusOwner);
+}
 
 const getLatLong = async (req, res) => {
   const { time_from, time_to } = req.body;
@@ -640,6 +719,39 @@ const getAllUnassignedManualDeliveries = async (req, res) => {
   }
 };
 
+const getAssignedManualDeliveriesByDate = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAllAssignedManualDeliveriesByDate({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)})
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE');
+    res.json(data);
+  }
+};
+
+const getUnassignedManualDeliveriesByDate = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAllUnassignedManualDeliveriesByDate({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE');
+    res.json(data);
+  }
+};
+
 const getCurrentLocationLatLong = async (req, res) => {
   const { address } = req.body;
   const url = `https://developers.onemap.sg/commonapi/search?returnGeom=Y&getAddrDetails=Y&pageNum=1&searchVal=${address}`;
@@ -676,7 +788,10 @@ const generateDO = async (req, res) => {
   const salesOrder = await salesOrderModel.findSalesOrderById({
     id: salesOrderId
   });
-  const assignedUser = await userModel.findUserById({ id: assignedUserId });
+  let assignedUser = {};
+  if (d.assignedUserId !== undefined) {
+    assignedUser = await userModel.findUserById({ id: assignedUserId });
+  }
   await generateDeliveryOrderPdfTemplate({
     id,
     createdAtFormatted,
@@ -703,7 +818,8 @@ const generateDO = async (req, res) => {
     });
 };
 
-exports.createDeliveryOrder = createDeliveryOrder;
+exports.createManualDeliveryOrder = createManualDeliveryOrder;
+exports.createShippitDeliveryOrder = createShippitDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
 exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
@@ -711,6 +827,7 @@ exports.getAllGrabDeliveryOrders = getAllGrabDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.getDeliveryOrder = getDeliveryOrder;
+exports.getDeliveryOrderBySalesOrderId = getDeliveryOrderBySalesOrderId;
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
@@ -731,3 +848,6 @@ exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
 exports.getDeliveryOrderByTrackingNumber = getDeliveryOrderByTrackingNumber;
 exports.getLatLongForUnassignedOrders = getLatLongForUnassignedOrders;
 exports.getLatLongForAssignedOrders = getLatLongForAssignedOrders;
+exports.getBookingLabelLink = getBookingLabelLink;
+exports.getAssignedManualDeliveriesByDate = getAssignedManualDeliveriesByDate;
+exports.getUnassignedManualDeliveriesByDate = getUnassignedManualDeliveriesByDate;

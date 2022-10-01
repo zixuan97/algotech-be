@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const deliveryController = require('../controllers/deliveryController');
 
-router.post('/', deliveryController.createDeliveryOrder);
+router.post('/manual', deliveryController.createManualDeliveryOrder);
+router.post('/shippit', deliveryController.createShippitDeliveryOrder);
 router.get('/all', deliveryController.getAllDeliveryOrders);
 router.get('/manual/all', deliveryController.getAllManualDeliveryOrders);
 router.get('/grab/all', deliveryController.getAllGrabDeliveryOrders);
@@ -60,5 +61,9 @@ router.get(
   '/track/:trackingNumber',
   deliveryController.getDeliveryOrderByTrackingNumber
 );
+router.get('/sales/:salesOrderId', deliveryController.getDeliveryOrderBySalesOrderId);
+router.post('/bookinglabel/:trackingNumber', deliveryController.getBookingLabelLink);
+router.post('/assignedByDate', deliveryController.getAssignedManualDeliveriesByDate);
+router.post('/unassignedByDate', deliveryController.getUnassignedManualDeliveriesByDate);
 
 module.exports = router;
