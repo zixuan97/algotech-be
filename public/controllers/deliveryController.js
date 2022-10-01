@@ -232,6 +232,7 @@ const getDeliveryOrder = async (req, res) => {
 const getDeliveryOrderByTrackingNumber = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
+    await deliveryModel.fetchLatestStatusFromShippitAndAddToStatus({ trackingNum: trackingNumber });
     const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
     const result = {
       ...deliveryOrder,
