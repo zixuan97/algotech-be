@@ -609,6 +609,12 @@ const findAllAssignedManualDeliveriesByDateByUser = async (req) => {
     await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
     console.log(deliveryOrders)
   const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.MANUAL && x.assignedUserId === assignedUserId);
+  for (let d of filteredDeliveryOrders) {
+    const salesOrder = await salesOrderModel.findSalesOrderById({
+      id: d.salesOrderId
+    });
+    d.salesOrder = salesOrder;
+  }
   return filteredDeliveryOrders;
 };
 

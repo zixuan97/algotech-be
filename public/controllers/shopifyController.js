@@ -21,7 +21,7 @@ const addShopifyOrders = async (req, res) => {
             return await salesOrderModel.createSalesOrder({
               orderId: salesOrder.id.toString(),
               customerName:
-                salesOrder.customer.first_name + salesOrder.customer.last_name,
+                salesOrder.customer.first_name + ' ' + salesOrder.customer.last_name,
               customerAddress:
                 salesOrder.customer.default_address.address1 +
                 salesOrder.customer.default_address.address2,
