@@ -575,6 +575,33 @@ const findAllAssignedManualDeliveriesByDate = async (req) => {
   return filteredDeliveryOrders;
 };
 
+const findAllAssignedManualDeliveriesByDateByUser = async (req) => {
+  // const { deliveryDate } = req;
+  // const deliveryOrders = await prisma.DeliveryOrder.findMany({
+  //   where: {
+  //     shippingType: ShippingType.MANUAL,
+  //   },
+  //   include: {
+  //     salesOrder: true,
+  //     assignedUser: true
+  //   }
+  // });
+  // let res = [];
+  // await deliveryOrders.map(d => {
+  //   if ((d.deliveryDate.toDateString() === deliveryDate.toDateString()) && d.assignedUserId != null) {
+  //     res.push(d);
+  //   }
+  // });
+  // return res;
+  const { time_from, time_to, assignedUserId } = req;
+  console.log(typeof(assignedUserId))
+  const deliveryOrders =
+    await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+    console.log(deliveryOrders)
+  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.MANUAL && x.assignedUserId === assignedUserId);
+  return filteredDeliveryOrders;
+};
+
 const findAllUnassignedManualDeliveriesByDate = async (req) => {
   // const { deliveryDate } = req;
   // const deliveryOrders = await prisma.DeliveryOrder.findMany({
@@ -651,3 +678,4 @@ exports.findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter =
 exports.fetchLatestStatusFromShippitAndAddToStatus = fetchLatestStatusFromShippitAndAddToStatus;
 exports.findAllAssignedManualDeliveriesByDate = findAllAssignedManualDeliveriesByDate;
 exports.findAllUnassignedManualDeliveriesByDate = findAllUnassignedManualDeliveriesByDate;
+exports.findAllAssignedManualDeliveriesByDateByUser = findAllAssignedManualDeliveriesByDateByUser;
