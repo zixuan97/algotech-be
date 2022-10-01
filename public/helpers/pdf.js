@@ -252,7 +252,7 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(8)
-    .text(`POC: ${salesOrder.customerName} (${salesOrder.customerContactNo})`, leftAlign + 130, 270, { width: 90 });
+    .text(`POC: ${salesOrder.customerName} (${salesOrder.customerContactNo})`, leftAlign + 130, 260, { width: 90 });
   doc
     .fill('black')
     .fontSize(8)
@@ -260,7 +260,7 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
   doc
     .fill('grey')
     .fontSize(10)
-    .text(carrier, leftAlign + 320, 225);
+    .text(carrier, leftAlign + 320, 225, { width: 50 });
   doc
     .fill('black')
     .fontSize(8)
@@ -275,7 +275,7 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(10)
-    .text('PRODUCT/SERVICE', leftAlign + 150, 300);
+    .text('PRODUCT/SERVICE', leftAlign + 140, 300);
   doc
     .fill('black')
     .fontSize(10)
@@ -306,13 +306,13 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
     const name = soList[i].name;
     const quantity = soList[i].quantity;
     currentPosY = tableTop + 15 + i * 12;
-    doc.text(name, leftAlign + 150, currentPosY, { width: 220 });
+    doc.text(name, leftAlign + 140, currentPosY, { width: 230 });
     doc.text(quantity, leftAlign + 430, currentPosY);
   }
 
   doc
-    .moveTo(leftAlign - 50, currentPosY + 30) // set the current point
-    .lineTo(leftAlign + 1000, currentPosY + 30)
+    .moveTo(leftAlign - 50, currentPosY + 40) // set the current point
+    .lineTo(leftAlign + 1000, currentPosY + 40)
     .dash(5, { space: 2 })
     .stroke();
 
