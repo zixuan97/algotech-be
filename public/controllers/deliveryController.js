@@ -720,9 +720,11 @@ const getAllUnassignedManualDeliveries = async (req, res) => {
 };
 
 const getAssignedManualDeliveriesByDate = async (req, res) => {
-  const { deliveryDate } = req.body;
+  const { time_from, time_to } = req.body;
   const { data, error } = await common.awaitWrap(
-    deliveryModel.findAllAssignedManualDeliveriesByDate({ deliveryDate: new Date(deliveryDate) })
+    deliveryModel.findAllAssignedManualDeliveriesByDate({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)})
   );
   if (error) {
     log.error('ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', error.message);
@@ -734,9 +736,12 @@ const getAssignedManualDeliveriesByDate = async (req, res) => {
 };
 
 const getUnassignedManualDeliveriesByDate = async (req, res) => {
-  const { deliveryDate } = req.body;
+  const { time_from, time_to } = req.body;
   const { data, error } = await common.awaitWrap(
-    deliveryModel.findAllUnassignedManualDeliveriesByDate({ deliveryDate: new Date(deliveryDate) })
+    deliveryModel.findAllUnassignedManualDeliveriesByDate({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
   );
   if (error) {
     log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE', error.message);
