@@ -802,12 +802,12 @@ const generateDO = async (req, res) => {
     assignedUserId
   } = deliveryOrder;
   const createdAtFormatted = format(createdAt, 'dd MMM yyyy');
-  const shippingDateFormatted = format(shippingDate, 'dd MMM yyyy');
+  const shippingDateFormatted = format(deliveryDate, 'dd MMM yyyy');
   const salesOrder = await salesOrderModel.findSalesOrderById({
     id: salesOrderId
   });
   let assignedUser = {};
-  if (d.assignedUserId !== undefined) {
+  if (assignedUserId !== null) {
     assignedUser = await userModel.findUserById({ id: assignedUserId });
   }
   await generateDeliveryOrderPdfTemplate({
