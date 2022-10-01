@@ -62,4 +62,6 @@ router.get(
   deliveryController.getDeliveryOrderByTrackingNumber
 );
 router.get('/sales/:salesOrderId', deliveryController.getDeliveryOrderBySalesOrderId);
+router.post('/bookinglabel/:trackingNumber', deliveryController.getBookingLabelLink);
+
 module.exports = router;

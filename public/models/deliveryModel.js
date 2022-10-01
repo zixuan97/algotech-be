@@ -278,8 +278,6 @@ const sendDeliveryOrderToShippit = async (req) => {
 
 const trackShippitOrder = async (req) => {
   const { trackingNum } = req;
-  const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
-  await snooze(1000);
   const api_path = `https://app.staging.shippit.com/api/3/orders/${trackingNum}/tracking`;
   const options = {
     headers: {

@@ -4,11 +4,12 @@ const userModel = require('../models/userModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { ShippingType, DeliveryMode, OrderStatus } = require('@prisma/client');
+const { ShippingType, DeliveryMode, OrderStatus, PrismaClient } = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
 const axios = require('axios');
 const { generateDeliveryOrderPdfTemplate } = require('../helpers/pdf');
 const { format } = require('date-fns');
+const prisma = new PrismaClient();
 
 const createManualDeliveryOrder = async (req, res) => {
   const {
@@ -124,15 +125,11 @@ const createShippitDeliveryOrder = async (req, res) => {
       orderStatus: OrderStatus.READY_FOR_DELIVERY
     });
     try {
-      const shippitOrder = await deliveryModel.trackShippitOrder({
-        trackingNum: soShippit.response.tracking_number
-      });
-      console.log(shippitOrder)
       await deliveryModel.updateShippitStatus({
-        status: shippitOrder.track[0].status,
-        statusOwner: shippitOrder.track[0].status_owner,
-        date: shippitOrder.track[0].date,
-        timestamp: shippitOrder.track[0].timestamp,
+        status: "order_placed",
+        statusOwner: "",
+        date: new Date(Date.now()).toDateString(),
+        timestamp: new Date(Date.now()).toTimeString(),
         deliveryOrderId: data.id
       });
       const result = {
@@ -147,7 +144,13 @@ const createShippitDeliveryOrder = async (req, res) => {
         orderStatus: OrderStatus.READY_FOR_DELIVERY,
         trackingNumber: data.shippitTrackingNum,
         salesOrder,
-        deliveryStatus: shippitOrder.track
+        deliveryStatus: {
+          status: "order_placed",
+          statusOwner: "",
+          date: new Date(Date.now()).toDateString(),
+          timestamp: new Date(Date.now()).toTimeString(),
+          deliveryOrderId: data.id
+        }
       };
       res.json(result);
       log.out('OK_DELIVERYORDER_CREATE-DO');
@@ -380,14 +383,11 @@ const cancelShippitOrder = async (req, res) => {
         trackingNumber
       });
     await deliveryModel.cancelShippitOrder({ trackingNumber });
-    const shippitOrder = await deliveryModel.trackShippitOrder({
-      trackingNum: trackingNumber
-    });
     deliveryModel.updateShippitStatus({
-      status: shippitOrder.track[0].status,
-      statusOwner: shippitOrder.track[0].status_owner,
-      date: shippitOrder.track[0].date,
-      timestamp: shippitOrder.track[0].timestamp,
+      status: "cancelled",
+      statusOwner: "",
+      date: new Date(Date.now()).toDateString(),
+      timestamp: new Date(Date.now()).toTimeString(),
       deliveryOrderId: deliveryOrder.id
     });
     await salesOrderModel.updateSalesOrderStatus({
@@ -533,14 +533,11 @@ const confirmShippitOrder = async (req, res) => {
       id: deliveryOrder.salesOrderId,
       orderStatus: OrderStatus.SHIPPED
     });
-    const shippitOrder = await deliveryModel.trackShippitOrder({
-      trackingNum: trackingNumber
-    });
-    deliveryModel.updateShippitStatus({
-      status: shippitOrder.track[0].status,
-      statusOwner: shippitOrder.track[0].status_owner,
-      date: shippitOrder.track[0].date,
-      timestamp: shippitOrder.track[0].timestamp,
+    await deliveryModel.updateShippitStatus({
+      status: "despatch_in_progress",
+      statusOwner: "",
+      date: new Date(Date.now()).toDateString(),
+      timestamp: new Date(Date.now()).toTimeString(),
       deliveryOrderId: deliveryOrder.id
     });
     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
@@ -580,16 +577,14 @@ const bookShippitDelivery = async (req, res) => {
       id: deliveryOrder.salesOrderId,
       orderStatus: OrderStatus.DELIVERED
     });
-    const shippitOrder = await deliveryModel.trackShippitOrder({
-      trackingNum: trackingNumber
-    });
     deliveryModel.updateShippitStatus({
-      status: shippitOrder.track[0].status,
-      statusOwner: shippitOrder.track[0].status_owner,
-      date: shippitOrder.track[0].date,
-      timestamp: shippitOrder.track[0].timestamp,
+      status: "ready_for_pickup",
+      statusOwner: deliveryBooking[0].manifest_pdf,
+      date: new Date(Date.now()).toDateString(),
+      timestamp: new Date(Date.now()).toTimeString(),
       deliveryOrderId: deliveryOrder.id
     });
+    bookingManifestLabelLink = deliveryBooking.manifest_pdf;
     log.out('OK_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY');
     res.json(deliveryBooking);
   } catch (error) {
@@ -598,6 +593,18 @@ const bookShippitDelivery = async (req, res) => {
     res.status(e.code).json(e.message);
   }
 };
+
+const getBookingLabelLink = async (req, res) => {
+  const { trackingNumber } = req.params;
+  const deliveryOrder = await deliveryModel.findDeliveryOrderByTrackingNumber({ trackingNumber });
+  const deliveryBooking = await prisma.DeliveryStatus.findMany({
+    where: {
+      deliveryOrderId: deliveryOrder.id,
+      status: "ready_for_pickup"
+    }
+  });
+  return res.json(deliveryBooking[0].statusOwner);
+}
 
 const getLatLong = async (req, res) => {
   const { time_from, time_to } = req.body;
@@ -807,3 +814,4 @@ exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
 exports.getDeliveryOrderByTrackingNumber = getDeliveryOrderByTrackingNumber;
 exports.getLatLongForUnassignedOrders = getLatLongForUnassignedOrders;
 exports.getLatLongForAssignedOrders = getLatLongForAssignedOrders;
+exports.getBookingLabelLink = getBookingLabelLink;
