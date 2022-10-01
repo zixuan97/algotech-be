@@ -735,6 +735,24 @@ const getAssignedManualDeliveriesByDate = async (req, res) => {
   }
 };
 
+const getAssignedManualDeliveriesByDateByUser = async (req, res) => {
+  const { time_from, time_to, assignedUserId } = req.body;
+  console.log(assignedUserId)
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAllAssignedManualDeliveriesByDateByUser({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to),
+      assignedUserId
+  }));
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE-BY-USER', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE-BY-USER');
+    res.json(data);
+  }
+};
+
 const getUnassignedManualDeliveriesByDate = async (req, res) => {
   const { time_from, time_to } = req.body;
   const { data, error } = await common.awaitWrap(
@@ -851,3 +869,4 @@ exports.getLatLongForAssignedOrders = getLatLongForAssignedOrders;
 exports.getBookingLabelLink = getBookingLabelLink;
 exports.getAssignedManualDeliveriesByDate = getAssignedManualDeliveriesByDate;
 exports.getUnassignedManualDeliveriesByDate = getUnassignedManualDeliveriesByDate;
+exports.getAssignedManualDeliveriesByDateByUser = getAssignedManualDeliveriesByDateByUser;
