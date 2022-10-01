@@ -101,7 +101,7 @@ const createOrderWebhook = async (req, res, next) => {
         platformType: 'SHOPIFY',
         createdTime: salesOrder.created_at,
         currency: salesOrder.currency,
-        amount: salesOrder.total_price,
+        amount: salesOrder.total_line_items_price,
         salesOrderItems: await Promise.all(
           salesOrder.line_items.map(async (item) => {
             const bundle = await bundleModel.findBundleByName({
