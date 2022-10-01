@@ -185,9 +185,11 @@ const updateSalesOrder = async (req) => {
   } = req;
   await Promise.all(
     salesOrderItems.map(async (so) => {
-      await prisma.salesOrderBundleItem.deleteMany({
-        where: { salesOrderItemId: Number(so.id) }
-      });
+      if (so.id) {
+        await prisma.salesOrderBundleItem.deleteMany({
+          where: { salesOrderItemId: Number(so.id) }
+        });
+      }
     })
   );
 
@@ -213,7 +215,7 @@ const updateSalesOrder = async (req) => {
           productName: so.productName,
           price: Number(so.price),
           salesOrderBundleItems: {
-            create: so.salesOrderBundleItems.map((bi) => {
+            create: so.salesOrderBundleItems?.map((bi) => {
               return {
                 productName: bi.productName,
                 quantity: bi.quantity
