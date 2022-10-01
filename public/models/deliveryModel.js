@@ -1,5 +1,5 @@
-const { PrismaClient, ShippingType, DeliveryMode } = require('@prisma/client');
-const prisma = new PrismaClient();
+const { ShippingType, DeliveryMode } = require('@prisma/client');
+const { prisma } = require('./index.js');
 const axios = require('axios');
 const shippitApi = require('../helpers/shippitApi');
 const salesOrderModel = require('../models/salesOrderModel');
@@ -604,11 +604,15 @@ const findAllAssignedManualDeliveriesByDateByUser = async (req) => {
   // });
   // return res;
   const { time_from, time_to, assignedUserId } = req;
-  console.log(typeof(assignedUserId))
+  console.log(typeof assignedUserId);
   const deliveryOrders =
     await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
-    console.log(deliveryOrders)
-  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.MANUAL && x.assignedUserId === assignedUserId);
+  console.log(deliveryOrders);
+  const filteredDeliveryOrders = deliveryOrders.filter(
+    (x) =>
+      x.shippingType === ShippingType.MANUAL &&
+      x.assignedUserId === assignedUserId
+  );
   for (let d of filteredDeliveryOrders) {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
@@ -699,7 +703,11 @@ exports.findSalesOrderPostalCodeForUnassignedManualDeliveries =
   findSalesOrderPostalCodeForUnassignedManualDeliveries;
 exports.findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter =
   findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter;
-exports.fetchLatestStatusFromShippitAndAddToStatus = fetchLatestStatusFromShippitAndAddToStatus;
-exports.findAllAssignedManualDeliveriesByDate = findAllAssignedManualDeliveriesByDate;
-exports.findAllUnassignedManualDeliveriesByDate = findAllUnassignedManualDeliveriesByDate;
-exports.findAllAssignedManualDeliveriesByDateByUser = findAllAssignedManualDeliveriesByDateByUser;
+exports.fetchLatestStatusFromShippitAndAddToStatus =
+  fetchLatestStatusFromShippitAndAddToStatus;
+exports.findAllAssignedManualDeliveriesByDate =
+  findAllAssignedManualDeliveriesByDate;
+exports.findAllUnassignedManualDeliveriesByDate =
+  findAllUnassignedManualDeliveriesByDate;
+exports.findAllAssignedManualDeliveriesByDateByUser =
+  findAllAssignedManualDeliveriesByDateByUser;

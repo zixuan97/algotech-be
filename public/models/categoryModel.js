@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const { prisma } = require('./index.js');
 
 const createCategory = async (req) => {
   const { name } = req;

@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const { prisma } = require('./index.js');
 const productModel = require('../models/productModel');
 
 const createProcurementOrder = async (req) => {
@@ -89,7 +88,7 @@ const findProcurementOrderById = async (req) => {
 
 const procOrderStructure = async (req) => {
   const { procOrderItems } = req;
-  let procOrderItemsPdt = []
+  let procOrderItemsPdt = [];
   for (let p of procOrderItems) {
     const pdt = await productModel.findProductBySku({ sku: p.productSku });
     pdt.category = pdt.productCategory;

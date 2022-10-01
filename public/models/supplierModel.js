@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const { prisma } = require('./index.js');
 
 const createSupplier = async (req) => {
   const { email, name, address } = req;
@@ -55,9 +54,9 @@ const updateSupplier = async (req) => {
       address,
       supplierProduct: {
         deleteMany: {},
-        create: supplierProduct.map(p => ({
+        create: supplierProduct.map((p) => ({
           productId: p.product.id,
-          rate: p.rate,
+          rate: p.rate
         }))
       }
     }
@@ -66,7 +65,7 @@ const updateSupplier = async (req) => {
   const updatedSupplier = {
     ...supplier,
     supplierProduct: supplierPdts
-  }
+  };
   return updatedSupplier;
 };
 
@@ -80,11 +79,7 @@ const deleteSupplier = async (req) => {
 };
 
 const connectOrCreateSupplierProduct = async (req) => {
-  const {
-    supplierId,
-    productId,
-    rate
-  } = req;
+  const { supplierId, productId, rate } = req;
   const supplierProduct = await prisma.SupplierProduct.upsert({
     where: {
       supplierId_productId: {
