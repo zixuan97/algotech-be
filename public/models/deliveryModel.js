@@ -551,6 +551,48 @@ const findAllUnassignedManualDeliveries = async () => {
   return deliveryOrders;
 };
 
+const findAllAssignedManualDeliveriesByDate = async (req) => {
+  const { deliveryDate } = req;
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippingType: ShippingType.MANUAL,
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  let res = [];
+  await deliveryOrders.map(d => {
+    if ((d.deliveryDate.toDateString() === deliveryDate.toDateString()) && d.assignedUserId != null) {
+      res.push(d);
+    }
+  });
+  return res;
+};
+
+const findAllUnassignedManualDeliveriesByDate = async (req) => {
+  const { deliveryDate } = req;
+  const deliveryOrders = await prisma.DeliveryOrder.findMany({
+    where: {
+      assignedUser: null,
+      shippingType: ShippingType.MANUAL,
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true
+    }
+  });
+  let res = [];
+  console.log("tgt", deliveryDate.toDateString());
+  await deliveryOrders.map(d => {
+    if (d.deliveryDate.toDateString() === deliveryDate.toDateString()) {
+      res.push(d);
+    }
+  });
+  return res;
+};
+
 const updateShippitStatus = async (req) => {
   const { status, statusOwner, date, timestamp, deliveryOrderId } = req;
   const withUpdatedDeliveryStatus = await prisma.DeliveryStatus.create({
@@ -599,3 +641,5 @@ exports.findSalesOrderPostalCodeForUnassignedManualDeliveries =
 exports.findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter =
   findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter;
 exports.fetchLatestStatusFromShippitAndAddToStatus = fetchLatestStatusFromShippitAndAddToStatus;
+exports.findAllAssignedManualDeliveriesByDate = findAllAssignedManualDeliveriesByDate;
+exports.findAllUnassignedManualDeliveriesByDate = findAllUnassignedManualDeliveriesByDate;

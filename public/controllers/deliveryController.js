@@ -719,6 +719,34 @@ const getAllUnassignedManualDeliveries = async (req, res) => {
   }
 };
 
+const getAssignedManualDeliveriesByDate = async (req, res) => {
+  const { deliveryDate } = req.body;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAllAssignedManualDeliveriesByDate({ deliveryDate: new Date(deliveryDate) })
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE');
+    res.json(data);
+  }
+};
+
+const getUnassignedManualDeliveriesByDate = async (req, res) => {
+  const { deliveryDate } = req.body;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAllUnassignedManualDeliveriesByDate({ deliveryDate: new Date(deliveryDate) })
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE', error.message);
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE');
+    res.json(data);
+  }
+};
+
 const getCurrentLocationLatLong = async (req, res) => {
   const { address } = req.body;
   const url = `https://developers.onemap.sg/commonapi/search?returnGeom=Y&getAddrDetails=Y&pageNum=1&searchVal=${address}`;
@@ -816,3 +844,5 @@ exports.getDeliveryOrderByTrackingNumber = getDeliveryOrderByTrackingNumber;
 exports.getLatLongForUnassignedOrders = getLatLongForUnassignedOrders;
 exports.getLatLongForAssignedOrders = getLatLongForAssignedOrders;
 exports.getBookingLabelLink = getBookingLabelLink;
+exports.getAssignedManualDeliveriesByDate = getAssignedManualDeliveriesByDate;
+exports.getUnassignedManualDeliveriesByDate = getUnassignedManualDeliveriesByDate;
