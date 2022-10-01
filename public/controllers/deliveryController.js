@@ -529,6 +529,10 @@ const confirmShippitOrder = async (req, res) => {
       { trackingNumber }
     );
     await deliveryModel.confirmShippitOrder({ trackingNumber });
+    await salesOrderModel.updateSalesOrderStatus({
+      id: deliveryOrder.salesOrderId,
+      orderStatus: OrderStatus.SHIPPED
+    });
     const shippitOrder = await deliveryModel.trackShippitOrder({
       trackingNum: trackingNumber
     });
@@ -538,10 +542,6 @@ const confirmShippitOrder = async (req, res) => {
       date: shippitOrder.track[0].date,
       timestamp: shippitOrder.track[0].timestamp,
       deliveryOrderId: deliveryOrder.id
-    });
-    await salesOrderModel.updateSalesOrderStatus({
-      id: deliveryOrder.salesOrderId,
-      orderStatus: OrderStatus.SHIPPED
     });
     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
     res.json({
