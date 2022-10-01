@@ -314,8 +314,8 @@ const fetchLatestStatusFromShippitAndAddToStatus = async (req) => {
       data: {
         status: latestStatus.status,
         statusOwner: '',
-        date: new Date(Date.now()).toDateString(),
-        timestamp: new Date(Date.now()).toTimeString(),
+        date: new Date(Date.now()).toLocaleDateString(),
+        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
         deliveryOrder: {
           connect: {
             id: deliveryOrder.id

@@ -125,11 +125,13 @@ const createShippitDeliveryOrder = async (req, res) => {
       orderStatus: OrderStatus.READY_FOR_DELIVERY
     });
     try {
+      console.log("Hi?")
+      console.log(new Date(Date.now()))
       await deliveryModel.updateShippitStatus({
         status: "order_placed",
         statusOwner: "",
-        date: new Date(Date.now()).toDateString(),
-        timestamp: new Date(Date.now()).toTimeString(),
+        date: new Date(Date.now()).toLocaleDateString(),
+        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
         deliveryOrderId: data.id
       });
       const result = {
@@ -148,7 +150,7 @@ const createShippitDeliveryOrder = async (req, res) => {
           status: "order_placed",
           statusOwner: "",
           date: new Date(Date.now()).toDateString(),
-          timestamp: new Date(Date.now()).toTimeString(),
+          timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
           deliveryOrderId: data.id
         }
       };
@@ -388,7 +390,7 @@ const cancelShippitOrder = async (req, res) => {
       status: "cancelled",
       statusOwner: "",
       date: new Date(Date.now()).toDateString(),
-      timestamp: new Date(Date.now()).toTimeString(),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
       deliveryOrderId: deliveryOrder.id
     });
     await salesOrderModel.updateSalesOrderStatus({
@@ -538,7 +540,7 @@ const confirmShippitOrder = async (req, res) => {
       status: "despatch_in_progress",
       statusOwner: "",
       date: new Date(Date.now()).toDateString(),
-      timestamp: new Date(Date.now()).toTimeString(),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
       deliveryOrderId: deliveryOrder.id
     });
     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
@@ -582,7 +584,7 @@ const bookShippitDelivery = async (req, res) => {
       status: "ready_for_pickup",
       statusOwner: deliveryBooking[0].manifest_pdf,
       date: new Date(Date.now()).toDateString(),
-      timestamp: new Date(Date.now()).toTimeString(),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
       deliveryOrderId: deliveryOrder.id
     });
     bookingManifestLabelLink = deliveryBooking.manifest_pdf;
@@ -834,6 +836,14 @@ const generateDO = async (req, res) => {
       log.error('ERR_PROCUREMENTORDER_GENERATE-DO-PDF', error.message);
       return res.status(error).json(error.message);
     });
+};
+
+const convertUTCDateToLocalDate = (date) => {
+  var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+  var offset = date.getTimezoneOffset() / 60;
+  var hours = date.getHours();
+  newDate.setHours(hours - offset);
+  return newDate;   
 };
 
 exports.createManualDeliveryOrder = createManualDeliveryOrder;
