@@ -63,5 +63,7 @@ router.get(
 );
 router.get('/sales/:salesOrderId', deliveryController.getDeliveryOrderBySalesOrderId);
 router.post('/bookinglabel/:trackingNumber', deliveryController.getBookingLabelLink);
+router.post('/assignedByDate', deliveryController.getAssignedManualDeliveriesByDate);
+router.post('/unassignedByDate', deliveryController.getUnassignedManualDeliveriesByDate);
 
 module.exports = router;
