@@ -99,6 +99,7 @@ const addShopeeOrders = async (req, res) => {
           const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
             orderId: salesOrder.order_sn
           });
+          console.log(salesOrder);
           if (!salesOrderDB) {
             return await salesOrderModel.createSalesOrder({
               orderId: salesOrder.order_sn,
