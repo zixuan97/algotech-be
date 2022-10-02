@@ -66,5 +66,6 @@ router.post('/bookinglabel/:trackingNumber', deliveryController.getBookingLabelL
 router.post('/assignedByDate', deliveryController.getAssignedManualDeliveriesByDate);
 router.post('/unassignedByDate', deliveryController.getUnassignedManualDeliveriesByDate);
 router.post('/byUser/assignedByDate', deliveryController.getAssignedManualDeliveriesByDateByUser);
+router.post('/shippitDeliveries/date', deliveryController.getShippitOrdersByDate);
 
 module.exports = router;

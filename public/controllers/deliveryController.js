@@ -810,6 +810,26 @@ const getCurrentLocationLatLong = async (req, res) => {
     });
 };
 
+const getShippitOrdersByDate = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAllShippitDeliveriesByDate({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+  if (error) {
+    log.error(
+      'ERR_DELIVERY_GET-ALL-SHIPPIT-DELIVERIES-BY-DATE',
+      error.message
+    );
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DELIVERIES-BY-DATE');
+    res.json(data);
+  }
+};
+
 const generateDO = async (req, res) => {
   const doId = req.params;
   const deliveryOrder = await deliveryModel.findDeliveryOrderById(doId);
@@ -896,3 +916,4 @@ exports.getUnassignedManualDeliveriesByDate =
   getUnassignedManualDeliveriesByDate;
 exports.getAssignedManualDeliveriesByDateByUser =
   getAssignedManualDeliveriesByDateByUser;
+exports.getShippitOrdersByDate = getShippitOrdersByDate;

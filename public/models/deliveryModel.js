@@ -656,6 +656,20 @@ const findAllUnassignedManualDeliveriesByDate = async (req) => {
   return filteredDeliveryOrders;
 };
 
+const findAllShippitDeliveriesByDate = async (req) => {
+  const { time_from, time_to } = req;
+  const deliveryOrders =
+    await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.SHIPPIT);
+  for (let d of filteredDeliveryOrders) {
+    const salesOrder = await salesOrderModel.findSalesOrderById({
+      id: d.salesOrderId
+    });
+    d.salesOrder = salesOrder;
+  }
+  return filteredDeliveryOrders;
+};
+
 const updateShippitStatus = async (req) => {
   const { status, statusOwner, date, timestamp, deliveryOrderId } = req;
   const withUpdatedDeliveryStatus = await prisma.DeliveryStatus.create({
@@ -711,3 +725,4 @@ exports.findAllUnassignedManualDeliveriesByDate =
   findAllUnassignedManualDeliveriesByDate;
 exports.findAllAssignedManualDeliveriesByDateByUser =
   findAllAssignedManualDeliveriesByDateByUser;
+exports.findAllShippitDeliveriesByDate = findAllShippitDeliveriesByDate;
