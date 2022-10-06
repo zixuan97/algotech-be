@@ -33,24 +33,50 @@ app.use(express.urlencoded({ limit: '50mb' }));
 app.get('/', (req, res) => {
   res.sendFile('index.html', { root: path.join(__dirname, 'public') });
 });
-
-app.use('/user', require('./public/routes/userRoutes'));
-app.use('/category', require('./public/routes/categoryRoutes'));
-app.use('/product', require('./public/routes/productRoutes'));
-app.use('/brand', require('./public/routes/brandRoutes'));
-app.use('/location', require('./public/routes/locationRoutes'));
-app.use('/supplier', require('./public/routes/supplierRoutes'));
+// internal algotech-fe
+app.use('/user', whiteListInternal, require('./public/routes/userRoutes'));
+app.use(
+  '/category',
+  whiteListInternal,
+  require('./public/routes/categoryRoutes')
+);
+app.use(
+  '/product',
+  whiteListInternal,
+  require('./public/routes/productRoutes')
+);
+app.use('/brand', whiteListInternal, require('./public/routes/brandRoutes'));
+app.use(
+  '/location',
+  whiteListInternal,
+  require('./public/routes/locationRoutes')
+);
+app.use(
+  '/supplier',
+  whiteListInternal,
+  require('./public/routes/supplierRoutes')
+);
 app.use(
   '/procurement',
   whiteListInternal,
   require('./public/routes/procurementRoutes')
 );
-app.use('/bundle', require('./public/routes/bundleRoutes'));
-app.use('/shopee', require('./public/routes/shopeeRoutes'));
-app.use('/lazada', require('./public/routes/lazadaRoutes'));
-app.use('/delivery', require('./public/routes/deliveryRoutes'));
-app.use('/shopify', require('./public/routes/shopifyRoutes'));
-app.use('/sales', require('./public/routes/salesRoutes'));
+app.use('/bundle', whiteListInternal, require('./public/routes/bundleRoutes'));
+app.use('/shopee', whiteListInternal, require('./public/routes/shopeeRoutes'));
+app.use('/lazada', whiteListInternal, require('./public/routes/lazadaRoutes'));
+app.use(
+  '/delivery',
+  whiteListInternal,
+  require('./public/routes/deliveryRoutes')
+);
+app.use(
+  '/shopify',
+  whiteListInternal,
+  require('./public/routes/shopifyRoutes')
+);
+app.use('/sales', whiteListInternal, require('./public/routes/salesRoutes'));
+
+//external algotech-fe-b2b
 
 const port = process.env.PORT || 4000;
 
