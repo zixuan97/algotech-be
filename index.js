@@ -3,6 +3,7 @@ const app = express();
 const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const { verifyToken, whiteListInternal } = require('./public/middleware/auth');
 
 const corsWhitelist = [
   'http://localhost:3000',
@@ -37,7 +38,11 @@ app.use('/product', require('./public/routes/productRoutes'));
 app.use('/brand', require('./public/routes/brandRoutes'));
 app.use('/location', require('./public/routes/locationRoutes'));
 app.use('/supplier', require('./public/routes/supplierRoutes'));
-app.use('/procurement', require('./public/routes/procurementRoutes'));
+app.use(
+  '/procurement',
+  whiteListInternal,
+  require('./public/routes/procurementRoutes')
+);
 app.use('/bundle', require('./public/routes/bundleRoutes'));
 app.use('/shopee', require('./public/routes/shopeeRoutes'));
 app.use('/lazada', require('./public/routes/lazadaRoutes'));
