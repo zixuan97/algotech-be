@@ -173,6 +173,25 @@ model SalesOrder {
   orderStatus       OrderStatus      @default(PAID)
   deliveryOrder     DeliveryOrder?
   salesOrderItems   SalesOrderItem[]
+  bulkOrder         BulkOrder?       @relation(fields: [bulkOrderId], references: [id])
+  bulkOrderId       Int?
+}
+
+model BulkOrder {
+  id           Int          @id @default(autoincrement())
+  amount       Float
+  paymentMode  PaymentMode
+  payeeName    String
+  payeeEmail   String
+  payeeRemarks String
+  salesOrders  SalesOrder[]
+}
+
+enum PaymentMode {
+  CREDIT_CARD
+  CASH
+  BANK_TRANSFER
+  PAYNOW
 }
 
 model DeliveryOrder {
