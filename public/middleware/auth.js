@@ -28,5 +28,20 @@ const verifyAdmin = (req, res, next) => {
   return next();
 };
 
+const whiteListInternal = (req, res, next) => {
+  const corsWhitelist = ['localhost', 'algotech-fe.vercel'];
+  console.log(req.hostname);
+  console.log(req.origin);
+  if (
+    corsWhitelist.includes(req.get('origin')) |
+    corsWhitelist.includes(req.hostname)
+  ) {
+    return next();
+  } else {
+    return res.status(401).send('Unauthorized');
+  }
+};
+
 exports.verifyToken = verifyToken;
 exports.verifyAdmin = verifyAdmin;
+exports.whiteListInternal = whiteListInternal;
