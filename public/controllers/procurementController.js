@@ -165,8 +165,18 @@ const getAllProcurementOrders = async (req, res) => {
         paymentStatus: d.paymentStatus,
         fulfilmentStatus: d.fulfilmentStatus,
         totalAmount: d.totalAmount,
-        supplierName: d.supplierName,
-        warehouseName: d.warehouseName,
+        supplier: {
+          id: d.supplierId,
+          email: d.supplierEmail,
+          name: d.supplierName,
+          address: d.supplierAddress
+        },
+        warehouse: {
+          id: 0,
+          name: d.warehouseName,
+          address: d.warehouseAddress,
+          stockQuantity: []
+        },
         procOrderItems: procOrderItemsPdt
       };
       dataRes.push(result);
@@ -186,9 +196,13 @@ const getProcurementOrder = async (req, res) => {
       description,
       paymentStatus,
       fulfilmentStatus,
+      supplierId,
+      supplierAddress,
+      supplierEmail,
       supplierName,
       totalAmount,
       warehouseName,
+      warehouseAddress,
       procOrderItems
     } = po;
     let procOrderItemsPdt = [];
@@ -208,8 +222,18 @@ const getProcurementOrder = async (req, res) => {
       paymentStatus,
       fulfilmentStatus,
       totalAmount,
-      supplierName,
-      warehouseName,
+      supplier: {
+        id: supplierId,
+        email: supplierEmail,
+        name: supplierName,
+        address: supplierAddress
+      },
+      warehouse: {
+        id: 0,
+        name: warehouseName,
+        address: warehouseAddress,
+        stockQuantity: []
+      },
       procOrderItems: procOrderItemsPdt
     };
     res.json(result);
