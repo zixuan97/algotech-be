@@ -29,12 +29,12 @@ const verifyAdmin = (req, res, next) => {
 };
 
 const whiteListInternal = (req, res, next) => {
-  const corsWhitelist = ['localhost', 'algotech-fe.vercel'];
+  const corsWhitelist = ['localhost:4000', 'algotech-fe.vercel'];
   console.log(req.hostname);
-  console.log(req.origin);
+  console.log(req.headers['host']);
   if (
     corsWhitelist.includes(req.get('origin')) |
-    corsWhitelist.includes(req.hostname)
+    corsWhitelist.includes(req.headers['host'])
   ) {
     return next();
   } else {
