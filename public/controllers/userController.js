@@ -55,6 +55,34 @@ const createUser = async (req, res) => {
   }
 };
 
+const createB2BUser = async (req, res) => {
+  const { firstName, lastName, email, role, status, isVerified } = req.body;
+  const user = await userModel.findUserByEmail({ email });
+  if (user) {
+    log.error('ERR_USER_CREATE-B2B-USER');
+    res.status(400).json({ message: 'User already exists' });
+  } else {
+    const { error } = await common.awaitWrap(
+      userModel.createUser({
+        firstName,
+        lastName,
+        email,
+        role,
+        status,
+        isVerified
+      })
+    );
+    if (error) {
+      log.error('ERR_USER_CREATE-B2B-USER', error.message);
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_USER_CREATE-B2B-USER');
+      res.status(200).json({ message: 'B2B User created' });
+    }
+  }
+};
+
 /**
  * Gets user by ID
  */
@@ -125,7 +153,6 @@ const getUsers = async (req, res) => {
     const users = await userModel.getUsers({});
     log.out('OK_USER_GET-USERS');
     res.json(users.filter((u) => u.id != req.user.userId));
-    //res.json(users);
   } catch (error) {
     log.error('ERR_USER_GET-USERS', err.message);
     res.status(500).send('Server Error');
@@ -277,6 +304,94 @@ const verifyPassword = async (req, res) => {
   }
 };
 
+const approveB2BUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await userModel.updateB2BUserStatus({ id, status: UserStatus.ACTIVE });
+    const { data } = await common.awaitWrap(userModel.generatePassword());
+    user.password = data;
+    await userModel.editUser({ updatedUser: user });
+    const content =
+      'Hi ' +
+      user.firstName +
+      ' ' +
+      user.lastName +
+      '! Your account has been approved. Your generated password is ' +
+      data +
+      '.';
+    try {
+      await emailHelper.sendEmail({
+        recipientEmail: user.email,
+        subject: 'Your generated password',
+        content
+      });
+      console.log('Email sent');
+    } catch (error) {
+      console.log('Error sending email');
+    }
+    log.out('OK_USER_APPROVE-USER');
+    res.json({
+      message: 'Account creation request approved.'
+    });
+  } catch (error) {
+    log.error('ERR_USER_APPROVE-USER', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const rejectB2BUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await userModel.updateB2BUserStatus({ id, status: UserStatus.REJECTED });
+    const content =
+    'Hi ' +
+    user.firstName +
+    ' ' +
+    user.lastName +
+    '! Your request to create an account has been rejected. Please contact our admin.';
+    try {
+      await emailHelper.sendEmail({
+        recipientEmail: user.email,
+        subject: 'Your account request status',
+        content
+      });
+      console.log('Email sent');
+    } catch (error) {
+      console.log('Error sending email');
+    }
+    log.out('OK_USER_REJECT-USER');
+    res.json({
+      message: 'Account creation request rejected.',
+      payload: user
+    });
+  } catch (error) {
+    log.error('ERR_USER_REJECT-USER', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getAllB2BUsers = async (req, res) => {
+  try {
+    const users = await userModel.getB2BUsers({});
+    log.out('OK_USER_GET-B2B-USERS');
+    res.json(users);
+  } catch (error) {
+    log.error('ERR_USER_GET-B2B-USERS', err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getAllPendingB2BUsers = async (req, res) => {
+  try {
+    const users = await userModel.getB2BUsers({});
+    log.out('OK_USER_GET-PENDING-B2B-USERS');
+    res.json(users.filter((u) => u.status === UserStatus.PENDING));
+  } catch (error) {
+    log.error('ERR_USER_GET-PENDING-B2B-USERS', err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -289,3 +404,9 @@ exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
 exports.sendForgetEmailPassword = sendForgetEmailPassword;
 exports.verifyPassword = verifyPassword;
+exports.createB2BUser = createB2BUser;
+exports.approveB2BUser = approveB2BUser;
+exports.rejectB2BUser = rejectB2BUser;
+exports.getAllB2BUsers = getAllB2BUsers;
+exports.getAllPendingB2BUsers = getAllPendingB2BUsers;
+

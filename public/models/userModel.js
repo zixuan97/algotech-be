@@ -3,9 +3,11 @@ const bcrypt = require('bcrypt');
 const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req) => {
-  const { firstName, lastName, email, password, role, isVerified } = req;
-  encryptedPassword = await bcrypt.hash(password, 10);
-
+  const { firstName, lastName, email, password, role, status, isVerified } = req;
+  let encryptedPassword = '';
+  if (role !== UserRole.DISTRIBUTOR && role !== UserRole.CORPORATE) {
+    encryptedPassword = await bcrypt.hash(password, 10);
+  }
   await prisma.User.create({
     data: {
       firstName,
@@ -13,6 +15,7 @@ const createUser = async (req) => {
       email,
       password: encryptedPassword,
       role,
+      status,
       isVerified
     }
   });
@@ -20,6 +23,22 @@ const createUser = async (req) => {
 
 const getUsers = async () => {
   const users = await prisma.User.findMany({});
+  return users;
+};
+
+const getB2BUsers = async () => {
+  const users = await prisma.User.findMany({
+    where: {
+      OR: [
+        {
+          role: UserRole.DISTRIBUTOR
+        },
+        {
+          role: UserRole.CORPORATE
+        },
+      ]
+    }
+  });
   return users;
 };
 
@@ -134,7 +153,7 @@ const generatePassword = async (req) => {
   const characters =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
-  for (var i = 0; i < 20; i++) {
+  for (var i = 0; i < 8; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
@@ -156,6 +175,17 @@ const verifyPassword = async (req) => {
   return is_equal;
 };
 
+const updateB2BUserStatus = async (req) => {
+  const { id, status } = req;
+  const user = await prisma.User.update({
+    where: { id: Number(id) },
+    data: {
+      status
+    }
+  });
+  return user;
+};
+
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
@@ -168,3 +198,5 @@ exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
 exports.generatePassword = generatePassword;
 exports.verifyPassword = verifyPassword;
+exports.updateB2BUserStatus = updateB2BUserStatus;
+exports.getB2BUsers = getB2BUsers;

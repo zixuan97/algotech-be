@@ -258,11 +258,15 @@ enum UserRole {
   PARTTIME
   FULLTIME
   CUSTOMER
+  DISTRIBUTOR
+  CORPORATE
 }
 
 enum UserStatus {
   ACTIVE
   DISABLED
+  PENDING
+  REJECTED
 }
 
 enum PaymentStatus {
