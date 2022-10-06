@@ -171,7 +171,7 @@ model SalesOrder {
   createdTime       DateTime
   customerRemarks   String?
   orderStatus       OrderStatus      @default(PAID)
-  deliveryOrder     DeliveryOrder?
+  deliveryOrder     DeliveryOrder[]
   salesOrderItems   SalesOrderItem[]
   bulkOrder         BulkOrder?       @relation(fields: [bulkOrderId], references: [id])
   bulkOrderId       Int?
@@ -200,7 +200,7 @@ model DeliveryOrder {
   deliveryDate       DateTime?
   shippitTrackingNum String?
   carrier            String?
-  salesOrderId       Int              @unique
+  salesOrderId       Int
   deliveryMode       DeliveryMode?    @default(STANDARD)
   shippingDate       DateTime?
   shippingType       ShippingType     @default(MANUAL)

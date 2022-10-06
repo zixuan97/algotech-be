@@ -133,7 +133,7 @@ const createShippitDeliveryOrder = async (req, res) => {
       orderStatus: OrderStatus.READY_FOR_DELIVERY
     });
     try {
-      await deliveryModel.updateShippitStatus({
+      await deliveryModel.updateDeliveryStatus({
         status: "order_placed",
         statusOwner: "",
         date: new Date(Date.now()).toLocaleDateString(),
@@ -362,19 +362,9 @@ const updateDeliveryOrder = async (req, res) => {
     res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_UPDATE-DO');
-    const result = {
-      id: data.id,
-      shippingType,
-      shippingDate,
-      deliveryMode,
-      comments,
-      eta,
-      orderStatus,
-      carrier,
-      salesOrder,
-      assignedUser
-    };
-    res.json(result);
+    data.salesOrder = salesOrder;
+    data.assignedUser = assignedUser;
+    res.json(data);
   }
 };
 
@@ -392,6 +382,31 @@ const deleteDeliveryOrder = async (req, res) => {
   }
 };
 
+const cancelManualDeliveryOrder = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deliveryOrder = await deliveryModel.findDeliveryOrderById({ id });
+    await salesOrderModel.updateSalesOrderStatus({
+      id: deliveryOrder.salesOrderId,
+      orderStatus: OrderStatus.PREPARED
+    });
+    await deliveryModel.updateDeliveryStatus({
+      status: 'cancelled',
+      statusOwner: '',
+      date: new Date(Date.now()).toLocaleDateString(),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+      deliveryOrderId: Number(id)
+    });
+    log.out('OK_DELIVERY_CANCEL-MANUAL-ORDER');
+    res.json({
+      message: `Cancelled Manual DeliveryOrder with id:${id}`
+    });
+  } catch (error) {
+    log.error('ERR_DELIVERY_CANCEL-MANUAL-ORDER', error.message);
+    res.json(Error.http(error));
+  }
+};
+
 const cancelShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
@@ -401,7 +416,7 @@ const cancelShippitOrder = async (req, res) => {
       }
     );
     await deliveryModel.cancelShippitOrder({ trackingNumber });
-    deliveryModel.updateShippitStatus({
+    deliveryModel.updateDeliveryStatus({
       status: 'cancelled',
       statusOwner: '',
       date: new Date(Date.now()).toLocaleDateString(),
@@ -410,7 +425,7 @@ const cancelShippitOrder = async (req, res) => {
     });
     await salesOrderModel.updateSalesOrderStatus({
       id: deliveryOrder.salesOrderId,
-      orderStatus: OrderStatus.CANCELLED
+      orderStatus: OrderStatus.PREPARED
     });
     log.out('OK_DELIVERY_CANCEL-SHIPPIT-ORDER');
     res.json({
@@ -526,20 +541,6 @@ const getToken = async (req, res) => {
   }
 };
 
-// const confirmShippitOrder = async (req, res) => {
-//   try {
-//     const { trackingNumber } = req.params;
-//     const deliveryOrder = await deliveryModel.findDeliveryOrderByShippitTrackingNum({ trackingNumber });
-//     await deliveryModel.confirmShippitOrder({ trackingNumber });
-//     await salesOrderModel.updateSalesOrderStatus({ id: deliveryOrder.salesOrderId, orderStatus: OrderStatus.SHIPPED });
-//     log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
-//     res.json({ message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}` });
-//   } catch (error) {
-//     log.error('ERR_DELIVERY_CONFIRM-SHIPPIT-ORDER', error.message);
-//     res.json(Error.http(error));
-//   }
-// };
-
 const confirmShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
@@ -551,7 +552,7 @@ const confirmShippitOrder = async (req, res) => {
       id: deliveryOrder.salesOrderId,
       orderStatus: OrderStatus.SHIPPED
     });
-    await deliveryModel.updateShippitStatus({
+    await deliveryModel.updateDeliveryStatus({
       status: 'despatch_in_progress',
       statusOwner: '',
       date: new Date(Date.now()).toLocaleDateString(),
@@ -595,7 +596,7 @@ const bookShippitDelivery = async (req, res) => {
       id: deliveryOrder.salesOrderId,
       orderStatus: OrderStatus.DELIVERED
     });
-    deliveryModel.updateShippitStatus({
+    deliveryModel.updateDeliveryStatus({
       status: 'ready_for_pickup',
       statusOwner: deliveryBooking[0].manifest_pdf,
       date: new Date(Date.now()).toLocaleDateString(),
@@ -705,6 +706,7 @@ const getLatLongForUnassignedOrders = async (req, res) => {
     })
   ).then(() => res.json(dataRes));
 };
+
 const getAllAssignedManualDeliveriesByUser = async (req, res) => {
   const { id } = req.params;
   const { data, error } = await common.awaitWrap(
@@ -895,6 +897,7 @@ exports.trackShippitOrder = trackShippitOrder;
 exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
 exports.getAllShippitOrdersFromWebsite = getAllShippitOrdersFromWebsite;
 exports.getToken = getToken;
+exports.cancelManualDeliveryOrder = cancelManualDeliveryOrder;
 exports.cancelShippitOrder = cancelShippitOrder;
 exports.confirmShippitOrder = confirmShippitOrder;
 exports.getShippitOrderLabel = getShippitOrderLabel;
