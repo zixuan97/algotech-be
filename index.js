@@ -8,7 +8,9 @@ const { verifyToken, whiteListInternal } = require('./public/middleware/auth');
 const corsWhitelist = [
   'http://localhost:3000',
   'https://algotech-fe.vercel.app',
-  'https://algotech-fe-prod.vercel.app'
+  'https://algotech-fe-prod.vercel.app',
+  'https://algotech-fe-b2b.vercel.app',
+  'https://algotech-fe-hrm.vercel.app'
 ];
 app.use(
   cors({

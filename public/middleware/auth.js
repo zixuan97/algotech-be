@@ -29,15 +29,16 @@ const verifyAdmin = (req, res, next) => {
 };
 
 const whiteListInternal = (req, res, next) => {
-  const corsWhitelist = ['localhost:4000', 'algotech-fe.vercel'];
-  console.log(req['Access-Control-Allow-Origin']);
-  console.log(req.headers['Access-Control-Allow-Origin']);
+  const corsWhitelist = [
+    'http://localhost:3000',
+    'https://algotech-fe.vercel.app',
+    'https://algotech-fe-prod.vercel.app'
+  ];
+  console.log(req.headers.origin);
   console.log(req.hostname);
-  console.log(req.headers['host']);
-  console.log(req.headers);
   if (
-    corsWhitelist.includes(req.get('origin')) |
-    corsWhitelist.includes(req.headers['host'])
+    corsWhitelist.includes(req.headers.origin) |
+    (req.hostname == 'localhost')
   ) {
     return next();
   } else {
