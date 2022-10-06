@@ -21,6 +21,7 @@ router.get(
   deliveryController.getAllShippitOrdersFromWebsite
 );
 router.get('/shippit/auth/token', deliveryController.getToken);
+router.post('/cancelManual/:id', deliveryController.cancelManualDeliveryOrder);
 router.post('/cancel/:trackingNumber', deliveryController.cancelShippitOrder);
 router.post(
   '/shippit/confirm/:trackingNumber',
