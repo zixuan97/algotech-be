@@ -171,8 +171,6 @@ model SalesOrder {
   createdTime       DateTime
   customerRemarks   String?
   orderStatus       OrderStatus      @default(PAID)
-  bulkOrderId       Int?
-  BulkOrder         BulkOrder?       @relation(fields: [bulkOrderId], references: [id])
   deliveryOrder     DeliveryOrder[]
   salesOrderItems   SalesOrderItem[]
   bulkOrder         BulkOrder?       @relation(fields: [bulkOrderId], references: [id])
@@ -197,22 +195,21 @@ enum PaymentMode {
 }
 
 model DeliveryOrder {
-  id                  Int              @id @default(autoincrement())
-  createdAt           DateTime         @default(now())
-  deliveryDate        DateTime?
-  shippitTrackingNum  String?
-  carrier             String?
-  salesOrderId        Int?
-  deliveryMode        DeliveryMode?    @default(STANDARD)
-  shippingDate        DateTime?
-  shippingType        ShippingType     @default(MANUAL)
-  assignedUserId      Int?
-  comments            String?
-  eta                 DateTime?
-  salesOrderIdString  Int?
-  assignedUser        User?            @relation(fields: [assignedUserId], references: [id])
-  salesOrder          SalesOrder?      @relation(fields: [salesOrderId], references: [id])
-  deliveryStatus      DeliveryStatus[]
+  id                 Int              @id @default(autoincrement())
+  createdAt          DateTime         @default(now())
+  deliveryDate       DateTime?
+  shippitTrackingNum String?
+  carrier            String?
+  salesOrderId       Int
+  deliveryMode       DeliveryMode?    @default(STANDARD)
+  shippingDate       DateTime?
+  shippingType       ShippingType     @default(MANUAL)
+  assignedUserId     Int?
+  comments           String?
+  eta                DateTime?
+  assignedUser       User?            @relation(fields: [assignedUserId], references: [id])
+  salesOrder         SalesOrder       @relation(fields: [salesOrderId], references: [id])
+  deliveryStatus     DeliveryStatus[]
 }
 
 model SupplierProduct {
@@ -234,16 +231,6 @@ model DeliveryStatus {
   deliveryOrder   DeliveryOrder @relation(fields: [deliveryOrderId], references: [id])
 
   @@id([deliveryOrderId, date, timestamp, status])
-}
-
-model BulkOrder {
-  id           Int          @id @default(autoincrement())
-  amount       Float
-  paymentMode  PaymentMode
-  payeeName    String
-  payeeEmail   String
-  payeeRemarks String
-  SalesOrder   SalesOrder[]
 }
 
 enum OrderStatus {
@@ -299,11 +286,4 @@ enum ShippingType {
   MANUAL
   SHIPPIT
   GRAB
-}
-
-enum PaymentMode {
-  CREDIT_CARD
-  CASH
-  BANK_TRANSFER
-  PAYNOW
 }

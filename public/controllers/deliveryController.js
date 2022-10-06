@@ -333,20 +333,17 @@ const updateDeliveryOrder = async (req, res) => {
     assignedUserId,
     orderStatus
   } = req.body;
-  let salesOrder = {};
-  if (salesOrderId !== null) {
-    salesOrder = await salesOrderModel.findSalesOrderById({
-      id: salesOrderId
-    });
-    await salesOrderModel.updateSalesOrderStatus({
-      id: salesOrderId,
-      orderStatus
-    });
-  }
+  const salesOrder = await salesOrderModel.findSalesOrderById({
+    id: salesOrderId
+  });
   let assignedUser = {};
   if (assignedUserId !== undefined) {
     assignedUser = await userModel.findUserById({ id: assignedUserId });
   }
+  await salesOrderModel.updateSalesOrderStatus({
+    id: salesOrderId,
+    orderStatus
+  });
   const { data, error } = await common.awaitWrap(
     deliveryModel.updateDeliveryOrder({
       id,
@@ -357,8 +354,7 @@ const updateDeliveryOrder = async (req, res) => {
       carrier,
       comments,
       eta,
-      assignedUserId,
-      salesOrderId
+      assignedUserId
     })
   );
   if (error) {

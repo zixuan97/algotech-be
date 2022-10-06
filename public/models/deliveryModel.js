@@ -29,8 +29,7 @@ const createDeliveryOrder = async (req) => {
       shippingType,
       assignedUserId,
       comments,
-      eta,
-      salesOrderIdString: salesOrderId
+      eta
     }
   });
 };
