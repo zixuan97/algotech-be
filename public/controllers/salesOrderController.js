@@ -84,8 +84,7 @@ const getAllSalesOrdersWithTimeFilter = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
   }
-  log.out('ERR_SALESORDER_GET-ALL-SO-TIMEFILTER');
-  console.log(data.length);
+  log.out('OK_SALESORDER_GET-ALL-SO-TIMEFILTER');
   res.json(data);
 };
 
