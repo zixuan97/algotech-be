@@ -178,13 +178,22 @@ model SalesOrder {
 }
 
 model BulkOrder {
-  id           Int          @id @default(autoincrement())
-  amount       Float
-  paymentMode  PaymentMode
-  payeeName    String
-  payeeEmail   String
-  payeeRemarks String
-  salesOrders  SalesOrder[]
+  id              Int             @id @default(autoincrement())
+  amount          Float
+  paymentMode     PaymentMode
+  payeeName       String
+  payeeEmail      String
+  payeeRemarks    String
+  bulkOrderStatus BulkOrderStatus
+  salesOrders     SalesOrder[]
+}
+
+enum BulkOrderStatus {
+  CREATED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  FULFILLED
+  CANCELLED
 }
 
 enum PaymentMode {
