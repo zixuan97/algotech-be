@@ -124,7 +124,8 @@ const findDeliveryOrderById = async (req) => {
     },
     include: {
       salesOrder: true,
-      assignedUser: true
+      assignedUser: true,
+      deliveryStatus: true
     }
   });
   return deliveryOrder;

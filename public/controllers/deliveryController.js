@@ -229,10 +229,15 @@ const getDeliveryOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const deliveryOrder = await deliveryModel.findDeliveryOrderById({ id });
+    const result = {
+      ...deliveryOrder,
+      deliveryStatus:
+      deliveryOrder.deliveryStatus.length !== 0 ? deliveryOrder.deliveryStatus[deliveryOrder.deliveryStatus.length - 1] : {}
+    };
     log.out('OK_DELIVERY_GET-DO-BY-ID');
-    res.json(deliveryOrder);
+    res.json(result);
   } catch (error) {
-    log.error('ERR_DELIVERY_GET-DO', error.message);
+    log.error('ERR_DELIVERY_GET-DO-BY-ID', error.message);
     res.status(500).send('Server Error');
   }
 };
