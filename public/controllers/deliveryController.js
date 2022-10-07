@@ -229,7 +229,6 @@ const getDeliveryOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const deliveryOrder = await deliveryModel.findDeliveryOrderById({ id });
-    console.log(deliveryOrder.deliveryStatus.length === 0)
     const result = {
       ...deliveryOrder,
       deliveryStatus:

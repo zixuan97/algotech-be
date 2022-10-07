@@ -74,9 +74,10 @@ const getAllProducts = async (req, res) => {
   if (error) {
     log.error('ERR_PRODUCT_GET-ALL-PRODUCTS', error.message);
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    res
+      .status(e.code)
+      .json({ err: e.message, req: { body: req.body, params: req.params } });
   } else {
-    log.out('OK_PRODUCT_GET-ALL-PRODUCTS');
     const result = await data.map((product) => {
       product.categories = product.productCategory;
       delete product.productCategory;
@@ -84,6 +85,10 @@ const getAllProducts = async (req, res) => {
         ...product,
         categories: product.categories.map((category) => category.category)
       };
+    });
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS', {
+      req: { body: req.body, params: req.params },
+      res: result
     });
     res.json(result);
   }
