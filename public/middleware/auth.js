@@ -34,11 +34,9 @@ const whiteListInternal = (req, res, next) => {
     'https://algotech-fe.vercel.app',
     'https://algotech-fe-prod.vercel.app'
   ];
-  console.log(req.headers.origin);
-  console.log(req.hostname);
   if (
     corsWhitelist.includes(req.headers.origin) |
-    (req.hostname == 'localhost')
+    ((req.hostname == 'localhost') | (req.hostname == 'algotech-be.vercel.app'))
   ) {
     return next();
   } else {
