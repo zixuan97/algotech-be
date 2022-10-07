@@ -21,7 +21,9 @@ const addShopifyOrders = async (req, res) => {
             return await salesOrderModel.createSalesOrder({
               orderId: salesOrder.id.toString(),
               customerName:
-                salesOrder.customer.first_name + ' ' + salesOrder.customer.last_name,
+                salesOrder.customer.first_name +
+                ' ' +
+                salesOrder.customer.last_name,
               customerAddress:
                 salesOrder.customer.default_address.address1 +
                 (salesOrder.customer.default_address.address2 ??
@@ -102,7 +104,7 @@ const createOrderWebhook = async (req, res, next) => {
         platformType: 'SHOPIFY',
         createdTime: salesOrder.created_at,
         currency: salesOrder.currency,
-        amount: salesOrder.total_line_items_price,
+        amount: salesOrder.total_price,
         salesOrderItems: await Promise.all(
           salesOrder.line_items.map(async (item) => {
             const bundle = await bundleModel.findBundleByName({
