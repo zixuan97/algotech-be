@@ -38,7 +38,8 @@ const getAllDeliveryOrders = async () => {
   const deliveryOrders = await prisma.DeliveryOrder.findMany({
     include: {
       salesOrder: true,
-      assignedUser: true
+      assignedUser: true,
+      deliveryStatus: true
     }
   });
   return deliveryOrders;
@@ -500,7 +501,8 @@ const findAssignedManualDeliveriesByUser = async (req) => {
     },
     include: {
       salesOrder: true,
-      assignedUser: true
+      assignedUser: true,
+      deliveryStatus: true
     }
   });
   return deliveryOrders;
@@ -514,7 +516,8 @@ const findAllUnassignedManualDeliveries = async () => {
     },
     include: {
       salesOrder: true,
-      assignedUser: true
+      assignedUser: true,
+      deliveryStatus: true
     }
   });
   return deliveryOrders;
@@ -531,17 +534,27 @@ const findAllAssignedManualDeliveriesByDate = async (req) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
     d.salesOrder = salesOrder;
+    d.deliveryStatus = deliveryStatus;
   }
   return filteredDeliveryOrders;
 };
 
+const findDeliveryStatusByDeliveryOrderId = async (req) => {
+  const { id } = req;
+  const deliveryStatutes = await prisma.DeliveryStatus.findMany({
+    where: {
+      deliveryOrderId: id
+    },
+  });
+  return deliveryStatutes;
+};
+
 const findAllAssignedManualDeliveriesByDateByUser = async (req) => {
   const { time_from, time_to, assignedUserId } = req;
-  console.log(typeof assignedUserId);
   const deliveryOrders =
     await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
-  console.log(deliveryOrders);
   const filteredDeliveryOrders = deliveryOrders.filter(
     (x) =>
       x.shippingType === ShippingType.MANUAL &&
@@ -551,7 +564,9 @@ const findAllAssignedManualDeliveriesByDateByUser = async (req) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
     d.salesOrder = salesOrder;
+    d.deliveryStatus = deliveryStatus;
   }
   return filteredDeliveryOrders;
 };
@@ -567,7 +582,9 @@ const findAllUnassignedManualDeliveriesByDate = async (req) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
     d.salesOrder = salesOrder;
+    d.deliveryStatus = deliveryStatus;
   }
   return filteredDeliveryOrders;
 };
@@ -581,7 +598,9 @@ const findAllShippitDeliveriesByDate = async (req) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
     d.salesOrder = salesOrder;
+    d.deliveryStatus = deliveryStatus;
   }
   return filteredDeliveryOrders;
 };
@@ -642,3 +661,4 @@ exports.findAllUnassignedManualDeliveriesByDate =
 exports.findAllAssignedManualDeliveriesByDateByUser =
   findAllAssignedManualDeliveriesByDateByUser;
 exports.findAllShippitDeliveriesByDate = findAllShippitDeliveriesByDate;
+exports.findDeliveryStatusByDeliveryOrderId = findDeliveryStatusByDeliveryOrderId;

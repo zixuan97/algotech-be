@@ -173,7 +173,9 @@ const getAllDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllDeliveryOrders({})
   );
-
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  });
   if (error) {
     log.error('ERR_DELIVERY_GET-ALL-DO', error.message);
     res.json(Error.http(error));
@@ -721,6 +723,9 @@ const getAllAssignedManualDeliveriesByUser = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.findAssignedManualDeliveriesByUser({ id })
   );
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  });
   if (error) {
     log.error('ERR_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', error.message);
     res.json(Error.http(error));
@@ -734,6 +739,9 @@ const getAllUnassignedManualDeliveries = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.findAllUnassignedManualDeliveries({})
   );
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  });
   if (error) {
     log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', error.message);
     res.json(Error.http(error));
@@ -751,6 +759,9 @@ const getAssignedManualDeliveriesByDate = async (req, res) => {
       time_to: new Date(time_to)
     })
   );
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  });
   if (error) {
     log.error(
       'ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE',
@@ -765,7 +776,6 @@ const getAssignedManualDeliveriesByDate = async (req, res) => {
 
 const getAssignedManualDeliveriesByDateByUser = async (req, res) => {
   const { time_from, time_to, assignedUserId } = req.body;
-  console.log(assignedUserId);
   const { data, error } = await common.awaitWrap(
     deliveryModel.findAllAssignedManualDeliveriesByDateByUser({
       time_from: new Date(time_from),
@@ -773,6 +783,9 @@ const getAssignedManualDeliveriesByDateByUser = async (req, res) => {
       assignedUserId
     })
   );
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  });
   if (error) {
     log.error(
       'ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE-BY-USER',
@@ -793,6 +806,9 @@ const getUnassignedManualDeliveriesByDate = async (req, res) => {
       time_to: new Date(time_to)
     })
   );
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  });
   if (error) {
     log.error(
       'ERR_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE',
@@ -829,6 +845,9 @@ const getShippitOrdersByDate = async (req, res) => {
       time_to: new Date(time_to)
     })
   );
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  });
   if (error) {
     log.error(
       'ERR_DELIVERY_GET-ALL-SHIPPIT-DELIVERIES-BY-DATE',
