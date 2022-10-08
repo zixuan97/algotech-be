@@ -5,7 +5,7 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const emailHelper = require('../helpers/email');
-const { UserStatus } = require('@prisma/client');
+const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req, res) => {
   const { firstName, lastName, email, role, isVerified } = req.body;
@@ -392,6 +392,18 @@ const getAllPendingB2BUsers = async (req, res) => {
   }
 };
 
+const getAllNonB2BUsers = async (req, res) => {
+  try {
+    const users = await userModel.getUsers({});
+    const filteredUsers = users.filter(u => u.role !== UserRole.CORPORATE && u.role !== UserRole.DISTRIBUTOR);
+    log.out('OK_USER_GET-NON-B2B-USERS');
+    res.json(filteredUsers);
+  } catch (error) {
+    log.error('ERR_USER_GET-NON-B2B-USERS', err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -409,4 +421,5 @@ exports.approveB2BUser = approveB2BUser;
 exports.rejectB2BUser = rejectB2BUser;
 exports.getAllB2BUsers = getAllB2BUsers;
 exports.getAllPendingB2BUsers = getAllPendingB2BUsers;
+exports.getAllNonB2BUsers = getAllNonB2BUsers;
 
