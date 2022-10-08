@@ -188,6 +188,16 @@ model BulkOrder {
   salesOrders     SalesOrder[]
 }
 
+model Newsletter {
+  id              Int            @id @default(autoincrement())
+  emailDate       DateTime
+  name            String
+  emailSubject    String
+  emailBodyTitle  String
+  emailBody       String
+  discountCode    String
+}
+
 enum BulkOrderStatus {
   CREATED
   PAYMENT_SUCCESS
