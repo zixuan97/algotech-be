@@ -51,7 +51,8 @@ const getAllManualDeliveryOrders = async () => {
     },
     include: {
       salesOrder: true,
-      assignedUser: true
+      assignedUser: true,
+      deliveryStatus: true
     }
   });
   return deliveryOrders;
@@ -78,7 +79,8 @@ const getAllShippitDeliveryOrders = async () => {
     },
     include: {
       salesOrder: true,
-      assignedUser: true
+      assignedUser: true,
+      deliveryStatus: true
     }
   });
   for (let dor of deliveryOrders) {
@@ -109,7 +111,8 @@ const getAllShippitDeliveryOrders = async () => {
         postcode: dor.salesOrder.postalCode,
         state: 'Singapore',
         suburb: 'Sg'
-      }
+      },
+      deliveryStatus: dor.deliveryStatus
     };
     filterOrders.push(data);
   }

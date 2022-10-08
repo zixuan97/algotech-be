@@ -187,7 +187,9 @@ const getAllManualDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllManualDeliveryOrders({})
   );
-
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  });
   if (error) {
     log.error('ERR_DELIVERY_GET-ALL-MANUAL-DO', error.message);
     res.json(Error.http(error));
@@ -201,7 +203,9 @@ const getAllShippitDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllShippitDeliveryOrders({})
   );
-
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[d.deliveryStatus.length - 1] : {}
+  });
   if (error) {
     log.error('ERR_DELIVERY_GET-ALL-SHIPPIT-DO', error.message);
     res.json(Error.http(error));
