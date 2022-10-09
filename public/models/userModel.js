@@ -3,10 +3,14 @@ const bcrypt = require('bcrypt');
 const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req) => {
-  const { firstName, lastName, email, password, role, status, isVerified } = req;
+  let { firstName, lastName, email, password, role, status, isVerified } = req;
   let encryptedPassword = '';
   if (role !== UserRole.DISTRIBUTOR && role !== UserRole.CORPORATE) {
     encryptedPassword = await bcrypt.hash(password, 10);
+  } else {
+    if (status === undefined) {
+      status = UserStatus.PENDING;
+    }
   }
   await prisma.User.create({
     data: {
