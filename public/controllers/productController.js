@@ -72,11 +72,12 @@ const getAllProducts = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS', error.message);
     const e = Error.http(error);
-    res
-      .status(e.code)
-      .json({ err: e.message, req: { body: req.body, params: req.params } });
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS', {
+      err: e.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(e.code).json(e.message);
   } else {
     const result = await data.map((product) => {
       product.categories = product.productCategory;
