@@ -76,7 +76,13 @@ app.use(
   require('./public/routes/shopifyRoutes')
 );
 app.use('/sales', whiteListInternal, require('./public/routes/salesRoutes'));
-app.use('/customer', whiteListInternal, require('./public/routes/customerRoutes'));
+app.use(
+  '/newsletter',
+  whiteListInternal,
+  require('./public/routes/newsletterRoutes')
+);
+
+app.use('/customer', require('./public/routes/customerRoutes'));
 //external algotech-fe-b2b
 
 const port = process.env.PORT || 4000;
