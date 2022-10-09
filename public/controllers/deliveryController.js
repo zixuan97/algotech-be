@@ -317,7 +317,9 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
       eta: d.eta,
       carrier: d.carrier,
       salesOrder,
-      assignedUser
+      assignedUser,
+      deliveryStatus:
+        d.deliveryStatus.length !== 0 ? d.deliveryStatus[d.deliveryStatus.length - 1] : {}
     };
     result.push(res);
   }
