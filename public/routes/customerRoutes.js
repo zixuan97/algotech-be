@@ -1,9 +1,10 @@
 const router = require('express').Router();
-const CustomerController = require('../controllers/customerController');
+const customerController = require('../controllers/customerController');
 
-router.post('/newsletter', CustomerController.createNewsletter);
-router.get('/newsletter/:id' , CustomerController.getNewsletter);
-router.get('/newsletter/all', CustomerController.getAllNewsletters);
-router.get('/newsletterTemplate', CustomerController.generateNewsletterHtml);
-
+router.post('/', customerController.createCustomer);
+router.get('/all', customerController.getAllCustomers);
+router.get('/id/:id', customerController.getCustomerById);
+router.post('/email', customerController.getCustomerByEmail);
+router.put('/', customerController.updateCustomer);
+router.delete('/:id', customerController.deleteCustomer);
 module.exports = router;

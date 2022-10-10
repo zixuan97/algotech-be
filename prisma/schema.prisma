@@ -43,17 +43,18 @@ model ProductCategory {
 }
 
 model Product {
-  id              Int               @id @default(autoincrement())
-  sku             String            @unique
-  name            String            @unique
-  image           String?
-  qtyThreshold    Int?
-  brandId         Int
-  brand           Brand             @relation(fields: [brandId], references: [id])
-  bundleProduct   BundleProduct[]
-  productCategory ProductCategory[]
-  stockQuantity   StockQuantity[]
-  supplierProduct SupplierProduct[]
+  id               Int                @id @default(autoincrement())
+  sku              String             @unique
+  name             String             @unique
+  image            String?
+  qtyThreshold     Int?
+  brandId          Int
+  brand            Brand              @relation(fields: [brandId], references: [id])
+  bundleProduct    BundleProduct[]
+  productCategory  ProductCategory[]
+  stockQuantity    StockQuantity[]
+  supplierProduct  SupplierProduct[]
+  ProductCatalogue ProductCatalogue[]
 }
 
 model Location {
@@ -79,10 +80,11 @@ model StockQuantity {
 }
 
 model Bundle {
-  id            Int             @id @default(autoincrement())
-  name          String          @unique
-  description   String
-  bundleProduct BundleProduct[]
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  description     String
+  bundleProduct   BundleProduct[]
+  BundleCatalogue BundleCatalogue[]
 }
 
 model BundleProduct {
@@ -189,13 +191,29 @@ model BulkOrder {
 }
 
 model Newsletter {
-  id              Int            @id @default(autoincrement())
-  emailDate       DateTime
-  name            String
-  emailSubject    String
-  emailBodyTitle  String
-  emailBody       String
-  discountCode    String
+  id             Int      @id @default(autoincrement())
+  emailDate      DateTime
+  name           String
+  emailSubject   String
+  emailBodyTitle String
+  emailBody      String
+  discountCode   String
+}
+
+model ProductCatalogue {
+  id        Int     @id @default(autoincrement())
+  price     Float
+  image     String?
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model BundleCatalogue {
+  id       Int     @id @default(autoincrement())
+  price    Float
+  image    String?
+  bundle   Bundle  @relation(fields: [bundleId], references: [id])
+  bundleId Int
 }
 
 enum BulkOrderStatus {
@@ -211,6 +229,22 @@ enum PaymentMode {
   CASH
   BANK_TRANSFER
   PAYNOW
+}
+
+model Customer {
+  id               Int      @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  company          String?
+  totalSpent       Float    @default(0.00)
+  ordersCount      Int      @default(0)
+  email            String   @unique
+  address          String
+  postalCode       String
+  contactNo        String
+  acceptsMarketing Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model DeliveryOrder {
