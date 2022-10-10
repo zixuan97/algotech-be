@@ -7,6 +7,7 @@ const { verifyToken, whiteListInternal } = require('./public/middleware/auth');
 
 const corsWhitelist = [
   'http://localhost:3000',
+  'http://localhost:3002',
   'https://algotech-fe.vercel.app',
   'https://algotech-fe-prod.vercel.app',
   'https://algotech-fe-b2b.vercel.app',
@@ -75,8 +76,15 @@ app.use(
   require('./public/routes/shopifyRoutes')
 );
 app.use('/sales', whiteListInternal, require('./public/routes/salesRoutes'));
-app.use('/customer', whiteListInternal, require('./public/routes/customerRoutes'));
+app.use(
+  '/newsletter',
+  whiteListInternal,
+  require('./public/routes/newsletterRoutes')
+);
+app.use('/customer', require('./public/routes/customerRoutes'));
+
 //external algotech-fe-b2b
+app.use('/productCatalogue', require('./public/routes/productCatalogueRoutes'));
 
 const port = process.env.PORT || 4000;
 

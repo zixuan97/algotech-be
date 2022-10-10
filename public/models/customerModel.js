@@ -1,35 +1,99 @@
 const { prisma } = require('./index.js');
 
-const createNewsletter = async (req) => {
-  const { emailDate, name, emailSubject, emailBodyTitle, emailBody, discountCode } = req.body;
-  const newsletter = await prisma.newsletter.create({
+const createCustomer = async (req) => {
+  const {
+    firstName,
+    lastName,
+    company,
+    email,
+    address,
+    postalCode,
+    contactNo
+  } = req;
+
+  await prisma.customer.create({
     data: {
-      emailDate,
-      name,
-      emailSubject,
-      emailBodyTitle,
-      emailBody,
-      discountCode
+      firstName,
+      lastName,
+      company,
+      email,
+      address,
+      postalCode,
+      contactNo
     }
   });
-  return newsletter;
 };
 
-const getAllNewsletters = async () => {
-  const newsletter = await prisma.newsletter.findMany({});
-  return newsletter;
+const getAllCustomers = async () => {
+  const customers = await prisma.customer.findMany({});
+  return customers;
 };
-  
-const findNewsletterById = async (req) => {
+
+const updateCustomer = async (req) => {
+  const {
+    id,
+    firstName,
+    lastName,
+    company,
+    email,
+    address,
+    postalCode,
+    contactNo,
+    totalSpent,
+    ordersCount,
+    acceptsMarketing
+  } = req;
+
+  const customer = await prisma.customer.update({
+    where: { id: Number(id) },
+    data: {
+      firstName,
+      lastName,
+      company,
+      email,
+      address,
+      postalCode,
+      contactNo,
+      totalSpent,
+      ordersCount,
+      acceptsMarketing
+    }
+  });
+  return customer;
+};
+
+const deleteCustomer = async (req) => {
   const { id } = req;
-  const newsletter = await prisma.newsletter.findUnique({
+  await prisma.customer.delete({
     where: {
       id: Number(id)
     }
   });
-  return newsletter;
 };
 
-exports.createNewsletter = createNewsletter;
-exports.getAllNewsletters = getAllNewsletters;
-exports.findNewsletterById = findNewsletterById;
+const findCustomerById = async (req) => {
+  const { id } = req;
+  const customer = await prisma.customer.findUnique({
+    where: {
+      id: Number(id)
+    }
+  });
+  return customer;
+};
+
+const findCustomerByEmail = async (req) => {
+  const { email } = req;
+  const customer = await prisma.customer.findUnique({
+    where: {
+      email
+    }
+  });
+  return customer;
+};
+
+exports.createCustomer = createCustomer;
+exports.getAllCustomers = getAllCustomers;
+exports.updateCustomer = updateCustomer;
+exports.deleteCustomer = deleteCustomer;
+exports.findCustomerById = findCustomerById;
+exports.findCustomerByEmail = findCustomerByEmail;

@@ -201,6 +201,10 @@ const findDeliveriesBasedOnTimeFilter = async (req) => {
   const { time_from, time_to } = req;
   const deliveryOrders =
     await prisma.$queryRaw`select "id" from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  for (let d of deliveryOrders) {
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
+    d.deliveryStatus = deliveryStatus;
+  }
   return deliveryOrders;
 };
 
@@ -435,6 +439,10 @@ const findDeliveriesWithTimeAndTypeFilter = async (req) => {
   const filteredDeliveryOrders = deliveryOrders.filter(
     (x) => x.shippingType === enumShippingType
   );
+  for (let d of filteredDeliveryOrders) {
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
+    d.deliveryStatus = deliveryStatus;
+  }
   return filteredDeliveryOrders;
 };
 
