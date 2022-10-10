@@ -36,8 +36,11 @@ const createProduct = async (req, res) => {
           payload: image
         });
       } catch (uploadS3Error) {
-        log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
         const e = Error.http(uploadS3Error);
+        log.error('ERR_PRODUCT_UPLOAD-S3', {
+          err: e.message,
+          req: { body: req.body, params: req.params }
+        });     
         res.status(e.code).json(e.message);
       }
     }
@@ -56,11 +59,17 @@ const createProduct = async (req, res) => {
     );
 
     if (error) {
-      log.error('ERR_PRODUCT_CREATE-PRODUCT', error.message);
       const e = Error.http(error);
+      log.error('ERR_PRODUCT_CREATE-PRODUCT', {
+        err: e.message,
+        req: { body: req.body, params: req.params }
+      });
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_PRODUCT_CREATE-PRODUCT');
+      log.out('OK_PRODUCT_CREATE-PRODUCT', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'product created' }
+      });
       res.json({ message: 'product created' });
     }
   }
@@ -112,21 +121,30 @@ const getProductById = async (req, res) => {
       }
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       product.image = productImg;
-      log.out('OK_PRODUCT_GET-PRODUCT-BY-ID');
-
       product.categories = product.productCategory;
       delete product.productCategory;
       product.categories = product.categories.map(
         (category) => category.category
       );
 
+      log.out('OK_PRODUCT_GET-PRODUCT-BY-ID', {
+        req: { body: req.body, params: req.params },
+        res: product
+      });
       res.json(product);
     } else {
-      log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+      log.error('ERR_PRODUCT_GET-PRODUCT', {
+        err: "Error getting product",
+        req: { body: req.body, params: req.params }
+      });
+   
       res.status(500).send('Server Error');
     }
   } catch (error) {
-    log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+    log.error('ERR_PRODUCT_GET-PRODUCT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -144,23 +162,35 @@ const getProductByName = async (req, res) => {
       );
 
       if (getS3Error) {
-        log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+        log.error('ERR_PRODUCT_GET-S3', {
+          err: getS3Error.message,
+          req: { body: req.body, params: req.params }
+        });
       }
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
       product.image = productImg;
-      log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME');
       product.categories = product.productCategory;
       delete product.productCategory;
       product.categories = product.categories.map(
         (category) => category.category
       );
+      log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME', {
+        req: { body: req.body, params: req.params },
+        res: product
+      });   
       res.json(product);
     } else {
-      log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+      log.error('ERR_PRODUCT_GET-PRODUCT', {
+        err: "Server Error",
+        req: { body: req.body, params: req.params }
+      });
       res.status(500).send('Server Error');
     }
   } catch (error) {
-    log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+    log.error('ERR_PRODUCT_GET-PRODUCT', {
+      err: "Server Error",
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -178,26 +208,36 @@ const getProductBySku = async (req, res) => {
       );
 
       if (getS3Error) {
-        log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+        log.error('ERR_PRODUCT_GET-S3', {
+          err: getS3Error.message,
+          req: { body: req.body, params: req.params }
+        });
       }
       if (productImg) {
         product.image = productImg;
       }
       log.out('OK_PRODUCT_GET-PRODUCT-IMG');
-      log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU');
       product.categories = product.productCategory;
       delete product.productCategory;
       product.categories = product.categories.map(
         (category) => category.category
       );
+      log.out('OK_PRODUCT_GET-PRODUCT-BY-SKU', {
+        req: { body: req.body, params: req.params },
+        res: product
+      });
 
       res.json(product);
     } else {
-      log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+     
+   
       res.status(500).send('Server Error');
     }
   } catch (error) {
-    log.error('ERR_PRODUCT_GET-PRODUCT', error.message);
+    log.error('ERR_PRODUCT_GET-PRODUCT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -209,11 +249,14 @@ const getAllProductsByCategory = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', error.message);
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+ 
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
       product.categories = product.productCategory;
       delete product.productCategory;
@@ -221,6 +264,10 @@ const getAllProductsByCategory = async (req, res) => {
         ...product,
         categories: product.categories.map((category) => category.category)
       };
+    });
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', {
+      req: { body: req.body, params: req.params },
+      res: result
     });
     res.json(result);
   }
@@ -236,7 +283,6 @@ const getAllProductsByBundle = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE');
     const result = await data.map((product) => {
       product.category = product.productCategory;
       delete product.productCategory;
@@ -245,6 +291,12 @@ const getAllProductsByBundle = async (req, res) => {
         category: product.category.map((category) => category.category)
       };
     });
+     
+  log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE', {
+    req: { body: req.body, params: req.params },
+    res: result
+  });
+
     res.json(result);
   }
 };
@@ -256,11 +308,13 @@ const getAllProductsByLocation = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', error.message);
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-LOCATION', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
       product.categories = product.productCategory;
       delete product.productCategory;
@@ -268,6 +322,10 @@ const getAllProductsByLocation = async (req, res) => {
         ...product,
         categories: product.categories.map((category) => category.category)
       };
+    });
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-LOCATION', {
+      req: { body: req.body, params: req.params },
+      res: result
     });
     res.json(result);
   }
@@ -280,11 +338,13 @@ const getAllProductsByBrand = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', error.message);
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-BRAND', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY');
     const result = await data.map((product) => {
       product.categories = product.productCategory;
       delete product.productCategory;
@@ -292,6 +352,10 @@ const getAllProductsByBrand = async (req, res) => {
         ...product,
         categories: product.categories.map((category) => category.category)
       };
+    });
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BRAND', {
+      req: { body: req.body, params: req.params },
+      res: result
     });
     res.json(result);
   }
@@ -329,8 +393,12 @@ const updateProduct = async (req, res) => {
         })
       );
       if (uploadS3Error) {
-        log.error('ERR_PRODUCT_UPLOAD-S3', uploadS3Error.message);
         const e = Error.http(uploadS3Error);
+        log.error('ERR_PRODUCT_UPLOAD-S3', {
+          err: e.message,
+          req: { body: req.body, params: req.params }
+        });
+     
         res.status(e.code).json(e.message);
       }
       log.out('OK_PRODUCT_UPLOAD-S3');
@@ -347,8 +415,11 @@ const updateProduct = async (req, res) => {
       })
     );
     if (error) {
-      log.error('ERR_PRODUCT_UPDATE-PRODUCT', error.message);
       const e = Error.http(error);
+      log.error('ERR_PRODUCT_UPDATE-PRODUCT', {
+        err: e.message,
+        req: { body: req.body, params: req.params }
+      });
       res.status(e.code).json(e.message);
     } else {
       log.out('OK_PRODUCT_UPDATE-PRODUCT');
@@ -361,8 +432,11 @@ const deleteProduct = async (req, res) => {
   const { id } = req.params;
   const { error } = await common.awaitWrap(productModel.deleteProduct({ id }));
   if (error) {
-    log.error('ERR_PRODUCT_DELETE-PRODUCT', error.message);
     const e = Error.http(error);
+    log.error('ERR_PRODUCT_DELETE-PRODUCT', {
+      err: e.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_PRODUCT_DELETE-PRODUCT');
@@ -386,6 +460,7 @@ const generateExcel = async (req, res) => {
           )}.xlsx`
         );
         res.send(Buffer.from(buf));
+        console.log('EXCEL GENERATED FOR INVENTORY SUCCESSFULLY');
       });
     })
     .catch((error) => {
@@ -405,11 +480,11 @@ const alertLowInventory = async (req, res) => {
       await emailHelper.sendEmailWithAttachment({
         recipientEmail: 'exleolee@gmail.com',
         subject: `Daily Inventory Report ${format(today, 'yyyyMMdd')}`,
-        content: 'Here are the products that are on low supply ',
+        content: 'Dear sir/madam, here are the products that are on low supply ',
         data: Buffer.from(buf).toString('base64'),
         filename: `LowStockReport${format(today, 'yyyyMMdd')}.xlsx`
       });
-      console.log('EMAIL SENT');
+      console.log('EMAIL SENT FOR LOW INVENTORY');
     });
     res.status(200).json({ message: 'email sent' });
   });
