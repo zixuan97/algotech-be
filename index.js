@@ -81,9 +81,10 @@ app.use(
   whiteListInternal,
   require('./public/routes/newsletterRoutes')
 );
-
 app.use('/customer', require('./public/routes/customerRoutes'));
+
 //external algotech-fe-b2b
+app.use('/productCatalogue', require('./public/routes/productCatalogueRoutes'));
 
 const port = process.env.PORT || 4000;
 
