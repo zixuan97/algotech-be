@@ -180,9 +180,17 @@ const getProductByName = async (req, res) => {
       });   
       res.json(product);
     } else {
+      log.error('ERR_PRODUCT_GET-PRODUCT', {
+        err: "Server Error",
+        req: { body: req.body, params: req.params }
+      });
       res.status(500).send('Server Error');
     }
   } catch (error) {
+    log.error('ERR_PRODUCT_GET-PRODUCT', {
+      err: "Server Error",
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
