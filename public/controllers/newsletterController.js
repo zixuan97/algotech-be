@@ -55,7 +55,12 @@ const getNewsletter = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+const generateNewsletterHtml = async (req, res) => {
+  const path = process.cwd() + '/public/newsletter.html';
+  res.sendFile(path);
+};
 
 exports.createNewsletter = createNewsletter;
 exports.getAllNewsletters = getAllNewsletters;
 exports.getNewsletter = getNewsletter;
+exports.generateNewsletterHtml = generateNewsletterHtml;
