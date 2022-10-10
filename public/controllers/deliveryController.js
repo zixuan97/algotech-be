@@ -52,11 +52,13 @@ const createManualDeliveryOrder = async (req, res) => {
     orderStatus: OrderStatus.READY_FOR_DELIVERY
   });
   if (error) {
-    log.error('ERR_DELIVERYORDER_CREATE-MANUAL-DO', error.message);
+    log.error('ERR_DELIVERYORDER_CREATE-MANUAL-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_DELIVERYORDER_CREATE-MANUAL-DO');
     const result = {
       id: data.id,
       shippingType,
@@ -69,6 +71,10 @@ const createManualDeliveryOrder = async (req, res) => {
       salesOrder,
       assignedUser
     };
+    log.out('OK_DELIVERYORDER_CREATE-MANUAL-DO', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
     res.json(result);
   }
 };
@@ -124,7 +130,10 @@ const createShippitDeliveryOrder = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
+    log.error('ERR_DELIVERYORDER_CREATE-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -134,10 +143,12 @@ const createShippitDeliveryOrder = async (req, res) => {
     });
     try {
       await deliveryModel.updateDeliveryStatus({
-        status: "order_placed",
-        statusOwner: "",
+        status: 'order_placed',
+        statusOwner: '',
         date: new Date(Date.now()).toLocaleDateString(),
-        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+          timeZone: 'Asia/Singapore'
+        }),
         deliveryOrderId: data.id
       });
       const result = {
@@ -156,13 +167,22 @@ const createShippitDeliveryOrder = async (req, res) => {
           status: 'order_placed',
           statusOwner: '',
           date: new Date(Date.now()).toLocaleDateString(),
-          timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+          timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+            timeZone: 'Asia/Singapore'
+          }),
           deliveryOrderId: data.id
         }
       };
+      log.out('OK_DELIVERYORDER_CREATE-DO', {
+        req: { body: req.body, params: req.params },
+        res: result
+      });
       res.json(result);
-      log.out('OK_DELIVERYORDER_CREATE-DO');
     } catch (error) {
+      log.error('ERR_DELIVERYORDER_CREATE-DO', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     }
@@ -173,14 +193,23 @@ const getAllDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllDeliveryOrders({})
   );
-  data.map(d => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[d.deliveryStatus.length - 1] : {}
+  data.map((d) => {
+    d.deliveryStatus =
+      d.deliveryStatus.length !== 0
+        ? d.deliveryStatus[d.deliveryStatus.length - 1]
+        : {};
   });
   if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-DO', error.message);
+    log.error('ERR_DELIVERY_GET-ALL-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-DO');
+    log.out('OK_DELIVERY_GET-ALL-DO', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -189,14 +218,20 @@ const getAllManualDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllManualDeliveryOrders({})
   );
-  data.map(d => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
-});
+  data.map((d) => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
+  });
   if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-MANUAL-DO', error.message);
+    log.error('ERR_DELIVERY_GET-ALL-MANUAL-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-MANUAL-DO');
+    log.out('OK_DELIVERY_GET-ALL-MANUAL-DO', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -205,14 +240,23 @@ const getAllShippitDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllShippitDeliveryOrders({})
   );
-  data.map(d => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[d.deliveryStatus.length - 1] : {}
+  data.map((d) => {
+    d.deliveryStatus =
+      d.deliveryStatus.length !== 0
+        ? d.deliveryStatus[d.deliveryStatus.length - 1]
+        : {};
   });
-  if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-SHIPPIT-DO', error.message);
+  if (error) {;
+    log.error('ERR_DELIVERY_GET-ALL-SHIPPIT-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DO');
+    log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DO', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -223,10 +267,16 @@ const getAllGrabDeliveryOrders = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-GRAB-DO', error.message);
+    log.error('ERR_DELIVERY_GET-ALL-GRAB-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-GRAB-DO');
+    log.out('OK_DELIVERY_GET-ALL-GRAB-DO', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -238,12 +288,22 @@ const getDeliveryOrder = async (req, res) => {
     const result = {
       ...deliveryOrder,
       deliveryStatus:
-      deliveryOrder.deliveryStatus.length !== 0 ? deliveryOrder.deliveryStatus[deliveryOrder.deliveryStatus.length - 1] : {}
+        deliveryOrder.deliveryStatus.length !== 0
+          ? deliveryOrder.deliveryStatus[
+              deliveryOrder.deliveryStatus.length - 1
+            ]
+          : {}
     };
-    log.out('OK_DELIVERY_GET-DO-BY-ID');
+    log.out('OK_DELIVERY_GET-DO-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
     res.json(result);
   } catch (error) {
-    log.error('ERR_DELIVERY_GET-DO-BY-ID', error.message);
+    log.error('ERR_DELIVERY_GET-DO-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -262,10 +322,16 @@ const getDeliveryOrderByTrackingNumber = async (req, res) => {
       deliveryStatus:
         deliveryOrder.deliveryStatus[deliveryOrder.deliveryStatus.length - 1]
     };
-    log.out('OK_DELIVERY_GET-DO-BY-TRACKING-NUMBER');
+    log.out('OK_DELIVERY_GET-DO-BY-TRACKING-NUMBER', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
     res.json(result);
   } catch (error) {
-    log.error('ERR_DELIVERY_GET-DO-BY-TRACKING-NUMBER', error.message);
+    log.error('ERR_DELIVERY_GET-DO-BY-TRACKING-NUMBER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -281,10 +347,16 @@ const getDeliveryOrderBySalesOrderId = async (req, res) => {
       deliveryStatus:
         deliveryOrder.deliveryStatus[deliveryOrder.deliveryStatus.length - 1]
     };
-    log.out('OK_DELIVERY_GET-DO-BY-SO-ID');
+    log.out('OK_DELIVERY_GET-DO-BY-SO-ID', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
     res.json(result);
   } catch (error) {
-    log.error('ERR_DELIVERY_GET-DO-BY-SO-ID', error.message);
+    log.error('ERR_DELIVERY_GET-DO-BY-SO-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -319,15 +391,23 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
       salesOrder,
       assignedUser,
       deliveryStatus:
-        d.deliveryStatus.length !== 0 ? d.deliveryStatus[d.deliveryStatus.length - 1] : {}
+        d.deliveryStatus.length !== 0
+          ? d.deliveryStatus[d.deliveryStatus.length - 1]
+          : {}
     };
     result.push(res);
   }
   if (error) {
-    log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', error.message);
+    log.error('ERR_DELIVERY_GET-DELIVERIES-TIME-TYPE-FILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY-DELIVERIES-TIME-TYPE-FILTER');
+    log.out('OK_DELIVERY-DELIVERIES-TIME-TYPE-FILTER', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
     res.json(result);
   }
 };
@@ -371,12 +451,18 @@ const updateDeliveryOrder = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_DELIVERY_UPDATE-DO', error.message);
+    log.error('ERR_DELIVERY_UPDATE-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_UPDATE-DO');
     data.salesOrder = salesOrder;
     data.assignedUser = assignedUser;
+    log.out('OK_DELIVERY_UPDATE-DO', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -387,10 +473,16 @@ const deleteDeliveryOrder = async (req, res) => {
     deliveryModel.deleteDeliveryOrder({ id })
   );
   if (error) {
-    log.error('ERR_DELIVERY_DELETE-DO', error.message);
+    log.error('ERR_DELIVERY_DELETE-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_DELETE-DO');
+    log.out('OK_DELIVERY_DELETE-DO', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted DeliveryOrder with id:${id}` }
+    });
     res.json({ message: `Deleted DeliveryOrder with id:${id}` });
   }
 };
@@ -407,15 +499,23 @@ const cancelManualDeliveryOrder = async (req, res) => {
       status: 'cancelled',
       statusOwner: '',
       date: new Date(Date.now()).toLocaleDateString(),
-      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+        timeZone: 'Asia/Singapore'
+      }),
       deliveryOrderId: Number(id)
     });
-    log.out('OK_DELIVERY_CANCEL-MANUAL-ORDER');
+    log.out('OK_DELIVERY_CANCEL-MANUAL-ORDER', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Cancelled Manual DeliveryOrder with id:${id}` }
+    });
     res.json({
       message: `Cancelled Manual DeliveryOrder with id:${id}`
     });
   } catch (error) {
-    log.error('ERR_DELIVERY_CANCEL-MANUAL-ORDER', error.message);
+    log.error('ERR_DELIVERY_CANCEL-MANUAL-ORDER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   }
 };
@@ -433,19 +533,27 @@ const cancelShippitOrder = async (req, res) => {
       status: 'cancelled',
       statusOwner: '',
       date: new Date(Date.now()).toLocaleDateString(),
-      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+        timeZone: 'Asia/Singapore'
+      }),
       deliveryOrderId: deliveryOrder.id
     });
     await salesOrderModel.updateSalesOrderStatus({
       id: deliveryOrder.salesOrderId,
       orderStatus: OrderStatus.PREPARED
     });
-    log.out('OK_DELIVERY_CANCEL-SHIPPIT-ORDER');
+    log.out('OK_DELIVERY_CANCEL-SHIPPIT-ORDER', {
+      req: { body: req.body, params: req.params },
+      res: {message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}`}
+    });
     res.json({
       message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}`
     });
   } catch (error) {
-    log.error('ERR_DELIVERY_CANCEL-SHIPPIT-ORDER', error.message);
+    log.error('ERR_DELIVERY_CANCEL-SHIPPIT-ORDER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -480,10 +588,16 @@ const sendDeliveryOrderToShippit = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_DELIVERY_SEND-DO-TO-SHIPPIT', error.message);
+    log.error('ERR_DELIVERY_SEND-DO-TO-SHIPPIT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_SEND-DO-TO-SHIPPIT');
+    log.out('OK_DELIVERY_SEND-DO-TO-SHIPPIT', {
+      req: { body: req.body, params: req.params },
+      res: data.response
+    });
     res.json(data.response);
   }
 };
@@ -492,10 +606,16 @@ const trackShippitOrder = async (req, res) => {
   try {
     const { trackingNum } = req.params;
     const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum });
-    log.out('OK_DELIVERY_TRACK-SHIPPIT-DO');
+    log.out('OK_DELIVERY_TRACK-SHIPPIT-DO', {
+      req: { body: req.body, params: req.params },
+      res: shippitOrder
+    });
     res.json(shippitOrder);
   } catch (error) {
-    log.error('ERR_DELIVERY_TRACK-SHIPPIT-DO', error.message);
+    log.error('ERR_DELIVERY_TRACK-SHIPPIT-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -504,10 +624,16 @@ const getLastestTrackingInfoOfOrder = async (req, res) => {
   try {
     const { trackingNum } = req.params;
     const shippitOrder = await deliveryModel.trackShippitOrder({ trackingNum });
-    log.out('OK_DELIVERY_TRACK-SHIPPIT-DO');
+    log.out('ERR_DELIVERY_GET_LATEST_INFO', {
+      req: { body: req.body, params: req.params },
+      res: shippitOrder.track[0]
+    });
     res.json(shippitOrder.track[0]);
   } catch (error) {
-    log.error('ERR_DELIVERY_TRACK-SHIPPIT-DO', error.message);
+    log.error('ERR_DELIVERY_GET_LATEST_INFO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -517,7 +643,10 @@ const getAllShippitOrdersFromWebsite = async (req, res) => {
     deliveryModel.getAllDeliveryOrdersFromShippit({})
   );
   if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-DO', error.message);
+    log.error('ERR_DELIVERY_GET-ALL-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
     let dataRes = [];
@@ -538,7 +667,10 @@ const getAllShippitOrdersFromWebsite = async (req, res) => {
       };
       dataRes.push(result);
     }
-    log.out('OK_DELIVERY_GET-ALL-DO');
+    log.out('OK_DELIVERY_GET-ALL-DO', {
+      req: { body: req.body, params: req.params },
+      res: dataRes
+    });
     res.json(dataRes);
   }
 };
@@ -546,10 +678,16 @@ const getAllShippitOrdersFromWebsite = async (req, res) => {
 const getToken = async (req, res) => {
   const { data, error } = await common.awaitWrap(shippitApi.getToken({}));
   if (error) {
-    log.error('ERR_DELIVERY_GET-TOKEN', error.message);
+    log.error('ERR_DELIVERY_GET-TOKEN', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-TOKEN');
+    log.out('OK_DELIVERY_GET-TOKEN', {
+      req: { body: req.body, params: req.params },
+      res: { token: data }
+    });
     res.json({ token: data });
   }
 };
@@ -569,15 +707,23 @@ const confirmShippitOrder = async (req, res) => {
       status: 'despatch_in_progress',
       statusOwner: '',
       date: new Date(Date.now()).toLocaleDateString(),
-      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+        timeZone: 'Asia/Singapore'
+      }),
       deliveryOrderId: deliveryOrder.id
     });
-    log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER');
+    log.out('OK_DELIVERY_CONFIRM-SHIPPIT-ORDER', {
+      req: { body: req.body, params: req.params },
+      res: {message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}` }
+    });
     res.json({
       message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}`
     });
   } catch (error) {
-    log.error('ERR_DELIVERY_CONFIRM-SHIPPIT-ORDER', error.message);
+    log.error('ERR_DELIVERY_CONFIRM-SHIPPIT-ORDER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   }
 };
@@ -588,10 +734,16 @@ const getShippitOrderLabel = async (req, res) => {
     deliveryModel.getShippitOrderLabel({ trackingNumber })
   );
   if (error) {
-    log.error('ERR_DELIVERY_GET-SHIPPIT-ORDER-LABEL', error.message);
+    log.error('ERR_DELIVERY_GET-SHIPPIT-ORDER-LABEL', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-SHIPPIT-ORDER-LABEL');
+    log.out('OK_DELIVERY_GET-SHIPPIT-ORDER-LABEL', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -613,14 +765,22 @@ const bookShippitDelivery = async (req, res) => {
       status: 'ready_for_pickup',
       statusOwner: deliveryBooking[0].manifest_pdf,
       date: new Date(Date.now()).toLocaleDateString(),
-      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+        timeZone: 'Asia/Singapore'
+      }),
       deliveryOrderId: deliveryOrder.id
     });
     bookingManifestLabelLink = deliveryBooking.manifest_pdf;
-    log.out('OK_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY');
+    log.out('OK_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY', {
+      req: { body: req.body, params: req.params },
+      res: deliveryBooking
+    });
     res.json(deliveryBooking);
   } catch (error) {
-    log.error('ERR_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY', error.message);
+    log.error('ERR_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
@@ -661,7 +821,10 @@ const getLatLong = async (req, res) => {
           dataRes.push(response.data.results[0]);
         })
         .catch((error) => {
-          log.error('ERR_DELIVERY_GET-LAT-LONG', error.message);
+          log.error('ERR_DELIVERY_GET-LAT-LONG', {
+            err: error.message,
+            req: { body: req.body, params: req.params }
+          });
         });
     })
   ).then(() => res.json(dataRes));
@@ -689,7 +852,10 @@ const getLatLongForAssignedOrders = async (req, res) => {
           dataRes.push(response.data.results[0]);
         })
         .catch((error) => {
-          log.error('ERR_DELIVERY_GET-LAT-LONG', error.message);
+          log.error('ERR_DELIVERY_GET-LAT-LONG', {
+            err: error.message,
+            req: { body: req.body, params: req.params }
+          });
         });
     })
   ).then(() => res.json(dataRes));
@@ -714,7 +880,10 @@ const getLatLongForUnassignedOrders = async (req, res) => {
           dataRes.push(response.data.results[0]);
         })
         .catch((error) => {
-          log.error('ERR_DELIVERY_GET-LAT-LONG', error.message);
+          log.error('ERR_DELIVERY_GET-LAT-LONG', {
+            err: error.message,
+            req: { body: req.body, params: req.params }
+          });
         });
     })
   ).then(() => res.json(dataRes));
@@ -725,14 +894,20 @@ const getAllAssignedManualDeliveriesByUser = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.findAssignedManualDeliveriesByUser({ id })
   );
-  data.map(d => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  data.map((d) => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
   });
   if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', error.message);
+    log.error('ERR_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER');
+    log.out('OK_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -741,14 +916,20 @@ const getAllUnassignedManualDeliveries = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.findAllUnassignedManualDeliveries({})
   );
-  data.map(d => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  data.map((d) => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
   });
   if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', error.message);
+    log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES');
+    log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -761,17 +942,20 @@ const getAssignedManualDeliveriesByDate = async (req, res) => {
       time_to: new Date(time_to)
     })
   );
-  data.map(d => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  data.map((d) => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
   });
   if (error) {
-    log.error(
-      'ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE',
-      error.message
-    );
+    log.error('ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE');
+    log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -785,17 +969,20 @@ const getAssignedManualDeliveriesByDateByUser = async (req, res) => {
       assignedUserId
     })
   );
-  data.map(d => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  data.map((d) => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
   });
   if (error) {
-    log.error(
-      'ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE-BY-USER',
-      error.message
-    );
+    log.error('ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE-BY-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE-BY-USER');
+    log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE-BY-USER', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -808,17 +995,20 @@ const getUnassignedManualDeliveriesByDate = async (req, res) => {
       time_to: new Date(time_to)
     })
   );
-  data.map(d => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {}
+  data.map((d) => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
   });
   if (error) {
-    log.error(
-      'ERR_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE',
-      error.message
-    );
+    log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE');
+    log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -829,11 +1019,17 @@ const getCurrentLocationLatLong = async (req, res) => {
   return await axios
     .get(url)
     .then((response) => {
-      log.out('OK_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG');
+      log.out('OK_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG', {
+        req: { body: req.body, params: req.params },
+        res: response.data.results[0]
+      });
       res.json(response.data.results[0]);
     })
     .catch((error) => {
-      log.error('ERR_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG', error.message);
+      log.error('ERR_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     });
@@ -847,17 +1043,23 @@ const getShippitOrdersByDate = async (req, res) => {
       time_to: new Date(time_to)
     })
   );
-  data.map(d => {
-      d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[d.deliveryStatus.length - 1] : {}
+  data.map((d) => {
+    d.deliveryStatus =
+      d.deliveryStatus.length !== 0
+        ? d.deliveryStatus[d.deliveryStatus.length - 1]
+        : {};
   });
   if (error) {
-    log.error(
-      'ERR_DELIVERY_GET-ALL-SHIPPIT-DELIVERIES-BY-DATE',
-      error.message
-    );
+    log.error('ERR_DELIVERY_GET-ALL-SHIPPIT-DELIVERIES-BY-DATE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DELIVERIES-BY-DATE');
+    log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DELIVERIES-BY-DATE', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -907,7 +1109,10 @@ const generateDO = async (req, res) => {
         .end(pdfBuffer);
     })
     .catch((error) => {
-      log.error('ERR_PROCUREMENTORDER_GENERATE-DO-PDF', error.message);
+      log.error('ERR_PROCUREMENTORDER_GENERATE-DO-PDF', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       return res.status(error).json(error.message);
     });
 };

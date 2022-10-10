@@ -7,7 +7,10 @@ const createCategory = async (req, res) => {
   const { name } = req.body;
   const category = await categoryModel.findCategoryByName({ name });
   if (category) {
-    log.error('ERR_USER_CREATE-CATEGORY');
+    log.error('ERR_USER_CREATE-CATEGORY', {
+      err: 'Category already exist',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Category already exists' });
   } else {
     const { error } = await common.awaitWrap(
@@ -16,11 +19,17 @@ const createCategory = async (req, res) => {
       })
     );
     if (error) {
-      log.error('ERR_CATEGORY_CREATE-CATEGORY', error.message);
+      log.error('ERR_CATEGORY_CREATE-CATEGORY', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_CATEGORY_CREATE-CATEGORY');
+      log.out('OK_CATEGORY_CREATE-CATEGORY', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'category created' }
+      });
       res.json({ message: 'category created' });
     }
   }
@@ -32,11 +41,17 @@ const getAllCategories = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_CATEGORY_GET-ALL-CATEGORIES', error.message);
+    log.error('ERR_CATEGORY_GET-ALL-CATEGORIES', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_CATEGORY_GET-ALL-CATEGORIES');
+    log.out('OK_CATEGORY_GET-ALL-CATEGORIES', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -45,10 +60,16 @@ const getCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const category = await categoryModel.findCategoryById({ id });
-    log.out('OK_CATEGORY_GET-CATEGORY-BY-ID');
+    log.out('OK_CATEGORY_GET-CATEGORY-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: category
+    });
     res.json(category);
   } catch (error) {
-    log.error('ERR_CATEGORY_GET-CATEGORY', error.message);
+    log.error('ERR_CATEGORY_GET-CATEGORY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -57,10 +78,16 @@ const getCategoryByName = async (req, res) => {
   try {
     const { name } = req.body;
     const category = await categoryModel.findCategoryByName({ name });
-    log.out('OK_CATEGORY_GET-CATEGORY-BY-ID');
+    log.out('OK_CATEGORY_GET-CATEGORY-BY-NAME', {
+      req: { body: req.body, params: req.params },
+      res: category
+    });
     res.json(category);
   } catch (error) {
-    log.error('ERR_CATEGORY_GET-CATEGORY', error.message);
+    log.error('ERR_CATEGORY_GET-CATEGORY-BY-NAME', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -69,18 +96,27 @@ const updateCategory = async (req, res) => {
   const { id, name } = req.body;
   const category = await categoryModel.findCategoryByName({ name });
   if (category && category.id != id) {
-    log.error('ERR_USER_CREATE-CATEGORY');
+    log.error('ERR_USER_UPDATE-CATEGORY', {
+      err: "error updating category",
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Category already exists' });
   } else {
     const { error } = await common.awaitWrap(
       categoryModel.updateCategory({ id, name })
     );
     if (error) {
-      log.error('ERR_CATEGORY_UPDATE_CATEGORY', error.message);
+      log.error('ERR_CATEGORY_UPDATE_CATEGORY', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_CATEGORY_UPDATE_CATEGORY');
+      log.out('OK_CATEGORY_UPDATE_CATEGORY', {
+        req: { body: req.body, params: req.params },
+        res: { message: `Updated category with id:${id}` }
+      });
       res.json({ message: `Updated category with id:${id}` });
     }
   }
@@ -92,11 +128,17 @@ const deleteCategory = async (req, res) => {
     categoryModel.deleteCategory({ id })
   );
   if (error) {
-    log.error('ERR_CATEGORY_DELETE_CATEGORY', error.message);
+    log.error('ERR_CATEGORY_DELETE_CATEGORY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_CATEGORY_DELETE_CATEGORY');
+    log.out('OK_CATEGORY_DELETE_CATEGORY', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted category with id:${id}` }
+    });
     res.json({ message: `Deleted category with id:${id}` });
   }
 };
