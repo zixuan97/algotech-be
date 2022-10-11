@@ -68,5 +68,10 @@ router.post('/assignedByDate', deliveryController.getAssignedManualDeliveriesByD
 router.post('/unassignedByDate', deliveryController.getUnassignedManualDeliveriesByDate);
 router.post('/byUser/assignedByDate', deliveryController.getAssignedManualDeliveriesByDateByUser);
 router.post('/shippitDeliveries/date', deliveryController.getShippitOrdersByDate);
+router.post('/lalamove/createQuotation', deliveryController.createLalamoveQuotation);
+router.post('/lalamove/placeOrder', deliveryController.placeLalamoveOrder);
+router.get('/lalamove/:id', deliveryController.getLalamoveOrderByLalamoveOrderId);
+router.post('/lalamove/cancel/:id', deliveryController.cancelLalamoveOrder);
+router.get('/lalamove/driver/:orderId', deliveryController.getDriverDetails);
 
 module.exports = router;

@@ -15,6 +15,7 @@ const axios = require('axios');
 const { generateDeliveryOrderPdfTemplate } = require('../helpers/pdf');
 const { format } = require('date-fns');
 const prisma = new PrismaClient();
+const lalamoveApi = require('../helpers/lalamoveApi');
 
 const createManualDeliveryOrder = async (req, res) => {
   const {
@@ -912,6 +913,35 @@ const generateDO = async (req, res) => {
     });
 };
 
+const createLalamoveQuotation = async (req, res) => {
+  const quote = await lalamoveApi.createQuotation({});
+  return res.json(quote);
+};
+
+const placeLalamoveOrder = async (req, res) => {
+  const order = await lalamoveApi.placeLalamoveOrder({});
+  return res.json(order);
+};
+
+const getLalamoveOrderByLalamoveOrderId = async (req, res) => {
+  const { id } = req.params;
+  const order = await lalamoveApi.getLalamoveOrder({ id });
+  res.json(order);
+};
+
+const cancelLalamoveOrder = async (req, res) => {
+  const { id } = req.params;
+  await lalamoveApi.cancelLalamoveOrder({ id });
+  return res.json({ message: `Successfully cancelled Lalamove order with order id: ${id}` });
+};
+
+const getDriverDetails = async (req, res) => {
+  const { orderId } = req.params;
+  const driver = await lalamoveApi.getDriverDetails({ orderId });
+  console.log(driver)
+  return res.json(driver);
+};
+
 exports.createManualDeliveryOrder = createManualDeliveryOrder;
 exports.createShippitDeliveryOrder = createShippitDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
@@ -950,3 +980,8 @@ exports.getUnassignedManualDeliveriesByDate =
 exports.getAssignedManualDeliveriesByDateByUser =
   getAssignedManualDeliveriesByDateByUser;
 exports.getShippitOrdersByDate = getShippitOrdersByDate;
+exports.createLalamoveQuotation = createLalamoveQuotation;
+exports.placeLalamoveOrder = placeLalamoveOrder;
+exports.getLalamoveOrderByLalamoveOrderId = getLalamoveOrderByLalamoveOrderId;
+exports.cancelLalamoveOrder = cancelLalamoveOrder;
+exports.getDriverDetails = getDriverDetails;
