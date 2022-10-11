@@ -10,10 +10,16 @@ const createBrand = async (req, res) => {
     brandModel.findBrandByName({ name })
   );
   if (data) {
-    log.error('ERR_BRAND_CREATE-BRAND');
+    log.error('ERR_BRAND_CREATE-BRAND', {
+      err: {message: 'brand name already exist'},
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Brand name already exists' });
   } else if (duplicateBrandNameError) {
-    log.error('ERR_BRAND_CREATE-BRAND');
+    log.error('ERR_BRAND_CREATE-BRAND', {
+      err: duplicateBrandNameError.message,
+      req: { body: req.body, params: req.params }
+    });
     res
       .status(400)
       .json(
@@ -28,11 +34,17 @@ const createBrand = async (req, res) => {
     );
 
     if (error) {
-      log.error('ERR_BRAND_CREATE-BRAND', error.message);
+      log.error('ERR_BRAND_CREATE-BRAND', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_BRAND_CREATE-BRAND');
+      log.out('OK_BRAND_CREATE-BRAND', {
+        req: { body: req.body, params: req.params },
+        res: {message: 'brand created'}
+      });
       res.json({ message: 'brand created' });
     }
   }
@@ -42,11 +54,17 @@ const getAllBrands = async (req, res) => {
   const { data, error } = await common.awaitWrap(brandModel.getAllBrands({}));
 
   if (error) {
-    log.error('ERR_BRAND_GET-ALL-BRANDS', error.message);
+    log.error('ERR_BRAND_GET-ALL-BRANDS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BRAND_GET-ALL-BRANDS');
+    log.out('OK_BRAND_GET-ALL-BRANDS', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -55,10 +73,16 @@ const getBrand = async (req, res) => {
   try {
     const { id } = req.params;
     const brand = await brandModel.findBrandById({ id });
-    log.out('OK_BRAND_GET-BRAND-BY-ID');
+    log.out('OK_BRAND_GET-BRAND-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: brand
+    });
     res.json(brand);
   } catch (error) {
-    log.error('ERR_BRAND_GET-BRAND', error.message);
+    log.error('ERR_BRAND_GET-BRAND-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -67,10 +91,16 @@ const getBrandByName = async (req, res) => {
   try {
     const { name } = req.body;
     const brand = await brandModel.findBrandByName({ name });
-    log.out('OK_BRAND_GET-BRAND-BY-ID');
+    log.out('OK_BRAND_GET-BRAND-BY-NAME', {
+      req: { body: req.body, params: req.params },
+      res: brand
+    });
     res.json(brand);
   } catch (error) {
-    log.error('ERR_BRAND_GET-BRAND', error.message);
+    log.error('ERR_BRAND_GET-BRAND-BY-NAME', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -81,10 +111,16 @@ const updateBrand = async (req, res) => {
     brandModel.findBrandByName({ name })
   );
   if (data && data.id != id) {
-    log.error('ERR_BRAND_CREATE-BRAND');
+    log.error('ERR_BRAND_UPDATE-BRAND', {
+      err: duplicateBrandNameError.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Brand name already exists' });
   } else if (duplicateBrandNameError) {
-    log.error('ERR_BRAND_CREATE-BRAND');
+    log.error('ERR_BRAND_UPDATE-BRAND', {
+      err: duplicateBrandNameError.message,
+      req: { body: req.body, params: req.params }
+    });
     res
       .status(400)
       .json(
@@ -96,11 +132,17 @@ const updateBrand = async (req, res) => {
       brandModel.updateBrands({ id, name })
     );
     if (error) {
-      log.error('ERR_BRAND_UPDATE_BRAND', error.message);
+      log.error('ERR_BRAND_UPDATE-BRAND', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_BRAND_UPDATE_BRAND');
+      log.out('OK_BRAND_UPDATE_BRAND', {
+        req: { body: req.body, params: req.params },
+        res: { message: `Updated brand with id:${id}` }
+      });
       res.json({ message: `Updated brand with id:${id}` });
     }
   }
@@ -113,8 +155,11 @@ const deleteBrand = async (req, res) => {
   );
 
   if (getAllProductsError) {
-    log.error('ERR_BRAND_GET-ALL-PRODUCTS', error.message);
-    const e = Error.http(error);
+    log.error('ERR_BRAND_GET-ALL-PRODUCTS', {
+      err: getAllProductsError.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(getAllProductsError);
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_BRAND_GET-ALL-PRODUCTS');
@@ -127,17 +172,26 @@ const deleteBrand = async (req, res) => {
     )
   );
   if (deleteProductsError) {
-    log.error('ERR_PRODUCT_DELETE-ALL-PRODUCTS', error.message);
-    const e = Error.http(error);
+    log.error('ERR_PRODUCT_DELETE-ALL-PRODUCTS', {
+      err: deleteProductsError.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(deleteProductsError);
     res.status(e.code).json(e.message);
   }
   const { error } = await common.awaitWrap(brandModel.deleteBrand({ id }));
   if (error) {
-    log.error('ERR_BRAND_DELETE_BRAND', error.message);
+    log.error('ERR_BRAND_DELETE_BRAND', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BRAND_DELETE_BRAND');
+    log.out('OK_BRAND_DELETE_BRAND', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted brand with id:${id}` }
+    });
     res.json({ message: `Deleted brand with id:${id}` });
   }
 };
@@ -148,4 +202,3 @@ exports.updateBrand = updateBrand;
 exports.deleteBrand = deleteBrand;
 exports.getBrand = getBrand;
 exports.getBrandByName = getBrandByName;
-//test

@@ -22,11 +22,17 @@ const createProduct = async (req, res) => {
 
   // if exists throw error
   if (productSku) {
-    log.error('ERR_PRODUCT_CREATE-PRODUCT');
+    log.error('ERR_PRODUCT_CREATE-PRODUCT', {
+      err: 'Product name already exist',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Product sku already exists' });
   } else if (productName) {
-    log.error('ERR_PRODUCT_CREATE-PRODUCT');
-    res.status(400).json({ message: 'Product name already exists' });
+    log.error('ERR_PRODUCT_CREATE-PRODUCT', {
+      err: 'Product name already exist',
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).json({ message: 'Product name already exist' });
   } else {
     //uploadImg to s3
     if (image) {
@@ -40,7 +46,7 @@ const createProduct = async (req, res) => {
         log.error('ERR_PRODUCT_UPLOAD-S3', {
           err: e.message,
           req: { body: req.body, params: req.params }
-        });     
+        });
         res.status(e.code).json(e.message);
       }
     }
@@ -134,10 +140,10 @@ const getProductById = async (req, res) => {
       res.json(product);
     } else {
       log.error('ERR_PRODUCT_GET-PRODUCT', {
-        err: "Error getting product",
+        err: 'Error getting product',
         req: { body: req.body, params: req.params }
       });
-   
+
       res.status(500).send('Server Error');
     }
   } catch (error) {
@@ -177,18 +183,18 @@ const getProductByName = async (req, res) => {
       log.out('OK_PRODUCT_GET-PRODUCT-BY-NAME', {
         req: { body: req.body, params: req.params },
         res: product
-      });   
+      });
       res.json(product);
     } else {
       log.error('ERR_PRODUCT_GET-PRODUCT', {
-        err: "Server Error",
+        err: 'Server Error',
         req: { body: req.body, params: req.params }
       });
       res.status(500).send('Server Error');
     }
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', {
-      err: "Server Error",
+      err: 'Server Error',
       req: { body: req.body, params: req.params }
     });
     res.status(500).send('Server Error');
@@ -229,8 +235,6 @@ const getProductBySku = async (req, res) => {
 
       res.json(product);
     } else {
-     
-   
       res.status(500).send('Server Error');
     }
   } catch (error) {
@@ -253,7 +257,7 @@ const getAllProductsByCategory = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
- 
+
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -291,11 +295,11 @@ const getAllProductsByBundle = async (req, res) => {
         category: product.category.map((category) => category.category)
       };
     });
-     
-  log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE', {
-    req: { body: req.body, params: req.params },
-    res: result
-  });
+
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
 
     res.json(result);
   }
@@ -336,7 +340,6 @@ const getAllProductsByBrand = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     productModel.getAllProductsByBrand({ brandId })
   );
-
   if (error) {
     log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-BY-BRAND', {
       err: error.message,
@@ -378,10 +381,16 @@ const updateProduct = async (req, res) => {
 
   // if exists throw error
   if (productSku && productSku.id != id) {
-    log.error('ERR_PRODUCT_UPDATE-PRODUCT');
+    log.error('ERR_PRODUCT_UPDATE-PRODUCT', {
+      err: 'Product sku already exists',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Product sku already exists' });
   } else if (productName && productName.id != id) {
-    log.error('ERR_PRODUCT_UPDATE-PRODUCT');
+    log.error('ERR_PRODUCT_UPDATE-PRODUCT', {
+      err: 'Product name already exists',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Product name already exists' });
   } else {
     //uploadImg to s3
@@ -398,7 +407,7 @@ const updateProduct = async (req, res) => {
           err: e.message,
           req: { body: req.body, params: req.params }
         });
-     
+
         res.status(e.code).json(e.message);
       }
       log.out('OK_PRODUCT_UPLOAD-S3');
@@ -422,7 +431,10 @@ const updateProduct = async (req, res) => {
       });
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_PRODUCT_UPDATE-PRODUCT');
+      log.out('OK_PRODUCT_UPDATE-PRODUCT', {
+        req: { body: req.body, params: req.params },
+        res: { message: `Updated product with id:${id}` }
+      });
       res.json({ message: `Updated product with id:${id}` });
     }
   }
@@ -480,7 +492,8 @@ const alertLowInventory = async (req, res) => {
       await emailHelper.sendEmailWithAttachment({
         recipientEmail: 'exleolee@gmail.com',
         subject: `Daily Inventory Report ${format(today, 'yyyyMMdd')}`,
-        content: 'Dear sir/madam, here are the products that are on low supply ',
+        content:
+          'Dear sir/madam, here are the products that are on low supply ',
         data: Buffer.from(buf).toString('base64'),
         filename: `LowStockReport${format(today, 'yyyyMMdd')}.xlsx`
       });

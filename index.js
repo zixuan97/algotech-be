@@ -85,7 +85,7 @@ app.use('/customer', require('./public/routes/customerRoutes'));
 
 //external algotech-fe-b2b
 app.use('/productCatalogue', require('./public/routes/productCatalogueRoutes'));
-
+app.use('/bundleCatalogue', require('./public/routes/bundleCatalogueRoutes'));
 const port = process.env.PORT || 4000;
 
 app.listen(port, () => {

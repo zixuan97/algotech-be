@@ -55,6 +55,7 @@ model Product {
   productCategory  ProductCategory[]
   stockQuantity    StockQuantity[]
   supplierProduct  SupplierProduct[]
+  ProductCatalogue ProductCatalogue?
 }
 
 model Location {
@@ -85,6 +86,7 @@ model Bundle {
   description     String
   BundleCatalogue BundleCatalogue?
   bundleProduct   BundleProduct[]
+  BundleCatalogue BundleCatalogue?
 }
 
 model BundleProduct {
@@ -201,19 +203,36 @@ model Newsletter {
 }
 
 model ProductCatalogue {
-  id        Int     @id @default(autoincrement())
-  price     Float
-  image     String?
-  productId Int     @unique
-  product   Product @relation(fields: [productId], references: [id])
+  id          Int     @id @default(autoincrement())
+  price       Float
+  image       String?
+  description String?
+  product     Product @relation(fields: [productId], references: [id])
+  productId   Int     @unique
 }
 
 model BundleCatalogue {
-  id       Int     @id @default(autoincrement())
-  price    Float
-  image    String?
-  bundleId Int     @unique
-  bundle   Bundle  @relation(fields: [bundleId], references: [id])
+  id          Int     @id @default(autoincrement())
+  price       Float
+  image       String?
+  description String?
+  bundle      Bundle  @relation(fields: [bundleId], references: [id])
+  bundleId    Int     @unique
+}
+
+enum BulkOrderStatus {
+  CREATED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  FULFILLED
+  CANCELLED
+}
+
+enum PaymentMode {
+  CREDIT_CARD
+  CASH
+  BANK_TRANSFER
+  PAYNOW
 }
 
 model Customer {
@@ -269,21 +288,6 @@ model DeliveryStatus {
   deliveryOrder   DeliveryOrder @relation(fields: [deliveryOrderId], references: [id])
 
   @@id([deliveryOrderId, date, timestamp, status])
-}
-
-enum BulkOrderStatus {
-  CREATED
-  PAYMENT_SUCCESS
-  PAYMENT_FAILED
-  FULFILLED
-  CANCELLED
-}
-
-enum PaymentMode {
-  CREDIT_CARD
-  CASH
-  BANK_TRANSFER
-  PAYNOW
 }
 
 enum OrderStatus {

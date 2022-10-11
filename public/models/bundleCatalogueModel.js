@@ -1,28 +1,44 @@
 const { prisma } = require('./index.js');
 
 const createBundleCatalogue = async (req) => {
-  const { price, bundleId } = req;
+  const { price, bundleId, description } = req;
 
   await prisma.bundleCatalogue.create({
     data: {
       price,
-      bundleId
+      bundleId,
+      description
     }
   });
 };
 
 const getAllBundleCatalogue = async () => {
-  const bundleCatalogue = await prisma.bundleCatalogue.findMany({});
+  const bundleCatalogue = await prisma.bundleCatalogue.findMany({
+    include: {
+      bundle: {
+        include: {
+          bundleProduct: {
+            select: {
+              product: true,
+              productId: true,
+              quantity: true
+            }
+          }
+        }
+      }
+    }
+  });
   return bundleCatalogue;
 };
 
 const updateBundleCatalogue = async (req) => {
-  const { id, price } = req;
+  const { id, price, description } = req;
 
   bundleCatalogue = await prisma.bundleCatalogue.update({
     where: { id },
     data: {
-      price
+      price,
+      description
     }
   });
   return bundleCatalogue;
@@ -42,6 +58,19 @@ const findBundleCatalogueById = async (req) => {
   const bundleCatalogue = await prisma.bundleCatalogue.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      bundle: {
+        include: {
+          bundleProduct: {
+            select: {
+              product: true,
+              productId: true,
+              quantity: true
+            }
+          }
+        }
+      }
     }
   });
   return bundleCatalogue;

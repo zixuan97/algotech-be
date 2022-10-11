@@ -1,12 +1,11 @@
 const productCatalogueModel = require('../models/productCatalogueModel');
-const productModel = require('../models/productModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { uploadS3, getS3 } = require('../helpers/s3');
 
 const createProductCatalogue = async (req, res) => {
-  const { price, product, image } = req.body;
+  const { price, product, image, description } = req.body;
 
   if (image) {
     try {
@@ -20,11 +19,12 @@ const createProductCatalogue = async (req, res) => {
       res.status(e.code).json(e.message);
     }
   }
-  log.out('OK_PRODUCT_UPLOAD-S3');
+  log.out('OK_PRODUCTCAT_UPLOAD-S3');
   const { error } = await common.awaitWrap(
     productCatalogueModel.createProdCatalogue({
       price,
-      productId: product.id
+      productId: product.id,
+      description
     })
   );
   if (error) {
@@ -94,7 +94,7 @@ const getProductCatalogue = async (req, res) => {
 };
 
 const updateProductCatalogue = async (req, res) => {
-  const { id, price, image, product } = req.body;
+  const { id, price, image, product, description } = req.body;
 
   if (image) {
     const { error: uploadS3Error } = await common.awaitWrap(
@@ -111,7 +111,7 @@ const updateProductCatalogue = async (req, res) => {
     log.out('OK_PRODUCTCAT_UPLOAD-S3');
   }
   const { error } = await common.awaitWrap(
-    productCatalogueModel.updateProdCatalogue({ id, price })
+    productCatalogueModel.updateProdCatalogue({ id, price, description })
   );
 
   if (error) {
