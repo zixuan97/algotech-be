@@ -10,9 +10,13 @@ const createLocation = async (req, res) => {
   );
   if (data) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
+    
     res.status(400).json({ message: 'Location name already exists' });
   } else if (duplicateLocationNameError) {
-    log.error('ERR_LOCATION_CREATE-LOCATION');
+    log.error('ERR_LOCATION_CREATE-LOCATION', {
+      err: duplicateLocationNameError.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(
       { message: 'Unable to find location name' },
       duplicateLocationNameError.message
@@ -26,11 +30,17 @@ const createLocation = async (req, res) => {
     );
 
     if (error) {
-      log.error('ERR_LOCATION_CREATE-LOCATION', error.message);
+      log.error('ERR_LOCATION_CREATE-LOCATION', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_LOCATION_CREATE-LOCATION');
+      log.out('OK_LOCATION_CREATE-LOCATION', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'location created' }
+      });
       res.json({ message: 'location created' });
     }
   }
@@ -42,11 +52,17 @@ const getAllLocations = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_LOCATION_GET-ALL-LOCATIONS', error.message);
+    log.error('ERR_LOCATION_GET-ALL-LOCATIONS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_LOCATION_GET-ALL-LOCATIONS');
+    log.out('OK_LOCATION_GET-ALL-LOCATIONS', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -55,10 +71,16 @@ const getLocation = async (req, res) => {
   try {
     const { id } = req.params;
     const location = await locationModel.findLocationById({ id });
-    log.out('OK_LOCATION_GET-LOCATION-BY-ID');
+    log.out('OK_LOCATION_GET-LOCATION-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: location
+    });
     res.json(location);
   } catch (error) {
-    log.error('ERR_LOCATION_GET-LOCATION', error.message);
+    log.error('ERR_LOCATION_GET-LOCATION-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -67,10 +89,16 @@ const getLocationByName = async (req, res) => {
   try {
     const { name } = req.body;
     const location = await locationModel.findLocationByName({ name });
-    log.out('OK_LOCATION_GET-LOCATION-BY-ID');
+    log.out('OK_LOCATION_GET-LOCATION-BY-NAME', {
+      req: { body: req.body, params: req.params },
+      res: location
+    });
     res.json(location);
   } catch (error) {
-    log.error('ERR_LOCATION_GET-LOCATION', error.message);
+    log.error('ERR_LOCATION_GET-LOCATION-BY-NAME', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -94,11 +122,17 @@ const updateLocation = async (req, res) => {
       locationModel.updateLocations({ id, name, stockQuantity, address })
     );
     if (error) {
-      log.error('ERR_LOCATION_UPDATE-LOCATION', error.message);
+      log.error('ERR_LOCATION_UPDATE-LOCATION', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_LOCATION_UPDATE-LOCATION');
+      log.out('OK_LOCATION_UPDATE-LOCATION', {
+        req: { body: req.body, params: req.params },
+        res: { message: `Updated location with id:${id}` }
+      });
       res.json({ message: `Updated location with id:${id}` });
     }
   }
@@ -123,11 +157,17 @@ const updateLocationWithoutProducts = async (req, res) => {
       locationModel.updateLocationsWithoutProducts({ id, name, address })
     );
     if (error) {
-      log.error('ERR_LOCATION_UPDATE-LOCATION', error.message);
+      log.error('ERR_LOCATION_UPDATE-LOCATION', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_LOCATION_UPDATE-LOCATION');
+      log.out('OK_LOCATION_UPDATE-LOCATION', {
+        req: { body: req.body, params: req.params },
+        res: { message: `Updated location with id:${id}` }
+      });
       res.json({ message: `Updated location with id:${id}` });
     }
   }
@@ -139,11 +179,17 @@ const addProductsToLocation = async (req, res) => {
     locationModel.addProductsToLocation({ products, id })
   );
   if (error) {
-    log.error('ERR_LOCATION_ADD-PRODUCTS', error.message);
+    log.error('ERR_LOCATION_ADD-PRODUCTS-TO-LOCATION', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_LOCATION_ADD-PRODUCTS');
+    log.out('OK_LOCATION_ADD-PRODUCTS', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Updated location with id:${id}` }
+    });
     res.json({ message: `Updated location with id:${id}` });
   }
 };
@@ -154,11 +200,17 @@ const deleteLocation = async (req, res) => {
     locationModel.deleteLocation({ id })
   );
   if (error) {
-    log.error('ERR_LOCATION_DELETE_LOCATION', error.message);
+    log.error('ERR_LOCATION_DELETE_LOCATION', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_LOCATION_DELETE_LOCATION');
+    log.out('OK_LOCATION_DELETE_LOCATION', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted location with id:${id}` }
+    });
     res.json({ message: `Deleted location with id:${id}` });
   }
 };

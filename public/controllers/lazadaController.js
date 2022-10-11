@@ -11,7 +11,10 @@ const refreshToken = async (req, res) => {
     keyModel.findKeyByName({ key: 'lazada_refresh_token' })
   );
   if (error) {
-    log.error('ERR_LAZADA_GET-REFRESH-KEY', error.message);
+    log.error('ERR_LAZADA_GET-REFRESH-KEY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -29,10 +32,16 @@ const refreshToken = async (req, res) => {
         key: 'lazada_refresh_token',
         value: response.refresh_token
       });
-      log.out('OK_LAZADA_UPDATE-LAZADA-KEY');
+      log.out('OK_LAZADA_UPDATE-LAZADA-KEY', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'Updated Lazada Keys' }
+      });
       res.json({ message: 'Updated Lazada Keys' });
     } catch (err) {
-      log.error('ERR_LAZADA_UPDATE-LAZADA-KEY', err.message);
+      log.error('ERR_LAZADA_UPDATE-LAZADA-KEY', {
+        err: err.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(err);
       res.status(e.code).json(e.message);
     }
@@ -46,7 +55,10 @@ const addLazadaOrders = async (req, res) => {
     keyModel.findKeyByName({ key: 'lazada_access_token' })
   );
   if (error) {
-    log.error('ERR_LAZADA_GET-ACCESS-KEY', error.message);
+    log.error('ERR_LAZADA_GET-ACCESS-KEY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -105,11 +117,16 @@ const addLazadaOrders = async (req, res) => {
           }
         })
       );
-
-      log.out('OK_LAZADA-ADD-ORDERS');
+      log.out('OK_LAZADA-ADD-ORDERS', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'Sales Orders for Lazada created' }
+      });
       res.json({ message: 'Sales Orders for Lazada created' });
     } catch (error) {
-      log.error('ERR_LAZADA-ADD-ORDERS', error.message);
+      log.error('ERR_LAZADA_ADD-ORDERS', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     }
@@ -122,7 +139,10 @@ const getSellerPerformance = async (req, res) => {
   );
   try {
     if (error) {
-      log.error('ERR_LAZADA_GET-ACCESS-KEY', error.message);
+      log.error('ERR_LAZADA_GET-ACCESS-KEY', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
@@ -130,17 +150,22 @@ const getSellerPerformance = async (req, res) => {
       const response = await lazadaApi.getSellerPerformance({
         access_token: access_token.value
       });
-
       const sellerPerformance = {
         indicators: response.indicators,
         category: response.main_category_name,
         sellerId: response.seller_id
       };
-
+      log.out('OK_LAZADA_GET-SHOP-PERFORMANCE', {
+        req: { body: req.body, params: req.params },
+        res: sellerPerformance
+      });
       res.json(sellerPerformance);
     }
   } catch (error) {
-    log.error('ERR_LAZADA_GET-SELLER-PERFORMANCE', error.message);
+    log.error('ERR_LAZADA_GET-SELLER-PERFORMANCE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }

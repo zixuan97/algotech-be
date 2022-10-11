@@ -39,7 +39,10 @@ const createProcurementOrder = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_PROCUREMENTORDER_CREATE-PO', error.message);
+    log.error('ERR_PROCUREMENTORDER_CREATE-PO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -52,7 +55,6 @@ const createProcurementOrder = async (req, res) => {
     const procOrderItemsPdt = await procurementModel.procOrderStructure({
       procOrderItems
     });
-    log.out('OK_PROCUREMENTORDER_CREATE-PO');
     const result = {
       id: data.id,
       orderDate,
@@ -64,6 +66,10 @@ const createProcurementOrder = async (req, res) => {
       location: location,
       procOrderItems: procOrderItemsPdt
     };
+    log.out('OK_PROCUREMENTORDER_CREATE-PO', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
     res.json(result);
   }
 };
@@ -92,7 +98,10 @@ const updateProcurementOrder = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_PROCUREMENTORDER_UPDATE-PO', error.message);
+    log.error('ERR_PROCUREMENTORDER_UPDATE-PO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -130,7 +139,10 @@ const updateProcurementOrder = async (req, res) => {
         procOrderItems: procOrderItemsPdt
       };
     }
-    log.out('OK_PROCUREMENTORDER_UPDATE-PO');
+    log.out('OK_PROCUREMENTORDER_UPDATE-PO', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
     res.json(result);
   }
 };
@@ -141,7 +153,10 @@ const getAllProcurementOrders = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_PROCUREMENTORDER_GET-ALL-PO', error.message);
+    log.error('ERR_PROCUREMENTORDER_GET-ALL-PO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -182,7 +197,10 @@ const getAllProcurementOrders = async (req, res) => {
       dataRes.push(result);
       procOrderItemsPdt = [];
     }
-    log.out('OK_PROCUREMENTORDER_GET-ALL-PO');
+    log.out('OK_PROCUREMENTORDER_GET-ALL-PO', {
+      req: { body: req.body, params: req.params },
+      res: dataRes
+    });
     res.json(dataRes);
   }
 };
@@ -214,7 +232,6 @@ const getProcurementOrder = async (req, res) => {
         quantity: p.quantity
       })
     })
-    log.out('OK_PROCUREMENTORDER_GET-PO-BY-ID');
     const result = {
       id,
       orderDate,
@@ -236,9 +253,16 @@ const getProcurementOrder = async (req, res) => {
       },
       procOrderItems: procOrderItemsPdt
     };
+    log.out('OK_PROCUREMENTORDER_GET-PO-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: result
+    });
     res.json(result);
   } catch (error) {
-    log.error('ERR_PROCUREMENTORDER_GET-PO', error.message);
+    log.error('ERR_PROCUREMENTORDER_GET-PO-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -265,7 +289,10 @@ const generatePO = async (req, res) => {
         .end(pdfBuffer);
     })
     .catch((error) => {
-      log.error('ERR_PROCUREMENTORDER_GENERATE-PO-PDF', error.message);
+      log.error('ERR_PROCUREMENTORDER_GENERATE-PO-PDF', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       return res.status(error).json(error.message);
     });
 };
@@ -294,7 +321,7 @@ const sendProcurementEmail = async (req, res) => {
       console.log('EMAIL SENT');
     });
   } catch (error) {
-    log.error('ERR_USER_SEND', error.message);
+    log.error('ERR_USER_SEND-PROCUREMENT-EMAIL', error.message);
   }
 };
 

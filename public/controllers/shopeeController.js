@@ -11,11 +11,17 @@ const createKey = async (req, res) => {
   const { error } = await common.awaitWrap(keyModel.createKey({ key, value }));
 
   if (error) {
-    log.error('ERR_SHOPEE_CREATE-KEY', error.message);
+    log.error('ERR_SHOPEE_CREATE-KEY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_SHOPEE_CREATE-KEY');
+    log.out('OK_SHOPEE_CREATE-KEY', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Created key with key:${key}` }
+    });
     res.json({ message: `Created key with key:${key}` });
   }
 };
@@ -25,7 +31,10 @@ const refreshToken = async (req, res) => {
     keyModel.findKeyByName({ key: 'shopee_refresh_token' })
   );
   if (error) {
-    log.error('ERR_SHOPEE_GET-REFRESH-KEY', error.message);
+    log.error('ERR_SHOPEE_GET-REFRESH-KEY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -42,10 +51,16 @@ const refreshToken = async (req, res) => {
         key: 'shopee_refresh_token',
         value: response.refresh_token
       });
-      log.out('OK_SHOPEE_UPDATE-SHOPEE-KEY');
+      log.out('OK_SHOPEE_UPDATE-SHOPEE-KEY', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'Updated Shopee Keys' }
+      });
       res.json({ message: 'Updated Shopee Keys' });
     } catch (err) {
-      log.error('ERR_SHOPEE_UPDATE-REFRESH-KEY', err.message);
+      log.error('ERR_SHOPEE_UPDATE-REFRESH-KEY', {
+        err: err.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(err);
       res.status(e.code).json(e.message);
     }
@@ -135,10 +150,16 @@ const addShopeeOrders = async (req, res) => {
         })
       );
     }
-    log.out('OK_SHOPEE-ADD-ORDERS');
+    log.out('OK_SHOPEE-ADD-ORDERS', {
+      req: { body: req.body, params: req.params },
+      res: { message: 'Sales Orders for Shopee created' }
+    });
     res.json({ message: 'Sales Orders for Shopee created' });
   } catch (error) {
-    log.error('ERR_SHOPEE-ADD-ORDERS', error.message);
+    log.error('ERR_SHOPEE-ADD-ORDERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
@@ -150,7 +171,10 @@ const getShopPerformance = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_SHOPEE_GET-KEY', error.message);
+    log.error('ERR_SHOPEE-GET-KEY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -165,10 +189,16 @@ const getShopPerformance = async (req, res) => {
         customerService: response.customer_service,
         customerSatisfaction: response.customer_satisfaction
       };
-      log.out('OK_SHOPEE_GET-SHOP-PERFORMANCE');
+      log.out('OK_SHOPEE_GET-SHOP-PERFORMANCE', {
+        req: { body: req.body, params: req.params },
+        res: sellerPerformance
+      });
       res.json(sellerPerformance);
     } catch (err) {
-      log.error('ERR_SHOPEE_GET-SHOP-PERFORMANCE', err.message);
+      log.error('ERR_SHOPEE_GET-SHOP-PERFORMANCE', {
+        err: err.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(err);
       res.status(e.code).json(e.message);
     }
@@ -181,7 +211,10 @@ const downloadShippingDocument = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_SHOPEE_CREATE-KEY', error.message);
+    log.error('ERR_SHOPEE_CREATE-KEY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -195,10 +228,16 @@ const downloadShippingDocument = async (req, res) => {
         access_token: access_token.value,
         order
       });
-      log.out('OK_SHOPEE_DOWNLOAD-SHIPPING-DOCUMENT');
+      log.out('OK_SHOPEE_DOWNLOAD-SHIPPING-DOCUMENT', {
+        req: { body: req.body, params: req.params },
+        res: response
+      });
       res.json(response);
     } catch (err) {
-      log.error('ERR_SHOPEE_DOWNLOAD-SHIPPING-DOCUMENT', err.message);
+      log.error('ERR_SHOPEE_DOWNLOAD-SHIPPING-DOCUMENT', {
+        err: err.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(err);
       res.status(e.code).json(e.message);
     }
