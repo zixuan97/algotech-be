@@ -43,18 +43,18 @@ model ProductCategory {
 }
 
 model Product {
-  id               Int                @id @default(autoincrement())
-  sku              String             @unique
-  name             String             @unique
+  id               Int               @id @default(autoincrement())
+  sku              String            @unique
+  name             String            @unique
   image            String?
   qtyThreshold     Int?
   brandId          Int
-  brand            Brand              @relation(fields: [brandId], references: [id])
+  brand            Brand             @relation(fields: [brandId], references: [id])
   bundleProduct    BundleProduct[]
   productCategory  ProductCategory[]
   stockQuantity    StockQuantity[]
   supplierProduct  SupplierProduct[]
-  ProductCatalogue ProductCatalogue[]
+  ProductCatalogue ProductCatalogue?
 }
 
 model Location {
@@ -80,11 +80,11 @@ model StockQuantity {
 }
 
 model Bundle {
-  id              Int               @id @default(autoincrement())
-  name            String            @unique
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
   description     String
   bundleProduct   BundleProduct[]
-  BundleCatalogue BundleCatalogue[]
+  BundleCatalogue BundleCatalogue?
 }
 
 model BundleProduct {
@@ -205,7 +205,7 @@ model ProductCatalogue {
   price     Float
   image     String?
   product   Product @relation(fields: [productId], references: [id])
-  productId Int
+  productId Int     @unique
 }
 
 model BundleCatalogue {
@@ -213,7 +213,7 @@ model BundleCatalogue {
   price    Float
   image    String?
   bundle   Bundle  @relation(fields: [bundleId], references: [id])
-  bundleId Int
+  bundleId Int     @unique
 }
 
 enum BulkOrderStatus {
