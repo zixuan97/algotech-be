@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "ShippingType" ADD VALUE 'LALAMOVE';
+
+-- AlterTable
+ALTER TABLE "BulkOrder" ADD COLUMN     "createdTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

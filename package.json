@@ -19,6 +19,7 @@
   "dependencies": {
     "@kelchy/common": "^1.0.1",
     "@kelchy/log": "^1.1.1",
+    "@lalamove/lalamove-js": "^1.1.0",
     "@prisma/client": "^4.2.1",
     "aws-sdk": "^2.1211.0",
     "axios": "^0.27.2",
