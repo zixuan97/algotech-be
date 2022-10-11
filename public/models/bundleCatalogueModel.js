@@ -12,7 +12,21 @@ const createBundleCatalogue = async (req) => {
 };
 
 const getAllBundleCatalogue = async () => {
-  const bundleCatalogue = await prisma.bundleCatalogue.findMany({});
+  const bundleCatalogue = await prisma.bundleCatalogue.findMany({
+    include: {
+      bundle: {
+        include: {
+          bundleProduct: {
+            select: {
+              product: true,
+              productId: true,
+              quantity: true
+            }
+          }
+        }
+      }
+    }
+  });
   return bundleCatalogue;
 };
 
@@ -42,6 +56,19 @@ const findBundleCatalogueById = async (req) => {
   const bundleCatalogue = await prisma.bundleCatalogue.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      bundle: {
+        include: {
+          bundleProduct: {
+            select: {
+              product: true,
+              productId: true,
+              quantity: true
+            }
+          }
+        }
+      }
     }
   });
   return bundleCatalogue;
