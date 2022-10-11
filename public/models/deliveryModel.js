@@ -59,14 +59,15 @@ const getAllManualDeliveryOrders = async () => {
   return deliveryOrders;
 };
 
-const getAllGrabDeliveryOrders = async () => {
+const getAllLalamoveOrders = async () => {
   const deliveryOrders = await prisma.DeliveryOrder.findMany({
     where: {
-      shippingType: ShippingType.GRAB
+      shippingType: ShippingType.LALAMOVE
     },
     include: {
       salesOrder: true,
-      assignedUser: true
+      assignedUser: true,
+      deliveryStatus: true
     }
   });
   return deliveryOrders;
@@ -631,11 +632,28 @@ const updateDeliveryStatus = async (req) => {
   return withUpdatedDeliveryStatus;
 };
 
+const getLatLngFromPostalCode = async (req) => {
+  const { postalCode } = req;
+  const url = `https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+  return await axios
+    .get(url)
+    .then((response) => {
+      log.out('OK_ONEMAP_GET-LAT-LONG');
+      return {
+        lat: response.data.results[0].LATITUDE,
+        lng: response.data.results[0].LONGITUDE
+      };
+    })
+    .catch((error) => {
+      log.error('ERR_ONEMAP_GET-LAT-LONG', error.message);
+    });
+}
+
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
 exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
-exports.getAllGrabDeliveryOrders = getAllGrabDeliveryOrders;
+exports.getAllLalamoveOrders = getAllLalamoveOrders;
 exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
@@ -670,3 +688,4 @@ exports.findAllAssignedManualDeliveriesByDateByUser =
   findAllAssignedManualDeliveriesByDateByUser;
 exports.findAllShippitDeliveriesByDate = findAllShippitDeliveriesByDate;
 exports.findDeliveryStatusByDeliveryOrderId = findDeliveryStatusByDeliveryOrderId;
+exports.getLatLngFromPostalCode = getLatLngFromPostalCode;

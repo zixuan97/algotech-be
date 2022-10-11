@@ -3,9 +3,10 @@ const deliveryController = require('../controllers/deliveryController');
 
 router.post('/manual', deliveryController.createManualDeliveryOrder);
 router.post('/shippit', deliveryController.createShippitDeliveryOrder);
+router.post('/lalamove', deliveryController.createLalamoveDeliveryOrder);
 router.get('/all', deliveryController.getAllDeliveryOrders);
 router.get('/manual/all', deliveryController.getAllManualDeliveryOrders);
-router.get('/grab/all', deliveryController.getAllGrabDeliveryOrders);
+router.get('/lalamove/all', deliveryController.getAllLalamoveDeliveryOrders);
 router.get('/shippit/all', deliveryController.getAllShippitDeliveryOrders);
 router.get('/:id', deliveryController.getDeliveryOrder);
 router.put('/', deliveryController.updateDeliveryOrder);
@@ -70,7 +71,8 @@ router.post('/byUser/assignedByDate', deliveryController.getAssignedManualDelive
 router.post('/shippitDeliveries/date', deliveryController.getShippitOrdersByDate);
 router.post('/lalamove/createQuotation', deliveryController.createLalamoveQuotation);
 router.post('/lalamove/placeOrder', deliveryController.placeLalamoveOrder);
-router.get('/lalamove/:id', deliveryController.getLalamoveOrderByLalamoveOrderId);
+router.get('/lalamove/order/:id', deliveryController.getLalamoveOrderByLalamoveOrderId);
+router.get('/lalamove/:id', deliveryController.getLalamoveOrderByDeliveryOrderId);
 router.post('/lalamove/cancel/:id', deliveryController.cancelLalamoveOrder);
 router.get('/lalamove/driver/:orderId', deliveryController.getDriverDetails);
 

@@ -8,13 +8,12 @@ const {
   ShippingType,
   DeliveryMode,
   OrderStatus,
-  PrismaClient
 } = require('@prisma/client');
 const shippitApi = require('../helpers/shippitApi');
 const axios = require('axios');
 const { generateDeliveryOrderPdfTemplate } = require('../helpers/pdf');
 const { format } = require('date-fns');
-const prisma = new PrismaClient();
+const { prisma } = require('../models/index.js');
 const lalamoveApi = require('../helpers/lalamoveApi');
 
 const createManualDeliveryOrder = async (req, res) => {
@@ -170,6 +169,75 @@ const createShippitDeliveryOrder = async (req, res) => {
   }
 };
 
+const createLalamoveDeliveryOrder = async (req, res) => {
+  const {
+    shippingDate,
+    deliveryDate,
+    comments,
+    eta,
+    senderAddress,
+    senderPostalCode,
+    senderName,
+    senderPhone,
+    salesOrderId
+  } = req.body;
+  let salesOrder = await salesOrderModel.findSalesOrderById({
+    id: salesOrderId
+  });
+  const senderLatLng = await deliveryModel.getLatLngFromPostalCode({ postalCode: senderPostalCode });
+  const recipientLatLng = await deliveryModel.getLatLngFromPostalCode({ postalCode: salesOrder.postalCode });
+  const customerPhone = salesOrder.customerContactNo.startsWith('+65') ? salesOrder.customerContactNo.replace(/\s/g, '') : `+65${salesOrder.customerContactNo.replace(/\s/g, '')}`
+  const soLalamove = await lalamoveApi.placeLalamoveOrder({
+    senderLat: senderLatLng.lat,
+    senderLng: senderLatLng.lng,
+    recipientLat: recipientLatLng.lat,
+    recipientLng: recipientLatLng.lng,
+    senderAddress,
+    recipientAddress: salesOrder.customerAddress,
+    senderName,
+    senderPhone,
+    recipientName: salesOrder.customerName,
+    recipientPhone: customerPhone
+  });
+  log.out('OK_DELIVERYORDER_CREATE-DO-LALAMOVE');
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.createDeliveryOrder({
+      shippingType: ShippingType.LALAMOVE,
+      shippingDate,
+      deliveryDate,
+      shippitTrackingNum: soLalamove.id,
+      comments,
+      eta,
+      salesOrderId
+    })
+  );
+  data.salesOrder = salesOrder;
+  if (error) {
+    log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    await salesOrderModel.updateSalesOrderStatus({
+      id: salesOrder.id,
+      orderStatus: OrderStatus.READY_FOR_DELIVERY
+    });
+    try {
+      await deliveryModel.updateDeliveryStatus({
+        status: "order_placed",
+        statusOwner: "",
+        date: new Date(Date.now()).toLocaleDateString(),
+        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+        deliveryOrderId: data.id
+      });
+      res.json(data);
+      log.out('OK_DELIVERYORDER_CREATE-DO');
+    } catch (error) {
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    }
+  }
+};
+
 const getAllDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     deliveryModel.getAllDeliveryOrders({})
@@ -218,16 +286,18 @@ const getAllShippitDeliveryOrders = async (req, res) => {
   }
 };
 
-const getAllGrabDeliveryOrders = async (req, res) => {
+const getAllLalamoveDeliveryOrders = async (req, res) => {
   const { data, error } = await common.awaitWrap(
-    deliveryModel.getAllGrabDeliveryOrders({})
+    deliveryModel.getAllLalamoveOrders({})
   );
-
+  data.map(d => {
+    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[d.deliveryStatus.length - 1] : {}
+  });
   if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-GRAB-DO', error.message);
+    log.error('ERR_DELIVERY_GET-ALL-LALAMOVE-DO', error.message);
     res.json(Error.http(error));
   } else {
-    log.out('OK_DELIVERY_GET-ALL-GRAB-DO');
+    log.out('OK_DELIVERY_GET-ALL-LALAMOVE-DO');
     res.json(data);
   }
 };
@@ -267,6 +337,24 @@ const getDeliveryOrderByTrackingNumber = async (req, res) => {
     res.json(result);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-DO-BY-TRACKING-NUMBER', error.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const getLalamoveOrderByDeliveryOrderId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deliveryOrder = await deliveryModel.findDeliveryOrderById({ id });
+    await lalamoveApi.fetchLatestStatusFromLalamoveAndAddToStatus({ orderId: deliveryOrder.shippitTrackingNum });
+    const result = {
+      ...deliveryOrder,
+      deliveryStatus:
+        deliveryOrder.deliveryStatus[deliveryOrder.deliveryStatus.length - 1]
+    };
+    log.out('OK_DELIVERY_GET-LALAMOVE-DO-BY-ID');
+    res.json(result);
+  } catch (error) {
+    log.error('ERR_DELIVERY_GET-LALAMOVE-DO-BY-ID', error.message);
     res.status(500).send('Server Error');
   }
 };
@@ -944,10 +1032,11 @@ const getDriverDetails = async (req, res) => {
 
 exports.createManualDeliveryOrder = createManualDeliveryOrder;
 exports.createShippitDeliveryOrder = createShippitDeliveryOrder;
+exports.createLalamoveDeliveryOrder = createLalamoveDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
 exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
-exports.getAllGrabDeliveryOrders = getAllGrabDeliveryOrders;
+exports.getAllLalamoveDeliveryOrders = getAllLalamoveDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.getDeliveryOrder = getDeliveryOrder;
@@ -985,3 +1074,4 @@ exports.placeLalamoveOrder = placeLalamoveOrder;
 exports.getLalamoveOrderByLalamoveOrderId = getLalamoveOrderByLalamoveOrderId;
 exports.cancelLalamoveOrder = cancelLalamoveOrder;
 exports.getDriverDetails = getDriverDetails;
+exports.getLalamoveOrderByDeliveryOrderId = getLalamoveOrderByDeliveryOrderId;

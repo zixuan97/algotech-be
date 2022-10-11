@@ -43,18 +43,18 @@ model ProductCategory {
 }
 
 model Product {
-  id               Int                @id @default(autoincrement())
-  sku              String             @unique
-  name             String             @unique
+  id               Int               @id @default(autoincrement())
+  sku              String            @unique
+  name             String            @unique
   image            String?
   qtyThreshold     Int?
   brandId          Int
-  brand            Brand              @relation(fields: [brandId], references: [id])
+  brand            Brand             @relation(fields: [brandId], references: [id])
   bundleProduct    BundleProduct[]
+  ProductCatalogue ProductCatalogue?
   productCategory  ProductCategory[]
   stockQuantity    StockQuantity[]
   supplierProduct  SupplierProduct[]
-  ProductCatalogue ProductCatalogue[]
 }
 
 model Location {
@@ -80,11 +80,11 @@ model StockQuantity {
 }
 
 model Bundle {
-  id              Int               @id @default(autoincrement())
-  name            String            @unique
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
   description     String
+  BundleCatalogue BundleCatalogue?
   bundleProduct   BundleProduct[]
-  BundleCatalogue BundleCatalogue[]
 }
 
 model BundleProduct {
@@ -173,10 +173,10 @@ model SalesOrder {
   createdTime       DateTime
   customerRemarks   String?
   orderStatus       OrderStatus      @default(PAID)
+  bulkOrderId       Int?
+  bulkOrder         BulkOrder?       @relation(fields: [bulkOrderId], references: [id])
   deliveryOrder     DeliveryOrder[]
   salesOrderItems   SalesOrderItem[]
-  bulkOrder         BulkOrder?       @relation(fields: [bulkOrderId], references: [id])
-  bulkOrderId       Int?
 }
 
 model BulkOrder {
@@ -204,31 +204,16 @@ model ProductCatalogue {
   id        Int     @id @default(autoincrement())
   price     Float
   image     String?
+  productId Int     @unique
   product   Product @relation(fields: [productId], references: [id])
-  productId Int
 }
 
 model BundleCatalogue {
   id       Int     @id @default(autoincrement())
   price    Float
   image    String?
+  bundleId Int     @unique
   bundle   Bundle  @relation(fields: [bundleId], references: [id])
-  bundleId Int
-}
-
-enum BulkOrderStatus {
-  CREATED
-  PAYMENT_SUCCESS
-  PAYMENT_FAILED
-  FULFILLED
-  CANCELLED
-}
-
-enum PaymentMode {
-  CREDIT_CARD
-  CASH
-  BANK_TRANSFER
-  PAYNOW
 }
 
 model Customer {
@@ -284,6 +269,21 @@ model DeliveryStatus {
   deliveryOrder   DeliveryOrder @relation(fields: [deliveryOrderId], references: [id])
 
   @@id([deliveryOrderId, date, timestamp, status])
+}
+
+enum BulkOrderStatus {
+  CREATED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  FULFILLED
+  CANCELLED
+}
+
+enum PaymentMode {
+  CREDIT_CARD
+  CASH
+  BANK_TRANSFER
+  PAYNOW
 }
 
 enum OrderStatus {
@@ -343,4 +343,5 @@ enum ShippingType {
   MANUAL
   SHIPPIT
   GRAB
+  LALAMOVE
 }
