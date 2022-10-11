@@ -23,16 +23,16 @@ const createProduct = async (req, res) => {
   // if exists throw error
   if (productSku) {
     log.error('ERR_PRODUCT_CREATE-PRODUCT', {
-      err: 'Product already exist',
+      err: 'Product name already exist',
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Product sku already exists' });
   } else if (productName) {
     log.error('ERR_PRODUCT_CREATE-PRODUCT', {
-      err: 'Product already exist',
+      err: 'Product name already exist',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Product name already exists' });
+    res.status(400).json({ message: 'Product name already exist' });
   } else {
     //uploadImg to s3
     if (image) {
@@ -382,13 +382,13 @@ const updateProduct = async (req, res) => {
   // if exists throw error
   if (productSku && productSku.id != id) {
     log.error('ERR_PRODUCT_UPDATE-PRODUCT', {
-      err: 'Product cannot be updated',
+      err: 'Product sku already exists',
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Product sku already exists' });
   } else if (productName && productName.id != id) {
     log.error('ERR_PRODUCT_UPDATE-PRODUCT', {
-      err: 'Product cannot be updated',
+      err: 'Product name already exists',
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Product name already exists' });

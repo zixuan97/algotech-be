@@ -13,7 +13,7 @@ const createBundle = async (req, res) => {
   // if exists throw error
   if (bundleName) {
     log.error('ERR_BUNDLE_CREATE-BUNDLE', {
-      err: 'Bundle already exist',
+      err: { message: 'Bundle name already exists' },
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Bundle name already exists' });
@@ -106,7 +106,7 @@ const updateBundle = async (req, res) => {
   // if exists throw error
   if (bundle && bundle.id != id) {
     log.error('ERR_BUNDLE_CREATE-BUNDLE', {
-      err: 'Bundle already exist',
+      err: 'Bundle name already exists',
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Bundle name already exists' });

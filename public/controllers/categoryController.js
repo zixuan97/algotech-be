@@ -8,10 +8,10 @@ const createCategory = async (req, res) => {
   const category = await categoryModel.findCategoryByName({ name });
   if (category) {
     log.error('ERR_USER_CREATE-CATEGORY', {
-      err: 'Category already exist',
+      err: 'Category name already exist',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Category already exists' });
+    res.status(400).json({ message: 'Category name already exist' });
   } else {
     const { error } = await common.awaitWrap(
       categoryModel.createCategory({
@@ -97,7 +97,7 @@ const updateCategory = async (req, res) => {
   const category = await categoryModel.findCategoryByName({ name });
   if (category && category.id != id) {
     log.error('ERR_USER_UPDATE-CATEGORY', {
-      err: "error updating category",
+      err: "Category already exists",
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Category already exists' });

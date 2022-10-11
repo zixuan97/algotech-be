@@ -11,7 +11,7 @@ const createBrand = async (req, res) => {
   );
   if (data) {
     log.error('ERR_BRAND_CREATE-BRAND', {
-      err: duplicateBrandNameError.message,
+      err: {message: 'brand name already exist'},
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Brand name already exists' });
@@ -159,7 +159,7 @@ const deleteBrand = async (req, res) => {
       err: getAllProductsError.message,
       req: { body: req.body, params: req.params }
     });
-    const e = Error.http(error);
+    const e = Error.http(getAllProductsError);
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_BRAND_GET-ALL-PRODUCTS');
@@ -176,7 +176,7 @@ const deleteBrand = async (req, res) => {
       err: deleteProductsError.message,
       req: { body: req.body, params: req.params }
     });
-    const e = Error.http(error);
+    const e = Error.http(deleteProductsError);
     res.status(e.code).json(e.message);
   }
   const { error } = await common.awaitWrap(brandModel.deleteBrand({ id }));
