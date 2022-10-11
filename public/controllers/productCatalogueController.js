@@ -1,5 +1,4 @@
 const productCatalogueModel = require('../models/productCatalogueModel');
-const productModel = require('../models/productModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -20,7 +19,7 @@ const createProductCatalogue = async (req, res) => {
       res.status(e.code).json(e.message);
     }
   }
-  log.out('OK_PRODUCT_UPLOAD-S3');
+  log.out('OK_PRODUCTCAT_UPLOAD-S3');
   const { error } = await common.awaitWrap(
     productCatalogueModel.createProdCatalogue({
       price,
