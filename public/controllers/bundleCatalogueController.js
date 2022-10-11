@@ -5,7 +5,7 @@ const { log } = require('../helpers/logger');
 const { uploadS3, getS3 } = require('../helpers/s3');
 
 const createBundleCatalogue = async (req, res) => {
-  const { price, bundle, image } = req.body;
+  const { price, bundle, image, description } = req.body;
 
   if (image) {
     try {
@@ -23,7 +23,8 @@ const createBundleCatalogue = async (req, res) => {
   const { error } = await common.awaitWrap(
     bundleCatalogueModel.createBundleCatalogue({
       price,
-      bundleId: bundle.id
+      bundleId: bundle.id,
+      description
     })
   );
   if (error) {
@@ -91,7 +92,7 @@ const getBundleCatalogue = async (req, res) => {
 };
 
 const updateBundleCatalogue = async (req, res) => {
-  const { id, price, image, bundle } = req.body;
+  const { id, price, image, bundle, description } = req.body;
 
   if (image) {
     const { error: uploadS3Error } = await common.awaitWrap(
@@ -108,7 +109,7 @@ const updateBundleCatalogue = async (req, res) => {
     log.out('OK_BUNDLECAT_UPLOAD-S3');
   }
   const { error } = await common.awaitWrap(
-    bundleCatalogueModel.updateBundleCatalogue({ id, price })
+    bundleCatalogueModel.updateBundleCatalogue({ id, price, description })
   );
 
   if (error) {

@@ -1,12 +1,13 @@
 const { prisma } = require('./index.js');
 
 const createBundleCatalogue = async (req) => {
-  const { price, bundleId } = req;
+  const { price, bundleId, description } = req;
 
   await prisma.bundleCatalogue.create({
     data: {
       price,
-      bundleId
+      bundleId,
+      description
     }
   });
 };
@@ -31,12 +32,13 @@ const getAllBundleCatalogue = async () => {
 };
 
 const updateBundleCatalogue = async (req) => {
-  const { id, price } = req;
+  const { id, price, description } = req;
 
   bundleCatalogue = await prisma.bundleCatalogue.update({
     where: { id },
     data: {
-      price
+      price,
+      description
     }
   });
   return bundleCatalogue;

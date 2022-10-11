@@ -201,19 +201,21 @@ model Newsletter {
 }
 
 model ProductCatalogue {
-  id        Int     @id @default(autoincrement())
-  price     Float
-  image     String?
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int     @unique
+  id          Int     @id @default(autoincrement())
+  price       Float
+  image       String?
+  description String?
+  product     Product @relation(fields: [productId], references: [id])
+  productId   Int     @unique
 }
 
 model BundleCatalogue {
-  id       Int     @id @default(autoincrement())
-  price    Float
-  image    String?
-  bundle   Bundle  @relation(fields: [bundleId], references: [id])
-  bundleId Int     @unique
+  id          Int     @id @default(autoincrement())
+  price       Float
+  image       String?
+  description String?
+  bundle      Bundle  @relation(fields: [bundleId], references: [id])
+  bundleId    Int     @unique
 }
 
 enum BulkOrderStatus {
