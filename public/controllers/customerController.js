@@ -1,7 +1,10 @@
 const customerModel = require('../models/customerModel');
+const salesOrderModel = require('../models/salesOrderModel');
+const { generateSalesOrderExcel } = require('../helpers/excel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const { format } = require('date-fns');
 
 const createCustomer = async (req, res) => {
   const {
@@ -11,7 +14,8 @@ const createCustomer = async (req, res) => {
     email,
     address,
     postalCode,
-    contactNo
+    contactNo,
+    lastOrderDate
   } = req.body;
   const { data, error: duplicateCustomerEmailError } = await common.awaitWrap(
     customerModel.findCustomerByEmail({ email })
@@ -36,7 +40,8 @@ const createCustomer = async (req, res) => {
         email,
         address,
         postalCode,
-        contactNo
+        contactNo,
+        lastOrderDate
       })
     );
 
@@ -70,6 +75,20 @@ const getCustomerById = async (req, res) => {
   try {
     const { id } = req.params;
     const customer = await customerModel.findCustomerById({ id });
+    const salesOrders = await salesOrderModel.findSalesOrderByCustomerEmail({
+      customerEmail: customer.email
+    });
+
+    const ordersByMonth = await salesOrderModel.getOrdersByMonthForCustomer({
+      customerEmail: customer.email
+    });
+    customer.ordersByMonth = JSON.parse(
+      JSON.stringify(
+        ordersByMonth,
+        (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+      )
+    );
+    customer.salesOrders = salesOrders;
     log.out('OK_CUSTOMER_GET-CUSTOMER-BY-ID');
     res.json(customer);
   } catch (error) {
@@ -82,6 +101,19 @@ const getCustomerByEmail = async (req, res) => {
   try {
     const { email } = req.body;
     const customer = await customerModel.findCustomerByEmail({ email });
+    const salesOrders = await salesOrderModel.findSalesOrderByCustomerEmail({
+      customerEmail: email
+    });
+    const ordersByMonth = await salesOrderModel.getOrdersByMonthForCustomer({
+      customerEmail: customer.email
+    });
+    customer.ordersByMonth = JSON.parse(
+      JSON.stringify(
+        ordersByMonth,
+        (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+      )
+    );
+    customer.salesOrders = salesOrders;
     log.out('OK_CUSTOMER_GET-CUSTOMER-BY-ID');
     res.json(customer);
   } catch (error) {
@@ -102,7 +134,8 @@ const updateCustomer = async (req, res) => {
     contactNo,
     totalSpent,
     ordersCount,
-    acceptsMarketing
+    acceptsMarketing,
+    lastOrderDate
   } = req.body;
   const { data, error: duplicateCustomerEmailError } = await common.awaitWrap(
     customerModel.findCustomerByEmail({ email })
@@ -131,7 +164,8 @@ const updateCustomer = async (req, res) => {
         contactNo,
         totalSpent,
         ordersCount,
-        acceptsMarketing
+        acceptsMarketing,
+        lastOrderDate
       })
     );
     if (error) {
@@ -161,9 +195,36 @@ const deleteCustomer = async (req, res) => {
   }
 };
 
+const generateExcel = async (req, res) => {
+  const { customerEmail } = req.body;
+  const salesOrders = await salesOrderModel.findSalesOrderByCustomerEmail({
+    customerEmail
+  });
+  await generateSalesOrderExcel({ salesOrders })
+    .then((blob) => {
+      const timeElapsed = Date.now();
+      const today = new Date(timeElapsed);
+      res.type(blob.type);
+      blob.arrayBuffer().then((buf) => {
+        res.setHeader(
+          'Content-disposition',
+          `attachment; filename = CustomerOrders${format(
+            today,
+            'yyyyMMdd'
+          )}.xlsx`
+        );
+        res.send(Buffer.from(buf));
+      });
+    })
+    .catch((error) => {
+      return res.status(400).json(error.message);
+    });
+};
+
 exports.createCustomer = createCustomer;
 exports.getAllCustomers = getAllCustomers;
 exports.updateCustomer = updateCustomer;
 exports.deleteCustomer = deleteCustomer;
 exports.getCustomerById = getCustomerById;
 exports.getCustomerByEmail = getCustomerByEmail;
+exports.generateExcel = generateExcel;

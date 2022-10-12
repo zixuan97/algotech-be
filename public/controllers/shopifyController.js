@@ -1,6 +1,6 @@
 const shopifyApi = require('../helpers/shopifyApi');
 const salesOrderModel = require('../models/salesOrderModel');
-const common = require('@kelchy/common');
+const customerModel = require('../models/customerModel');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const CryptoJS = require('crypto-js');
@@ -18,7 +18,7 @@ const addShopifyOrders = async (req, res) => {
             orderId: salesOrder.id.toString()
           });
           if (!salesOrderDB) {
-            return await salesOrderModel.createSalesOrder({
+            await salesOrderModel.createSalesOrder({
               orderId: salesOrder.id.toString(),
               customerName:
                 salesOrder.customer.first_name +
@@ -53,6 +53,20 @@ const addShopifyOrders = async (req, res) => {
                   };
                 })
               )
+            });
+            await customerModel.connectOrCreateCustomer({
+              firstName: salesOrder.customer.first_name,
+              lastName: salesOrder.customer.last_name,
+              email: salesOrder.contact_email,
+              address:
+                salesOrder.customer.default_address.address1 +
+                (salesOrder.customer.default_address.address2 ??
+                  ` ${salesOrder.customer.default_address.zip}`),
+              postalCode: salesOrder.customer.default_address.zip,
+              contactNo: salesOrder.customer.default_address.phone,
+              totalSpent: salesOrder.current_total_price,
+              acceptsMarketing: salesOrder.customer.accepts_marketing,
+              lastOrderDate: salesOrder.created_at
             });
           }
         })

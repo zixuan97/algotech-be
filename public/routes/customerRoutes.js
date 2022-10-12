@@ -7,4 +7,5 @@ router.get('/id/:id', customerController.getCustomerById);
 router.post('/email', customerController.getCustomerByEmail);
 router.put('/', customerController.updateCustomer);
 router.delete('/:id', customerController.deleteCustomer);
+router.post('/excel', customerController.generateExcel);
 module.exports = router;

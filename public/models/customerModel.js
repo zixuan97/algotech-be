@@ -8,7 +8,9 @@ const createCustomer = async (req) => {
     email,
     address,
     postalCode,
-    contactNo
+    contactNo,
+    totalSpent,
+    lastOrderDate
   } = req;
 
   await prisma.customer.create({
@@ -19,7 +21,9 @@ const createCustomer = async (req) => {
       email,
       address,
       postalCode,
-      contactNo
+      contactNo,
+      totalSpent,
+      lastOrderDate
     }
   });
 };
@@ -27,6 +31,49 @@ const createCustomer = async (req) => {
 const getAllCustomers = async () => {
   const customers = await prisma.customer.findMany({});
   return customers;
+};
+
+const connectOrCreateCustomer = async (req) => {
+  const {
+    firstName,
+    lastName,
+    company,
+    email,
+    address,
+    postalCode,
+    contactNo,
+    totalSpent,
+    acceptsMarketing,
+    lastOrderDate
+  } = req;
+
+  await prisma.customer.upsert({
+    where: {
+      email
+    },
+    update: {
+      ordersCount: {
+        increment: 1
+      },
+      totalSpent: {
+        increment: Number(totalSpent)
+      },
+      acceptsMarketing,
+      lastOrderDate
+    },
+    create: {
+      firstName,
+      lastName,
+      company,
+      email,
+      address,
+      postalCode,
+      contactNo,
+      totalSpent: Number(totalSpent),
+      acceptsMarketing,
+      lastOrderDate
+    }
+  });
 };
 
 const updateCustomer = async (req) => {
@@ -54,9 +101,10 @@ const updateCustomer = async (req) => {
       address,
       postalCode,
       contactNo,
-      totalSpent,
+      totalSpent: Number(totalSpent),
       ordersCount,
-      acceptsMarketing
+      acceptsMarketing,
+      lastOrderDate
     }
   });
   return customer;
@@ -97,3 +145,4 @@ exports.updateCustomer = updateCustomer;
 exports.deleteCustomer = deleteCustomer;
 exports.findCustomerById = findCustomerById;
 exports.findCustomerByEmail = findCustomerByEmail;
+exports.connectOrCreateCustomer = connectOrCreateCustomer;
