@@ -54,20 +54,22 @@ const addShopifyOrders = async (req, res) => {
                 })
               )
             });
-            await customerModel.connectOrCreateCustomer({
-              firstName: salesOrder.customer.first_name,
-              lastName: salesOrder.customer.last_name,
-              email: salesOrder.contact_email,
-              address:
-                salesOrder.customer.default_address.address1 +
-                (salesOrder.customer.default_address.address2 ??
-                  ` ${salesOrder.customer.default_address.zip}`),
-              postalCode: salesOrder.customer.default_address.zip,
-              contactNo: salesOrder.customer.default_address.phone,
-              totalSpent: salesOrder.current_total_price,
-              acceptsMarketing: salesOrder.customer.accepts_marketing,
-              lastOrderDate: salesOrder.created_at
-            });
+            if (salesOrder.contact_email) {
+              await customerModel.connectOrCreateCustomer({
+                firstName: salesOrder.customer.first_name,
+                lastName: salesOrder.customer.last_name,
+                email: salesOrder.contact_email,
+                address:
+                  salesOrder.customer.default_address.address1 +
+                  (salesOrder.customer.default_address.address2 ??
+                    ` ${salesOrder.customer.default_address.zip}`),
+                postalCode: salesOrder.customer.default_address.zip,
+                contactNo: salesOrder.customer.default_address.phone,
+                totalSpent: salesOrder.current_total_price,
+                acceptsMarketing: salesOrder.customer.accepts_marketing,
+                lastOrderDate: salesOrder.created_at
+              });
+            }
           }
         })
       );
