@@ -17,10 +17,16 @@ const createNewsletter = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_CUSTOMER_CREATE-NEWSLETTER', error.message);
+    log.error('ERR_CUSTOMER_CREATE-NEWSLETTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_CUSTOMER_CREATE-NEWSLETTER');
+    log.out('OK_CUSTOMER_CREATE-NEWSLETTER', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -30,10 +36,16 @@ const getAllNewsletters = async (req, res) => {
     newsletterModel.getAllNewsletters({})
   );
   if (error) {
-    log.error('ERR_CUSTOMER_GET-ALL-NEWSLETTERS', error.message);
+    log.error('ERR_CUSTOMER_GET-ALL-NEWSLETTERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_CUSTOMER_GET-ALL-NEWSLETTERS');
+    log.out('OK_CUSTOMER_GET-ALL-NEWSLETTERS', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -42,10 +54,16 @@ const getNewsletter = async (req, res) => {
   try {
     const { id } = req.params;
     const newsletter = await newsletterModel.findNewsletterById({ id });
-    log.out('OK_CUSTOMER_GET-NEWSLETTER-BY-ID');
+    log.out('OK_CUSTOMER_GET-NEWSLETTER-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: newsletter
+    });
     res.json(newsletter);
   } catch (error) {
-    log.error('ERR_CUSTOMER_GET-NEWSLETTER-BY-ID', error.message);
+    log.error('ERR_CUSTOMER_GET-NEWSLETTER-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };

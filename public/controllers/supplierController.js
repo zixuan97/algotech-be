@@ -8,7 +8,10 @@ const createSupplier = async (req, res) => {
   const { email, name, address, supplierProduct } = req.body;
   const supplier = await supplierModel.findSupplierByEmail({ email });
   if (supplier) {
-    log.error('ERR_PRODUCT_CREATE-SUPPLIER');
+    log.error('ERR_PRODUCT_CREATE-SUPPLIER', {
+      err: 'Supplier already exists',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Supplier already exists' });
   } else {
     const { data, error } = await common.awaitWrap(
@@ -19,7 +22,10 @@ const createSupplier = async (req, res) => {
       })
     );
     if (error) {
-      log.error('ERR_SUPPLIER_CREATE-SUPPLIER', error.message);
+      log.error('ERR_SUPPLIER_CREATE-SUPPLIER', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       res.json(Error.http(error));
     } else {
       if (supplierProduct !== []) {
@@ -27,7 +33,10 @@ const createSupplier = async (req, res) => {
           await supplierModel.connectOrCreateSupplierProduct({ supplierId: data.id, productId: p.product.id, rate: p.rate })
         })
       }
-      log.out('OK_SUPPLIER_CREATE-SUPPLIER');
+      log.out('OK_SUPPLIER_CREATE-SUPPLIER', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'supplier created' }
+      });
       res.json({ message: 'supplier created' });
     }
   }
@@ -38,7 +47,10 @@ const getAllSuppliers = async (req, res) => {
     supplierModel.getAllSuppliers({})
   );
   if (error) {
-    log.error('ERR_SUPPLIER_GET-ALL-SUPPLIERS', error.message);
+    log.error('ERR_SUPPLIER_GET-ALL-SUPPLIERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
     let finalRes = [];
@@ -63,7 +75,10 @@ const getAllSuppliers = async (req, res) => {
       finalRes.push(result);
       supplierProducts = [];
     }
-    log.out('OK_SUPPLIER_GET-ALL-SUPPLIERS');
+    log.out('OK_SUPPLIER_GET-ALL-SUPPLIERS', {
+      req: { body: req.body, params: req.params },
+      res: finalRes
+    });
     res.json(finalRes);
   }
 };
@@ -88,13 +103,19 @@ const getSupplier = async (req, res) => {
         ...supplier,
         supplierProduct: data
       }
-      log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID');
+      log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID', {
+        req: { body: req.body, params: req.params },
+        res: result
+      });
       res.json(result);
     } else {
       res.json(null);
     }
   } catch (error) {
-    log.error('ERR_SUPPLIER_GET-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_GET-SUPPLIER-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -103,10 +124,16 @@ const getSupplierByName = async (req, res) => {
   try {
     const { name } = req.body;
     const supplier = await supplierModel.findSupplierByName({ name });
-    log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID');
+    log.out('OK_SUPPLIER_GET-SUPPLIER-BY-NAME', {
+      req: { body: req.body, params: req.params },
+      res: supplier
+    });
     res.json(supplier);
   } catch (error) {
-    log.error('ERR_SUPPLIER_GET-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_GET-SUPPLIER-BY-NAME', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -123,11 +150,17 @@ const updateSupplier = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_SUPPLIER_UPDATE-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_UPDATE-SUPPLIER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_SUPPLIER_UPDATE-SUPPLIER');
+    log.out('OK_SUPPLIER_UPDATE-SUPPLIER', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -138,7 +171,10 @@ const deleteSupplier = async (req, res) => {
     supplierModel.findProductsFromSupplier({ id })
   );
   if (getAllProductsFromSupplierError) {
-    log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER', {
+      err: getAllProductsFromSupplierError.message, 
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -152,17 +188,26 @@ const deleteSupplier = async (req, res) => {
     )
   );
   if (deleteProductsError) {
-    log.error('ERR_SUPPLIER_DELETE-ALL-PRODUCTS-FROM-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_DELETE-ALL-PRODUCTS-FROM-SUPPLIER', {
+      err: deleteProductsError.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
   const { error } = await common.awaitWrap(supplierModel.deleteSupplier({ id }));
   if (error) {
-    log.error('ERR_SUPPLIER_DELETE-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_DELETE-SUPPLIER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_SUPPLIER_DELETE-SUPPLIER');
+    log.out('OK_SUPPLIER_DELETE-SUPPLIER', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted supplier with id:${id}` }
+    });
     res.json({ message: `Deleted supplier with id:${id}` });
   }
 };
@@ -172,17 +217,26 @@ const addProductToSupplier = async (req, res) => {
   const supplier = supplierModel.findSupplierById({ id: supplierId });
   const product = productModel.findProductById({ id: productId });
   if (!supplier || !product) {
-    log.error('ERR_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', {
+      err: 'Supplier or product does not exist.' ,
+      req: { body: req.body, params: req.params }
+    });
     res.json({ "message" : "Supplier or product does not exist." });
   }
   const { data, error } = await common.awaitWrap(
     supplierModel.connectOrCreateSupplierProduct({ supplierId, productId, rate })
   );
   if (error) {
-    log.error('ERR_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER');
+    log.out('OK_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -192,10 +246,16 @@ const getAllSupplierProducts = async (req, res) => {
     supplierModel.getAllSupplierProducts({})
   );
   if (error) {
-    log.error('ERR_SUPPLIER_GET-ALL-SUPPLIER-PRODUCTS', error.message);
+    log.error('ERR_SUPPLIER_GET-ALL-SUPPLIER-PRODUCTS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_SUPPLIER_GET-ALL-SUPPLIER=PRODUCTS');
+    log.out('OK_SUPPLIER_GET-ALL-SUPPLIER=PRODUCTS', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -206,10 +266,16 @@ const getAllProductsBySupplier = async (req, res) => {
     supplierModel.findProductsFromSupplier({ id })
   );
   if (error) {
-    log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-BY-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-BY-SUPPLIER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-BY-SUPPLIER');
+    log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-BY-SUPPLIER', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -220,10 +286,16 @@ const deleteProductBySupplier = async (req, res) => {
     supplierModel.deleteProductBySupplier({ supplierId, productId })
   );
   if (error) {
-    log.error('ERR_SUPPLIER_DELETE-PRODUCT-BY-SUPPLIER', error.message);
+    log.error('ERR_SUPPLIER_DELETE-PRODUCT-BY-SUPPLIER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.json(Error.http(error));
   } else {
-    log.out('OK_SUPPLIER_DELETE-PRODUCT-BY-SUPPLIER');
+    log.out('OK_SUPPLIER_DELETE-PRODUCT-BY-SUPPLIER', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted product id: ${productId} from supplier id: ${supplierId}` }
+    });
     res.json({ message: `Deleted product id: ${productId} from supplier id: ${supplierId}` });
   }
 };

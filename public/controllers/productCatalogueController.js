@@ -14,7 +14,10 @@ const createProductCatalogue = async (req, res) => {
         payload: image
       });
     } catch (uploadS3Error) {
-      log.error('ERR_PRODUCTCAT_UPLOAD-S3', uploadS3Error.message);
+      log.error('ERR_PRODUCTCAT_UPLOAD-S3', {
+        err: uploadS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(uploadS3Error);
       res.status(e.code).json(e.message);
     }
@@ -28,11 +31,17 @@ const createProductCatalogue = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_PRODUCTCAT_CREATE-PRODUCTCAT', error.message);
+    log.error('ERR_PRODUCTCAT_CREATE-PRODUCTCAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_PRODUCTCAT_CREATE-PRODUCTCAT');
+    log.out('OK_PRODUCTCAT_CREATE-PRODUCTCAT', {
+      req: { body: req.body, params: req.params },
+      res: { message: 'Product catalogue created' }
+    });
     res.json({ message: 'Product catalogue created' });
   }
 };
@@ -59,11 +68,17 @@ const getAllProductCatalogue = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_PRODUCTCAT_GET-ALL-PRODUCTCAT', error.message);
+    log.error('ERR_PRODUCTCAT_GET-ALL-PRODUCTCAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_PRODUCTCAT_GET-ALL-PRODUCTCAT');
+    log.out('OK_PRODUCTCAT_GET-ALL-PRODUCTCAT', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   }
 };
@@ -85,7 +100,10 @@ const getProductCatalogue = async (req, res) => {
       log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
     }
     prodCatalogue.image = productImg;
-    log.out('OK_PRODUCTCAT_GET-PRODUCTCAT-BY-ID');
+    log.out('OK_PRODUCTCAT_GET-PRODUCTCAT-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: prodCatalogue
+    });
     res.json(prodCatalogue);
   } catch (error) {
     log.error('ERR_PRODUCTCAT_GET-PRODUCTCAT', error.message);
@@ -104,7 +122,10 @@ const updateProductCatalogue = async (req, res) => {
       })
     );
     if (uploadS3Error) {
-      log.error('ERR_PRODUCTCAT_UPLOAD-S3', uploadS3Error.message);
+      log.error('ERR_PRODUCTCAT_UPLOAD-S3', {
+        err: uploadS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(uploadS3Error);
       res.status(e.code).json(e.message);
     }
@@ -115,11 +136,17 @@ const updateProductCatalogue = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_PRODUCTCAT_UPDATE_PRODUCTCAT', error.message);
+    log.error('ERR_PRODUCTCAT_UPDATE_PRODUCTCAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_PRODUCTCAT_UPDATE_PRODUCTCAT');
+    log.out('OK_PRODUCTCAT_UPDATE_PRODUCTCAT', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Updated product category with id:${id}` }
+    });
     res.json({ message: `Updated product catalogue with id:${id}` });
   }
 };
@@ -130,11 +157,17 @@ const deleteProductCatalogue = async (req, res) => {
     productCatalogueModel.deleteProdCatalogue({ id })
   );
   if (error) {
-    log.error('ERR_PRODUCTCAT_DELETE_PRODUCTCAT', error.message);
+    log.error('ERR_PRODUCTCAT_DELETE_PRODUCTCAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_PRODUCTCAT_DELETE_PRODUCTCAT');
+    log.out('OK_PRODUCTCAT_DELETE_PRODUCTCAT', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted product category with id:${id}` }
+    });
     res.json({ message: `Deleted product category with id:${id}` });
   }
 };

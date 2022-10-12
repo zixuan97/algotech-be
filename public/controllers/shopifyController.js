@@ -58,10 +58,16 @@ const addShopifyOrders = async (req, res) => {
         })
       );
     }
-    log.out('OK_SHOPIFY_GET-SHOPIFY-ORDER');
+    log.out('OK_SHOPIFY_GET-SHOPIFY-ORDER', {
+      req: { body: req.body, params: req.params },
+      res: data
+    });
     res.json(data);
   } catch (error) {
-    log.error('ERR_SHOPIFY-ADD-ORDERS', error.message);
+    log.error('ERR_SHOPIFY-ADD-ORDERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
@@ -123,14 +129,20 @@ const createOrderWebhook = async (req, res, next) => {
           })
         )
       });
-      log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK');
+      log.out('OK_SHOPIFY_ADD-ORDER-WEBHOOK', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'order received' }
+      });
       res.json({ message: 'order received' });
       pusherUtil.sendPusherMsg(salesOrderData);
     } else {
       res.json({ message: 'order already exists' });
     }
   } catch (error) {
-    log.error('ERR_SHOPIFY_ADD-ORDER-WEBHOOK', error.message);
+    log.error('ERR_SHOPIFY_ADD-ORDER-WEBHOOK', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }

@@ -41,15 +41,24 @@ const createSalesOrder = async (req, res) => {
     );
 
     if (error) {
-      log.error('ERR_SALESORDER_CREATE-SO', error.message);
+      log.error('ERR_SALESORDER_CREATE-SO', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_SALESORDER_CREATE-SO');
+      log.out('OK_SALESORDER_CREATE-SO', {
+        req: { body: req.body, params: req.params },
+        res: data
+      });
       res.json(data);
     }
   } else {
-    log.error('ERR_SALESORDER_CREATE-SO');
+    log.error('ERR_SALESORDER_CREATE-SO', {
+      err: 'Sales orderId already exist!',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'Sales orderId already exist!' });
   }
 };
@@ -60,12 +69,18 @@ const getAllSalesOrders = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_SALESORDER_GET-ALL-SO', error.message);
+    log.error('ERR_SALESORDER_GET-ALL-SO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
   }
-  log.out('ERR_SALESORDER_GET-ALL-SO');
+  log.out('OK_SALESORDER_GET-ALL-SO', {
+    req: { body: req.body, params: req.params },
+    res: data
+  });
   res.json(data);
 };
 
@@ -79,12 +94,17 @@ const getAllSalesOrdersWithTimeFilter = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_SALESORDER_GET-ALL-SO-TIMEFILTER', error.message);
+    log.error('ERR_SALESORDER_GET-ALL-SO-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
-  } else {
-  }
-  log.out('OK_SALESORDER_GET-ALL-SO-TIMEFILTER');
+  } 
+  log.out('OK_SALESORDER_GET-ALL-SO-TIMEFILTER', {
+    req: { body: req.body, params: req.params },
+    res: data
+  });
   res.json(data);
 };
 
@@ -98,11 +118,22 @@ const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_SALESORDER_GET-SO-BY-DAY-TIMEFILTER', error.message);
+    log.error('ERR_SALESORDER_GET-SO-BY-DAY-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_SALESORDER_GET-SO-BY-DAY-TIMEFILTER');
+    log.out('OK_SALESORDER_GET-SO-BY-DAY-TIMEFILTER', {
+      req: { body: req.body, params: req.params },
+      res:   JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    });
 
     res.json(
       JSON.parse(
@@ -125,11 +156,22 @@ const getRevenueByDayWithTimeFilter = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER', error.message);
+    log.error('ERR_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER');
+    log.out('OK_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    });
     res.json(
       JSON.parse(
         JSON.stringify(
@@ -151,11 +193,22 @@ const getBestSellerWithTimeFilter = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_SALESORDER_GET-BEST-SELLER-TIMEFILTER', error.message);
+    log.error('ERR_SALESORDER_GET-BEST-SELLER-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_SALESORDER_GET-BEST-SELLER-TIMEFILTER');
+    log.out('OK_SALESORDER_GET-BEST-SELLER-TIMEFILTER', {
+      req: { body: req.body, params: req.params },
+      res:  JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    });
     res.json(
       JSON.parse(
         JSON.stringify(
@@ -177,14 +230,22 @@ const getOrdersByPlatformWithTimeFilter = async (req, res) => {
   );
 
   if (error) {
-    log.error(
-      'ERR_SALESORDER_GET-ORDERS-BY-PLATFORM-TIMEFILTER',
-      error.message
-    );
+    log.error('ERR_SALESORDER_GET-ORDERS-BY-PLATFORM-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_SALESORDER_GET-ORDERS-BY-PLATFORM-TIMEFILTER');
+    log.out('OK_SALESORDER_GET-ORDERS-BY-PLATFORM-TIMEFILTER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    });
     res.json(
       JSON.parse(
         JSON.stringify(
@@ -200,10 +261,16 @@ const findSalesOrderById = async (req, res) => {
   try {
     const { id } = req.params;
     const salesOrder = await salesOrderModel.findSalesOrderById({ id });
-    log.out('OK_SALESORDER_GET-SALESORDER-BY-ID');
+    log.out('OK_SALESORDER_GET-SALESORDER-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: salesOrder
+    });
     res.json(salesOrder);
   } catch (error) {
-    log.error('ERR_SALESORDER_GET-SALESORDER-BY-ID', error.message);
+    log.error('ERR_SALESORDER_GET-SALESORDER-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
@@ -215,10 +282,16 @@ const findSalesOrderByOrderId = async (req, res) => {
     const salesOrder = await salesOrderModel.findSalesOrderByOrderId({
       orderId
     });
-    log.out('OK_SALESORDER_GET-SALESORDER-BY-ORDER-ID');
+    log.out('OK_SALESORDER_GET-SALESORDER-BY-ORDER-ID', {
+      req: { body: req.body, params: req.params },
+      res: salesOrder
+    });
     res.json(salesOrder);
   } catch (error) {
-    log.error('ERR_SALESORDER_GET-SALESORDER-BY-ORDER-ID', error.message);
+    log.error('ERR_SALESORDER_GET-SALESORDER-BY-ORDER-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
@@ -250,12 +323,18 @@ const updateSalesOrderStatus = async (req, res) => {
     //     });
     //   });
     // }
-    log.out('OK_SALESORDER_UPDATE-SALESORDER-STATUS');
+    log.out('OK_SALESORDER_UPDATE-SALESORDER-STATUS', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Successfully updated sales order status with id: ${id}` }
+    });
     res.json({
       message: `Successfully updated sales order status with id: ${id}`
     });
   } catch (error) {
-    log.error('ERR_SALESORDER_UPDATE-SALESORDER-STATUS', error.message);
+    log.error('ERR_SALESORDER_UPDATE-SALESORDER-STATUS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
@@ -315,10 +394,16 @@ const updateSalesOrder = async (req, res) => {
       customerRemarks,
       salesOrderItems
     });
-    log.out('OK_SALESORDER_UPDATE-SALESORDER');
+    log.out('OK_SALESORDER_UPDATE-SALESORDER', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Successfully updated sales order status with id: ${id}` }
+    });
     res.json({ message: `Successfully updated sales order with id: ${id}` });
   } catch (error) {
-    log.error('ERR_SALESORDER_UPDATE-SALESORDER', error.message);
+    log.error('ERR_SALESORDER_UPDATE-SALESORDER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }

@@ -12,7 +12,10 @@ const createUser = async (req, res) => {
 
   const user = await userModel.findUserByEmail({ email });
   if (user) {
-    log.error('ERR_USER_CREATE-USER');
+    log.error('ERR_USER_CREATE-USER', {
+      err: 'User already exist',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'User already exists' });
   } else {
     const password = await common.awaitWrap(userModel.generatePassword());
@@ -45,11 +48,17 @@ const createUser = async (req, res) => {
       })
     );
     if (error) {
-      log.error('ERR_USER_CREATE-USER', error.message);
+      log.error('ERR_USER_CREATE-USER', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_USER_CREATE-USER');
+      log.out('OK_USER_CREATE-USER', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'User created' }
+      });
       res.status(200).json({ message: 'User created' });
     }
   }
@@ -59,7 +68,10 @@ const createB2BUser = async (req, res) => {
   const { firstName, lastName, email, role, status, isVerified } = req.body;
   const user = await userModel.findUserByEmail({ email });
   if (user) {
-    log.error('ERR_USER_CREATE-B2B-USER');
+    log.error('ERR_USER_CREATE-B2B-USER', {
+      err: 'B2B user already exist',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'User already exists' });
   } else {
     const { error } = await common.awaitWrap(
@@ -73,11 +85,17 @@ const createB2BUser = async (req, res) => {
       })
     );
     if (error) {
-      log.error('ERR_USER_CREATE-B2B-USER', error.message);
+      log.error('ERR_USER_CREATE-B2B-USER', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
-      log.out('OK_USER_CREATE-B2B-USER');
+      log.out('OK_USER_CREATE-B2B-USER', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'B2B User created' }
+      });
       res.status(200).json({ message: 'B2B User created' });
     }
   }
@@ -90,10 +108,16 @@ const getUser = async (req, res) => {
   try {
     const user = await userModel.findUserById({ id: req.user.userId });
     delete user.password;
-    log.out('OK_USER_GET-USER');
+    log.out('OK_USER_GET-USER', {
+      req: { body: req.body, params: req.params },
+      res: user
+    });
     res.json(user);
   } catch (error) {
-    log.error('ERR_USER_GET-USER', error.message);
+    log.error('ERR_USER_GET-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -102,10 +126,16 @@ const getUserDetails = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await userModel.getUserDetails({ id });
-    log.out('OK_USER_GET-USER-DETAILS');
+    log.out('OK_USER_GET-USER-DETAILS', {
+      req: { body: req.body, params: req.params },
+      res: user
+    });
     res.json(user);
   } catch (error) {
-    log.error('ERR_USER_GET-USER-DETAILS', error.message);
+    log.error('ERR_USER_GET-USER-DETAILS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -134,27 +164,42 @@ const auth = async (req, res) => {
       },
       (err, token) => {
         if (err) {
-          log.error('ERR_AUTH_LOGIN', err.message);
+          log.error('ERR_AUTH_LOGIN', {
+            err: err.message,
+            req: { body: req.body, params: req.params }
+          });
           res.status(500).send('Server Error');
         }
-        log.out('OK_AUTH_LOGIN');
+        log.out('OK_AUTH_LOGIN', {
+          req: { body: req.body, params: req.params },
+          res: token
+        });
         user.token = token;
         res.json({ token });
       }
     );
   } else {
-    log.error('ERR_AUTH_LOGIN', 'Invalid Credentials');
+    log.error('ERR_AUTH_LOGIN', {
+      err: 'Invalid Credentials',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).send('Invalid Credentials');
   }
 };
 
 const getUsers = async (req, res) => {
   try {
-    const users = await userModel.getUsers({});
-    log.out('OK_USER_GET-USERS');
+    const users = await userModel.getUsers({});;
+    log.out('OK_USER_GET-USERS', {
+      req: { body: req.body, params: req.params },
+      res: users.filter((u) => u.id != req.user.userId)
+    });
     res.json(users.filter((u) => u.id != req.user.userId));
   } catch (error) {
-    log.error('ERR_USER_GET-USERS', err.message);
+    log.error('ERR_USER_GET-USERS', {
+      err: error.message,   
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -164,18 +209,29 @@ const editUser = async (req, res) => {
   const email = updatedUser.email;
   let user = await userModel.findUserByEmail({ email });
   if (user && user.id != updatedUser.id) {
-    log.error('ERR_USER_EDIT-USER');
+    log.error('ERR_USER_EDIT-USERS', {
+      err: 'User already exists',
+      req: { body: req.body, params: req.params }
+    });
     res.status(400).json({ message: 'User already exists' });
   } else {
     try {
       user = await userModel.editUser({ updatedUser: req.body });
-      log.out('OK_USER_EDIT-USER');
+      log.out('OK_USER_EDIT-USERS', {
+        req: { body: req.body, params: req.params },
+        res: {
+           message: 'User edited', payload: user 
+          }
+      });
       res.json({
         message: 'User edited',
         payload: user
       });
     } catch (error) {
-      log.error('ERR_USER_EDIT-USER', error.message);
+      log.error('ERR_USER_EDIT-USER', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
       res.status(500).send('Server Error');
     }
   }
@@ -185,10 +241,16 @@ const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await userModel.deleteUserById({ id });
-    log.out('OK_USER_DELETE-USER');
+    log.out('OK_USER_DELETE-USERS', {
+      req: { body: req.body, params: req.params },
+      res: { message: 'User deleted' }
+    });
     res.json({ message: 'User deleted' });
   } catch (error) {
-    log.error('ERR_USER_DELETE-USER', error.message);
+    log.error('ERR_USER_DELETE-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -197,13 +259,22 @@ const enableUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await userModel.enableUser({ id });
-    log.out('OK_USER_ENABLE-USER');
+    log.out('OK_USER_ENABLE-USERS', {
+      req: { body: req.body, params: req.params },
+      res: {
+        message: 'User enabled',
+        payload: user
+      }
+    });
     res.json({
       message: 'User enabled',
       payload: user
     });
   } catch (error) {
-    log.error('ERR_USER_ENABLE-USER', error.message);
+    log.error('ERR_USER_ENABLE-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -212,13 +283,22 @@ const disableUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await userModel.disableUser({ id });
-    log.out('OK_USER_DISABLE-USER');
+    log.out('OK_USER_DISABLE-USERS', {
+      req: { body: req.body, params: req.params },
+      res: {
+        message: 'User disabled',
+        payload: user
+      }
+    });
     res.json({
       message: 'User disabled',
       payload: user
     });
   } catch (error) {
-    log.error('ERR_USER_DISABLE-USER', error.message);
+    log.error('ERR_USER_DISABLE-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -228,13 +308,22 @@ const changeUserRole = async (req, res) => {
   try {
     const { id, action } = req.params;
     const user = await userModel.changeUserRole({ id, action });
-    log.out('OK_USER_CHANGE-USER-ROLE');
+    log.out('OK_USER_CHANGE-USER-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: {
+        message: 'User role updated',
+        payload: user
+      }
+    });
     res.json({
       message: 'User role updated',
       payload: user
     });
   } catch (error) {
-    log.error('ERR_USER_CHANGE-USER-ROLE', error.message);
+    log.error('ERR_USER_CHANGE-USER-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -257,16 +346,27 @@ const sendForgetEmailPassword = async (req, res) => {
       };
       await userModel.editUser({ updatedUser });
       await emailHelper.sendEmail({ recipientEmail, subject, content });
-      log.out('OK_USER_SENT-EMAIL');
+      log.out('OK_USER_SENT-EMAIL', {
+        req: { body: req.body, params: req.params },
+        res: {
+          message: 'Email sent'
+        }
+      });
       res.json({
         message: 'Email sent'
       });
     } else {
-      log.error('ERR_USER_SEND', 'user is not registered');
+      log.error('ERR_USER_SEND', {
+        err: 'Failed to send email as user is not registered',
+        req: { body: req.body, params: req.params }
+      });
       res.status(500).send('Failed to send email as user is not registered');
     }
   } catch (error) {
-    log.error('ERR_USER_SEND', error.message);
+    log.error('ERR_USER_SEND', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -275,10 +375,11 @@ const verifyPassword = async (req, res) => {
   try {
     const { userEmail, currentPassword, newPassword } = req.body;
     if (currentPassword === newPassword) {
-      log.out('ERR_USER_VERIFY-PW');
-      res
-        .status(200)
-        .json({ message: 'Old and new password cannot be the same' });
+      log.error('ERR_USER_VERIFY-PW', {
+        err: 'Old and new password cannot be the same',
+        req: { body: req.body, params: req.params }
+      });
+      res.status(400).json({ message: 'Old and new password cannot be the same' });
     }
     const user = await userModel.findUserByEmail({ email: userEmail });
     if (user) {
@@ -288,18 +389,30 @@ const verifyPassword = async (req, res) => {
         newPassword
       });
       if (is_equal) {
-        log.out('OK_USER_VERIFY-PW');
+        log.out('OK_USER_SVERIFY-PW', {
+          req: { body: req.body, params: req.params },
+          res: { message: 'Password verified' }
+        });
         res.status(200).json({ message: 'Password verified' });
       } else {
-        log.out('ERR_USER_VERIFY-PW');
+        log.error('ERR_USER_VERIFY-PW', {
+          err: 'Passwords do not match',
+          req: { body: req.body, params: req.params }
+        });
         res.status(400).json({ message: 'Passwords do not match' });
       }
     } else {
-      log.error('ERR_USER_VERIFY-PW');
+      log.error('ERR_USER_VERIFY-PW', {
+        err: 'User does not exist',
+        req: { body: req.body, params: req.params }
+      });
       res.status(400).json({ message: 'User does not exist' });
     }
   } catch (error) {
-    log.error('ERR_USER_VERIFY-PW', error.message);
+    log.error('ERR_USER_VERIFY-PW', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -329,12 +442,20 @@ const approveB2BUser = async (req, res) => {
     } catch (error) {
       console.log('Error sending email');
     }
-    log.out('OK_USER_APPROVE-USER');
+    log.out('OK_USER_APPROVE-USER', {
+      req: { body: req.body, params: req.params },
+      res: {
+        message: 'Account creation request approved.'
+      }
+    });
     res.json({
       message: 'Account creation request approved.'
     });
   } catch (error) {
-    log.error('ERR_USER_APPROVE-USER', error.message);
+    log.error('ERR_USER_APPROVE-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -359,13 +480,22 @@ const rejectB2BUser = async (req, res) => {
     } catch (error) {
       console.log('Error sending email');
     }
-    log.out('OK_USER_REJECT-USER');
+    log.out('OK_USER_REJECT-USER', {
+      req: { body: req.body, params: req.params },
+      res: {
+        message: 'Account creation request rejected.',
+        payload: user
+      }
+    });
     res.json({
       message: 'Account creation request rejected.',
       payload: user
     });
   } catch (error) {
-    log.error('ERR_USER_REJECT-USER', error.message);
+    log.error('ERR_USER_REJECT-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -373,10 +503,16 @@ const rejectB2BUser = async (req, res) => {
 const getAllB2BUsers = async (req, res) => {
   try {
     const users = await userModel.getB2BUsers({});
-    log.out('OK_USER_GET-B2B-USERS');
+    log.out('OK_USER_GET-B2B-USERS', {
+      req: { body: req.body, params: req.params },
+      res: users
+    });
     res.json(users);
   } catch (error) {
-    log.error('ERR_USER_GET-B2B-USERS', err.message);
+    log.error('ERR_USER_GET-B2B-USERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -384,10 +520,16 @@ const getAllB2BUsers = async (req, res) => {
 const getAllPendingB2BUsers = async (req, res) => {
   try {
     const users = await userModel.getB2BUsers({});
-    log.out('OK_USER_GET-PENDING-B2B-USERS');
+    log.out('OK_USER_GET-PENDING-B2B-USERS', {
+      req: { body: req.body, params: req.params },
+      res: users.filter((u) => u.status === UserStatus.PENDING)
+    });
     res.json(users.filter((u) => u.status === UserStatus.PENDING));
   } catch (error) {
-    log.error('ERR_USER_GET-PENDING-B2B-USERS', err.message);
+    log.error('ERR_USER_GET-PENDING-B2B-USERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
@@ -396,10 +538,16 @@ const getAllNonB2BUsers = async (req, res) => {
   try {
     const users = await userModel.getUsers({});
     const filteredUsers = users.filter(u => u.role !== UserRole.CORPORATE && u.role !== UserRole.DISTRIBUTOR);
-    log.out('OK_USER_GET-NON-B2B-USERS');
+    log.out('OK_USER_GET-NON-B2B-USERS', {
+      req: { body: req.body, params: req.params },
+      res: filteredUsers
+    });
     res.json(filteredUsers);
   } catch (error) {
-    log.error('ERR_USER_GET-NON-B2B-USERS', err.message);
+    log.error('ERR_USER_GET-NON-B2B-USERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     res.status(500).send('Server Error');
   }
 };
