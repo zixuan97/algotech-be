@@ -505,7 +505,7 @@ const getAllB2BUsers = async (req, res) => {
     const users = await userModel.getB2BUsers({});
     log.out('OK_USER_GET-B2B-USERS', {
       req: { body: req.body, params: req.params },
-      res: JSON.stringify(user)
+      res: JSON.stringify(users)
     });
     res.json(users);
   } catch (error) {
