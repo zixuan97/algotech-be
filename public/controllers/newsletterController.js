@@ -155,6 +155,25 @@ const sendNewsLetter = async (req, res) => {
   res.json(response);
 };
 
+const sendNewsLetterToRecommendedCustomers = async (req, res) => {
+  const { emails, id } = req.body;
+  const newsletter = await newsletterModel.findNewsletterById({ id });
+  await Promise.all(
+    emails.map(async (email) => {
+      await emailHelper.sendEmail({
+        recipientEmail: email,
+        subject: newsletter.emailSubject,
+        content: newsletterTemplate(
+          newsletter.discountCode,
+          newsletter.emailBodyTitle,
+          newsletter.emailBody
+        )
+      });
+    })
+  );
+  res.json({ message: 'Email sent to customers' });
+};
+
 exports.createNewsletter = createNewsletter;
 exports.getAllNewsletters = getAllNewsletters;
 exports.getNewsletter = getNewsletter;
@@ -162,3 +181,5 @@ exports.updateNewsletter = updateNewsletter;
 exports.deleteNewsletter = deleteNewsletter;
 exports.generateNewsletterHtml = generateNewsletterHtml;
 exports.sendNewsLetter = sendNewsLetter;
+exports.sendNewsLetterToRecommendedCustomers =
+  sendNewsLetterToRecommendedCustomers;
