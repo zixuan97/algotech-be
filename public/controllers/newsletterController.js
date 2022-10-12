@@ -25,7 +25,7 @@ const createNewsletter = async (req, res) => {
   } else {
     log.out('OK_CUSTOMER_CREATE-NEWSLETTER', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -44,7 +44,7 @@ const getAllNewsletters = async (req, res) => {
   } else {
     log.out('OK_CUSTOMER_GET-ALL-NEWSLETTERS', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -56,7 +56,7 @@ const getNewsletter = async (req, res) => {
     const newsletter = await newsletterModel.findNewsletterById({ id });
     log.out('OK_CUSTOMER_GET-NEWSLETTER-BY-ID', {
       req: { body: req.body, params: req.params },
-      res: newsletter
+      res: JSON.stringify(newsletter)
     });
     res.json(newsletter);
   } catch (error) {
@@ -64,7 +64,7 @@ const getNewsletter = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting newsletter');
   }
 };
 
@@ -74,11 +74,17 @@ const updateNewsletter = async (req, res) => {
     newsletterModel.updateNewsletter({ id, name, emailSubject, emailBodyTitle, emailBody, discountCode })
   );
   if (error) {
-    log.error('ERR_NEWSLETTER_UPDATE_NEWSLETTER', error.message);
+    log.error('ERR_NEWSLETTER_UPDATE_NEWSLETTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_NEWSLETTER_UPDATE_NEWSLETTER');
+    log.out('OK_NEWSLETTER_UPDATE_NEWSLETTER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
     res.json(data);
   }
 };
@@ -89,11 +95,17 @@ const deleteNewsletter = async (req, res) => {
     newsletterModel.deleteNewsletter({ id })
   );
   if (error) {
-    log.error('ERR_NEWSLETTER_DELETE_NEWSLETTER', error.message);
+    log.error('ERR_NEWSLETTER_DELETE_NEWSLETTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_NEWSLETTER_DELETE_NEWSLETTER');
+    log.out('OK_NEWSLETTER_DELETE_NEWSLETTER', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted newsletter with id:${id}` }
+    });
     res.json({ message: `Deleted newsletter with id:${id}` });
   }
 };

@@ -110,7 +110,7 @@ const getUser = async (req, res) => {
     delete user.password;
     log.out('OK_USER_GET-USER', {
       req: { body: req.body, params: req.params },
-      res: user
+      res: JSON.stringify(user)
     });
     res.json(user);
   } catch (error) {
@@ -118,7 +118,7 @@ const getUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting user');
   }
 };
 
@@ -128,7 +128,7 @@ const getUserDetails = async (req, res) => {
     const user = await userModel.getUserDetails({ id });
     log.out('OK_USER_GET-USER-DETAILS', {
       req: { body: req.body, params: req.params },
-      res: user
+      res: JSON.stringify(user)
     });
     res.json(user);
   } catch (error) {
@@ -136,7 +136,7 @@ const getUserDetails = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting user details');
   }
 };
 
@@ -168,11 +168,11 @@ const auth = async (req, res) => {
             err: err.message,
             req: { body: req.body, params: req.params }
           });
-          res.status(500).send('Server Error');
+          res.status(400).send('Error authenticating');
         }
         log.out('OK_AUTH_LOGIN', {
           req: { body: req.body, params: req.params },
-          res: token
+          res: JSON.stringify(token)
         });
         user.token = token;
         res.json({ token });
@@ -200,7 +200,7 @@ const getUsers = async (req, res) => {
       err: error.message,   
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting users');
   }
 };
 
@@ -232,7 +232,7 @@ const editUser = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.status(500).send('Server Error');
+      res.status(400).send('Error editing user');
     }
   }
 };
@@ -251,7 +251,7 @@ const deleteUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error deleting user');
   }
 };
 
@@ -275,7 +275,7 @@ const enableUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error enabling user');
   }
 };
 
@@ -299,7 +299,7 @@ const disableUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error disabling user');
   }
 };
 
@@ -324,7 +324,7 @@ const changeUserRole = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error changing user role');
   }
 };
 
@@ -360,14 +360,14 @@ const sendForgetEmailPassword = async (req, res) => {
         err: 'Failed to send email as user is not registered',
         req: { body: req.body, params: req.params }
       });
-      res.status(500).send('Failed to send email as user is not registered');
+      res.status(400).send('Failed to send email as user is not registered');
     }
   } catch (error) {
     log.error('ERR_USER_SEND', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error sending forget email password');
   }
 };
 
@@ -413,7 +413,7 @@ const verifyPassword = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error verifying password');
   }
 };
 
@@ -456,7 +456,7 @@ const approveB2BUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error approving B2B user');
   }
 };
 
@@ -496,7 +496,7 @@ const rejectB2BUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error rejecting B2B user');
   }
 };
 
@@ -505,7 +505,7 @@ const getAllB2BUsers = async (req, res) => {
     const users = await userModel.getB2BUsers({});
     log.out('OK_USER_GET-B2B-USERS', {
       req: { body: req.body, params: req.params },
-      res: users
+      res: JSON.stringify(user)
     });
     res.json(users);
   } catch (error) {
@@ -513,7 +513,7 @@ const getAllB2BUsers = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting all B2B users');
   }
 };
 
@@ -530,7 +530,7 @@ const getAllPendingB2BUsers = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting all pending B2B users');
   }
 };
 
@@ -540,7 +540,7 @@ const getAllNonB2BUsers = async (req, res) => {
     const filteredUsers = users.filter(u => u.role !== UserRole.CORPORATE && u.role !== UserRole.DISTRIBUTOR);
     log.out('OK_USER_GET-NON-B2B-USERS', {
       req: { body: req.body, params: req.params },
-      res: filteredUsers
+      res: JSON.stringify(filteredUsers)
     });
     res.json(filteredUsers);
   } catch (error) {
@@ -548,7 +548,7 @@ const getAllNonB2BUsers = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting all non-B2B users');
   }
 };
 

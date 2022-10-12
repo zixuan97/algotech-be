@@ -61,7 +61,7 @@ const getAllLocations = async (req, res) => {
   } else {
     log.out('OK_LOCATION_GET-ALL-LOCATIONS', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -73,7 +73,7 @@ const getLocation = async (req, res) => {
     const location = await locationModel.findLocationById({ id });
     log.out('OK_LOCATION_GET-LOCATION-BY-ID', {
       req: { body: req.body, params: req.params },
-      res: location
+      res: JSON.stringify(location)
     });
     res.json(location);
   } catch (error) {
@@ -81,7 +81,7 @@ const getLocation = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting location');
   }
 };
 
@@ -91,7 +91,7 @@ const getLocationByName = async (req, res) => {
     const location = await locationModel.findLocationByName({ name });
     log.out('OK_LOCATION_GET-LOCATION-BY-NAME', {
       req: { body: req.body, params: req.params },
-      res: location
+      res: JSON.stringify(location)
     });
     res.json(location);
   } catch (error) {
@@ -99,7 +99,7 @@ const getLocationByName = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting location by name');
   }
 };
 

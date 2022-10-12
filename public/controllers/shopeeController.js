@@ -191,7 +191,7 @@ const getShopPerformance = async (req, res) => {
       };
       log.out('OK_SHOPEE_GET-SHOP-PERFORMANCE', {
         req: { body: req.body, params: req.params },
-        res: sellerPerformance
+        res: JSON.stringify(sellerPerformance)
       });
       res.json(sellerPerformance);
     } catch (err) {
@@ -230,7 +230,7 @@ const downloadShippingDocument = async (req, res) => {
       });
       log.out('OK_SHOPEE_DOWNLOAD-SHIPPING-DOCUMENT', {
         req: { body: req.body, params: req.params },
-        res: response
+        res: JSON.stringify(response)
       });
       res.json(response);
     } catch (err) {
