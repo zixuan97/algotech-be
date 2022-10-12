@@ -49,7 +49,7 @@ const createSalesOrder = async (req, res) => {
     } else {
       log.out('OK_SALESORDER_CREATE-SO', {
         req: { body: req.body, params: req.params },
-        res: data
+        res: JSON.stringify(data)
       });
       res.json(data);
     }
@@ -78,7 +78,7 @@ const getAllSalesOrders = async (req, res) => {
   }
   log.out('OK_SALESORDER_GET-ALL-SO', {
     req: { body: req.body, params: req.params },
-    res: data
+    res: JSON.stringify(data)
   });
   res.json(data);
 };
@@ -102,7 +102,7 @@ const getAllSalesOrdersWithTimeFilter = async (req, res) => {
   }
   log.out('OK_SALESORDER_GET-ALL-SO-TIMEFILTER', {
     req: { body: req.body, params: req.params },
-    res: data
+    res: JSON.stringify(data)
   });
   res.json(data);
 };
@@ -262,7 +262,7 @@ const findSalesOrderById = async (req, res) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({ id });
     log.out('OK_SALESORDER_GET-SALESORDER-BY-ID', {
       req: { body: req.body, params: req.params },
-      res: salesOrder
+      res: JSON.stringify(salesOrder)
     });
     res.json(salesOrder);
   } catch (error) {
@@ -283,7 +283,7 @@ const findSalesOrderByOrderId = async (req, res) => {
     });
     log.out('OK_SALESORDER_GET-SALESORDER-BY-ORDER-ID', {
       req: { body: req.body, params: req.params },
-      res: salesOrder
+      res: JSON.stringify(salesOrder)
     });
     res.json(salesOrder);
   } catch (error) {

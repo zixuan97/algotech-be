@@ -50,7 +50,7 @@ const getAllCategories = async (req, res) => {
   } else {
     log.out('OK_CATEGORY_GET-ALL-CATEGORIES', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -62,7 +62,7 @@ const getCategory = async (req, res) => {
     const category = await categoryModel.findCategoryById({ id });
     log.out('OK_CATEGORY_GET-CATEGORY-BY-ID', {
       req: { body: req.body, params: req.params },
-      res: category
+      res: JSON.stringify(category)
     });
     res.json(category);
   } catch (error) {
@@ -70,7 +70,7 @@ const getCategory = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting category');
   }
 };
 
@@ -80,7 +80,7 @@ const getCategoryByName = async (req, res) => {
     const category = await categoryModel.findCategoryByName({ name });
     log.out('OK_CATEGORY_GET-CATEGORY-BY-NAME', {
       req: { body: req.body, params: req.params },
-      res: category
+      res: JSON.stringify(category)
     });
     res.json(category);
   } catch (error) {
@@ -88,7 +88,7 @@ const getCategoryByName = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting category by name');
   }
 };
 

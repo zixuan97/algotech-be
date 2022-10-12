@@ -77,7 +77,7 @@ const getAllSuppliers = async (req, res) => {
     }
     log.out('OK_SUPPLIER_GET-ALL-SUPPLIERS', {
       req: { body: req.body, params: req.params },
-      res: finalRes
+      res: JSON.stringify(finalRes)
     });
     res.json(finalRes);
   }
@@ -105,7 +105,7 @@ const getSupplier = async (req, res) => {
       }
       log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID', {
         req: { body: req.body, params: req.params },
-        res: result
+        res: JSON.stringify(result)
       });
       res.json(result);
     } else {
@@ -116,7 +116,7 @@ const getSupplier = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting supplier');
   }
 };
 
@@ -126,7 +126,7 @@ const getSupplierByName = async (req, res) => {
     const supplier = await supplierModel.findSupplierByName({ name });
     log.out('OK_SUPPLIER_GET-SUPPLIER-BY-NAME', {
       req: { body: req.body, params: req.params },
-      res: supplier
+      res: JSON.stringify(supplier)
     });
     res.json(supplier);
   } catch (error) {
@@ -134,7 +134,7 @@ const getSupplierByName = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting supplier by name');
   }
 };
 
@@ -159,7 +159,7 @@ const updateSupplier = async (req, res) => {
   } else {
     log.out('OK_SUPPLIER_UPDATE-SUPPLIER', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -235,7 +235,7 @@ const addProductToSupplier = async (req, res) => {
   } else {
     log.out('OK_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -254,7 +254,7 @@ const getAllSupplierProducts = async (req, res) => {
   } else {
     log.out('OK_SUPPLIER_GET-ALL-SUPPLIER=PRODUCTS', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -274,7 +274,7 @@ const getAllProductsBySupplier = async (req, res) => {
   } else {
     log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-BY-SUPPLIER', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }

@@ -74,7 +74,7 @@ const addShopifyOrders = async (req, res) => {
     }
     log.out('OK_SHOPIFY_GET-SHOPIFY-ORDER', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   } catch (error) {
