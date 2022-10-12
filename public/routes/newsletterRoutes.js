@@ -7,5 +7,6 @@ router.get('/:id', newsletterController.getNewsletter);
 router.post('/template', newsletterController.generateNewsletterHtml);
 router.put('/', newsletterController.updateNewsletter);
 router.delete('/:id', newsletterController.deleteNewsletter);
+router.post('/email', newsletterController.sendNewsLetter);
 
 module.exports = router;
