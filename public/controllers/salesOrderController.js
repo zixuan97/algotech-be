@@ -100,7 +100,7 @@ const getAllSalesOrdersWithTimeFilter = async (req, res) => {
     });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
-  } 
+  }
   log.out('OK_SALESORDER_GET-ALL-SO-TIMEFILTER', {
     req: { body: req.body, params: req.params },
     res: data
@@ -127,7 +127,7 @@ const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
   } else {
     log.out('OK_SALESORDER_GET-SO-BY-DAY-TIMEFILTER', {
       req: { body: req.body, params: req.params },
-      res:   JSON.parse(
+      res: JSON.parse(
         JSON.stringify(
           data,
           (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
@@ -202,7 +202,7 @@ const getBestSellerWithTimeFilter = async (req, res) => {
   } else {
     log.out('OK_SALESORDER_GET-BEST-SELLER-TIMEFILTER', {
       req: { body: req.body, params: req.params },
-      res:  JSON.parse(
+      res: JSON.parse(
         JSON.stringify(
           data,
           (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
@@ -303,26 +303,6 @@ const updateSalesOrderStatus = async (req, res) => {
       id,
       orderStatus
     });
-    // if (orderStatus === 'DELIVERED') {
-    //   const salesOrder = await salesOrderModel.findSalesOrderById({ id });
-    //   salesOrder.map(async (so) => {
-    //     so.salesOrderItems.map(async (soi) => {
-    //       if (soi.salesOrderBundleItems.length === 0) {
-    //         const pdt = await productModel.findProductByName({
-    //           name: soi.productName
-    //         });
-    //         await stockQuantityModel.connectOrCreateStockQuantity({
-    //           productId: pdt.id,
-    //           productName: pdt.name,
-    //           productSku: pdt.sku,
-    //           locationId: location.id,
-    //           quantity: p.quantity,
-    //           locationName: po.warehouseName
-    //         });
-    //       }
-    //     });
-    //   });
-    // }
     log.out('OK_SALESORDER_UPDATE-SALESORDER-STATUS', {
       req: { body: req.body, params: req.params },
       res: { message: `Successfully updated sales order status with id: ${id}` }
@@ -396,7 +376,7 @@ const updateSalesOrder = async (req, res) => {
     });
     log.out('OK_SALESORDER_UPDATE-SALESORDER', {
       req: { body: req.body, params: req.params },
-      res: { message: `Successfully updated sales order status with id: ${id}` }
+      res: { message: `Successfully updated sales order with id: ${id}` }
     });
     res.json({ message: `Successfully updated sales order with id: ${id}` });
   } catch (error) {
