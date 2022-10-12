@@ -7,11 +7,15 @@ const createBulkOrder = async (req) => {
     payeeEmail,
     payeeRemarks,
     bulkOrderStatus,
-    salesOrders
+    salesOrders,
+    amount,
+    orderId
   } = req;
 
-  await prisma.bulkOrder.create({
+  return await prisma.bulkOrder.create({
     data: {
+      orderId,
+      amount,
       paymentMode,
       payeeName,
       payeeEmail,
@@ -20,19 +24,18 @@ const createBulkOrder = async (req) => {
       salesOrders: {
         create: salesOrders.map((salesOrder) => ({
           orderId: salesOrder.orderId,
-          customerName,
-          customerAddress,
-          customerContactNo,
-          customerEmail,
-          postalCode,
-          platformType,
-          createdTime,
-          currency,
-          customerRemarks,
-          orderStatus,
-          amount: Number(amount),
+          customerName: salesOrder.customerName,
+          customerAddress: salesOrder.customerAddress,
+          customerContactNo: salesOrder.customerContactNo,
+          customerEmail: salesOrder.customerEmail,
+          postalCode: salesOrder.postalCode,
+          platformType: salesOrder.platformType,
+          createdTime: salesOrder.createdTime,
+          currency: salesOrder.currency,
+          customerRemarks: salesOrder.customerRemarks,
+          amount: Number(salesOrder.amount),
           salesOrderItems: {
-            create: salesOrderItems.map((so) => ({
+            create: salesOrder.salesOrderItems.map((so) => ({
               quantity: so.quantity,
               productName: so.productName,
               price: Number(so.price),
@@ -44,7 +47,131 @@ const createBulkOrder = async (req) => {
                   };
                 })
               },
-              createdTime
+              createdTime: salesOrder.createdTime
+            }))
+          }
+        }))
+      }
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
+    }
+  });
+};
+
+const getAllBulkOrders = async () => {
+  const bulkOrders = await prisma.bulkOrder.findMany({
+    orderBy: {
+      createdTime: 'asc'
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
+    }
+  });
+  return bulkOrders;
+};
+
+const updateBulkOrder = async (req) => {
+  const {
+    id,
+    paymentMode,
+    payeeName,
+    payeeEmail,
+    payeeRemarks,
+    bulkOrderStatus,
+    salesOrders,
+    amount
+  } = req;
+
+  await Promise.all(
+    salesOrders.map(async (so) => {
+      await Promise.all(
+        so.salesOrderItems.map(async (soi) => {
+          if (soi.id) {
+            await prisma.salesOrderBundleItem.deleteMany({
+              where: { salesOrderItemId: Number(soi.id) }
+            });
+          }
+        })
+      );
+      await prisma.salesOrder.update({
+        where: { id: Number(so.id) },
+        data: {
+          salesOrderItems: {
+            deleteMany: {}
+          }
+        }
+      });
+    })
+  );
+
+  return await prisma.bulkOrder.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      amount,
+      paymentMode,
+      payeeName,
+      payeeEmail,
+      payeeRemarks,
+      bulkOrderStatus,
+      salesOrders: {
+        deleteMany: {},
+        create: salesOrders.map((salesOrder) => ({
+          orderId: salesOrder.orderId,
+          customerName: salesOrder.customerName,
+          customerAddress: salesOrder.customerAddress,
+          customerContactNo: salesOrder.customerContactNo,
+          customerEmail: salesOrder.customerEmail,
+          postalCode: salesOrder.postalCode,
+          platformType: salesOrder.platformType,
+          createdTime: salesOrder.createdTime,
+          currency: salesOrder.currency,
+          customerRemarks: salesOrder.customerRemarks,
+          amount: Number(salesOrder.amount),
+          salesOrderItems: {
+            create: salesOrder.salesOrderItems.map((so) => ({
+              quantity: so.quantity,
+              productName: so.productName,
+              price: Number(so.price),
+              salesOrderBundleItems: {
+                create: so.salesOrderBundleItems.map((bi) => {
+                  return {
+                    productName: bi.product.name,
+                    quantity: bi.quantity
+                  };
+                })
+              },
+              createdTime: salesOrder.createdTime
             }))
           }
         }))
@@ -53,51 +180,72 @@ const createBulkOrder = async (req) => {
   });
 };
 
-const getAllProdCatalogue = async () => {
-  const prodCatalogue = await prisma.productCatalogue.findMany({
-    include: {
-      product: true
-    }
-  });
-  return prodCatalogue;
-};
-
-const updateProdCatalogue = async (req) => {
-  const { id, price } = req;
-
-  prodCatalogue = await prisma.productCatalogue.update({
-    where: { id },
-    data: {
-      price
-    }
-  });
-  return prodCatalogue;
-};
-
-const deleteProdCatalogue = async (req) => {
+const deleteBulkOrder = async (req) => {
   const { id } = req;
-  await prisma.productCatalogue.delete({
+  await prisma.bulkOrder.delete({
     where: {
       id: Number(id)
     }
   });
 };
 
-const findProdCatalogueById = async (req) => {
+const findBulkOrderById = async (req) => {
   const { id } = req;
-  const prodCatalogue = await prisma.productCatalogue.findUnique({
+  const bulkOrder = await prisma.bulkOrder.findUnique({
     where: {
       id: Number(id)
     },
     include: {
-      product: true
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
     }
   });
-  return prodCatalogue;
+  return bulkOrder;
 };
 
-exports.createProdCatalogue = createProdCatalogue;
-exports.getAllProdCatalogue = getAllProdCatalogue;
-exports.updateProdCatalogue = updateProdCatalogue;
-exports.deleteProdCatalogue = deleteProdCatalogue;
-exports.findProdCatalogueById = findProdCatalogueById;
+const findBulkOrderByOrderId = async (req) => {
+  const { orderId } = req;
+  const bulkOrder = await prisma.bulkOrder.findUnique({
+    where: {
+      orderId
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
+    }
+  });
+  return bulkOrder;
+};
+
+exports.createBulkOrder = createBulkOrder;
+exports.getAllBulkOrders = getAllBulkOrders;
+exports.updateBulkOrder = updateBulkOrder;
+exports.deleteBulkOrder = deleteBulkOrder;
+exports.findBulkOrderById = findBulkOrderById;
+exports.findBulkOrderByOrderId = findBulkOrderByOrderId;

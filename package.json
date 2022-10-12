@@ -42,6 +42,7 @@
     "nodemon": "^2.0.19",
     "pdfkit": "^0.13.0",
     "pusher": "^5.1.1-beta",
+    "uuid": "^9.0.0",
     "write-excel-file": "^1.4.12"
   },
   "devDependencies": {
