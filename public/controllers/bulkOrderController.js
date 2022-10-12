@@ -3,6 +3,7 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const bundleModel = require('../models/bundleModel');
+const customerModel = require('../models/customerModel');
 
 const createBulkOrder = async (req, res) => {
   const {
@@ -12,9 +13,22 @@ const createBulkOrder = async (req, res) => {
     payeeRemarks,
     bulkOrderStatus,
     salesOrders,
-    amount
+    amount,
+    payeeContactNo,
+    payeeCompany
   } = req.body;
   const orderId = new Date().getTime().toString();
+  await customerModel.connectOrCreateCustomer({
+    firstName: payeeName,
+    lastName: '',
+    email: payeeEmail,
+    address: '',
+    postalCode: '',
+    contactNo: payeeContactNo,
+    company: payeeCompany,
+    totalSpent: amount,
+    lastOrderDate: new Date()
+  });
   await Promise.all(
     await salesOrders.map(async (so) => {
       so.orderId = Math.floor(new Date().getTime() / 1000).toString();
@@ -40,6 +54,8 @@ const createBulkOrder = async (req, res) => {
       payeeEmail,
       payeeRemarks,
       bulkOrderStatus,
+      payeeContactNo,
+      payeeCompany,
       salesOrders,
       amount,
       orderId
@@ -131,6 +147,8 @@ const updateBulkOrder = async (req, res) => {
       payeeRemarks,
       bulkOrderStatus,
       salesOrders,
+      payeeContactNo,
+      payeeCompany,
       amount
     } = req.body;
 
@@ -158,6 +176,8 @@ const updateBulkOrder = async (req, res) => {
       payeeRemarks,
       bulkOrderStatus,
       salesOrders,
+      payeeContactNo,
+      payeeCompany,
       amount
     });
     log.out('OK_BULKORDER_UPDATE-BULKORDER', {

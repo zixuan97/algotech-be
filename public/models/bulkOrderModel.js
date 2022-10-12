@@ -9,7 +9,9 @@ const createBulkOrder = async (req) => {
     bulkOrderStatus,
     salesOrders,
     amount,
-    orderId
+    orderId,
+    payeeContactNo,
+    payeeCompany
   } = req;
 
   return await prisma.bulkOrder.create({
@@ -20,7 +22,9 @@ const createBulkOrder = async (req) => {
       payeeName,
       payeeEmail,
       payeeRemarks,
+      payeeContactNo,
       bulkOrderStatus,
+      payeeCompany,
       salesOrders: {
         create: salesOrders.map((salesOrder) => ({
           orderId: salesOrder.orderId,
@@ -108,6 +112,8 @@ const updateBulkOrder = async (req) => {
     payeeRemarks,
     bulkOrderStatus,
     salesOrders,
+    payeeContactNo,
+    payeeCompany,
     amount
   } = req;
 
@@ -138,12 +144,14 @@ const updateBulkOrder = async (req) => {
       id: Number(id)
     },
     data: {
+      payeeContactNo,
       amount,
       paymentMode,
       payeeName,
       payeeEmail,
       payeeRemarks,
       bulkOrderStatus,
+      payeeCompany,
       salesOrders: {
         deleteMany: {},
         create: salesOrders.map((salesOrder) => ({

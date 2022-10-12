@@ -107,6 +107,13 @@ const getOrdersByPlatformWithTimeFilter = async (req) => {
   return bestSeller;
 };
 
+const getOrdersByMonthForCustomer = async (req) => {
+  const { customerEmail } = req;
+  const orders =
+    await prisma.$queryRaw`select DATE_TRUNC('month',"createdTime") as month, COUNT("orderId") as numOrders, SUM("amount") as totalamount FROM "public"."SalesOrder" where "customerEmail"=${customerEmail} group by DATE_TRUNC('month',"createdTime")`;
+  return orders;
+};
+
 const findSalesOrderById = async (req) => {
   const { id } = req;
   const salesOrder = await prisma.salesOrder.findUnique({
@@ -128,6 +135,32 @@ const findSalesOrderById = async (req) => {
     }
   });
   return salesOrder;
+};
+
+const findSalesOrderByCustomerEmail = async (req) => {
+  const { customerEmail } = req;
+  const salesOrders = await prisma.salesOrder.findMany({
+    where: {
+      customerEmail
+    },
+    orderBy: {
+      createdTime: 'asc'
+    },
+    include: {
+      salesOrderItems: {
+        select: {
+          productName: true,
+          price: true,
+          quantity: true,
+          salesOrderId: true,
+          createdTime: true,
+          salesOrderBundleItems: true,
+          id: true
+        }
+      }
+    }
+  });
+  return salesOrders;
 };
 
 const findSalesOrderByOrderId = async (req) => {
@@ -239,3 +272,5 @@ exports.getSalesOrdersByDayWithTimeFilter = getSalesOrdersByDayWithTimeFilter;
 exports.getRevenueByDayWithTimeFilter = getRevenueByDayWithTimeFilter;
 exports.getBestSellerWithTimeFilter = getBestSellerWithTimeFilter;
 exports.getOrdersByPlatformWithTimeFilter = getOrdersByPlatformWithTimeFilter;
+exports.findSalesOrderByCustomerEmail = findSalesOrderByCustomerEmail;
+exports.getOrdersByMonthForCustomer = getOrdersByMonthForCustomer;

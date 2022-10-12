@@ -4,7 +4,6 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { generateSalesOrderExcel } = require('../helpers/excel');
 const { format } = require('date-fns');
-const productModel = require('../models/productModel');
 
 const createSalesOrder = async (req, res) => {
   const {
