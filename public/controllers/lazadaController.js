@@ -157,7 +157,7 @@ const getSellerPerformance = async (req, res) => {
       };
       log.out('OK_LAZADA_GET-SHOP-PERFORMANCE', {
         req: { body: req.body, params: req.params },
-        res: sellerPerformance
+        res: JSON.stringify(sellerPerformance)
       });
       res.json(sellerPerformance);
     }

@@ -104,7 +104,7 @@ const getAllProducts = async (req, res) => {
     });
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS', {
       req: { body: req.body, params: req.params },
-      res: result
+      res: JSON.stringify(result)
     });
     res.json(result);
   }
@@ -135,7 +135,7 @@ const getProductById = async (req, res) => {
 
       log.out('OK_PRODUCT_GET-PRODUCT-BY-ID', {
         req: { body: req.body, params: req.params },
-        res: product
+        res: JSON.stringify(product)
       });
       res.json(product);
     } else {
@@ -144,14 +144,14 @@ const getProductById = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
 
-      res.status(500).send('Server Error');
+      res.status(400).send('Error getting product by Id');
     }
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting product by Id');
   }
 };
 
@@ -190,14 +190,14 @@ const getProductByName = async (req, res) => {
         err: 'Server Error',
         req: { body: req.body, params: req.params }
       });
-      res.status(500).send('Server Error');
+      res.status(400).send('Error getting product by name');
     }
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', {
       err: 'Server Error',
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting product by name');
   }
 };
 
@@ -235,14 +235,14 @@ const getProductBySku = async (req, res) => {
 
       res.json(product);
     } else {
-      res.status(500).send('Server Error');
+      res.status(400).send('Error getting product by Sku');
     }
   } catch (error) {
     log.error('ERR_PRODUCT_GET-PRODUCT', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting product by Sku');
   }
 };
 
@@ -271,7 +271,7 @@ const getAllProductsByCategory = async (req, res) => {
     });
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-CATEGORY', {
       req: { body: req.body, params: req.params },
-      res: result
+      res: JSON.stringify(result)
     });
     res.json(result);
   }
@@ -298,7 +298,7 @@ const getAllProductsByBundle = async (req, res) => {
 
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BUNDLE', {
       req: { body: req.body, params: req.params },
-      res: result
+      res: JSON.stringify(result)
     });
 
     res.json(result);
@@ -329,7 +329,7 @@ const getAllProductsByLocation = async (req, res) => {
     });
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-LOCATION', {
       req: { body: req.body, params: req.params },
-      res: result
+      res: JSON.stringify(result)
     });
     res.json(result);
   }
@@ -358,7 +358,7 @@ const getAllProductsByBrand = async (req, res) => {
     });
     log.out('OK_PRODUCT_GET-ALL-PRODUCTS-BY-BRAND', {
       req: { body: req.body, params: req.params },
-      res: result
+      res: JSON.stringify(result)
     });
     res.json(result);
   }

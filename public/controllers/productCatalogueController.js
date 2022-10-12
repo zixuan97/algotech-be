@@ -77,7 +77,7 @@ const getAllProductCatalogue = async (req, res) => {
   } else {
     log.out('OK_PRODUCTCAT_GET-ALL-PRODUCTCAT', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -102,12 +102,12 @@ const getProductCatalogue = async (req, res) => {
     prodCatalogue.image = productImg;
     log.out('OK_PRODUCTCAT_GET-PRODUCTCAT-BY-ID', {
       req: { body: req.body, params: req.params },
-      res: prodCatalogue
+      res: JSON.stringify(prodCatalogue)
     });
     res.json(prodCatalogue);
   } catch (error) {
     log.error('ERR_PRODUCTCAT_GET-PRODUCTCAT', error.message);
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting product catalogue');
   }
 };
 

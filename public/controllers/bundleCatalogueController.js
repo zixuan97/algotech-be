@@ -3,6 +3,7 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { uploadS3, getS3 } = require('../helpers/s3');
+const { da } = require('date-fns/locale');
 
 const createBundleCatalogue = async (req, res) => {
   const { price, bundle, image, description } = req.body;
@@ -28,11 +29,17 @@ const createBundleCatalogue = async (req, res) => {
     })
   );
   if (error) {
-    log.error('ERR_BUNDLECAT_CREATE-BUNDLECAT', error.message);
+    log.error('ERR_BUNDLECAT_CREATE-BUNDLECAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BUNDLECAT_CREATE-BUNDLECAT');
+    log.out('OK_BUNDLECAT_CREATE-BUNDLECAT', {
+      req: { body: req.body, params: req.params },
+      res: { message: 'Bundle catalogue created' }
+    });
     res.json({ message: 'Bundle catalogue created' });
   }
 };
@@ -58,11 +65,17 @@ const getAllBundleCatalogue = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_BUNDLECAT_GET-ALL-BUNDLECAT', error.message);
+    log.error('ERR_BUNDLECAT_GET-ALL-BUNDLECAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BUNDLECAT_GET-ALL-BUNDLECAT');
+    log.out('OK_BUNDLECAT_GET-ALL-BUNDLECAT', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
     res.json(data);
   }
 };
@@ -83,11 +96,17 @@ const getBundleCatalogue = async (req, res) => {
       log.error('ERR_BUNDLECAT_GET-S3', getS3Error.message);
     }
     bundleCatalogue.image = productImg;
-    log.out('OK_BUNDLECAT_GET-BUNDLECAT-BY-ID');
+    log.out('OK_BUNDLECAT_GET-BUNDLECAT-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(bundleCatalogue)
+    });
     res.json(bundleCatalogue);
   } catch (error) {
-    log.error('ERR_BUNDLECAT_GET-BUNDLECAT', error.message);
-    res.status(500).send('Server Error');
+    log.error('ERR_BUNDLECAT_GET-BUNDLECAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting bundle catalogue');
   }
 };
 
@@ -102,7 +121,10 @@ const updateBundleCatalogue = async (req, res) => {
       })
     );
     if (uploadS3Error) {
-      log.error('ERR_BUNDLECAT_UPLOAD-S3', uploadS3Error.message);
+      log.error('ERR_BUNDLECAT_UPLOAD-S3', {
+        err: uploadS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
       const e = Error.http(uploadS3Error);
       res.status(e.code).json(e.message);
     }
@@ -113,11 +135,17 @@ const updateBundleCatalogue = async (req, res) => {
   );
 
   if (error) {
-    log.error('ERR_BUNDLECAT_UPDATE_BUNDLECAT', error.message);
+    log.error('ERR_BUNDLECAT_UPDATE_BUNDLECAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BUNDLECAT_UPDATE_BUNDLECAT');
+    log.out('OK_BUNDLECAT_UPDATE_BUNDLECAT', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Updated bundle catalogue with id:${id}` }
+    });
     res.json({ message: `Updated bundle catalogue with id:${id}` });
   }
 };
@@ -128,11 +156,17 @@ const deleteBundleCatalogue = async (req, res) => {
     bundleCatalogueModel.deleteBundleCatalogue({ id })
   );
   if (error) {
-    log.error('ERR_BUNDLECAT_DELETE_BUNDLECAT', error.message);
+    log.error('ERR_BUNDLECAT_DELETE_BUNDLECAT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BUNDLECAT_DELETE_BUNDLECAT');
+    log.out('OK_BUNDLECAT_DELETE_BUNDLECAT', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Deleted bundle catalogue with id:${id}` }
+    });
     res.json({ message: `Deleted bundle category with id:${id}` });
   }
 };

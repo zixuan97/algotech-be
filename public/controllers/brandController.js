@@ -63,7 +63,7 @@ const getAllBrands = async (req, res) => {
   } else {
     log.out('OK_BRAND_GET-ALL-BRANDS', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -75,7 +75,7 @@ const getBrand = async (req, res) => {
     const brand = await brandModel.findBrandById({ id });
     log.out('OK_BRAND_GET-BRAND-BY-ID', {
       req: { body: req.body, params: req.params },
-      res: brand
+      res: JSON.stringify(brand)
     });
     res.json(brand);
   } catch (error) {
@@ -83,7 +83,7 @@ const getBrand = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting brand');
   }
 };
 
@@ -93,7 +93,7 @@ const getBrandByName = async (req, res) => {
     const brand = await brandModel.findBrandByName({ name });
     log.out('OK_BRAND_GET-BRAND-BY-NAME', {
       req: { body: req.body, params: req.params },
-      res: brand
+      res: JSON.stringify(brand)
     });
     res.json(brand);
   } catch (error) {
@@ -101,7 +101,7 @@ const getBrandByName = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting brand by name');
   }
 };
 

@@ -56,7 +56,7 @@ const getAllBundles = async (req, res) => {
   } else {
     log.out('OK_BUNDLE_GET-ALL-BUNDLES', {
       req: { body: req.body, params: req.params },
-      res: data
+      res: JSON.stringify(data)
     });
     res.json(data);
   }
@@ -68,7 +68,7 @@ const getBundleById = async (req, res) => {
     const bundle = await bundleModel.findBundleById({ id });
     log.out('OK_BUNDLE_GET-BUNDLE-BY-ID', {
       req: { body: req.body, params: req.params },
-      res: bundle
+      res: JSON.stringify(bundle)
     });
     res.json(bundle);
   } catch (error) {
@@ -76,7 +76,7 @@ const getBundleById = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting bundle by Id');
   }
 };
 
@@ -86,7 +86,7 @@ const getBundleByName = async (req, res) => {
     const bundle = await bundleModel.findBundleByName({ name });
     log.out('OK_BUNDLE_GET-BUNDLE-BY-NAME', {
       req: { body: req.body, params: req.params },
-      res: bundle
+      res: JSON.stringify(bundle)
     });
     res.json(bundle);
   } catch (error) {
@@ -94,7 +94,7 @@ const getBundleByName = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(500).send('Server Error');
+    res.status(400).send('Error getting bundle by name');
   }
 };
 

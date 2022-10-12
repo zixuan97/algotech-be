@@ -94,7 +94,7 @@ const getAllBulkOrders = async (req, res) => {
   }
   log.out('OK_BULKORDER_GET-ALL-BO', {
     req: { body: req.body, params: req.params },
-    res: data
+    res: JSON.stringify(data)
   });
   res.json(data);
 };
