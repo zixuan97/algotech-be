@@ -2,10 +2,19 @@ const newsletterModel = require('../models/newsletterModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const fs = require("fs");
+const fs = require('fs');
+const emailHelper = require('../helpers/email');
+const newsletterTemplate = require('../utils/templates/newsletterTemplate');
 
 const createNewsletter = async (req, res) => {
-  const { emailDate, name, emailSubject, emailBodyTitle, emailBody, discountCode } = req.body;
+  const {
+    emailDate,
+    name,
+    emailSubject,
+    emailBodyTitle,
+    emailBody,
+    discountCode
+  } = req.body;
   const { data, error } = await common.awaitWrap(
     newsletterModel.createNewsletter({
       emailDate: new Date(emailDate),
@@ -49,7 +58,7 @@ const getAllNewsletters = async (req, res) => {
     res.json(data);
   }
 };
-  
+
 const getNewsletter = async (req, res) => {
   try {
     const { id } = req.params;
@@ -69,9 +78,17 @@ const getNewsletter = async (req, res) => {
 };
 
 const updateNewsletter = async (req, res) => {
-  const { id, name, emailSubject, emailBodyTitle, emailBody, discountCode } = req.body;
+  const { id, name, emailSubject, emailBodyTitle, emailBody, discountCode } =
+    req.body;
   const { data, error } = await common.awaitWrap(
-    newsletterModel.updateNewsletter({ id, name, emailSubject, emailBodyTitle, emailBody, discountCode })
+    newsletterModel.updateNewsletter({
+      id,
+      name,
+      emailSubject,
+      emailBodyTitle,
+      emailBody,
+      discountCode
+    })
   );
   if (error) {
     log.error('ERR_NEWSLETTER_UPDATE_NEWSLETTER', error.message);
@@ -103,11 +120,27 @@ const generateNewsletterHtml = async (req, res) => {
   const path = process.cwd() + '/public/newsletter.html';
   const temp = process.cwd() + '/public/temp.html';
   let content = fs.readFileSync(path, 'utf8');
-  content = content.replace("sample", title);
-  content = content.replace("placeholder", contentBody);
-  content = content.replace("test", discountCode);
+  content = content.replace('sample', title);
+  content = content.replace('placeholder', contentBody);
+  content = content.replace('test', discountCode);
   fs.writeFileSync(temp, content, 'utf-8');
   res.sendFile(temp);
+};
+
+const sendNewsLetter = async (req, res) => {
+  const { email, id } = req.body;
+  const newsletter = await newsletterModel.findNewsletterById({ id });
+
+  const response = await emailHelper.sendEmail({
+    recipientEmail: email,
+    subject: newsletter.emailSubject,
+    content: newsletterTemplate(
+      newsletter.discountCode,
+      newsletter.emailBodyTitle,
+      newsletter.emailBody
+    )
+  });
+  res.json(response);
 };
 
 exports.createNewsletter = createNewsletter;
@@ -116,3 +149,4 @@ exports.getNewsletter = getNewsletter;
 exports.updateNewsletter = updateNewsletter;
 exports.deleteNewsletter = deleteNewsletter;
 exports.generateNewsletterHtml = generateNewsletterHtml;
+exports.sendNewsLetter = sendNewsLetter;
