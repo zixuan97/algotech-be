@@ -1,4 +1,11 @@
 const newsletterModel = require('../models/newsletterModel');
+const scheduledNewsletterModel = require('../models/scheduledNewsletterModel');
+const {
+  scheduleJobs,
+  cancelJob,
+  rescheduleJob,
+  getScheduledNewsLetters
+} = require('../helpers/scheduler');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -174,6 +181,53 @@ const sendNewsLetterToRecommendedCustomers = async (req, res) => {
   res.json({ message: 'Email sent to customers' });
 };
 
+const scheduleNewsLetter = async (req, res) => {
+  const { newsletterId, customerEmails, sentDate } = req.body;
+  try {
+    const newsletter = await newsletterModel.findNewsletterById({
+      id: newsletterId
+    });
+    const job = await scheduleJobs({ newsletter, customerEmails, sentDate });
+    log.out('OK_NEWSLETTER_SCHEDULE-NEWSLETTER', job);
+
+    const newsletterJob =
+      await scheduledNewsletterModel.createScheduledNewsLetter({
+        newsletterId,
+        customerEmails,
+        sentDate
+      });
+
+    log.out('OK_NEWSLETTER_CREATE-NEWSLETTER', {
+      req: { body: req.body, params: req.params },
+      res: newsletterJob
+    });
+    res.json(newsletterJob);
+  } catch (error) {
+    log.error('ERR_NEWSLETTER_SCHEDULE-NEWSLETTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const getAllScheduledJobs = async (req, res) => {
+  try {
+    const scheduledJobs = await getScheduledNewsLetters();
+    log.out('OK_NEWSLETTER_GET-SCHEDULED-JOBS', scheduledJobs);
+
+    res.json('ok');
+  } catch (error) {
+    log.error('ERR_NEWSLETTER_GET-SCHEDULED-JOBS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
 exports.createNewsletter = createNewsletter;
 exports.getAllNewsletters = getAllNewsletters;
 exports.getNewsletter = getNewsletter;
@@ -183,3 +237,5 @@ exports.generateNewsletterHtml = generateNewsletterHtml;
 exports.sendNewsLetter = sendNewsLetter;
 exports.sendNewsLetterToRecommendedCustomers =
   sendNewsLetterToRecommendedCustomers;
+exports.scheduleNewsLetter = scheduleNewsLetter;
+exports.getAllScheduledJobs = getAllScheduledJobs;
