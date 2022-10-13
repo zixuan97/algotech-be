@@ -2,7 +2,7 @@ const productCatalogueModel = require('../models/productCatalogueModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { uploadS3, getS3 } = require('../helpers/s3');
+const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
 
 const createProductCatalogue = async (req, res) => {
   const { price, product, image, description } = req.body;
@@ -62,7 +62,6 @@ const getAllProductCatalogue = async (req, res) => {
       if (getS3Error) {
         log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
       }
-      console.log(productImg);
       prodCatalogue.image = productImg;
     })
   );
@@ -89,7 +88,6 @@ const getProductCatalogue = async (req, res) => {
     const prodCatalogue = await productCatalogueModel.findProdCatalogueById({
       id
     });
-    console.log(prodCatalogue);
     const { data: productImg, error: getS3Error } = await common.awaitWrap(
       getS3({
         key: `productCatalogueImages/${prodCatalogue.product.sku}-img`
@@ -127,9 +125,21 @@ const updateProductCatalogue = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
     }
     log.out('OK_PRODUCTCAT_UPLOAD-S3');
+  } else {
+    const { error: deleteS3Error } = await common.awaitWrap(
+      deleteS3({
+        key: `productCatalogueImages/${product.sku}-img`
+      })
+    );
+    if (deleteS3Error) {
+      log.error('ERR_PRODUCTCAT_DELETE-S3', {
+        err: deleteS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
+    }
+    log.out('OK_PRODUCTCAT_DELETE-S3');
   }
   const { error } = await common.awaitWrap(
     productCatalogueModel.updateProdCatalogue({ id, price, description })
@@ -153,6 +163,9 @@ const updateProductCatalogue = async (req, res) => {
 
 const deleteProductCatalogue = async (req, res) => {
   const { id } = req.params;
+  const productCatalogue = await productCatalogueModel.findProdCatalogueById({
+    id
+  });
   const { error } = await common.awaitWrap(
     productCatalogueModel.deleteProdCatalogue({ id })
   );
@@ -164,6 +177,18 @@ const deleteProductCatalogue = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
+    const { error: deleteS3Error } = await common.awaitWrap(
+      deleteS3({
+        key: `productCatalogueImages/${productCatalogue.product.sku}-img`
+      })
+    );
+    if (deleteS3Error) {
+      log.error('ERR_PRODUCTCAT_DELETE-S3', {
+        err: deleteS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
+    }
+    log.out('OK_PRODUCTCAT_DELETE-S3');
     log.out('OK_PRODUCTCAT_DELETE_PRODUCTCAT', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted product category with id:${id}` }

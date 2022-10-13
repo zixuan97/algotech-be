@@ -4,7 +4,7 @@ globalThis.Blob = buffer.Blob;
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { uploadS3, getS3 } = require('../helpers/s3');
+const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
 const {
   generateInventoryExcel,
   generateLowStockExcel
@@ -411,6 +411,19 @@ const updateProduct = async (req, res) => {
         res.status(e.code).json(e.message);
       }
       log.out('OK_PRODUCT_UPLOAD-S3');
+    } else {
+      const { error: deleteS3Error } = await common.awaitWrap(
+        deleteS3({
+          key: `productImages/${sku}-img`
+        })
+      );
+      if (deleteS3Error) {
+        log.error('ERR_PRODUCT_DELETE-S3', {
+          err: deleteS3Error.message,
+          req: { body: req.body, params: req.params }
+        });
+      }
+      log.out('OK_PRODUCT_DELETE-S3');
     }
     const { error } = await common.awaitWrap(
       productModel.updateProduct({
@@ -442,6 +455,7 @@ const updateProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
   const { id } = req.params;
+  const product = await productModel.findProductById({ id });
   const { error } = await common.awaitWrap(productModel.deleteProduct({ id }));
   if (error) {
     const e = Error.http(error);
@@ -451,6 +465,18 @@ const deleteProduct = async (req, res) => {
     });
     res.status(e.code).json(e.message);
   } else {
+    const { error: deleteS3Error } = await common.awaitWrap(
+      deleteS3({
+        key: `productImages/${product.sku}-img`
+      })
+    );
+    if (deleteS3Error) {
+      log.error('ERR_PRODUCT_DELETE-S3', {
+        err: deleteS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
+    }
+    log.out('OK_PRODUCT_DELETE-S3');
     log.out('OK_PRODUCT_DELETE-PRODUCT');
     res.json({ message: `Deleted product with id:${id}` });
   }
