@@ -50,7 +50,12 @@ const findProdCatalogueById = async (req) => {
       id: Number(id)
     },
     include: {
-      product: true
+      product: {
+        include: {
+          productCategory: true,
+          brand: true
+        }
+      }
     }
   });
   return prodCatalogue;

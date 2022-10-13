@@ -51,7 +51,7 @@ model Product {
   brandId          Int
   brand            Brand             @relation(fields: [brandId], references: [id])
   bundleProduct    BundleProduct[]
-  ProductCatalogue ProductCatalogue?
+  productCatalogue ProductCatalogue?
   productCategory  ProductCategory[]
   stockQuantity    StockQuantity[]
   supplierProduct  SupplierProduct[]
