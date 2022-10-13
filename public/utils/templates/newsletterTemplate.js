@@ -22,10 +22,12 @@ const newsletterTemplate = (discountCode, emailBodyTitle, emailBody) => `
           <div
             style="background-color: #1f1646; height: 100px; text-align: center"
           >
+            
             <img
-              src="https://i.ibb.co/ZdRSTdY/image-4.png"
+              src=" https://i.ibb.co/km9Pq80/logo-brown-white-text.png"
               style="height: 150px; padding-top: 30px"
             />
+           
           </div>
         </tr>
         <tr>
@@ -80,7 +82,15 @@ const newsletterTemplate = (discountCode, emailBodyTitle, emailBody) => `
                 font-size: 32px;
                 color: #1F1646;
               "
-              ><b>Code: <u>${discountCode}</u></b>
+              ><b>Code: </b>
+            </span>
+            <span
+              style="
+                font-family: Poppins;
+                font-size: 32px;
+                color: #96694c;
+              "
+              ><b><u>${discountCode}</u></b>
             </span>
           </div>
         </tr>

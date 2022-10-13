@@ -8,4 +8,5 @@ router.post('/email', customerController.getCustomerByEmail);
 router.put('/', customerController.updateCustomer);
 router.delete('/:id', customerController.deleteCustomer);
 router.post('/excel', customerController.generateExcel);
+router.post('/filter', customerController.findCustomerByFilter);
 module.exports = router;

@@ -27,7 +27,8 @@ const createBulkOrder = async (req, res) => {
     contactNo: payeeContactNo,
     company: payeeCompany,
     totalSpent: amount,
-    lastOrderDate: new Date()
+    lastOrderDate: new Date(),
+    daysSinceLastPurchase: 0
   });
   await Promise.all(
     await salesOrders.map(async (so) => {
