@@ -268,6 +268,14 @@ model SupplierProduct {
   @@id([supplierId, productId])
 }
 
+model ScheduledNewsletter {
+  id             Int       @id @default(autoincrement())
+  newsletterId   Int
+  customerEmails String[]
+  sentDate       DateTime
+  jobStatus      JobStatus @default(SCHEDULED)
+}
+
 model DeliveryStatus {
   status          String
   statusOwner     String
@@ -291,6 +299,12 @@ enum PaymentMode {
   CREDIT_CARD
   BANK_TRANSFER
   PAYNOW
+}
+
+enum JobStatus {
+  SENT
+  CANCELLED
+  SCHEDULED
 }
 
 enum OrderStatus {

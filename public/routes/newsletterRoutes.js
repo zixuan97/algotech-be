@@ -12,4 +12,6 @@ router.post(
   '/emails',
   newsletterController.sendNewsLetterToRecommendedCustomers
 );
+router.get('/schedule/jobs', newsletterController.getAllScheduledJobs);
+router.post('/schedule', newsletterController.scheduleNewsLetter);
 module.exports = router;
