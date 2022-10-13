@@ -54,6 +54,8 @@ const addShopifyOrders = async (req, res) => {
                 })
               )
             });
+            const today = new Date();
+            const lastOrderDate = new Date(salesOrder.created_at);
             if (salesOrder.contact_email) {
               await customerModel.connectOrCreateCustomer({
                 firstName: salesOrder.customer.first_name,
@@ -67,7 +69,11 @@ const addShopifyOrders = async (req, res) => {
                 contactNo: salesOrder.customer.default_address.phone,
                 totalSpent: salesOrder.current_total_price,
                 acceptsMarketing: salesOrder.customer.accepts_marketing,
-                lastOrderDate: salesOrder.created_at
+                lastOrderDate: salesOrder.created_at,
+                daysSinceLastPurchase: Math.floor(
+                  (today.getTime() - lastOrderDate.getTime()) /
+                    (1000 * 3600 * 24)
+                )
               });
             }
           }
