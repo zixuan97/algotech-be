@@ -2,7 +2,7 @@ const bundleCatalogueModel = require('../models/bundleCatalogueModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-const { uploadS3, getS3 } = require('../helpers/s3');
+const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
 const { da } = require('date-fns/locale');
 
 const createBundleCatalogue = async (req, res) => {
@@ -129,6 +129,19 @@ const updateBundleCatalogue = async (req, res) => {
       res.status(e.code).json(e.message);
     }
     log.out('OK_BUNDLECAT_UPLOAD-S3');
+  } else {
+    const { error: deleteS3Error } = await common.awaitWrap(
+      deleteS3({
+        key: `bundleCatalogueImages/${bundle.name}-img`
+      })
+    );
+    if (deleteS3Error) {
+      log.error('ERR_BUNDLECAT_DELETE-S3', {
+        err: deleteS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
+    }
+    log.out('OK_BUNDLECAT_DELETE-S3');
   }
   const { error } = await common.awaitWrap(
     bundleCatalogueModel.updateBundleCatalogue({ id, price, description })
@@ -152,6 +165,9 @@ const updateBundleCatalogue = async (req, res) => {
 
 const deleteBundleCatalogue = async (req, res) => {
   const { id } = req.params;
+  const bundleCatalogue = await bundleCatalogueModel.findBundleCatalogueById({
+    id
+  });
   const { error } = await common.awaitWrap(
     bundleCatalogueModel.deleteBundleCatalogue({ id })
   );
@@ -163,6 +179,18 @@ const deleteBundleCatalogue = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
+    const { error: deleteS3Error } = await common.awaitWrap(
+      deleteS3({
+        key: `bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`
+      })
+    );
+    if (deleteS3Error) {
+      log.error('ERR_BUNDLECAT_DELETE-S3', {
+        err: deleteS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
+    }
+    log.out('OK_BUNDLECAT_DELETE-S3');
     log.out('OK_BUNDLECAT_DELETE_BUNDLECAT', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted bundle catalogue with id:${id}` }
