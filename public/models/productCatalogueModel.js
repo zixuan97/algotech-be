@@ -15,7 +15,12 @@ const createProdCatalogue = async (req) => {
 const getAllProdCatalogue = async () => {
   const prodCatalogue = await prisma.productCatalogue.findMany({
     include: {
-      product: true
+      product: {
+        include: {
+          productCategory: true,
+          brand: true
+        }
+      }
     }
   });
   return prodCatalogue;
