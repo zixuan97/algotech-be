@@ -1230,7 +1230,7 @@ const cancelLalamoveOrder = async (req, res) => {
     const deliveryOrder = await deliveryModel.findDeliveryOrderById({ id });
     await lalamoveApi.cancelLalamoveOrder({ orderId: deliveryOrder.shippitTrackingNum });
     deliveryModel.updateDeliveryStatus({
-      status: 'CANCELLED',
+      status: 'CANCELED',
       statusOwner: '',
       date: new Date(Date.now()).toLocaleDateString(),
       timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {

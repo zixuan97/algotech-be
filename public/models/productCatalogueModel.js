@@ -17,7 +17,6 @@ const getAllProdCatalogue = async () => {
     include: {
       product: {
         include: {
-          productCategory: true,
           brand: true
         }
       }
@@ -57,7 +56,6 @@ const findProdCatalogueById = async (req) => {
     include: {
       product: {
         include: {
-          productCategory: true,
           brand: true
         }
       }

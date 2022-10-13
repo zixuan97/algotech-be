@@ -10,7 +10,8 @@ const createCustomer = async (req) => {
     postalCode,
     contactNo,
     totalSpent,
-    lastOrderDate
+    lastOrderDate,
+    daysSinceLastPurchase
   } = req;
 
   await prisma.customer.create({
@@ -22,8 +23,9 @@ const createCustomer = async (req) => {
       address,
       postalCode,
       contactNo,
-      totalSpent,
-      lastOrderDate
+      totalSpent: Number(totalSpent),
+      lastOrderDate,
+      daysSinceLastPurchase
     }
   });
 };
@@ -44,7 +46,8 @@ const connectOrCreateCustomer = async (req) => {
     contactNo,
     totalSpent,
     acceptsMarketing,
-    lastOrderDate
+    lastOrderDate,
+    daysSinceLastPurchase
   } = req;
 
   await prisma.customer.upsert({
@@ -59,7 +62,8 @@ const connectOrCreateCustomer = async (req) => {
         increment: Number(totalSpent)
       },
       acceptsMarketing,
-      lastOrderDate
+      lastOrderDate,
+      daysSinceLastPurchase
     },
     create: {
       firstName,
@@ -71,7 +75,8 @@ const connectOrCreateCustomer = async (req) => {
       contactNo,
       totalSpent: Number(totalSpent),
       acceptsMarketing,
-      lastOrderDate
+      lastOrderDate,
+      daysSinceLastPurchase
     }
   });
 };
@@ -88,7 +93,8 @@ const updateCustomer = async (req) => {
     contactNo,
     totalSpent,
     ordersCount,
-    acceptsMarketing
+    acceptsMarketing,
+    daysSinceLastPurchase
   } = req;
 
   const customer = await prisma.customer.update({
@@ -104,7 +110,8 @@ const updateCustomer = async (req) => {
       totalSpent: Number(totalSpent),
       ordersCount,
       acceptsMarketing,
-      lastOrderDate
+      lastOrderDate,
+      daysSinceLastPurchase
     }
   });
   return customer;
@@ -139,6 +146,37 @@ const findCustomerByEmail = async (req) => {
   return customer;
 };
 
+const findCustomerByFilter = async (req) => {
+  const {
+    daysSinceLastPurchase,
+    minAvgOrderValue,
+    maxAvgOrderValue,
+    allTimeOrderValue
+  } = req;
+  let customers = await prisma.customer.findMany({});
+  console.log(customers.length);
+  if (daysSinceLastPurchase) {
+    customers = customers.filter(
+      (customer) => customer.daysSinceLastPurchase >= daysSinceLastPurchase
+    );
+  }
+
+  if (allTimeOrderValue) {
+    customers = customers.filter(
+      (customer) => customer.totalSpent >= allTimeOrderValue
+    );
+  }
+  if (minAvgOrderValue | maxAvgOrderValue) {
+    customers = customers.filter((customer) => {
+      return (
+        customer.totalSpent / customer.ordersCount >= minAvgOrderValue &&
+        customer.totalSpent / customer.ordersCount <= maxAvgOrderValue
+      );
+    });
+  }
+  return customers;
+};
+
 exports.createCustomer = createCustomer;
 exports.getAllCustomers = getAllCustomers;
 exports.updateCustomer = updateCustomer;
@@ -146,3 +184,4 @@ exports.deleteCustomer = deleteCustomer;
 exports.findCustomerById = findCustomerById;
 exports.findCustomerByEmail = findCustomerByEmail;
 exports.connectOrCreateCustomer = connectOrCreateCustomer;
+exports.findCustomerByFilter = findCustomerByFilter;

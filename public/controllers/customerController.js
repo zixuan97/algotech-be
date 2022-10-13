@@ -221,6 +221,37 @@ const generateExcel = async (req, res) => {
     });
 };
 
+const findCustomerByFilter = async (req, res) => {
+  const {
+    daysSinceLastPurchase,
+    minAvgOrderValue,
+    maxAvgOrderValue,
+    allTimeOrderValue
+  } = req.body;
+
+  try {
+    const customers = await customerModel.findCustomerByFilter({
+      daysSinceLastPurchase,
+      minAvgOrderValue,
+      maxAvgOrderValue,
+      allTimeOrderValue
+    });
+
+    // log.out('OK_CUSTOMERS_FIND-CUSTOMERS-BY-FILTER', {
+    //   req: { body: req.body, params: req.params },
+    //   res: customers
+    // });
+    res.json({ customers });
+  } catch (error) {
+    log.error('ERR_CUSTOMERS_FIND-CUSTOMERS-BY-FILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
 exports.createCustomer = createCustomer;
 exports.getAllCustomers = getAllCustomers;
 exports.updateCustomer = updateCustomer;
@@ -228,3 +259,4 @@ exports.deleteCustomer = deleteCustomer;
 exports.getCustomerById = getCustomerById;
 exports.getCustomerByEmail = getCustomerByEmail;
 exports.generateExcel = generateExcel;
+exports.findCustomerByFilter = findCustomerByFilter;

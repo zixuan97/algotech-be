@@ -223,20 +223,21 @@ model BundleCatalogue {
 }
 
 model Customer {
-  id               Int      @id @default(autoincrement())
-  firstName        String
-  lastName         String
-  company          String?
-  totalSpent       Float
-  ordersCount      Int      @default(1)
-  email            String   @unique
-  address          String
-  postalCode       String
-  contactNo        String
-  lastOrderDate    DateTime
-  acceptsMarketing Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                    Int      @id @default(autoincrement())
+  firstName             String
+  lastName              String
+  company               String?
+  totalSpent            Float
+  ordersCount           Int      @default(1)
+  email                 String   @unique
+  address               String
+  postalCode            String
+  contactNo             String
+  lastOrderDate         DateTime
+  acceptsMarketing      Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  daysSinceLastPurchase Int
 }
 
 model DeliveryOrder {
