@@ -1,4 +1,6 @@
 const SDKClient = require("@lalamove/lalamove-js");
+const { prisma } = require('../models/index');
+const deliveryModel = require('../models/deliveryModel');
 
 const sdkClient = new SDKClient.ClientModule(
   new SDKClient.Config(
@@ -75,43 +77,44 @@ const getLalamoveOrder = async (req,) => {
 };
 
 const cancelLalamoveOrder = async (req) => {
-  const { id } = req;
-  await sdkClient.Order.cancel("SG", id);
+  const { orderId } = req;
+  await sdkClient.Order.cancel("SG", orderId);
 };
 
 const getDriverDetails = async (req) => {
-  const { orderId } = req;
-  const order = await getLalamoveOrder({ id: orderId });
-  console.log(orderId)
-  return await sdkClient.Driver.retrieve("SG", order.driverId, orderId);
+  const { id } = req;
+  const deliveryOrder = await deliveryModel.findDeliveryOrderById({ id });
+  const order = await getLalamoveOrder({ id: deliveryOrder.shippitTrackingNum });
+  return await sdkClient.Driver.retrieve("SG", order.driverId, deliveryOrder.shippitTrackingNum);
 };
 
 const fetchLatestStatusFromLalamoveAndAddToStatus = async (req) => {
-    const { orderId } = req;
-    const deliveryOrder = await getLalamoveOrder({ id: orderId });
-    const latestStatus = deliveryOrder.status;
-    const deliveryStatus = await prisma.DeliveryStatus.findMany({
-      where: {
-        deliveryOrderId: deliveryOrder.id,
-        status: latestStatus
-      }
-    });
-    if (deliveryStatus[0] === undefined) {
-      await prisma.DeliveryStatus.create({
-        data: {
-          status: latestStatus,
-          statusOwner: '',
-          date: new Date(Date.now()).toLocaleDateString(),
-          timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
-          deliveryOrder: {
-            connect: {
-              id: deliveryOrder.id
-            }
+  const { orderId } = req;
+  const lalamoveOrder = await getLalamoveOrder({ id: orderId });
+  const deliveryOrder = await deliveryModel.findDeliveryOrderByLalamoveOrderId({ orderId });
+  const latestStatus = lalamoveOrder.status;
+  const deliveryStatus = await prisma.DeliveryStatus.findMany({
+    where: {
+      deliveryOrderId: deliveryOrder.id,
+      status: latestStatus
+    }
+  });
+  if (deliveryStatus[0] === undefined) {
+    await prisma.DeliveryStatus.create({
+      data: {
+        status: latestStatus,
+        statusOwner: '',
+        date: new Date(Date.now()).toLocaleDateString(),
+        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+        deliveryOrder: {
+          connect: {
+            id: deliveryOrder.id
           }
         }
-      });
-    }
-  };
+      }
+    });
+  }
+};
 
 exports.createQuotation = createQuotation;
 exports.placeLalamoveOrder = placeLalamoveOrder;

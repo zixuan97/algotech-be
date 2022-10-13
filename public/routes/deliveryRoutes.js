@@ -17,11 +17,6 @@ router.get(
   '/shippit/latest/:trackingNum',
   deliveryController.getLastestTrackingInfoOfOrder
 );
-router.get(
-  '/shippit/orders/all',
-  deliveryController.getAllShippitOrdersFromWebsite
-);
-router.get('/shippit/auth/token', deliveryController.getToken);
 router.post('/cancelManual/:id', deliveryController.cancelManualDeliveryOrder);
 router.post('/cancel/:trackingNumber', deliveryController.cancelShippitOrder);
 router.post(
@@ -74,6 +69,6 @@ router.post('/lalamove/placeOrder', deliveryController.placeLalamoveOrder);
 router.get('/lalamove/order/:id', deliveryController.getLalamoveOrderByLalamoveOrderId);
 router.get('/lalamove/:id', deliveryController.getLalamoveOrderByDeliveryOrderId);
 router.post('/lalamove/cancel/:id', deliveryController.cancelLalamoveOrder);
-router.get('/lalamove/driver/:orderId', deliveryController.getDriverDetails);
+router.get('/lalamove/driver/:id', deliveryController.getDriverDetails);
 
 module.exports = router;

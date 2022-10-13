@@ -166,6 +166,21 @@ const findDeliveryOrderBySalesOrderId = async (req) => {
   return deliveryOrder[0];
 };
 
+const findDeliveryOrderByLalamoveOrderId = async (req) => {
+  const { orderId } = req;
+  const deliveryOrder = await prisma.DeliveryOrder.findMany({
+    where: {
+      shippitTrackingNum: orderId
+    },
+    include: {
+      salesOrder: true,
+      assignedUser: true,
+      deliveryStatus: true
+    }
+  });
+  return deliveryOrder[0];
+};
+
 const updateDeliveryOrder = async (req) => {
   const {
     id,
@@ -689,3 +704,4 @@ exports.findAllAssignedManualDeliveriesByDateByUser =
 exports.findAllShippitDeliveriesByDate = findAllShippitDeliveriesByDate;
 exports.findDeliveryStatusByDeliveryOrderId = findDeliveryStatusByDeliveryOrderId;
 exports.getLatLngFromPostalCode = getLatLngFromPostalCode;
+exports.findDeliveryOrderByLalamoveOrderId = findDeliveryOrderByLalamoveOrderId;

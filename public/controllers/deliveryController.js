@@ -9,13 +9,11 @@ const {
   DeliveryMode,
   OrderStatus,
 } = require('@prisma/client');
-const shippitApi = require('../helpers/shippitApi');
 const axios = require('axios');
 const { generateDeliveryOrderPdfTemplate } = require('../helpers/pdf');
 const { format } = require('date-fns');
 const { prisma } = require('../models/index.js');
 const lalamoveApi = require('../helpers/lalamoveApi');
-const { json } = require('express');
 
 const createManualDeliveryOrder = async (req, res) => {
   const {
@@ -220,7 +218,10 @@ const createLalamoveDeliveryOrder = async (req, res) => {
     recipientName: salesOrder.customerName,
     recipientPhone: customerPhone
   });
-  log.out('OK_DELIVERYORDER_CREATE-DO-LALAMOVE');
+  log.out('OK_DELIVERYORDER_SEND-DO-TO-LALAMOVE', {
+    req: { body: req.body, params: req.params },
+    res: JSON.stringify(soLalamove)
+  });
   const { data, error } = await common.awaitWrap(
     deliveryModel.createDeliveryOrder({
       shippingType: ShippingType.LALAMOVE,
@@ -234,7 +235,10 @@ const createLalamoveDeliveryOrder = async (req, res) => {
   );
   data.salesOrder = salesOrder;
   if (error) {
-    log.error('ERR_DELIVERYORDER_CREATE-DO', error.message);
+    log.error('ERR_DELIVERYORDER_CREATE-DO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
@@ -244,14 +248,17 @@ const createLalamoveDeliveryOrder = async (req, res) => {
     });
     try {
       await deliveryModel.updateDeliveryStatus({
-        status: "order_placed",
+        status: "ASSIGNING_DRIVER",
         statusOwner: "",
         date: new Date(Date.now()).toLocaleDateString(),
         timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
         deliveryOrderId: data.id
       });
+      log.out('OK_DELIVERYORDER_CREATE-DO', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
       res.json(data);
-      log.out('OK_DELIVERYORDER_CREATE-DO');
     } catch (error) {
       const e = Error.http(error);
       res.status(e.code).json(e.message);
@@ -734,60 +741,6 @@ const getLastestTrackingInfoOfOrder = async (req, res) => {
   }
 };
 
-const getAllShippitOrdersFromWebsite = async (req, res) => {
-  const { data, error } = await common.awaitWrap(
-    deliveryModel.getAllDeliveryOrdersFromShippit({})
-  );
-  if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-DO', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    let dataRes = [];
-    for (let d of data) {
-      const result = {
-        shippitTrackingNum: d.trackingNumber,
-        deliveryDate: d.scheduledDeliveryDate,
-        comments: d.description,
-        eta: d.estimatedDeliveryDatetime,
-        deliveryMode:
-          d.serviceLevel === 'standard'
-            ? DeliveryMode.STANDARD
-            : DeliveryMode.EXPRESS,
-        shippingDate: d.scheduledDeliveryDate,
-        shippingType: ShippingType.SHIPPIT,
-        recipient: d.recipient,
-        deliveryAddress: d.deliveryAddress
-      };
-      dataRes.push(result);
-    }
-    log.out('OK_DELIVERY_GET-ALL-DO', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(dataRes)
-    });
-    res.json(dataRes);
-  }
-};
-
-const getToken = async (req, res) => {
-  const { data, error } = await common.awaitWrap(shippitApi.getToken({}));
-  if (error) {
-    log.error('ERR_DELIVERY_GET-TOKEN', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY_GET-TOKEN', {
-      req: { body: req.body, params: req.params },
-      res: { token: data }
-    });
-    res.json({ token: data });
-  }
-};
-
 const confirmShippitOrder = async (req, res) => {
   try {
     const { trackingNumber } = req.params;
@@ -1214,76 +1167,167 @@ const generateDO = async (req, res) => {
 };
 
 const createLalamoveQuotation = async (req, res) => {
-  const quote = await lalamoveApi.createQuotation({});
-  return res.json(quote);
+  const { data, error } = await common.awaitWrap(
+    lalamoveApi.createQuotation({})
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
 };
 
 const placeLalamoveOrder = async (req, res) => {
-  const order = await lalamoveApi.placeLalamoveOrder({});
-  return res.json(order);
+  const { data, error } = await common.awaitWrap(
+    lalamoveApi.placeLalamoveOrder({})
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
 };
 
 const getLalamoveOrderByLalamoveOrderId = async (req, res) => {
   const { id } = req.params;
-  const order = await lalamoveApi.getLalamoveOrder({ id });
-  res.json(order);
+  const { data, error } = await common.awaitWrap(
+    lalamoveApi.getLalamoveOrder({ id })
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-LALAMOVE-ORDER-BY-ORDER-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.json(Error.http(error));
+  } else {
+    log.out('ERR_DELIVERY_GET-LALAMOVE-ORDER-BY-ORDER-ID', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
 };
 
 const cancelLalamoveOrder = async (req, res) => {
   const { id } = req.params;
-  await lalamoveApi.cancelLalamoveOrder({ id });
-  return res.json({ message: `Successfully cancelled Lalamove order with order id: ${id}` });
+  try {
+    const deliveryOrder = await deliveryModel.findDeliveryOrderById({ id });
+    await lalamoveApi.cancelLalamoveOrder({ orderId: deliveryOrder.shippitTrackingNum });
+    deliveryModel.updateDeliveryStatus({
+      status: 'CANCELLED',
+      statusOwner: '',
+      date: new Date(Date.now()).toLocaleDateString(),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+        timeZone: 'Asia/Singapore'
+      }),
+      deliveryOrderId: deliveryOrder.id
+    });
+    await salesOrderModel.updateSalesOrderStatus({
+      id: deliveryOrder.salesOrderId,
+      orderStatus: OrderStatus.PREPARED
+    });
+    log.out('OK_DELIVERY_CANCEL-LALAMOVE-ORDER', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Cancelled Lalalove DeliveryOrder with id:${id}` }
+    });
+    res.json({
+      message: `Cancelled Lalalove DeliveryOrder with id:${id}`
+    });
+  } catch (error) {
+    log.error('ERR_DELIVERY_CANCEL-LALAMOVE-ORDER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error cancelling Lalamove order');
+  }
 };
 
 const getDriverDetails = async (req, res) => {
-  const { orderId } = req.params;
-  const driver = await lalamoveApi.getDriverDetails({ orderId });
-  console.log(driver)
-  return res.json(driver);
+  const { id } = req.params;
+  const { data, error } = await common.awaitWrap(
+    lalamoveApi.getDriverDetails({ id })
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-LALAMOVE-DRIVER-DETAILS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-LALAMOVE-DRIVER-DETAILS', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
 };
 
+// create
 exports.createManualDeliveryOrder = createManualDeliveryOrder;
 exports.createShippitDeliveryOrder = createShippitDeliveryOrder;
 exports.createLalamoveDeliveryOrder = createLalamoveDeliveryOrder;
+//get
+exports.getDeliveryOrder = getDeliveryOrder;
+exports.getDeliveryOrderBySalesOrderId = getDeliveryOrderBySalesOrderId;
+exports.getDeliveryOrderByTrackingNumber = getDeliveryOrderByTrackingNumber; // shippit
+exports.getLalamoveOrderByDeliveryOrderId = getLalamoveOrderByDeliveryOrderId; // lalamove
+exports.getLalamoveOrderByLalamoveOrderId = getLalamoveOrderByLalamoveOrderId; // lalamove
+// get all
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
 exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
 exports.getAllLalamoveDeliveryOrders = getAllLalamoveDeliveryOrders;
+// update & delete
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
-exports.getDeliveryOrder = getDeliveryOrder;
-exports.getDeliveryOrderBySalesOrderId = getDeliveryOrderBySalesOrderId;
+// shippit
 exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
-exports.getAllShippitOrdersFromWebsite = getAllShippitOrdersFromWebsite;
-exports.getToken = getToken;
-exports.cancelManualDeliveryOrder = cancelManualDeliveryOrder;
-exports.cancelShippitOrder = cancelShippitOrder;
 exports.confirmShippitOrder = confirmShippitOrder;
 exports.getShippitOrderLabel = getShippitOrderLabel;
 exports.bookShippitDelivery = bookShippitDelivery;
-exports.getLatLong = getLatLong;
-exports.findDeliveriesWithTimeAndTypeFilter =
-  findDeliveriesWithTimeAndTypeFilter;
+exports.getShippitOrdersByDate = getShippitOrdersByDate;
+// cancel
+exports.cancelManualDeliveryOrder = cancelManualDeliveryOrder;
+exports.cancelShippitOrder = cancelShippitOrder;
+exports.cancelLalamoveOrder = cancelLalamoveOrder;
+// label
 exports.generateDO = generateDO;
-exports.getAllAssignedManualDeliveriesByUser =
-  getAllAssignedManualDeliveriesByUser;
-exports.getCurrentLocationLatLong = getCurrentLocationLatLong;
-exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
-exports.getDeliveryOrderByTrackingNumber = getDeliveryOrderByTrackingNumber;
+exports.getBookingLabelLink = getBookingLabelLink;
+// map
+exports.getLatLong = getLatLong;
 exports.getLatLongForUnassignedOrders = getLatLongForUnassignedOrders;
 exports.getLatLongForAssignedOrders = getLatLongForAssignedOrders;
-exports.getBookingLabelLink = getBookingLabelLink;
+exports.getCurrentLocationLatLong = getCurrentLocationLatLong;
+// map with time
+exports.findDeliveriesWithTimeAndTypeFilter =
+  findDeliveriesWithTimeAndTypeFilter;
+exports.getAllAssignedManualDeliveriesByUser =
+  getAllAssignedManualDeliveriesByUser;
+exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
 exports.getAssignedManualDeliveriesByDate = getAssignedManualDeliveriesByDate;
 exports.getUnassignedManualDeliveriesByDate =
   getUnassignedManualDeliveriesByDate;
 exports.getAssignedManualDeliveriesByDateByUser =
   getAssignedManualDeliveriesByDateByUser;
-exports.getShippitOrdersByDate = getShippitOrdersByDate;
+// lalamove
 exports.createLalamoveQuotation = createLalamoveQuotation;
 exports.placeLalamoveOrder = placeLalamoveOrder;
-exports.getLalamoveOrderByLalamoveOrderId = getLalamoveOrderByLalamoveOrderId;
-exports.cancelLalamoveOrder = cancelLalamoveOrder;
 exports.getDriverDetails = getDriverDetails;
-exports.getLalamoveOrderByDeliveryOrderId = getLalamoveOrderByDeliveryOrderId;
