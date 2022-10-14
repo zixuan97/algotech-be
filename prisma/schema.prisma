@@ -181,22 +181,21 @@ model SalesOrder {
 
 model BulkOrder {
   id              Int             @id @default(autoincrement())
-  orderId         String          @unique
   amount          Float
   paymentMode     PaymentMode
   payeeName       String
   payeeEmail      String
   payeeRemarks    String
-  payeeContactNo  String
-  payeeCompany    String?
   bulkOrderStatus BulkOrderStatus
   createdTime     DateTime        @default(now())
+  orderId         String          @unique
+  payeeContactNo  String
+  payeeCompany    String?
   salesOrders     SalesOrder[]
 }
 
 model Newsletter {
   id             Int      @id @default(autoincrement())
-  emailDate      DateTime
   name           String
   emailSubject   String
   emailBodyTitle String
@@ -233,10 +232,10 @@ model Customer {
   address               String
   postalCode            String
   contactNo             String
-  lastOrderDate         DateTime
   acceptsMarketing      Boolean  @default(true)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+  lastOrderDate         DateTime
   daysSinceLastPurchase Int
 }
 

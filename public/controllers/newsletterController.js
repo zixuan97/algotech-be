@@ -15,7 +15,6 @@ const newsletterTemplate = require('../utils/templates/newsletterTemplate');
 
 const createNewsletter = async (req, res) => {
   const {
-    emailDate,
     name,
     emailSubject,
     emailBodyTitle,
@@ -24,7 +23,6 @@ const createNewsletter = async (req, res) => {
   } = req.body;
   const { data, error } = await common.awaitWrap(
     newsletterModel.createNewsletter({
-      emailDate: new Date(emailDate),
       name,
       emailSubject,
       emailBodyTitle,

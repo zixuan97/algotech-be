@@ -19,6 +19,6 @@ router.put('/approve/:id', UserController.approveB2BUser);
 router.put('/reject/:id', UserController.rejectB2BUser);
 router.get('/b2b/all', UserController.getAllB2BUsers);
 router.get('/b2b/pending', UserController.getAllPendingB2BUsers);
-router.get('/nonb2b/all', UserController.getAllNonB2BUsers);
+router.get('/nonb2b/all', verifyToken, UserController.getAllNonB2BUsers);
 
 module.exports = router;
