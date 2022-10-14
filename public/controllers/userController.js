@@ -537,7 +537,7 @@ const getAllPendingB2BUsers = async (req, res) => {
 const getAllNonB2BUsers = async (req, res) => {
   try {
     const users = await userModel.getUsers({});
-    const filteredUsers = users.filter(u => u.role !== UserRole.CORPORATE && u.role !== UserRole.DISTRIBUTOR);
+    const filteredUsers = users.filter(u => u.id != req.user.userId && u.role !== UserRole.CORPORATE && u.role !== UserRole.DISTRIBUTOR);
     log.out('OK_USER_GET-NON-B2B-USERS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(filteredUsers)

@@ -2,7 +2,6 @@ const { prisma } = require('./index.js');
 
 const createNewsletter = async (req) => {
   const {
-    emailDate,
     name,
     emailSubject,
     emailBodyTitle,
@@ -11,7 +10,6 @@ const createNewsletter = async (req) => {
   } = req;
   const newsletter = await prisma.newsletter.create({
     data: {
-      emailDate,
       name,
       emailSubject,
       emailBodyTitle,
