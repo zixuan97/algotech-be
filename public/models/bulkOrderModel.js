@@ -251,9 +251,71 @@ const findBulkOrderByOrderId = async (req) => {
   return bulkOrder;
 };
 
+const getAllBulkOrdersWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const bulkOrders = await prisma.bulkOrder.findMany({
+    where: {
+      createdTime: {
+        lte: time_to, //last date
+        gte: time_from //first date
+      }
+    },
+    orderBy: {
+      createdTime: 'asc'
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
+    }
+  });
+  return bulkOrders;
+};
+
+const findBulkOrderByEmail = async (req) => {
+  const { payeeEmail } = req;
+  const bulkOrder = await prisma.bulkOrder.findMany({
+    where: {
+      payeeEmail
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
+    }
+  });
+  return bulkOrder;
+};
+
 exports.createBulkOrder = createBulkOrder;
 exports.getAllBulkOrders = getAllBulkOrders;
 exports.updateBulkOrder = updateBulkOrder;
 exports.deleteBulkOrder = deleteBulkOrder;
 exports.findBulkOrderById = findBulkOrderById;
 exports.findBulkOrderByOrderId = findBulkOrderByOrderId;
+exports.findBulkOrderByEmail = findBulkOrderByEmail;
+exports.getAllBulkOrdersWithTimeFilter = getAllBulkOrdersWithTimeFilter;
