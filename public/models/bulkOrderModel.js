@@ -251,6 +251,19 @@ const findBulkOrderByOrderId = async (req) => {
   return bulkOrder;
 };
 
+const updateBulkOrderStatus = async (req) => {
+  const { id, bulkOrderStatus } = req;
+  const bulkOrder = await prisma.bulkOrder.update({
+    where: {
+      id
+    },
+    data: {
+      bulkOrderStatus
+    }
+  });
+  return bulkOrder;
+};
+
 const getAllBulkOrdersWithTimeFilter = async (req) => {
   const { time_from, time_to } = req;
   const bulkOrders = await prisma.bulkOrder.findMany({
@@ -319,3 +332,4 @@ exports.findBulkOrderById = findBulkOrderById;
 exports.findBulkOrderByOrderId = findBulkOrderByOrderId;
 exports.findBulkOrderByEmail = findBulkOrderByEmail;
 exports.getAllBulkOrdersWithTimeFilter = getAllBulkOrdersWithTimeFilter;
+exports.updateBulkOrderStatus = updateBulkOrderStatus;

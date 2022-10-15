@@ -8,4 +8,6 @@ router.get('/orderid/:orderId', bulkOrderController.findBulkOrderByOrderId);
 router.get('/email/:payeeEmail', bulkOrderController.findBulkOrderByEmail);
 router.post('/timefilter', bulkOrderController.getAllBulkOrdersWithTimeFilter);
 router.put('/', bulkOrderController.updateBulkOrder);
+router.put('/status', bulkOrderController.updateBulkOrderStatus);
+router.put('/salesOrderStatus', bulkOrderController.massUpdateSalesOrderStatus);
 module.exports = router;
