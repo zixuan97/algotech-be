@@ -185,7 +185,7 @@ model BulkOrder {
   paymentMode     PaymentMode
   payeeName       String
   payeeEmail      String
-  payeeRemarks    String
+  payeeRemarks    String?
   bulkOrderStatus BulkOrderStatus
   createdTime     DateTime        @default(now())
   orderId         String          @unique
@@ -195,7 +195,7 @@ model BulkOrder {
 }
 
 model Newsletter {
-  id             Int      @id @default(autoincrement())
+  id             Int    @id @default(autoincrement())
   name           String
   emailSubject   String
   emailBodyTitle String
