@@ -138,6 +138,47 @@ const findBulkOrderByOrderId = async (req, res) => {
   }
 };
 
+const findBulkOrderByEmail = async (req, res) => {
+  try {
+    const { payeeEmail } = req.params;
+    const bulkOrder = await bulkOrderModel.findBulkOrderByEmail({ payeeEmail });
+    log.out('OK_BULKORDER_GET-BULKORDER-BY-EMAIL', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(bulkOrder)
+    });
+    res.json(bulkOrder);
+  } catch (error) {
+    log.error('ERR_BULKORDER_GET-BULKORDER-BY-EMAIL', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const getAllBulkOrdersWithTimeFilter = async (req, res) => {
+  try {
+    const { time_to, time_from } = req.body;
+    const bulkOrders = await bulkOrderModel.getAllBulkOrdersWithTimeFilter({
+      time_to,
+      time_from
+    });
+    log.out('OK_BULKORDER_GET-BULKORDER-BY-TIMEFILTER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(bulkOrders)
+    });
+    res.json(bulkOrders);
+  } catch (error) {
+    log.error('ERR_BULKORDER_GET-BULKORDER-BY-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
 const updateBulkOrder = async (req, res) => {
   try {
     const {
@@ -201,3 +242,5 @@ exports.getAllBulkOrders = getAllBulkOrders;
 exports.findBulkOrderById = findBulkOrderById;
 exports.updateBulkOrder = updateBulkOrder;
 exports.findBulkOrderByOrderId = findBulkOrderByOrderId;
+exports.findBulkOrderByEmail = findBulkOrderByEmail;
+exports.getAllBulkOrdersWithTimeFilter = getAllBulkOrdersWithTimeFilter;
