@@ -1,4 +1,5 @@
 const bulkOrderModel = require('../models/bulkOrderModel');
+const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -179,6 +180,64 @@ const getAllBulkOrdersWithTimeFilter = async (req, res) => {
   }
 };
 
+const updateBulkOrderStatus = async (req, res) => {
+  try {
+    const { id, bulkOrderStatus } = req.body;
+    const bulkOrder = await bulkOrderModel.updateBulkOrderStatus({
+      id,
+      bulkOrderStatus
+    });
+    log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS', {
+      req: { body: req.body, params: req.params },
+      res: `Successfully updated bulk order with id: ${id}`
+    });
+    res.json({ message: `Successfully updated bulk order with id: ${id}` });
+  } catch (error) {
+    log.error('ERR_BULKORDER_GET-BULKORDER-BY-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const massUpdateSalesOrderStatus = async (req, res) => {
+  try {
+    const { id, bulkOrderStatus } = req.body;
+    const bulkOrder = await bulkOrderModel.findBulkOrderById({
+      id
+    });
+
+    await Promise.all(
+      bulkOrder.salesOrders.map(async (so) => {
+        await salesOrderModel.updateSalesOrderStatus({
+          id: so.id,
+          orderStatus: 'PREPARED'
+        });
+      })
+    );
+    await bulkOrderModel.updateBulkOrderStatus({
+      id,
+      bulkOrderStatus
+    });
+    log.out('OK_BULKORDER_UPDATE-SALESORDER-STATUS', {
+      req: { body: req.body, params: req.params },
+      res: `Successfully updated sales order status with bulk order id: ${id}`
+    });
+    res.json({
+      message: `Successfully updated sales order status with bulk order id: ${id}`
+    });
+  } catch (error) {
+    log.error('ERR_BULKORDER_UPDATE-SALESORDER-STATUS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
 const updateBulkOrder = async (req, res) => {
   try {
     const {
@@ -244,3 +303,5 @@ exports.updateBulkOrder = updateBulkOrder;
 exports.findBulkOrderByOrderId = findBulkOrderByOrderId;
 exports.findBulkOrderByEmail = findBulkOrderByEmail;
 exports.getAllBulkOrdersWithTimeFilter = getAllBulkOrdersWithTimeFilter;
+exports.updateBulkOrderStatus = updateBulkOrderStatus;
+exports.massUpdateSalesOrderStatus = massUpdateSalesOrderStatus;
