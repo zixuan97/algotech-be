@@ -1,5 +1,6 @@
 const customerModel = require('../models/customerModel');
 const salesOrderModel = require('../models/salesOrderModel');
+const bulkOrderModel = require('../models/bulkOrderModel');
 const { generateSalesOrderExcel } = require('../helpers/excel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
@@ -78,7 +79,9 @@ const getCustomerById = async (req, res) => {
     const salesOrders = await salesOrderModel.findSalesOrderByCustomerEmail({
       customerEmail: customer.email
     });
-
+    const bulkOrders = await bulkOrderModel.findBulkOrderByEmail({
+      payeeEmail: customer.email
+    });
     const ordersByMonth = await salesOrderModel.getOrdersByMonthForCustomer({
       customerEmail: customer.email
     });
@@ -89,6 +92,7 @@ const getCustomerById = async (req, res) => {
       )
     );
     customer.salesOrders = salesOrders;
+    customer.bulkOrders = bulkOrders;
     log.out('OK_CUSTOMER_GET-CUSTOMER-BY-ID');
     res.json(customer);
   } catch (error) {
@@ -107,6 +111,9 @@ const getCustomerByEmail = async (req, res) => {
     const ordersByMonth = await salesOrderModel.getOrdersByMonthForCustomer({
       customerEmail: customer.email
     });
+    const bulkOrders = await bulkOrderModel.findBulkOrderByEmail({
+      payeeEmail: customer.email
+    });
     customer.ordersByMonth = JSON.parse(
       JSON.stringify(
         ordersByMonth,
@@ -114,6 +121,7 @@ const getCustomerByEmail = async (req, res) => {
       )
     );
     customer.salesOrders = salesOrders;
+    customer.bulkOrders = bulkOrders;
     log.out('OK_CUSTOMER_GET-CUSTOMER-BY-ID');
     res.json(customer);
   } catch (error) {
