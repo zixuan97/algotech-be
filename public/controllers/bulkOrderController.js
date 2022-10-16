@@ -5,6 +5,7 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const bundleModel = require('../models/bundleModel');
 const customerModel = require('../models/customerModel');
+const { uuid } = require('uuidv4');
 
 const createBulkOrder = async (req, res) => {
   const {
@@ -33,7 +34,7 @@ const createBulkOrder = async (req, res) => {
   });
   await Promise.all(
     await salesOrders.map(async (so) => {
-      so.orderId = Math.floor(new Date().getTime() / 1000).toString();
+      so.orderId = uuid();
       so.createdTime = new Date();
       await Promise.all(
         so.salesOrderItems.map(async (item) => {
