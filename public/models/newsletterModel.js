@@ -1,13 +1,7 @@
 const { prisma } = require('./index.js');
 
 const createNewsletter = async (req) => {
-  const {
-    name,
-    emailSubject,
-    emailBodyTitle,
-    emailBody,
-    discountCode
-  } = req;
+  const { name, emailSubject, emailBodyTitle, emailBody, discountCode } = req;
   const newsletter = await prisma.newsletter.create({
     data: {
       name,
@@ -28,7 +22,7 @@ const getAllNewsletters = async () => {
 const findNewsletterById = async (req) => {
   const { id } = req;
   const newsletter = await prisma.newsletter.findUnique({
-    where: { id }
+    where: { id: Number(id) }
   });
   return newsletter;
 };
