@@ -16,6 +16,8 @@ model User {
   role           UserRole        @default(ADMIN)
   status         UserStatus      @default(ACTIVE)
   isVerified     Boolean         @default(false)
+  contactNo      String?
+  company        String?
   deliveryOrders DeliveryOrder[]
 }
 

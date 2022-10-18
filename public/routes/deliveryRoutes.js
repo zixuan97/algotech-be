@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const deliveryController = require('../controllers/deliveryController');
+const sns = require('../helpers/sns');
 
 router.post('/manual', deliveryController.createManualDeliveryOrder);
 router.post('/shippit', deliveryController.createShippitDeliveryOrder);
@@ -58,16 +59,43 @@ router.get(
   '/track/:trackingNumber',
   deliveryController.getDeliveryOrderByTrackingNumber
 );
-router.get('/sales/:salesOrderId', deliveryController.getDeliveryOrderBySalesOrderId);
-router.post('/bookinglabel/:trackingNumber', deliveryController.getBookingLabelLink);
-router.post('/assignedByDate', deliveryController.getAssignedManualDeliveriesByDate);
-router.post('/unassignedByDate', deliveryController.getUnassignedManualDeliveriesByDate);
-router.post('/byUser/assignedByDate', deliveryController.getAssignedManualDeliveriesByDateByUser);
-router.post('/shippitDeliveries/date', deliveryController.getShippitOrdersByDate);
-router.post('/lalamove/createQuotation', deliveryController.createLalamoveQuotation);
+router.get(
+  '/sales/:salesOrderId',
+  deliveryController.getDeliveryOrderBySalesOrderId
+);
+router.post(
+  '/bookinglabel/:trackingNumber',
+  deliveryController.getBookingLabelLink
+);
+router.post(
+  '/assignedByDate',
+  deliveryController.getAssignedManualDeliveriesByDate
+);
+router.post(
+  '/unassignedByDate',
+  deliveryController.getUnassignedManualDeliveriesByDate
+);
+router.post(
+  '/byUser/assignedByDate',
+  deliveryController.getAssignedManualDeliveriesByDateByUser
+);
+router.post(
+  '/shippitDeliveries/date',
+  deliveryController.getShippitOrdersByDate
+);
+router.post(
+  '/lalamove/createQuotation',
+  deliveryController.createLalamoveQuotation
+);
 router.post('/lalamove/placeOrder', deliveryController.placeLalamoveOrder);
-router.get('/lalamove/order/:id', deliveryController.getLalamoveOrderByLalamoveOrderId);
-router.get('/lalamove/:id', deliveryController.getLalamoveOrderByDeliveryOrderId);
+router.get(
+  '/lalamove/order/:id',
+  deliveryController.getLalamoveOrderByLalamoveOrderId
+);
+router.get(
+  '/lalamove/:id',
+  deliveryController.getLalamoveOrderByDeliveryOrderId
+);
 router.post('/lalamove/cancel/:id', deliveryController.cancelLalamoveOrder);
 router.get('/lalamove/driver/:id', deliveryController.getDriverDetails);
 
