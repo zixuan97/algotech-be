@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+const { log } = require('../helpers/logger');
 
 const sns = new AWS.SNS({
   accessKeyId: process.env.ACCESS_KEY_ID,
@@ -6,25 +7,28 @@ const sns = new AWS.SNS({
   region: 'ap-southeast-1'
 });
 
-const sendOTP = (req) => {
+const sendOTP = (req, res) => {
   // const { number, message } = req;
   const params = {
     Message: 'testing hello',
-    TopicArn:
-      'arn:aws:sns:ap-southeast-1:407923579514:TheKettleGourmet:475f0b15-2c88-46d8-a5e9-ce07c692fcd2'
+    PhoneNumber: '+6593861801'
   };
-  var phonenumPromise = sns
-    .checkIfPhoneNumberIsOptedOut({
-      phoneNumber: '+6591114685'
-    })
-    .promise();
-  console.log(phonenumPromise);
-  return sns
+  sns
     .publish(params)
     .promise()
-    .then(console.log('sent'))
-    .catch((err) => {
-      return err;
+    .then(function (data) {
+      log.out('OK_SNS_SEND-OTP', {
+        req: { body: req.body, params: req.params },
+        res: data
+      });
+      return res.json({ message: `Message ID is ${data.MessageId}` });
+    })
+    .catch(function (err) {
+      log.error('ERR_SNS_SEND-OTP', {
+        err: err.message,
+        req: { body: req.body, params: req.params }
+      });
+      return res.status(Error.http(err).code).json(e.message);
     });
 };
 
