@@ -1,7 +1,6 @@
 const { ShippingType, DeliveryMode } = require('@prisma/client');
 const { prisma } = require('./index.js');
 const axios = require('axios');
-const shippitApi = require('../helpers/shippitApi');
 const salesOrderModel = require('../models/salesOrderModel');
 const { log } = require('../helpers/logger');
 
@@ -207,7 +206,7 @@ const updateDeliveryOrder = async (req) => {
       eta,
       assignedUserId,
       deliveryStatus,
-      salesOrderId,
+      salesOrderId
     }
   });
   return deliveryOrder;
@@ -218,7 +217,9 @@ const findDeliveriesBasedOnTimeFilter = async (req) => {
   const deliveryOrders =
     await prisma.$queryRaw`select "id" from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
   for (let d of deliveryOrders) {
-    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
+      id: d.id
+    });
     d.deliveryStatus = deliveryStatus;
   }
   return deliveryOrders;
@@ -327,7 +328,9 @@ const fetchLatestStatusFromShippitAndAddToStatus = async (req) => {
         status: latestStatus.status,
         statusOwner: '',
         date: new Date(Date.now()).toLocaleDateString(),
-        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+          timeZone: 'Asia/Singapore'
+        }),
         deliveryOrder: {
           connect: {
             id: deliveryOrder.id
@@ -336,27 +339,6 @@ const fetchLatestStatusFromShippitAndAddToStatus = async (req) => {
       }
     });
   }
-};
-
-const getAllDeliveryOrdersFromShippit = async () => {
-  const api_path = 'https://app.staging.shippit.com/api/5/orders';
-  const token = await shippitApi.getToken({});
-  const headerToken = `Bearer ${token}`;
-  const options = {
-    headers: {
-      Authorization: headerToken
-    }
-  };
-  return await axios
-    .get(api_path, options)
-    .then((res) => {
-      const response = res.data;
-      return response.data;
-    })
-    .catch((err) => {
-      log.error('ERR_GET-ALL-SHIPPIT-ORDER', err.message);
-      throw err;
-    });
 };
 
 const cancelShippitOrder = async (req) => {
@@ -456,7 +438,9 @@ const findDeliveriesWithTimeAndTypeFilter = async (req) => {
     (x) => x.shippingType === enumShippingType
   );
   for (let d of filteredDeliveryOrders) {
-    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
+      id: d.id
+    });
     d.deliveryStatus = deliveryStatus;
   }
   return filteredDeliveryOrders;
@@ -558,7 +542,9 @@ const findAllAssignedManualDeliveriesByDate = async (req) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
-    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
+      id: d.id
+    });
     d.salesOrder = salesOrder;
     d.deliveryStatus = deliveryStatus;
   }
@@ -570,7 +556,7 @@ const findDeliveryStatusByDeliveryOrderId = async (req) => {
   const deliveryStatutes = await prisma.DeliveryStatus.findMany({
     where: {
       deliveryOrderId: id
-    },
+    }
   });
   return deliveryStatutes;
 };
@@ -588,7 +574,9 @@ const findAllAssignedManualDeliveriesByDateByUser = async (req) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
-    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
+      id: d.id
+    });
     d.salesOrder = salesOrder;
     d.deliveryStatus = deliveryStatus;
   }
@@ -606,7 +594,9 @@ const findAllUnassignedManualDeliveriesByDate = async (req) => {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
-    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
+      id: d.id
+    });
     d.salesOrder = salesOrder;
     d.deliveryStatus = deliveryStatus;
   }
@@ -617,12 +607,16 @@ const findAllShippitDeliveriesByDate = async (req) => {
   const { time_from, time_to } = req;
   const deliveryOrders =
     await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
-  const filteredDeliveryOrders = deliveryOrders.filter(x => x.shippingType === ShippingType.SHIPPIT);
+  const filteredDeliveryOrders = deliveryOrders.filter(
+    (x) => x.shippingType === ShippingType.SHIPPIT
+  );
   for (let d of filteredDeliveryOrders) {
     const salesOrder = await salesOrderModel.findSalesOrderById({
       id: d.salesOrderId
     });
-    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({ id: d.id });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
+      id: d.id
+    });
     d.salesOrder = salesOrder;
     d.deliveryStatus = deliveryStatus;
   }
@@ -662,14 +656,13 @@ const getLatLngFromPostalCode = async (req) => {
     .catch((error) => {
       log.error('ERR_ONEMAP_GET-LAT-LONG', error.message);
     });
-}
+};
 
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
 exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
 exports.getAllLalamoveOrders = getAllLalamoveOrders;
-exports.getAllDeliveryOrdersFromShippit = getAllDeliveryOrdersFromShippit;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 exports.findDeliveryOrderById = findDeliveryOrderById;
@@ -702,6 +695,7 @@ exports.findAllUnassignedManualDeliveriesByDate =
 exports.findAllAssignedManualDeliveriesByDateByUser =
   findAllAssignedManualDeliveriesByDateByUser;
 exports.findAllShippitDeliveriesByDate = findAllShippitDeliveriesByDate;
-exports.findDeliveryStatusByDeliveryOrderId = findDeliveryStatusByDeliveryOrderId;
+exports.findDeliveryStatusByDeliveryOrderId =
+  findDeliveryStatusByDeliveryOrderId;
 exports.getLatLngFromPostalCode = getLatLngFromPostalCode;
 exports.findDeliveryOrderByLalamoveOrderId = findDeliveryOrderByLalamoveOrderId;
