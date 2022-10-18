@@ -1,7 +1,6 @@
 const { ShippingType, DeliveryMode } = require('@prisma/client');
 const { prisma } = require('./index.js');
 const axios = require('axios');
-const shippitApi = require('../helpers/shippitApi');
 const salesOrderModel = require('../models/salesOrderModel');
 const { log } = require('../helpers/logger');
 
