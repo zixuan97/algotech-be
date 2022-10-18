@@ -43,6 +43,7 @@
     "nodemon": "^2.0.19",
     "pdfkit": "^0.13.0",
     "pusher": "^5.1.1-beta",
+    "stripe": "^10.14.0",
     "uuid": "^9.0.0",
     "uuidv4": "^6.2.13",
     "write-excel-file": "^1.4.12"
