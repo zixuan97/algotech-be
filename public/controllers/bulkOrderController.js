@@ -1,4 +1,5 @@
 const bulkOrderModel = require('../models/bulkOrderModel');
+const paymentModel = require('../models/paymentModel');
 const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
@@ -73,11 +74,43 @@ const createBulkOrder = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BULKORDER_CREATE-BO', {
-      req: { body: req.body, params: req.params },
-      res: data
-    });
-    res.json(data);
+    try {
+      log.out('OK_BULKORDER_CREATE-BO', {
+        req: { body: req.body, params: req.params },
+        res: data
+      });
+      const { payeeEmail, amount, orderId } = data;
+      if (paymentMode === 'CREDIT_CARD') {
+        const sessionURL = await paymentModel.payByStripeCreditCard({
+          payeeEmail,
+          amount,
+          orderId
+        });
+        log.out('OK_BULKORDER_CREATE-CREDITCARD-PAYMENT-LINK', {
+          req: { body: req.body, params: req.params },
+          res: sessionURL
+        });
+        res.json(sessionURL);
+      } else {
+        const sessionURL = await paymentModel.payByStripePaynow({
+          payeeEmail,
+          amount,
+          orderId
+        });
+        log.out('OK_BULKORDER_CREATE-PAYNOW-PAYMENT-LINK', {
+          req: { body: req.body, params: req.params },
+          res: sessionURL
+        });
+        res.json(sessionURL);
+      }
+    } catch (error) {
+      log.error('ERR_BULKORDER_CREATE-PAYMENT', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    }
   }
 };
 

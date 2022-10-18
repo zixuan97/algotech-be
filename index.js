@@ -29,11 +29,13 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.static('public'));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 app.get('/', (req, res) => {
   res.sendFile('index.html', { root: path.join(__dirname, 'public') });
 });
+
 // internal algotech-fe
 app.use('/user', whiteListInternal, require('./public/routes/userRoutes'));
 app.use(
@@ -87,7 +89,7 @@ app.use('/customer', require('./public/routes/customerRoutes'));
 app.use('/productCatalogue', require('./public/routes/productCatalogueRoutes'));
 app.use('/bundleCatalogue', require('./public/routes/bundleCatalogueRoutes'));
 app.use('/bulkOrder', require('./public/routes/bulkOrderRoutes'));
-
+app.use('/payment', require('./public/routes/paymentRoutes'));
 const port = process.env.PORT || 4000;
 
 app.listen(port, () => {
