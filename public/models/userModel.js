@@ -39,7 +39,7 @@ const getB2BUsers = async () => {
         },
         {
           role: UserRole.CORPORATE
-        },
+        }
       ]
     }
   });
@@ -79,17 +79,17 @@ const getUserDetails = async (req) => {
 const editUser = async (req) => {
   const { updatedUser } = req;
   const id = updatedUser.id;
-  const currUser = await findUserById({ id });
+  // const currUser = await findUserById({ id });
   user = await prisma.User.update({
     where: { id: Number(id) },
     data: {
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
       email: updatedUser.email,
-      password:
-        updatedUser.password !== undefined
-          ? await bcrypt.hash(updatedUser.password, 10)
-          : currUser.password,
+      // password:
+      //   updatedUser.password !== undefined
+      //     ? await bcrypt.hash(updatedUser.password, 10)
+      //     : currUser.password,
       role: updatedUser.role,
       status: updatedUser.status,
       isVerified: updatedUser.isVerified
@@ -179,6 +179,18 @@ const verifyPassword = async (req) => {
   return is_equal;
 };
 
+const changePassword = async (req) => {
+  const { updatedUser } = req;
+  user = await prisma.User.update({
+    where: { id: Number(updatedUser.id) },
+    data: {
+      ...updatedUser,
+      password: await bcrypt.hash(updatedUser.password, 10)
+    }
+  });
+  return user;
+};
+
 const updateB2BUserStatus = async (req) => {
   const { id, status } = req;
   const user = await prisma.User.update({
@@ -202,5 +214,6 @@ exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
 exports.generatePassword = generatePassword;
 exports.verifyPassword = verifyPassword;
+exports.changePassword = changePassword;
 exports.updateB2BUserStatus = updateB2BUserStatus;
 exports.getB2BUsers = getB2BUsers;
