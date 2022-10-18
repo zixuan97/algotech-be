@@ -189,7 +189,7 @@ const auth = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const users = await userModel.getUsers({});;
+    const users = await userModel.getUsers({});
     log.out('OK_USER_GET-USERS', {
       req: { body: req.body, params: req.params },
       res: users.filter((u) => u.id != req.user.userId)
@@ -197,7 +197,7 @@ const getUsers = async (req, res) => {
     res.json(users.filter((u) => u.id != req.user.userId));
   } catch (error) {
     log.error('ERR_USER_GET-USERS', {
-      err: error.message,   
+      err: error.message,
       req: { body: req.body, params: req.params }
     });
     res.status(400).send('Error getting users');
@@ -220,8 +220,9 @@ const editUser = async (req, res) => {
       log.out('OK_USER_EDIT-USERS', {
         req: { body: req.body, params: req.params },
         res: {
-           message: 'User edited', payload: user 
-          }
+          message: 'User edited',
+          payload: user
+        }
       });
       res.json({
         message: 'User edited',
@@ -379,7 +380,9 @@ const verifyPassword = async (req, res) => {
         err: 'Old and new password cannot be the same',
         req: { body: req.body, params: req.params }
       });
-      res.status(400).json({ message: 'Old and new password cannot be the same' });
+      res
+        .status(400)
+        .json({ message: 'Old and new password cannot be the same' });
     }
     const user = await userModel.findUserByEmail({ email: userEmail });
     if (user) {
@@ -417,10 +420,37 @@ const verifyPassword = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  const updatedUser = req.body;
+  try {
+    const user = await userModel.changePassword({ updatedUser });
+    log.out('OK_USER_CHANGE-PW', {
+      req: { body: req.body, params: req.params },
+      res: {
+        message: 'Password changed',
+        payload: user
+      }
+    });
+    res.json({
+      message: 'Password changed',
+      payload: user
+    });
+  } catch (error) {
+    log.error('ERR_USER_CHANGE-PW', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error changing password');
+  }
+};
+
 const approveB2BUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await userModel.updateB2BUserStatus({ id, status: UserStatus.ACTIVE });
+    const user = await userModel.updateB2BUserStatus({
+      id,
+      status: UserStatus.ACTIVE
+    });
     const { data } = await common.awaitWrap(userModel.generatePassword());
     user.password = data;
     await userModel.editUser({ updatedUser: user });
@@ -463,13 +493,16 @@ const approveB2BUser = async (req, res) => {
 const rejectB2BUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await userModel.updateB2BUserStatus({ id, status: UserStatus.REJECTED });
+    const user = await userModel.updateB2BUserStatus({
+      id,
+      status: UserStatus.REJECTED
+    });
     const content =
-    'Hi ' +
-    user.firstName +
-    ' ' +
-    user.lastName +
-    '! Your request to create an account has been rejected. Please contact our admin.';
+      'Hi ' +
+      user.firstName +
+      ' ' +
+      user.lastName +
+      '! Your request to create an account has been rejected. Please contact our admin.';
     try {
       await emailHelper.sendEmail({
         recipientEmail: user.email,
@@ -537,7 +570,12 @@ const getAllPendingB2BUsers = async (req, res) => {
 const getAllNonB2BUsers = async (req, res) => {
   try {
     const users = await userModel.getUsers({});
-    const filteredUsers = users.filter(u => u.id != req.user.userId && u.role !== UserRole.CORPORATE && u.role !== UserRole.DISTRIBUTOR);
+    const filteredUsers = users.filter(
+      (u) =>
+        u.id != req.user.userId &&
+        u.role !== UserRole.CORPORATE &&
+        u.role !== UserRole.DISTRIBUTOR
+    );
     log.out('OK_USER_GET-NON-B2B-USERS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(filteredUsers)
@@ -564,10 +602,10 @@ exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
 exports.sendForgetEmailPassword = sendForgetEmailPassword;
 exports.verifyPassword = verifyPassword;
+exports.changePassword = changePassword;
 exports.createB2BUser = createB2BUser;
 exports.approveB2BUser = approveB2BUser;
 exports.rejectB2BUser = rejectB2BUser;
 exports.getAllB2BUsers = getAllB2BUsers;
 exports.getAllPendingB2BUsers = getAllPendingB2BUsers;
 exports.getAllNonB2BUsers = getAllNonB2BUsers;
-
