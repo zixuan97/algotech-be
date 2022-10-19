@@ -185,7 +185,8 @@ const changePassword = async (req) => {
     where: { id: Number(updatedUser.id) },
     data: {
       ...updatedUser,
-      password: await bcrypt.hash(updatedUser.password, 10)
+      password: await bcrypt.hash(updatedUser.password, 10),
+      isVerified: true
     }
   });
   return user;
