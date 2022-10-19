@@ -81,10 +81,9 @@ const createBulkOrder = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: data
       });
-      const { payeeEmail, amount, orderId } = data;
+      const { amount, orderId } = data;
       if (paymentMode === 'CREDIT_CARD') {
         const sessionURL = await paymentModel.payByStripeCreditCard({
-          payeeEmail,
           amount,
           orderId
         });
@@ -95,7 +94,6 @@ const createBulkOrder = async (req, res) => {
         res.json(sessionURL);
       } else {
         const sessionURL = await paymentModel.payByStripePaynow({
-          payeeEmail,
           amount,
           orderId
         });
