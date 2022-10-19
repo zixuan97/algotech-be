@@ -129,6 +129,78 @@ const generateSalesOrderExcel = async (req) => {
   });
 };
 
+const generateBulkOrderExcel = async (req) => {
+  const { bulkOrders } = req;
+
+  const schema = [
+    {
+      column: 'OrderId',
+      type: String,
+      value: (bo) => bo.orderId
+    },
+    {
+      column: 'Customer Email',
+      type: String,
+      value: (bo) => bo.payeeEmail
+    },
+    {
+      column: 'Customer Name',
+      type: String,
+      value: (bo) => bo.payeeName
+    },
+    {
+      column: 'Customer Contact Number',
+      type: String,
+      value: (bo) => bo.payeeContactNo
+    },
+    {
+      column: 'Amount',
+      type: Number,
+      value: (bo) => bo.amount
+    },
+    {
+      column: 'Customer Remarks',
+      type: String,
+      value: (bo) => bo.payeeRemarks
+    },
+    {
+      column: 'Payment Mode',
+      type: String,
+      value: (bo) => bo.paymentMode
+    },
+    {
+      column: 'Number of Orders',
+      type: Number,
+      value: (bo) => bo.salesOrders.length
+    },
+    {
+      column: 'Customer Order Status',
+      type: String,
+      value: (bo) => bo.orderStatus
+    },
+    {
+      column: 'Company',
+      type: String,
+      value: (bo) => bo.payeeCompany
+    },
+    {
+      column: 'Order Created At',
+      type: Date,
+      format: 'dd/mm/yyyy',
+      value: (bo) => bo.createdTime
+    }
+  ];
+
+  return await writeXlsxFile(bulkOrders, {
+    schema,
+    headerStyle: {
+      backgroundColor: '#eeeeee',
+      fontWeight: 'bold',
+      align: 'center'
+    }
+  });
+};
+
 const generateLowStockExcel = async (req) => {
   const { products } = req;
   let objects = [{}];
@@ -188,3 +260,4 @@ const generateLowStockExcel = async (req) => {
 exports.generateInventoryExcel = generateInventoryExcel;
 exports.generateLowStockExcel = generateLowStockExcel;
 exports.generateSalesOrderExcel = generateSalesOrderExcel;
+exports.generateBulkOrderExcel = generateBulkOrderExcel;

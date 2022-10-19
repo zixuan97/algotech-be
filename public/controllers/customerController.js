@@ -85,14 +85,25 @@ const getCustomerById = async (req, res) => {
     const ordersByMonth = await salesOrderModel.getOrdersByMonthForCustomer({
       customerEmail: customer.email
     });
+    const bulkOrdersByMonth =
+      await bulkOrderModel.getBulkOrdersByMonthForCustomer({
+        payeeEmail: customer.email
+      });
     customer.ordersByMonth = JSON.parse(
       JSON.stringify(
         ordersByMonth,
         (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
       )
     );
+    customer.bulkOrdersByMonth = JSON.parse(
+      JSON.stringify(
+        bulkOrdersByMonth,
+        (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+      )
+    );
     customer.salesOrders = salesOrders;
     customer.bulkOrders = bulkOrders;
+
     log.out('OK_CUSTOMER_GET-CUSTOMER-BY-ID');
     res.json(customer);
   } catch (error) {
@@ -117,6 +128,17 @@ const getCustomerByEmail = async (req, res) => {
     customer.ordersByMonth = JSON.parse(
       JSON.stringify(
         ordersByMonth,
+        (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+      )
+    );
+    const bulkOrdersByMonth =
+      await bulkOrderModel.getBulkOrdersByMonthForCustomer({
+        payeeEmail: customer.email
+      });
+
+    customer.bulkOrdersByMonth = JSON.parse(
+      JSON.stringify(
+        bulkOrdersByMonth,
         (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
       )
     );

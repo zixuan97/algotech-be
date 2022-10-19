@@ -1,13 +1,14 @@
 const { prisma } = require('./index.js');
 
 const createScheduledNewsLetter = async (req) => {
-  const { newsletterId, customerEmails, sentDate } = req;
+  const { newsletterId, customerEmails, sentDate, jobId } = req;
 
   await prisma.scheduledNewsletter.create({
     data: {
       newsletterId,
       customerEmails,
-      sentDate
+      sentDate,
+      jobId
     }
   });
 };
@@ -17,19 +18,39 @@ const getAllScheduledNewsLetters = async () => {
   return scheduledNewsletters;
 };
 
-const updateScheduledNewsLetter = async (req) => {
-  const { id, newsletterId, customerEmails, sentDate, jobStatus } = req;
+const getAllScheduledNewsLettersByJobStatus = async (req) => {
+  const { jobStatus } = req;
+  const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({
+    where: { jobStatus }
+  });
+  return scheduledNewsletters;
+};
 
-  brand = await prisma.scheduledNewsletter.update({
+const updateScheduledNewsLetter = async (req) => {
+  const { id, newsletterId, customerEmails, sentDate, jobId } = req;
+
+  const scheduledNewsletter = await prisma.scheduledNewsletter.update({
     where: { id },
     data: {
       newsletterId,
       customerEmails,
       sentDate,
+      jobId
+    }
+  });
+  return scheduledNewsletter;
+};
+
+const updateScheduledNewsLetterStatus = async (req) => {
+  const { jobId, jobStatus } = req;
+
+  const scheduledNewsletter = await prisma.scheduledNewsletter.update({
+    where: { jobId },
+    data: {
       jobStatus
     }
   });
-  return brand;
+  return scheduledNewsletter;
 };
 
 const deleteScheduledNewsletter = async (req) => {
@@ -68,3 +89,6 @@ exports.deleteScheduledNewsletter = deleteScheduledNewsletter;
 exports.findScheduledNewsletterById = findScheduledNewsletterById;
 exports.findScheduledNewsletterByNewsletterId =
   findScheduledNewsletterByNewsletterId;
+exports.updateScheduledNewsLetterStatus = updateScheduledNewsLetterStatus;
+exports.getAllScheduledNewsLettersByJobStatus =
+  getAllScheduledNewsLettersByJobStatus;

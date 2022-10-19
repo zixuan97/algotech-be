@@ -6,6 +6,8 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const bundleModel = require('../models/bundleModel');
 const customerModel = require('../models/customerModel');
+const { generateBulkOrderExcel } = require('../helpers/excel');
+const { format } = require('date-fns');
 const { uuid } = require('uuidv4');
 
 const createBulkOrder = async (req, res) => {
@@ -79,10 +81,9 @@ const createBulkOrder = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: data
       });
-      const { payeeEmail, amount, orderId } = data;
+      const { amount, orderId } = data;
       if (paymentMode === 'CREDIT_CARD') {
         const sessionURL = await paymentModel.payByStripeCreditCard({
-          payeeEmail,
           amount,
           orderId
         });
@@ -93,7 +94,6 @@ const createBulkOrder = async (req, res) => {
         res.json(sessionURL);
       } else {
         const sessionURL = await paymentModel.payByStripePaynow({
-          payeeEmail,
           amount,
           orderId
         });
@@ -330,6 +330,32 @@ const updateBulkOrder = async (req, res) => {
   }
 };
 
+const generateExcel = async (req, res) => {
+  const { payeeEmail } = req.body;
+  const bulkOrders = await bulkOrderModel.findBulkOrderByEmail({
+    payeeEmail
+  });
+  await generateBulkOrderExcel({ bulkOrders })
+    .then((blob) => {
+      const timeElapsed = Date.now();
+      const today = new Date(timeElapsed);
+      res.type(blob.type);
+      blob.arrayBuffer().then((buf) => {
+        res.setHeader(
+          'Content-disposition',
+          `attachment; filename = CustomerOrders${format(
+            today,
+            'yyyyMMdd'
+          )}.xlsx`
+        );
+        res.send(Buffer.from(buf));
+      });
+    })
+    .catch((error) => {
+      return res.status(400).json(error.message);
+    });
+};
+
 exports.createBulkOrder = createBulkOrder;
 exports.getAllBulkOrders = getAllBulkOrders;
 exports.findBulkOrderById = findBulkOrderById;
@@ -339,3 +365,4 @@ exports.findBulkOrderByEmail = findBulkOrderByEmail;
 exports.getAllBulkOrdersWithTimeFilter = getAllBulkOrdersWithTimeFilter;
 exports.updateBulkOrderStatus = updateBulkOrderStatus;
 exports.massUpdateSalesOrderStatus = massUpdateSalesOrderStatus;
+exports.generateExcel = generateExcel;
