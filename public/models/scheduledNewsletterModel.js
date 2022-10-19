@@ -21,6 +21,9 @@ const getAllScheduledNewsLetters = async (req) => {
         lte: time_to, //last date
         gte: time_from //first date
       }
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletters;
@@ -35,6 +38,9 @@ const getAllScheduledNewsLettersByJobStatus = async (req) => {
         lte: time_to, //last date
         gte: time_from //first date
       }
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletters;
