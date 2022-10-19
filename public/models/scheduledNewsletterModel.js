@@ -56,6 +56,9 @@ const updateScheduledNewsLetter = async (req) => {
       customerEmails,
       sentDate,
       jobId
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletter;
@@ -68,6 +71,9 @@ const updateScheduledNewsLetterStatus = async (req) => {
     where: { jobId },
     data: {
       jobStatus
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletter;
@@ -87,6 +93,9 @@ const findScheduledNewsletterById = async (req) => {
   const scheduledNewsletter = await prisma.scheduledNewsletter.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletter;
@@ -97,6 +106,9 @@ const findScheduledNewsletterByNewsletterId = async (req) => {
   const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({
     where: {
       newsletterId
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletters;
