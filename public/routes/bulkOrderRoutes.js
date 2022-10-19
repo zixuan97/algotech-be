@@ -10,4 +10,5 @@ router.post('/timefilter', bulkOrderController.getAllBulkOrdersWithTimeFilter);
 router.put('/', bulkOrderController.updateBulkOrder);
 router.put('/status', bulkOrderController.updateBulkOrderStatus);
 router.put('/salesOrderStatus', bulkOrderController.massUpdateSalesOrderStatus);
+router.post('/excel', bulkOrderController.generateExcel);
 module.exports = router;
