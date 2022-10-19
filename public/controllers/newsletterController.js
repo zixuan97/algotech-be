@@ -12,15 +12,11 @@ const { log } = require('../helpers/logger');
 const fs = require('fs');
 const emailHelper = require('../helpers/email');
 const newsletterTemplate = require('../utils/templates/newsletterTemplate');
+const { uuid } = require('uuidv4');
 
 const createNewsletter = async (req, res) => {
-  const {
-    name,
-    emailSubject,
-    emailBodyTitle,
-    emailBody,
-    discountCode
-  } = req.body;
+  const { name, emailSubject, emailBodyTitle, emailBody, discountCode } =
+    req.body;
   const { data, error } = await common.awaitWrap(
     newsletterModel.createNewsletter({
       name,
@@ -185,23 +181,158 @@ const scheduleNewsLetter = async (req, res) => {
     const newsletter = await newsletterModel.findNewsletterById({
       id: newsletterId
     });
-    const job = await scheduleJobs({ newsletter, customerEmails, sentDate });
+    const jobId = uuid();
+    const job = await scheduleJobs({
+      newsletter,
+      customerEmails,
+      sentDate,
+      jobId
+    });
     log.out('OK_NEWSLETTER_SCHEDULE-NEWSLETTER', job);
 
     const newsletterJob =
       await scheduledNewsletterModel.createScheduledNewsLetter({
         newsletterId,
         customerEmails,
-        sentDate
+        sentDate,
+        jobId
       });
 
     log.out('OK_NEWSLETTER_CREATE-NEWSLETTER', {
       req: { body: req.body, params: req.params },
-      res: newsletterJob
+      res: { message: `Newsletter scheduled for ${sentDate}` }
     });
-    res.json(newsletterJob);
+    res.json({ message: `Newsletter scheduled for ${sentDate}` });
   } catch (error) {
     log.error('ERR_NEWSLETTER_SCHEDULE-NEWSLETTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const getAllScheduledNewsletters = async (req, res) => {
+  try {
+    const scheduledNewsletters =
+      await scheduledNewsletterModel.getAllScheduledNewsLetters({});
+
+    log.out('OK_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTERS', {
+      req: { body: req.body, params: req.params },
+      res: scheduledNewsletters
+    });
+    res.json(scheduledNewsletters);
+  } catch (error) {
+    log.error('ERR_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const getAllScheduledNewslettersByJobStatus = async (req, res) => {
+  const { jobStatus } = req.body;
+  try {
+    const scheduledNewsletters =
+      await scheduledNewsletterModel.getAllScheduledNewsLettersByJobStatus({
+        jobStatus
+      });
+
+    log.out('OK_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTERS', {
+      req: { body: req.body, params: req.params },
+      res: scheduledNewsletters
+    });
+    res.json(scheduledNewsletters);
+  } catch (error) {
+    log.error('ERR_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTERS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const getScheduledNewsletterById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const scheduledNewsletter =
+      await scheduledNewsletterModel.findScheduledNewsletterById({ id });
+
+    log.out('OK_NEWSLETTER_GET-SCHEDULED-NEWSLETTER-BY-ID', {
+      req: { body: req.body, params: req.params },
+      res: scheduledNewsletter
+    });
+    res.json(scheduledNewsletter);
+  } catch (error) {
+    log.error('ERR_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTER-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const updateScheduledNewsLetter = async (req, res) => {
+  const { id, newsletterId, customerEmails, sentDate, jobId } = req.body;
+  try {
+    //cancel background job
+    await cancelJob({ key: jobId });
+
+    const newsletter = await newsletterModel.findNewsletterById({
+      id: newsletterId
+    });
+    const job = await scheduleJobs({
+      newsletter,
+      customerEmails,
+      sentDate,
+      jobId
+    });
+    log.out('OK_NEWSLETTER_SCHEDULE-NEWSLETTER', job);
+
+    const newsletterJob =
+      await scheduledNewsletterModel.updateScheduledNewsLetter({
+        id,
+        newsletterId,
+        customerEmails,
+        sentDate,
+        jobId
+      });
+
+    log.out('OK_NEWSLETTER_UPDATE-SCHEDULED-NEWSLETTER', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Newsletter scheduled for ${sentDate}` }
+    });
+    res.json({ message: `Newsletter updated and scheduled for ${sentDate}` });
+  } catch (error) {
+    log.error('ERR_NEWSLETTER_UPDATED-SCHEDULED-NEWSLETTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
+const cancelScheduledNewsletter = async (req, res) => {
+  const { jobId } = req.body;
+  try {
+    await cancelJob({ key: jobId });
+    await scheduledNewsletterModel.updateScheduledNewsLetterStatus({
+      jobId,
+      jobStatus: 'CANCELLED'
+    });
+    log.out('OK_NEWSLETTER_CANCEL-SCHEDULED-NEWSLETTER', {
+      req: { body: req.body, params: req.params },
+      res: { message: `Scheduled Newsletter cancelled ` }
+    });
+    res.json({ message: `Scheduled Newsletter cancelled ` });
+  } catch (error) {
+    log.error('ERR_NEWSLETTER_CANCEL-SCHEDULED-NEWSLETTER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
@@ -237,3 +368,9 @@ exports.sendNewsLetterToRecommendedCustomers =
   sendNewsLetterToRecommendedCustomers;
 exports.scheduleNewsLetter = scheduleNewsLetter;
 exports.getAllScheduledJobs = getAllScheduledJobs;
+exports.getAllScheduledNewsletters = getAllScheduledNewsletters;
+exports.updateScheduledNewsLetter = updateScheduledNewsLetter;
+exports.getScheduledNewsletterById = getScheduledNewsletterById;
+exports.cancelScheduledNewsletter = cancelScheduledNewsletter;
+exports.getAllScheduledNewslettersByJobStatus =
+  getAllScheduledNewslettersByJobStatus;
