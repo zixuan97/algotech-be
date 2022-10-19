@@ -91,7 +91,7 @@ const createBulkOrder = async (req, res) => {
           req: { body: req.body, params: req.params },
           res: sessionURL
         });
-        res.json(sessionURL);
+        res.json({ paymentUrl: sessionURL, bulkOrder: data });
       } else {
         const sessionURL = await paymentModel.payByStripePaynow({
           amount,
