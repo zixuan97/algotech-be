@@ -15,7 +15,6 @@ router.put('/disable/:id', UserController.disableUser);
 router.put('/role/:id/:action', UserController.changeUserRole);
 router.post('/forgetpw', UserController.sendForgetEmailPassword);
 router.post('/updatepw', UserController.verifyPassword);
-router.patch('/changepw', UserController.changePassword);
 router.put('/approve/:id', UserController.approveB2BUser);
 router.put('/reject/:id', UserController.rejectB2BUser);
 router.get('/b2b/all', UserController.getAllB2BUsers);
