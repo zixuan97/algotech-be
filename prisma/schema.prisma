@@ -16,8 +16,8 @@ model User {
   role           UserRole        @default(ADMIN)
   status         UserStatus      @default(ACTIVE)
   isVerified     Boolean         @default(false)
-  contactNo      String?
   company        String?
+  contactNo      String?
   deliveryOrders DeliveryOrder[]
 }
 
@@ -271,10 +271,13 @@ model SupplierProduct {
 
 model ScheduledNewsletter {
   id             Int       @id @default(autoincrement())
+  jobId          String    @unique
   newsletterId   Int
   customerEmails String[]
   sentDate       DateTime
   jobStatus      JobStatus @default(SCHEDULED)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model DeliveryStatus {
