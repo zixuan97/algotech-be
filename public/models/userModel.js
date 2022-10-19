@@ -3,7 +3,17 @@ const bcrypt = require('bcrypt');
 const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req) => {
-  let { firstName, lastName, email, password, role, status, isVerified } = req;
+  let {
+    firstName,
+    lastName,
+    email,
+    password,
+    role,
+    status,
+    isVerified,
+    company,
+    contactNo
+  } = req;
   let encryptedPassword = '';
   if (role !== UserRole.DISTRIBUTOR && role !== UserRole.CORPORATE) {
     encryptedPassword = await bcrypt.hash(password, 10);
@@ -20,7 +30,9 @@ const createUser = async (req) => {
       password: encryptedPassword,
       role,
       status,
-      isVerified
+      isVerified,
+      company,
+      contactNo
     }
   });
 };
@@ -79,20 +91,17 @@ const getUserDetails = async (req) => {
 const editUser = async (req) => {
   const { updatedUser } = req;
   const id = updatedUser.id;
-  // const currUser = await findUserById({ id });
   user = await prisma.User.update({
     where: { id: Number(id) },
     data: {
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
       email: updatedUser.email,
-      // password:
-      //   updatedUser.password !== undefined
-      //     ? await bcrypt.hash(updatedUser.password, 10)
-      //     : currUser.password,
       role: updatedUser.role,
       status: updatedUser.status,
-      isVerified: updatedUser.isVerified
+      isVerified: updatedUser.isVerified,
+      company: updatedUser.company,
+      contactNo: updatedUser.contactNo
     }
   });
   return user;

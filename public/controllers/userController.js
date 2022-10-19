@@ -65,7 +65,16 @@ const createUser = async (req, res) => {
 };
 
 const createB2BUser = async (req, res) => {
-  const { firstName, lastName, email, role, status, isVerified } = req.body;
+  const {
+    firstName,
+    lastName,
+    email,
+    role,
+    status,
+    isVerified,
+    company,
+    contactNo
+  } = req.body;
   const user = await userModel.findUserByEmail({ email });
   if (user) {
     log.error('ERR_USER_CREATE-B2B-USER', {
@@ -81,7 +90,9 @@ const createB2BUser = async (req, res) => {
         email,
         role,
         status,
-        isVerified
+        isVerified,
+        company,
+        contactNo
       })
     );
     if (error) {
