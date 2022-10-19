@@ -8,7 +8,7 @@ const payByStripeCreditCard = async (req) => {
       ? 'https://algotech-fe-b2b.vercel.app'
       : 'http://localhost:3002';
 
-  const { payeeEmail, amount, orderId } = req;
+  const { amount, orderId } = req;
   const expiryDate = Date.now() + 3600 * 1000;
   const session = await stripe.checkout.sessions.create({
     line_items: [
@@ -16,7 +16,7 @@ const payByStripeCreditCard = async (req) => {
         price_data: {
           currency: 'sgd',
           product_data: {
-            name: payeeEmail
+            name: orderId
           },
           unit_amount: (amount * 100).toString().replace('.', '') // in stripe checkout format
         },
@@ -26,7 +26,7 @@ const payByStripeCreditCard = async (req) => {
     mode: 'payment',
     success_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?success=true`,
     cancel_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?canceled=true`,
-    metadata: { payeeEmail, orderId }, // Store orderid and payee email in metadata
+    metadata: { orderId }, // Store orderid and payee email in metadata
     expires_at: Math.floor(expiryDate / 1000)
   });
 
@@ -39,7 +39,7 @@ const payByStripePaynow = async (req) => {
       ? 'https://algotech-fe-b2b.vercel.app'
       : 'http://localhost:3002';
 
-  const { payeeEmail, amount, orderId } = req;
+  const { amount, orderId } = req;
   const expiryDate = Date.now() + 3600 * 1000;
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['paynow'], // identify for paynow payment
@@ -48,7 +48,7 @@ const payByStripePaynow = async (req) => {
         price_data: {
           currency: 'sgd',
           product_data: {
-            name: payeeEmail
+            name: orderId
           },
           unit_amount: (amount * 100).toString().replace('.', '') // in stripe checkout format
         },
@@ -58,12 +58,65 @@ const payByStripePaynow = async (req) => {
     mode: 'payment',
     success_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?success=true`,
     cancel_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?canceled=true`,
-    metadata: { payeeEmail, orderId }, // Store orderid and payee email in metadata
+    metadata: { orderId }, // Store orderid and payee email in metadata
     expires_at: Math.floor(expiryDate / 1000)
   });
 
   return session.url;
 };
 
+const generatePaymentLink = async (req) => {
+  const domain =
+    process.env.NODE_ENV === 'production'
+      ? 'https://algotech-fe-b2b.vercel.app'
+      : 'http://localhost:3002';
+
+  const { paymentMode, amount, orderId } = req;
+  let payment_method_types = [];
+  if (paymentMode === 'CREDIT_CARD') {
+    payment_method_types.push('card');
+  } else {
+    payment_method_types.push('paynow');
+  }
+  const product = await stripe.products.create({
+    name: orderId
+  });
+
+  const price = await stripe.prices.create({
+    currency: 'sgd',
+    unit_amount: (amount * 100).toString().replace('.', ''),
+    product: product.id
+  });
+
+  const paymentLink = await stripe.paymentLinks.create({
+    line_items: [{ price: price.id, quantity: 1 }],
+    after_completion: {
+      type: 'redirect',
+      redirect: {
+        url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?success=true`
+      }
+    },
+    payment_method_types,
+    metadata: { orderId }
+  });
+
+  return paymentLink;
+};
+
+const removePaymentLink = async (req) => {
+  const { paymentLinkId } = req;
+  const items = await stripe.paymentLinks.listLineItems(paymentLinkId, {
+    limit: 3
+  });
+  await stripe.prices.update(items.data[0].price.id, { active: false });
+  await stripe.products.update(items.data[0].price.product, { active: false });
+
+  return await stripe.paymentLinks.update(paymentLinkId, {
+    active: false
+  });
+};
+
 exports.payByStripeCreditCard = payByStripeCreditCard;
 exports.payByStripePaynow = payByStripePaynow;
+exports.generatePaymentLink = generatePaymentLink;
+exports.removePaymentLink = removePaymentLink;

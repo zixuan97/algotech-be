@@ -8,13 +8,35 @@ const stripe = require('stripe')(
   'sk_test_51LrBGjKgwBBPqmgaFEzCgBqD8OPqvLAeMq3UJsFmJrPQS3T2KJvPnBx007jiANN2Yn1sc37eqJ6OQUYb6XefpogS004C11Kb1r'
 );
 const payByStripeCreditCard = async (req, res) => {
-  const { payeeEmail, amount, orderId } = req.body;
+  const { amount, orderId } = req.body;
   const sessionURL = await paymentModel.payByStripePaynow({
-    payeeEmail,
     amount,
     orderId
   });
   res.json(sessionURL);
+};
+
+const generatePaymentLink = async (req, res) => {
+  const { paymentMode, amount, orderId } = req.body;
+  try {
+    const paymentLink = await paymentModel.generatePaymentLink({
+      paymentMode,
+      amount,
+      orderId
+    });
+    log.out('OK_PAYMENT_GENERATE-PAYMENT-LINK', {
+      req: { body: req.body, params: req.params },
+      res: paymentLink
+    });
+    res.json(paymentLink.url);
+  } catch (error) {
+    log.error('ERR_PAYMENT_GENERATE-PAYMENT-LINK', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
 };
 
 const stripeWebhook = async (req, res) => {
@@ -24,25 +46,40 @@ const stripeWebhook = async (req, res) => {
     case 'checkout.session.async_payment_succeeded': {
       const session = payload.data.object;
       const { orderId } = session.metadata;
+
       if (orderId) {
         await bulkOrderModel.updateBulkOrderStatusByOrderId({
           orderId,
           bulkOrderStatus: 'PAYMENT_SUCCESS'
         });
+        log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');
       }
+
+      if (session.payment_link) {
+        paymentModel.removePaymentLink({ paymentLinkId: session.payment_link });
+        log.out('OK_PAYMENT_REMOVE-PAYMENT-LINK');
+      }
+
       break;
     }
 
     case 'checkout.session.async_payment_failed': {
       const session = payload.data.object;
       const { orderId } = session.metadata;
+      if (session.payment_link) {
+        paymentModel.removePaymentLink({ paymentLinkId: session.payment_link });
+      }
       if (orderId) {
         await bulkOrderModel.updateBulkOrderStatusByOrderId({
           orderId,
           bulkOrderStatus: 'PAYMENT_FAILED'
         });
+        log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');
       }
-      // Send an email to the customer asking them to retry their order
+      if (session.payment_link) {
+        paymentModel.removePaymentLink({ paymentLinkId: session.payment_link });
+        log.out('OK_PAYMENT_REMOVE-PAYMENT-LINK');
+      }
 
       break;
     }
@@ -52,5 +89,14 @@ const stripeWebhook = async (req, res) => {
   res.send();
 };
 
+const removePaymentLink = async (req, res) => {
+  const { paymentLinkId } = req.body;
+
+  await paymentModel.removePaymentLink({ paymentLinkId });
+  res.json('done');
+};
+
 exports.payByStripeCreditCard = payByStripeCreditCard;
 exports.stripeWebhook = stripeWebhook;
+exports.generatePaymentLink = generatePaymentLink;
+exports.removePaymentLink = removePaymentLink;
