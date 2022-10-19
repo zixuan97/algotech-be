@@ -13,15 +13,29 @@ const createScheduledNewsLetter = async (req) => {
   });
 };
 
-const getAllScheduledNewsLetters = async () => {
-  const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({});
+const getAllScheduledNewsLetters = async (req) => {
+  const { time_from, time_to } = req;
+  const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({
+    where: {
+      sentDate: {
+        lte: time_to, //last date
+        gte: time_from //first date
+      }
+    }
+  });
   return scheduledNewsletters;
 };
 
 const getAllScheduledNewsLettersByJobStatus = async (req) => {
-  const { jobStatus } = req;
+  const { jobStatus, time_from, time_to } = req;
   const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({
-    where: { jobStatus }
+    where: {
+      jobStatus,
+      sentDate: {
+        lte: time_to, //last date
+        gte: time_from //first date
+      }
+    }
   });
   return scheduledNewsletters;
 };

@@ -214,9 +214,13 @@ const scheduleNewsLetter = async (req, res) => {
 };
 
 const getAllScheduledNewsletters = async (req, res) => {
+  const { time_from, time_to } = req.body;
   try {
     const scheduledNewsletters =
-      await scheduledNewsletterModel.getAllScheduledNewsLetters({});
+      await scheduledNewsletterModel.getAllScheduledNewsLetters({
+        time_from,
+        time_to
+      });
 
     log.out('OK_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTERS', {
       req: { body: req.body, params: req.params },
