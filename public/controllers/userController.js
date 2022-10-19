@@ -345,7 +345,7 @@ const sendForgetEmailPassword = async (req, res) => {
         password: updatedPassword.data,
         isVerified: false
       };
-      await userModel.editUser({ updatedUser });
+      await userModel.changePassword({ updatedUser });
       await emailHelper.sendEmail({ recipientEmail, subject, content });
       log.out('OK_USER_SENT-EMAIL', {
         req: { body: req.body, params: req.params },
@@ -454,6 +454,7 @@ const approveB2BUser = async (req, res) => {
     const { data } = await common.awaitWrap(userModel.generatePassword());
     user.password = data;
     await userModel.editUser({ updatedUser: user });
+    await userModel.changePassword({ updatedUser: user });
     const content =
       'Hi ' +
       user.firstName +
