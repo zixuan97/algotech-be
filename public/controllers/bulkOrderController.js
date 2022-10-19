@@ -89,7 +89,7 @@ const createBulkOrder = async (req, res) => {
         });
         log.out('OK_BULKORDER_CREATE-CREDITCARD-PAYMENT-LINK', {
           req: { body: req.body, params: req.params },
-          res: sessionURL
+          res: { paymentUrl: sessionURL, bulkOrder: JSON.stringify(data) }
         });
         res.json({ paymentUrl: sessionURL, bulkOrder: data });
       } else {
@@ -99,9 +99,9 @@ const createBulkOrder = async (req, res) => {
         });
         log.out('OK_BULKORDER_CREATE-PAYNOW-PAYMENT-LINK', {
           req: { body: req.body, params: req.params },
-          res: sessionURL
+          res: { paymentUrl: sessionURL, bulkOrder: JSON.stringify(data) }
         });
-        res.json(sessionURL);
+        res.json({ paymentUrl: sessionURL, bulkOrder: data });
       }
     } catch (error) {
       log.error('ERR_BULKORDER_CREATE-PAYMENT', {
