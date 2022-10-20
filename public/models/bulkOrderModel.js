@@ -184,6 +184,23 @@ const updateBulkOrder = async (req) => {
           }
         }))
       }
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
     }
   });
 };
@@ -259,6 +276,23 @@ const updateBulkOrderStatus = async (req) => {
     },
     data: {
       bulkOrderStatus
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
     }
   });
   return bulkOrder;
@@ -272,6 +306,23 @@ const updateBulkOrderPaymentMode = async (req) => {
     },
     data: {
       paymentMode
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
     }
   });
   return bulkOrder;

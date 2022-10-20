@@ -317,9 +317,9 @@ const updateBulkOrder = async (req, res) => {
     });
     log.out('OK_BULKORDER_UPDATE-BULKORDER', {
       req: { body: req.body, params: req.params },
-      res: { message: `Successfully updated bulk order with id: ${id}` }
+      res: JSON.stringify(bulkOrder)
     });
-    res.json({ message: `Successfully updated bulk order with id: ${id}` });
+    res.json(bulkOrder);
   } catch (error) {
     log.error('ERR_BULKORDER_UPDATE-BULKORDER', {
       err: error.message,
