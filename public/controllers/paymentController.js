@@ -63,7 +63,7 @@ const stripeWebhook = async (req, res) => {
 
       break;
     case 'checkout.session.async_payment_failed':
-    case 'heckout.session.expired':
+    case 'checkout.session.expired':
       if (session.payment_link) {
         paymentModel.removePaymentLink({ paymentLinkId: session.payment_link });
       }

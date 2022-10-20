@@ -281,6 +281,29 @@ const getScheduledNewsletterById = async (req, res) => {
   }
 };
 
+const getScheduledNewsletterByNewsletterId = async (req, res) => {
+  const { newsletterId } = req.body;
+  try {
+    const scheduledNewsletters =
+      await scheduledNewsletterModel.findScheduledNewsletterByNewsletterId({
+        newsletterId
+      });
+
+    log.out('OK_NEWSLETTER_GET-SCHEDULED-NEWSLETTER-BY-NEWSLETTER-ID', {
+      req: { body: req.body, params: req.params },
+      res: scheduledNewsletters
+    });
+    res.json(scheduledNewsletters);
+  } catch (error) {
+    log.error('ERR_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTER-BY-NEWSLETTER-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+};
+
 const updateScheduledNewsLetter = async (req, res) => {
   const { id, newsletterId, customerEmails, sentDate, jobId } = req.body;
   try {
@@ -378,3 +401,5 @@ exports.getScheduledNewsletterById = getScheduledNewsletterById;
 exports.cancelScheduledNewsletter = cancelScheduledNewsletter;
 exports.getAllScheduledNewslettersByJobStatus =
   getAllScheduledNewslettersByJobStatus;
+exports.getScheduledNewsletterByNewsletterId =
+  getScheduledNewsletterByNewsletterId;
