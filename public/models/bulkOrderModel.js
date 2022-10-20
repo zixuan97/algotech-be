@@ -264,6 +264,19 @@ const updateBulkOrderStatus = async (req) => {
   return bulkOrder;
 };
 
+const updateBulkOrderPaymentMode = async (req) => {
+  const { orderId, paymentMode } = req;
+  const bulkOrder = await prisma.bulkOrder.update({
+    where: {
+      orderId
+    },
+    data: {
+      paymentMode
+    }
+  });
+  return bulkOrder;
+};
+
 const updateBulkOrderStatusByOrderId = async (req) => {
   const { orderId, bulkOrderStatus } = req;
   const bulkOrder = await prisma.bulkOrder.update({
@@ -355,3 +368,4 @@ exports.getAllBulkOrdersWithTimeFilter = getAllBulkOrdersWithTimeFilter;
 exports.updateBulkOrderStatus = updateBulkOrderStatus;
 exports.updateBulkOrderStatusByOrderId = updateBulkOrderStatusByOrderId;
 exports.getBulkOrdersByMonthForCustomer = getBulkOrdersByMonthForCustomer;
+exports.updateBulkOrderPaymentMode = updateBulkOrderPaymentMode;

@@ -17,11 +17,13 @@ const payByStripeCreditCard = async (req, res) => {
 };
 
 const generatePaymentLink = async (req, res) => {
-  const { paymentMode, amount, orderId } = req.body;
+  const { paymentMode, orderId } = req.body;
+  const bulkOrder = await bulkOrderModel.findBulkOrderByOrderId({ orderId });
+  await bulkOrderModel.updateBulkOrderPaymentMode({ orderId, paymentMode });
   try {
     const paymentLink = await paymentModel.generatePaymentLink({
       paymentMode,
-      amount,
+      amount: bulkOrder.amount,
       orderId
     });
     log.out('OK_PAYMENT_GENERATE-PAYMENT-LINK', {
