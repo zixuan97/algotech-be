@@ -43,12 +43,11 @@ const generatePaymentLink = async (req, res) => {
 
 const stripeWebhook = async (req, res) => {
   const payload = req.body;
-
+  const session = payload.data.object;
+  const { orderId } = session.metadata;
   switch (payload.type) {
-    case 'checkout.session.async_payment_succeeded': {
-      const session = payload.data.object;
-      const { orderId } = session.metadata;
-
+    case 'checkout.session.async_payment_succeeded':
+    case 'checkout.session.completed':
       if (orderId) {
         await bulkOrderModel.updateBulkOrderStatusByOrderId({
           orderId,
@@ -63,11 +62,8 @@ const stripeWebhook = async (req, res) => {
       }
 
       break;
-    }
-
-    case 'checkout.session.async_payment_failed': {
-      const session = payload.data.object;
-      const { orderId } = session.metadata;
+    case 'checkout.session.async_payment_failed':
+    case 'heckout.session.expired':
       if (session.payment_link) {
         paymentModel.removePaymentLink({ paymentLinkId: session.payment_link });
       }
@@ -84,7 +80,6 @@ const stripeWebhook = async (req, res) => {
       }
 
       break;
-    }
   }
 
   // Return a 200 response to acknowledge receipt of the event
