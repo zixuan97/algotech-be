@@ -24,8 +24,8 @@ const payByStripeCreditCard = async (req) => {
       }
     ],
     mode: 'payment',
-    success_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?success=true`,
-    cancel_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?canceled=true`,
+    success_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&success=true`,
+    cancel_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&canceled=true`,
     metadata: { orderId }, // Store orderid and payee email in metadata
     expires_at: Math.floor(expiryDate / 1000)
   });
@@ -56,8 +56,8 @@ const payByStripePaynow = async (req) => {
       }
     ],
     mode: 'payment',
-    success_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?success=true`,
-    cancel_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?canceled=true`,
+    success_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&success=true`,
+    cancel_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&canceled=true`,
     metadata: { orderId }, // Store orderid and payee email in metadata
     expires_at: Math.floor(expiryDate / 1000)
   });
@@ -93,7 +93,7 @@ const generatePaymentLink = async (req) => {
     after_completion: {
       type: 'redirect',
       redirect: {
-        url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}?success=true`
+        url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&success=true`
       }
     },
     payment_method_types,
