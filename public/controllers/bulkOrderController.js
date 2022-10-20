@@ -238,7 +238,7 @@ const updateBulkOrderStatus = async (req, res) => {
 
 const massUpdateSalesOrderStatus = async (req, res) => {
   try {
-    const { id, bulkOrderStatus } = req.body;
+    const { id, bulkOrderStatus, orderStatus } = req.body;
     const bulkOrder = await bulkOrderModel.findBulkOrderById({
       id
     });
@@ -247,7 +247,7 @@ const massUpdateSalesOrderStatus = async (req, res) => {
       bulkOrder.salesOrders.map(async (so) => {
         await salesOrderModel.updateSalesOrderStatus({
           id: so.id,
-          orderStatus: 'PREPARED'
+          orderStatus
         });
       })
     );
