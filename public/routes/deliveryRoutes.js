@@ -12,7 +12,6 @@ router.get('/shippit/all', deliveryController.getAllShippitDeliveryOrders);
 router.get('/:id', deliveryController.getDeliveryOrder);
 router.put('/', deliveryController.updateDeliveryOrder);
 router.delete('/:id', deliveryController.deleteDeliveryOrder);
-router.post('/shippit', deliveryController.sendDeliveryOrderToShippit);
 router.get('/shippit/:trackingNum', deliveryController.trackShippitOrder);
 router.get(
   '/shippit/latest/:trackingNum',
