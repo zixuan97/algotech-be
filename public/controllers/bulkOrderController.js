@@ -9,6 +9,7 @@ const customerModel = require('../models/customerModel');
 const { generateBulkOrderExcel } = require('../helpers/excel');
 const { format } = require('date-fns');
 const { uuid } = require('uuidv4');
+const sns = require('../helpers/sns');
 
 const createBulkOrder = async (req, res) => {
   const {
@@ -258,6 +259,20 @@ const massUpdateSalesOrderStatus = async (req, res) => {
     log.out('OK_BULKORDER_UPDATE-SALESORDER-STATUS', {
       req: { body: req.body, params: req.params },
       res: `Successfully updated sales order status with bulk order id: ${id}`
+    });
+
+    if (orderStatus === 'PREPARED') {
+      if (bulkOrder.payeeContactNo !== null) {
+        sns.sendOTP({
+          number: bulkOrder.payeeContactNo,
+          message:
+            'Your order is being prepared and delivery is on the way to you soon!'
+        });
+      }
+    }
+    log.out('OK_BULKORDER_SALESORDER-STATUS-UPDATE-SMS', {
+      req: { body: req.body, params: req.params },
+      res: `Successfully sent sms for sales order status update`
     });
     res.json({
       message: `Successfully updated sales order status with bulk order id: ${id}`

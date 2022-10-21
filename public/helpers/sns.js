@@ -8,7 +8,8 @@ const sns = new AWS.SNS({
 });
 
 const sendOTP = (req, res) => {
-  const { number, message } = req;
+  let { number, message } = req;
+  if (number !== null && !number.startsWith('+65')) number = `+65${number}`;
   const params = {
     Message: message,
     PhoneNumber: number

@@ -68,7 +68,7 @@ const createManualDeliveryOrder = async (req, res) => {
       assignedUser
     };
     let number = salesOrder.customerContactNo;
-    if (number !== null && !number.startsWith('+65')) number = `+65${number}`;
+
     if (number !== null) {
       sns.sendOTP({
         number,
