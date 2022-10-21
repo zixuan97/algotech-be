@@ -294,7 +294,7 @@ model DeliveryStatus {
 }
 
 enum BulkOrderStatus {
-  CREATED
+  PAYMENT_PENDING
   PAYMENT_SUCCESS
   PAYMENT_FAILED
   FULFILLED
