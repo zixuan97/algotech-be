@@ -8,27 +8,25 @@ const sns = new AWS.SNS({
 });
 
 const sendOTP = (req, res) => {
-  // const { number, message } = req;
+  const { number, message } = req;
   const params = {
-    Message: 'testing hello',
-    PhoneNumber: '+6593861801'
+    Message: message,
+    PhoneNumber: number
   };
   sns
     .publish(params)
     .promise()
     .then(function (data) {
       log.out('OK_SNS_SEND-OTP', {
-        req: { body: req.body, params: req.params },
+        req,
         res: data
       });
-      return res.json({ message: `Message ID is ${data.MessageId}` });
     })
     .catch(function (err) {
       log.error('ERR_SNS_SEND-OTP', {
         err: err.message,
-        req: { body: req.body, params: req.params }
+        req
       });
-      return res.status(Error.http(err).code).json(e.message);
     });
 };
 
