@@ -15,7 +15,7 @@ const createUser = async (req) => {
     contactNo
   } = req;
   let encryptedPassword = '';
-  if (role !== UserRole.DISTRIBUTOR && role !== UserRole.CORPORATE) {
+  if (role !== UserRole.B2B) {
     encryptedPassword = await bcrypt.hash(password, 10);
   } else {
     if (status === undefined) {
@@ -45,14 +45,7 @@ const getUsers = async () => {
 const getB2BUsers = async () => {
   const users = await prisma.User.findMany({
     where: {
-      OR: [
-        {
-          role: UserRole.DISTRIBUTOR
-        },
-        {
-          role: UserRole.CORPORATE
-        }
-      ]
+      role: UserRole.B2B
     }
   });
   return users;

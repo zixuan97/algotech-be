@@ -65,16 +65,8 @@ const createUser = async (req, res) => {
 };
 
 const createB2BUser = async (req, res) => {
-  const {
-    firstName,
-    lastName,
-    email,
-    role,
-    status,
-    isVerified,
-    company,
-    contactNo
-  } = req.body;
+  const { firstName, lastName, email, status, isVerified, company, contactNo } =
+    req.body;
   const user = await userModel.findUserByEmail({ email });
   if (user) {
     log.error('ERR_USER_CREATE-B2B-USER', {
@@ -88,7 +80,7 @@ const createB2BUser = async (req, res) => {
         firstName,
         lastName,
         email,
-        role,
+        role: UserRole.B2B,
         status,
         isVerified,
         company,
@@ -161,6 +153,10 @@ const auth = async (req, res) => {
   });
   if (user && user.status === UserStatus.DISABLED) {
     res.status(400).send('User has been disabled.');
+  } else if (user && user.status === UserStatus.REJECTED) {
+    res.status(400).send('User has been rejected.');
+  } else if (user && user.status === UserStatus.PENDING) {
+    res.status(400).send('User is still pending verification.');
   } else if (
     user &&
     (await bcrypt.compare(password, user.password)) &&
@@ -583,10 +579,7 @@ const getAllNonB2BUsers = async (req, res) => {
   try {
     const users = await userModel.getUsers({});
     const filteredUsers = users.filter(
-      (u) =>
-        u.id != req.user.userId &&
-        u.role !== UserRole.CORPORATE &&
-        u.role !== UserRole.DISTRIBUTOR
+      (u) => u.id != req.user.userId && u.role !== UserRole.B2B
     );
     log.out('OK_USER_GET-NON-B2B-USERS', {
       req: { body: req.body, params: req.params },
@@ -600,6 +593,16 @@ const getAllNonB2BUsers = async (req, res) => {
     });
     res.status(400).send('Error getting all non-B2B users');
   }
+};
+
+const getNumberOfPendingUsers = async (req, res) => {
+  const users = await userModel.getB2BUsers({});
+  const filtered = users.filter((u) => u.status === UserStatus.PENDING);
+  log.out('OK_USER_GET-NUMBER-OF-PENDING-USERS', {
+    req: { body: req.body, params: req.params },
+    res: filtered.length
+  });
+  res.json(filtered.length);
 };
 
 exports.createUser = createUser;
@@ -621,3 +624,4 @@ exports.rejectB2BUser = rejectB2BUser;
 exports.getAllB2BUsers = getAllB2BUsers;
 exports.getAllPendingB2BUsers = getAllPendingB2BUsers;
 exports.getAllNonB2BUsers = getAllNonB2BUsers;
+exports.getNumberOfPendingUsers = getNumberOfPendingUsers;
