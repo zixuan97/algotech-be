@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --runInBand --forceExit",
     "vercel-build": "prisma generate && prisma migrate deploy",
     "prisma:generate": "prisma generate",
     "format": "npx prettier --write ."
@@ -44,12 +44,14 @@
     "pdfkit": "^0.13.0",
     "pusher": "^5.1.1-beta",
     "stripe": "^10.14.0",
+    "supertest": "^6.3.0",
     "uuid": "^9.0.0",
     "uuidv4": "^6.2.13",
     "write-excel-file": "^1.4.12"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.3",
+    "jest": "^29.2.1",
     "prisma": "4.2.1"
   }
 }
