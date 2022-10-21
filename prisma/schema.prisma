@@ -339,8 +339,7 @@ enum UserRole {
   PARTTIME
   FULLTIME
   CUSTOMER
-  DISTRIBUTOR
-  CORPORATE
+  B2B
 }
 
 enum UserStatus {
