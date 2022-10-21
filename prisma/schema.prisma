@@ -197,12 +197,13 @@ model BulkOrder {
 }
 
 model Newsletter {
-  id             Int    @id @default(autoincrement())
-  name           String
-  emailSubject   String
-  emailBodyTitle String
-  emailBody      String
-  discountCode   String
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  emailSubject        String
+  emailBodyTitle      String
+  emailBody           String
+  discountCode        String
+  scheduledNewsletter ScheduledNewsletter[]
 }
 
 model ProductCatalogue {
@@ -270,14 +271,15 @@ model SupplierProduct {
 }
 
 model ScheduledNewsletter {
-  id             Int       @id @default(autoincrement())
-  jobId          String    @unique
+  id             Int        @id @default(autoincrement())
+  jobId          String     @unique
   newsletterId   Int
+  newsletter     Newsletter @relation(fields: [newsletterId], references: [id])
   customerEmails String[]
   sentDate       DateTime
-  jobStatus      JobStatus @default(SCHEDULED)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  jobStatus      JobStatus  @default(SCHEDULED)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 }
 
 model DeliveryStatus {

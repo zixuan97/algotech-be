@@ -89,9 +89,9 @@ const createBulkOrder = async (req, res) => {
         });
         log.out('OK_BULKORDER_CREATE-CREDITCARD-PAYMENT-LINK', {
           req: { body: req.body, params: req.params },
-          res: sessionURL
+          res: { paymentUrl: sessionURL, bulkOrder: JSON.stringify(data) }
         });
-        res.json(sessionURL);
+        res.json({ paymentUrl: sessionURL, bulkOrder: data });
       } else {
         const sessionURL = await paymentModel.payByStripePaynow({
           amount,
@@ -99,9 +99,9 @@ const createBulkOrder = async (req, res) => {
         });
         log.out('OK_BULKORDER_CREATE-PAYNOW-PAYMENT-LINK', {
           req: { body: req.body, params: req.params },
-          res: sessionURL
+          res: { paymentUrl: sessionURL, bulkOrder: JSON.stringify(data) }
         });
-        res.json(sessionURL);
+        res.json({ paymentUrl: sessionURL, bulkOrder: data });
       }
     } catch (error) {
       log.error('ERR_BULKORDER_CREATE-PAYMENT', {
@@ -238,7 +238,7 @@ const updateBulkOrderStatus = async (req, res) => {
 
 const massUpdateSalesOrderStatus = async (req, res) => {
   try {
-    const { id, bulkOrderStatus } = req.body;
+    const { id, bulkOrderStatus, orderStatus } = req.body;
     const bulkOrder = await bulkOrderModel.findBulkOrderById({
       id
     });
@@ -247,7 +247,7 @@ const massUpdateSalesOrderStatus = async (req, res) => {
       bulkOrder.salesOrders.map(async (so) => {
         await salesOrderModel.updateSalesOrderStatus({
           id: so.id,
-          orderStatus: 'PREPARED'
+          orderStatus
         });
       })
     );
@@ -317,9 +317,9 @@ const updateBulkOrder = async (req, res) => {
     });
     log.out('OK_BULKORDER_UPDATE-BULKORDER', {
       req: { body: req.body, params: req.params },
-      res: { message: `Successfully updated bulk order with id: ${id}` }
+      res: JSON.stringify(bulkOrder)
     });
-    res.json({ message: `Successfully updated bulk order with id: ${id}` });
+    res.json(bulkOrder);
   } catch (error) {
     log.error('ERR_BULKORDER_UPDATE-BULKORDER', {
       err: error.message,

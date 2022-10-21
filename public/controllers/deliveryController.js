@@ -70,10 +70,9 @@ const createManualDeliveryOrder = async (req, res) => {
     let number = salesOrder.customerContactNo;
     if (number !== null && !number.startsWith('+65')) number = `+65${number}`;
     if (number !== null) {
-      console.log(number);
       sns.sendOTP({
         number,
-        message: 'Your delivery order is on the way to you soon!'
+        message: 'Your delivery is on the way to you soon!'
       });
     }
     log.out('OK_DELIVERYORDER_CREATE-MANUAL-DO', {
@@ -181,10 +180,9 @@ const createShippitDeliveryOrder = async (req, res) => {
       let number = salesOrder.customerContactNo;
       if (number !== null && !number.startsWith('+65')) number = `+65${number}`;
       if (number !== null) {
-        console.log(number);
         sns.sendOTP({
           number,
-          message: `Your delivery order with tracking number ${soShippit.response.tracking_number} is on the way to you soon!`
+          message: `Your delivery is on the way to you soon! Track your order here: https://app.staging.shippit.com/tracking/${soShippit.response.tracking_number}`
         });
       }
       log.out('OK_DELIVERYORDER_CREATE-DO', {
@@ -239,7 +237,6 @@ const createLalamoveDeliveryOrder = async (req, res) => {
     recipientName: salesOrder.customerName,
     recipientPhone: customerPhone
   });
-  console.log(soLalamove);
   log.out('OK_DELIVERYORDER_SEND-DO-TO-LALAMOVE', {
     req: { body: req.body, params: req.params },
     res: JSON.stringify(soLalamove)
@@ -281,7 +278,7 @@ const createLalamoveDeliveryOrder = async (req, res) => {
       if (customerPhone !== null) {
         sns.sendOTP({
           number: customerPhone,
-          message: `Your delivery order is on the way to you soon! Track you delivery here: ${soLalamove.shareLink}`
+          message: `Your delivery is on the way to you soon! Track you delivery here: ${soLalamove.shareLink}`
         });
       }
       log.out('OK_DELIVERYORDER_CREATE-DO', {
@@ -697,50 +694,6 @@ const cancelShippitOrder = async (req, res) => {
     res.status(400).send('Error cancelling shippit order');
   }
 };
-
-// const sendDeliveryOrderToShippit = async (req, res) => {
-//   const {
-//     courierType,
-//     deliveryAddress,
-//     deliveryPostcode,
-//     deliveryState,
-//     deliverySuburb,
-//     courierAllocation,
-//     parcelQty,
-//     parcelWeight,
-//     recipientEmail,
-//     firstName,
-//     lastName
-//   } = req.body;
-//   const { data, error } = await common.awaitWrap(
-//     deliveryModel.sendDeliveryOrderToShippit({
-//       courier_type: courierType,
-//       delivery_address: deliveryAddress,
-//       delivery_postcode: deliveryPostcode,
-//       delivery_state: deliveryState,
-//       delivery_suburb: deliverySuburb,
-//       courier_allocation: courierAllocation,
-//       qty: parcelQty,
-//       weight: parcelWeight,
-//       email: recipientEmail,
-//       first_name: firstName,
-//       last_name: lastName
-//     })
-//   );
-//   if (error) {
-//     log.error('ERR_DELIVERY_SEND-DO-TO-SHIPPIT', {
-//       err: error.message,
-//       req: { body: req.body, params: req.params }
-//     });
-//     res.json(Error.http(error));
-//   } else {
-//     log.out('OK_DELIVERY_SEND-DO-TO-SHIPPIT', {
-//       req: { body: req.body, params: req.params },
-//       res: JSON.stringify(data.response)
-//     });
-//     res.json(data.response);
-//   }
-// };
 
 const trackShippitOrder = async (req, res) => {
   try {
@@ -1341,7 +1294,6 @@ exports.getAllLalamoveDeliveryOrders = getAllLalamoveDeliveryOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
 // shippit
-// exports.sendDeliveryOrderToShippit = sendDeliveryOrderToShippit;
 exports.trackShippitOrder = trackShippitOrder;
 exports.getLastestTrackingInfoOfOrder = getLastestTrackingInfoOfOrder;
 exports.confirmShippitOrder = confirmShippitOrder;

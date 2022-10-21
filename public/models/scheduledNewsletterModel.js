@@ -13,15 +13,35 @@ const createScheduledNewsLetter = async (req) => {
   });
 };
 
-const getAllScheduledNewsLetters = async () => {
-  const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({});
+const getAllScheduledNewsLetters = async (req) => {
+  const { time_from, time_to } = req;
+  const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({
+    where: {
+      sentDate: {
+        lte: time_to, //last date
+        gte: time_from //first date
+      }
+    },
+    include: {
+      newsletter: true
+    }
+  });
   return scheduledNewsletters;
 };
 
 const getAllScheduledNewsLettersByJobStatus = async (req) => {
-  const { jobStatus } = req;
+  const { jobStatus, time_from, time_to } = req;
   const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({
-    where: { jobStatus }
+    where: {
+      jobStatus,
+      sentDate: {
+        lte: time_to, //last date
+        gte: time_from //first date
+      }
+    },
+    include: {
+      newsletter: true
+    }
   });
   return scheduledNewsletters;
 };
@@ -36,6 +56,9 @@ const updateScheduledNewsLetter = async (req) => {
       customerEmails,
       sentDate,
       jobId
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletter;
@@ -48,6 +71,9 @@ const updateScheduledNewsLetterStatus = async (req) => {
     where: { jobId },
     data: {
       jobStatus
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletter;
@@ -67,6 +93,9 @@ const findScheduledNewsletterById = async (req) => {
   const scheduledNewsletter = await prisma.scheduledNewsletter.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletter;
@@ -77,6 +106,9 @@ const findScheduledNewsletterByNewsletterId = async (req) => {
   const scheduledNewsletters = await prisma.scheduledNewsletter.findMany({
     where: {
       newsletterId
+    },
+    include: {
+      newsletter: true
     }
   });
   return scheduledNewsletters;
