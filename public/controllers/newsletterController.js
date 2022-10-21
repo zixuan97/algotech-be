@@ -238,11 +238,13 @@ const getAllScheduledNewsletters = async (req, res) => {
 };
 
 const getAllScheduledNewslettersByJobStatus = async (req, res) => {
-  const { jobStatus } = req.body;
+  const { jobStatus, time_from, time_to } = req.body;
   try {
     const scheduledNewsletters =
       await scheduledNewsletterModel.getAllScheduledNewsLettersByJobStatus({
-        jobStatus
+        jobStatus,
+        time_from,
+        time_to
       });
 
     log.out('OK_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTERS', {
