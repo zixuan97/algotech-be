@@ -84,7 +84,7 @@ const generatePaymentLink = async (req) => {
 
   const price = await stripe.prices.create({
     currency: 'sgd',
-    unit_amount: (amount * 100).toString().replace('.', ''),
+    unit_amount: (amount * 100).toFixed(0).toString().replace('.', ''),
     product: product.id
   });
 
