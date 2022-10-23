@@ -18,7 +18,7 @@ const payByStripeCreditCard = async (req) => {
           product_data: {
             name: orderId
           },
-          unit_amount: (amount * 100).toString().replace('.', '') // in stripe checkout format
+          unit_amount: (amount * 100).toFixed(0).toString().replace('.', '') // in stripe checkout format
         },
         quantity: 1
       }
@@ -50,7 +50,7 @@ const payByStripePaynow = async (req) => {
           product_data: {
             name: orderId
           },
-          unit_amount: (amount * 100).toString().replace('.', '') // in stripe checkout format
+          unit_amount: (amount * 100).toFixed(0).toString().replace('.', '') // in stripe checkout format
         },
         quantity: 1
       }
