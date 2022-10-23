@@ -422,7 +422,7 @@ const findBulkOrderByEmail = async (req) => {
 const getBulkOrdersByMonthForCustomer = async (req) => {
   const { payeeEmail } = req;
   const orders =
-    await prisma.$queryRaw`select DATE_TRUNC('month',"createdTime") as month, COUNT("orderId") as numOrders, SUM("amount") as totalamount FROM "public"."BulkOrder" where "payeeEmail"=${payeeEmail} group by DATE_TRUNC('month',"createdTime")`;
+    await prisma.$queryRaw`select DATE_TRUNC('month',"createdTime") as month, COUNT("orderId") as numOrders, SUM("amount") as totalamount FROM "public"."BulkOrder" where "payeeEmail"=${payeeEmail} group by DATE_TRUNC('month',"createdTime") order by DATE_TRUNC('month',"createdTime")`;
   return orders;
 };
 
