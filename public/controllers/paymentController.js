@@ -1,5 +1,6 @@
 const paymentModel = require('../models/paymentModel');
 const bulkOrderModel = require('../models/bulkOrderModel');
+const salesOrderModel = require('../models/salesOrderModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -49,10 +50,20 @@ const stripeWebhook = async (req, res) => {
     case 'checkout.session.async_payment_succeeded':
     case 'checkout.session.completed':
       if (orderId) {
-        await bulkOrderModel.updateBulkOrderStatusByOrderId({
+        const bulkOrder = await bulkOrderModel.updateBulkOrderStatusByOrderId({
           orderId,
           bulkOrderStatus: 'PAYMENT_SUCCESS'
         });
+
+        await Promise.all(
+          bulkOrder.salesOrders.map(async (so) => {
+            await salesOrderModel.updateSalesOrderStatus({
+              id: so.id,
+              orderStatus: 'PAID'
+            });
+          })
+        );
+
         log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');
       }
 

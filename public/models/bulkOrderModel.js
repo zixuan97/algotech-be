@@ -36,6 +36,7 @@ const createBulkOrder = async (req) => {
           platformType: salesOrder.platformType,
           createdTime: salesOrder.createdTime,
           currency: salesOrder.currency,
+          orderStatus: 'CREATED',
           customerRemarks: salesOrder.customerRemarks,
           amount: Number(salesOrder.amount),
           salesOrderItems: {
@@ -336,6 +337,23 @@ const updateBulkOrderStatusByOrderId = async (req) => {
     },
     data: {
       bulkOrderStatus
+    },
+    include: {
+      salesOrders: {
+        include: {
+          salesOrderItems: {
+            select: {
+              productName: true,
+              price: true,
+              quantity: true,
+              salesOrderId: true,
+              createdTime: true,
+              salesOrderBundleItems: true,
+              id: true
+            }
+          }
+        }
+      }
     }
   });
   return bulkOrder;
