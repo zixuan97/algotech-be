@@ -82,7 +82,8 @@ const createBulkOrder = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: data
       });
-      const { amount, orderId } = data;
+      let { amount, orderId } = data;
+      amount = amount.toFixed(2);
       if (paymentMode === 'CREDIT_CARD') {
         const sessionURL = await paymentModel.payByStripeCreditCard({
           amount,
