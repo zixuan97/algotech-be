@@ -335,6 +335,35 @@ const getAllProductsByLocation = async (req, res) => {
   }
 };
 
+const findProductsWithNoProdCat = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    productModel.findProductsWithNoProdCat()
+  );
+
+  if (error) {
+    log.error('ERR_PRODUCT_GET-ALL-PRODUCTS-NO-PRODUCT-CATALOG', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    const result = await data.map((product) => {
+      product.categories = product.productCategory;
+      delete product.productCategory;
+      return {
+        ...product,
+        categories: product.categories.map((category) => category.category)
+      };
+    });
+    log.out('OK_PRODUCT_GET-ALL-PRODUCTS-NO-PRODUCT-CATALOG', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(result)
+    });
+    res.json(result);
+  }
+};
+
 const getAllProductsByBrand = async (req, res) => {
   const { brandId } = req.params;
   const { data, error } = await common.awaitWrap(
@@ -542,3 +571,4 @@ exports.getAllProductsByCategory = getAllProductsByCategory;
 exports.getAllProductsByBundle = getAllProductsByBundle;
 exports.getAllProductsByLocation = getAllProductsByLocation;
 exports.getAllProductsByBrand = getAllProductsByBrand;
+exports.findProductsWithNoProdCat = findProductsWithNoProdCat;

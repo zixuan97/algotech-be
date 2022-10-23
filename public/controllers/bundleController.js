@@ -80,6 +80,25 @@ const getBundleById = async (req, res) => {
   }
 };
 
+const findBundlesWithNoBundleCat = async (req, res) => {
+  try {
+    const bundles = await bundleModel.findBundlesWithNoBundleCat();
+    log.out('OK_BUNDLE_GET-BUNDLE-NO-BUNDLE-CATALOG', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(bundles)
+    });
+    res.json(bundles);
+  } catch (error) {
+    log.error('ERR_BUNDLE_GET-BUNDLE-NO-BUNDLE-CATALOG', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res
+      .status(400)
+      .send({ message: 'Error getting bundles that has no bundle catalogue' });
+  }
+};
+
 const getBundleByName = async (req, res) => {
   try {
     const { name } = req.body;
@@ -161,3 +180,4 @@ exports.updateBundle = updateBundle;
 exports.deleteBundle = deleteBundle;
 exports.getBundleById = getBundleById;
 exports.getBundleByName = getBundleByName;
+exports.findBundlesWithNoBundleCat = findBundlesWithNoBundleCat;
