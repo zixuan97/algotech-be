@@ -58,6 +58,24 @@ const findBundleById = async (req) => {
   return bundle;
 };
 
+const findBundlesWithNoBundleCat = async (req) => {
+  const bundles = await prisma.bundle.findMany({
+    where: {
+      bundleCatalogue: null
+    },
+    include: {
+      bundleProduct: {
+        select: {
+          product: true,
+          productId: true,
+          quantity: true
+        }
+      }
+    }
+  });
+  return bundles;
+};
+
 const findBundleByName = async (req) => {
   const { name } = req;
   const bundle = await prisma.bundle.findUnique({
@@ -128,3 +146,4 @@ exports.updateBundle = updateBundle;
 exports.deleteBundle = deleteBundle;
 exports.findBundleById = findBundleById;
 exports.findBundleByName = findBundleByName;
+exports.findBundlesWithNoBundleCat = findBundlesWithNoBundleCat;

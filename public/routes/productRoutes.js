@@ -3,6 +3,7 @@ const productController = require('../controllers/productController');
 
 router.post('/', productController.createProduct);
 router.get('/all', productController.getAllProducts);
+router.get('/productCatalogue', productController.findProductsWithNoProdCat);
 router.get('/:id', productController.getProductById);
 router.get('/', productController.getProductByName);
 router.get('/sku/:sku', productController.getProductBySku);

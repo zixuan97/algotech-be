@@ -153,6 +153,35 @@ const findProductByName = async (req) => {
   return product;
 };
 
+const findProductsWithNoProdCat = async (req) => {
+  const product = await prisma.product.findMany({
+    where: {
+      productCatalogue: null
+    },
+    include: {
+      productCategory: {
+        select: {
+          category: true
+        }
+      },
+      stockQuantity: {
+        select: {
+          productId: true,
+          location: true,
+          quantity: true
+        }
+      },
+      brand: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    }
+  });
+  return product;
+};
+
 const updateProduct = async (req) => {
   const { id, sku, name, categories, brand, qtyThreshold, stockQuantity } = req;
   const product = await prisma.product.update({
@@ -366,3 +395,4 @@ exports.getAllProductsByBrand = getAllProductsByBrand;
 exports.getAllProductsByCategory = getAllProductsByCategory;
 exports.getAllProductsByBundle = getAllProductsByBundle;
 exports.getAllProductsByLocation = getAllProductsByLocation;
+exports.findProductsWithNoProdCat = findProductsWithNoProdCat;

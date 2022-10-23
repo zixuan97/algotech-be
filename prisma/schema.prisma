@@ -85,7 +85,7 @@ model Bundle {
   id              Int              @id @default(autoincrement())
   name            String           @unique
   description     String
-  BundleCatalogue BundleCatalogue?
+  bundleCatalogue BundleCatalogue?
   bundleProduct   BundleProduct[]
 }
 
@@ -272,14 +272,14 @@ model SupplierProduct {
 
 model ScheduledNewsletter {
   id             Int        @id @default(autoincrement())
-  jobId          String     @unique
   newsletterId   Int
-  newsletter     Newsletter @relation(fields: [newsletterId], references: [id])
   customerEmails String[]
   sentDate       DateTime
   jobStatus      JobStatus  @default(SCHEDULED)
   createdAt      DateTime   @default(now())
+  jobId          String     @unique
   updatedAt      DateTime   @updatedAt
+  newsletter     Newsletter @relation(fields: [newsletterId], references: [id])
 }
 
 model DeliveryStatus {
