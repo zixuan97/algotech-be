@@ -1240,7 +1240,7 @@ const getDriverDetails = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    res.status(400).send('Error retrieving driver details');
   } else {
     log.out('OK_DELIVERY_GET-LALAMOVE-DRIVER-DETAILS', {
       req: { body: req.body, params: req.params },
@@ -1292,7 +1292,7 @@ const getLalamoveStatusLink = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    res.status(400).send('Error retrieving status of order');
   } else {
     log.out('OK_DELIVERY_GET-LALAMOVE-STATUS-LINK', {
       req: { body: req.body, params: req.params },
