@@ -340,55 +340,30 @@ const getAllManualDeliveryOrders = async (req, res) => {
   }
 };
 
-const getAllShippitDeliveryOrders = async (req, res) => {
-  const { data, error } = await common.awaitWrap(
-    deliveryModel.getAllShippitDeliveryOrders({})
-  );
-  data.map((d) => {
-    d.deliveryStatus =
-      d.deliveryStatus.length !== 0
-        ? d.deliveryStatus[d.deliveryStatus.length - 1]
-        : {};
-  });
-  if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-SHIPPIT-DO', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DO', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  }
-};
-
-const getAllLalamoveDeliveryOrders = async (req, res) => {
-  const { data, error } = await common.awaitWrap(
-    deliveryModel.getAllLalamoveOrders({})
-  );
-  data.map((d) => {
-    d.deliveryStatus =
-      d.deliveryStatus.length !== 0
-        ? d.deliveryStatus[d.deliveryStatus.length - 1]
-        : {};
-  });
-  if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-LALAMOVE-DO', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY_GET-ALL-LALAMOVE-DO', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  }
-};
+// const getAllShippitDeliveryOrders = async (req, res) => {
+//   const { data, error } = await common.awaitWrap(
+//     deliveryModel.getAllShippitDeliveryOrders({})
+//   );
+//   data.map((d) => {
+//     d.deliveryStatus =
+//       d.deliveryStatus.length !== 0
+//         ? d.deliveryStatus[d.deliveryStatus.length - 1]
+//         : {};
+//   });
+//   if (error) {
+//     log.error('ERR_DELIVERY_GET-ALL-SHIPPIT-DO', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     res.json(Error.http(error));
+//   } else {
+//     log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DO', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     res.json(data);
+//   }
+// };
 
 const getDeliveryOrder = async (req, res) => {
   try {
@@ -930,76 +905,76 @@ const getLatLongForUnassignedOrders = async (req, res) => {
   ).then(() => res.json(dataRes));
 };
 
-const getAllAssignedManualDeliveriesByUser = async (req, res) => {
-  const { id } = req.params;
-  const { data, error } = await common.awaitWrap(
-    deliveryModel.findAssignedManualDeliveriesByUser({ id })
-  );
-  data.map((d) => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
-  });
-  if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  }
-};
+// const getAllAssignedManualDeliveriesByUser = async (req, res) => {
+//   const { id } = req.params;
+//   const { data, error } = await common.awaitWrap(
+//     deliveryModel.findAssignedManualDeliveriesByUser({ id })
+//   );
+//   data.map((d) => {
+//     d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
+//   });
+//   if (error) {
+//     log.error('ERR_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     res.json(Error.http(error));
+//   } else {
+//     log.out('OK_DELIVERY_GET-ALL-DO-ASSIGNED-TO-USER', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     res.json(data);
+//   }
+// };
 
-const getAllUnassignedManualDeliveries = async (req, res) => {
-  const { data, error } = await common.awaitWrap(
-    deliveryModel.findAllUnassignedManualDeliveries({})
-  );
-  data.map((d) => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
-  });
-  if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  }
-};
+// const getAllUnassignedManualDeliveries = async (req, res) => {
+//   const { data, error } = await common.awaitWrap(
+//     deliveryModel.findAllUnassignedManualDeliveries({})
+//   );
+//   data.map((d) => {
+//     d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
+//   });
+//   if (error) {
+//     log.error('ERR_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     res.json(Error.http(error));
+//   } else {
+//     log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-DELIVERIES', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     res.json(data);
+//   }
+// };
 
-const getAssignedManualDeliveriesByDate = async (req, res) => {
-  const { time_from, time_to } = req.body;
-  const { data, error } = await common.awaitWrap(
-    deliveryModel.findAllAssignedManualDeliveriesByDate({
-      time_from: new Date(time_from),
-      time_to: new Date(time_to)
-    })
-  );
-  data.map((d) => {
-    d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
-  });
-  if (error) {
-    log.error('ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  }
-};
+// const getAssignedManualDeliveriesByDate = async (req, res) => {
+//   const { time_from, time_to } = req.body;
+//   const { data, error } = await common.awaitWrap(
+//     deliveryModel.findAllAssignedManualDeliveriesByDate({
+//       time_from: new Date(time_from),
+//       time_to: new Date(time_to)
+//     })
+//   );
+//   data.map((d) => {
+//     d.deliveryStatus = d.deliveryStatus.length !== 0 ? d.deliveryStatus[0] : {};
+//   });
+//   if (error) {
+//     log.error('ERR_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     res.json(Error.http(error));
+//   } else {
+//     log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     res.json(data);
+//   }
+// };
 
 const getAssignedManualDeliveriesByDateByUser = async (req, res) => {
   const { time_from, time_to, assignedUserId } = req.body;
@@ -1161,43 +1136,43 @@ const generateDO = async (req, res) => {
     });
 };
 
-const createLalamoveQuotation = async (req, res) => {
-  const { data, error } = await common.awaitWrap(
-    lalamoveApi.createQuotation({})
-  );
-  if (error) {
-    log.error('ERR_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  }
-};
+// const createLalamoveQuotation = async (req, res) => {
+//   const { data, error } = await common.awaitWrap(
+//     lalamoveApi.createQuotation({})
+//   );
+//   if (error) {
+//     log.error('ERR_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     res.json(Error.http(error));
+//   } else {
+//     log.out('OK_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     res.json(data);
+//   }
+// };
 
-const placeLalamoveOrder = async (req, res) => {
-  const { data, error } = await common.awaitWrap(
-    lalamoveApi.placeLalamoveOrder({})
-  );
-  if (error) {
-    log.error('ERR_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  }
-};
+// const placeLalamoveOrder = async (req, res) => {
+//   const { data, error } = await common.awaitWrap(
+//     lalamoveApi.placeLalamoveOrder({})
+//   );
+//   if (error) {
+//     log.error('ERR_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     res.json(Error.http(error));
+//   } else {
+//     log.out('OK_DELIVERY_CREATE-LALAMOVE-QUOTATION', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     res.json(data);
+//   }
+// };
 
 const getLalamoveOrderByLalamoveOrderId = async (req, res) => {
   const { id } = req.params;
@@ -1275,6 +1250,58 @@ const getDriverDetails = async (req, res) => {
   }
 };
 
+const getLalamoveOrdersByDate = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    deliveryModel.findAllLalamoveDeliveriesByDate({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+  for (let d of data) {
+    await lalamoveApi.fetchLatestStatusFromLalamoveAndAddToStatus({
+      orderId: d.shippitTrackingNum
+    });
+    d.deliveryStatus =
+      d.deliveryStatus.length !== 0
+        ? d.deliveryStatus[d.deliveryStatus.length - 1]
+        : {};
+  }
+  if (error) {
+    log.error('ERR_DELIVERY_GET-ALL-LALAMOVE-DELIVERIES-BY-DATE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-ALL-LALAMOVE-DELIVERIES-BY-DATE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const getLalamoveStatusLink = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await common.awaitWrap(
+    lalamoveApi.getLalamoveOrder({ id })
+  );
+  if (error) {
+    log.error('ERR_DELIVERY_GET-LALAMOVE-STATUS-LINK', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_DELIVERY_GET-LALAMOVE-STATUS-LINK', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data.shareLink);
+  }
+};
+
 // create
 exports.createManualDeliveryOrder = createManualDeliveryOrder;
 exports.createShippitDeliveryOrder = createShippitDeliveryOrder;
@@ -1288,8 +1315,7 @@ exports.getLalamoveOrderByLalamoveOrderId = getLalamoveOrderByLalamoveOrderId; /
 // get all
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
-exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
-exports.getAllLalamoveDeliveryOrders = getAllLalamoveDeliveryOrders;
+// exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
 // update & delete
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
@@ -1315,15 +1341,16 @@ exports.getCurrentLocationLatLong = getCurrentLocationLatLong;
 // map with time
 exports.findDeliveriesWithTimeAndTypeFilter =
   findDeliveriesWithTimeAndTypeFilter;
-exports.getAllAssignedManualDeliveriesByUser =
-  getAllAssignedManualDeliveriesByUser;
-exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
-exports.getAssignedManualDeliveriesByDate = getAssignedManualDeliveriesByDate;
+// exports.getAllAssignedManualDeliveriesByUser = getAllAssignedManualDeliveriesByUser;
+// exports.getAllUnassignedManualDeliveries = getAllUnassignedManualDeliveries;
+// exports.getAssignedManualDeliveriesByDate = getAssignedManualDeliveriesByDate;
 exports.getUnassignedManualDeliveriesByDate =
   getUnassignedManualDeliveriesByDate;
 exports.getAssignedManualDeliveriesByDateByUser =
   getAssignedManualDeliveriesByDateByUser;
 // lalamove
-exports.createLalamoveQuotation = createLalamoveQuotation;
-exports.placeLalamoveOrder = placeLalamoveOrder;
+// exports.createLalamoveQuotation = createLalamoveQuotation;
+// exports.placeLalamoveOrder = placeLalamoveOrder;
 exports.getDriverDetails = getDriverDetails;
+exports.getLalamoveOrdersByDate = getLalamoveOrdersByDate;
+exports.getLalamoveStatusLink = getLalamoveStatusLink;

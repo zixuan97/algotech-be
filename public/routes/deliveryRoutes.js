@@ -7,8 +7,7 @@ router.post('/shippit', deliveryController.createShippitDeliveryOrder);
 router.post('/lalamove', deliveryController.createLalamoveDeliveryOrder);
 router.get('/all', deliveryController.getAllDeliveryOrders);
 router.get('/manual/all', deliveryController.getAllManualDeliveryOrders);
-router.get('/lalamove/all', deliveryController.getAllLalamoveDeliveryOrders);
-router.get('/shippit/all', deliveryController.getAllShippitDeliveryOrders);
+// router.get('/shippit/all', deliveryController.getAllShippitDeliveryOrders);
 router.get('/:id', deliveryController.getDeliveryOrder);
 router.put('/', deliveryController.updateDeliveryOrder);
 router.delete('/:id', deliveryController.deleteDeliveryOrder);
@@ -45,15 +44,15 @@ router.post(
   deliveryController.findDeliveriesWithTimeAndTypeFilter
 );
 router.post('/pdf/:id', deliveryController.generateDO);
-router.post(
-  '/deliveryAssignment/:id',
-  deliveryController.getAllAssignedManualDeliveriesByUser
-);
+// router.post(
+//   '/deliveryAssignment/:id',
+//   deliveryController.getAllAssignedManualDeliveriesByUser
+// );
 router.post('/getCurrentLatLng', deliveryController.getCurrentLocationLatLong);
-router.get(
-  '/unassigned/user',
-  deliveryController.getAllUnassignedManualDeliveries
-);
+// router.get(
+//   '/unassigned/user',
+//   deliveryController.getAllUnassignedManualDeliveries
+// );
 router.get(
   '/track/:trackingNumber',
   deliveryController.getDeliveryOrderByTrackingNumber
@@ -66,10 +65,10 @@ router.post(
   '/bookinglabel/:trackingNumber',
   deliveryController.getBookingLabelLink
 );
-router.post(
-  '/assignedByDate',
-  deliveryController.getAssignedManualDeliveriesByDate
-);
+// router.post(
+//   '/assignedByDate',
+//   deliveryController.getAssignedManualDeliveriesByDate
+// );
 router.post(
   '/unassignedByDate',
   deliveryController.getUnassignedManualDeliveriesByDate
@@ -82,11 +81,11 @@ router.post(
   '/shippitDeliveries/date',
   deliveryController.getShippitOrdersByDate
 );
-router.post(
-  '/lalamove/createQuotation',
-  deliveryController.createLalamoveQuotation
-);
-router.post('/lalamove/placeOrder', deliveryController.placeLalamoveOrder);
+// router.post(
+//   '/lalamove/createQuotation',
+//   deliveryController.createLalamoveQuotation
+// );
+// router.post('/lalamove/placeOrder', deliveryController.placeLalamoveOrder);
 router.get(
   '/lalamove/order/:id',
   deliveryController.getLalamoveOrderByLalamoveOrderId
@@ -97,5 +96,9 @@ router.get(
 );
 router.post('/lalamove/cancel/:id', deliveryController.cancelLalamoveOrder);
 router.get('/lalamove/driver/:id', deliveryController.getDriverDetails);
-
+router.post(
+  '/lalamoveDeliveries/date',
+  deliveryController.getLalamoveOrdersByDate
+);
+router.get('/lalamove/track/:id', deliveryController.getLalamoveStatusLink);
 module.exports = router;
