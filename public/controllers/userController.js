@@ -510,7 +510,7 @@ const rejectB2BUser = async (req, res) => {
       user.firstName +
       ' ' +
       user.lastName +
-      '! Your request to create an account has been rejected. Please contact our admin.';
+      '! Your request to create an account has been rejected. Please contact TKG at zac@thekettlegourmet.com.';
     try {
       await emailHelper.sendEmail({
         recipientEmail: user.email,

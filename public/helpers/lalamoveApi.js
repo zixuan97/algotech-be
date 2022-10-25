@@ -1,4 +1,4 @@
-const SDKClient = require("@lalamove/lalamove-js");
+const SDKClient = require('@lalamove/lalamove-js');
 const { prisma } = require('../models/index');
 const deliveryModel = require('../models/deliveryModel');
 
@@ -6,39 +6,57 @@ const sdkClient = new SDKClient.ClientModule(
   new SDKClient.Config(
     process.env.LALAMOVE_API_KEY,
     process.env.LALAMOVE_API_SECRET,
-    "sandbox"
+    'sandbox'
   )
 );
 
 const createQuotation = async (req) => {
-  const { senderLat, senderLng, recipientLat, recipientLng, senderAddress, recipientAddress } = req; 
+  const {
+    senderLat,
+    senderLng,
+    recipientLat,
+    recipientLng,
+    senderAddress,
+    recipientAddress
+  } = req;
   const co = {
     lat: recipientLat,
-    lng: recipientLng,
+    lng: recipientLng
   };
   const co2 = {
     lat: senderLat,
-    lng: senderLng,
+    lng: senderLng
   };
   const stop1 = {
     coordinates: co,
-    address: senderAddress,
+    address: senderAddress
   };
   const stop2 = {
     coordinates: co2,
-    address: recipientAddress,
+    address: recipientAddress
   };
   const quotationPayload = SDKClient.QuotationPayloadBuilder.quotationPayload()
-    .withLanguage("en_SG")
-    .withServiceType("CAR")
+    .withLanguage('en_SG')
+    .withServiceType('CAR')
     .withStops([stop1, stop2])
     .build();
-  const quote = await sdkClient.Quotation.create("SG", quotationPayload);
+  const quote = await sdkClient.Quotation.create('SG', quotationPayload);
   return quote;
 };
 
 const placeLalamoveOrder = async (req) => {
-  const { senderLat, senderLng, recipientLat, recipientLng, senderAddress, recipientAddress, senderName, senderPhone, recipientName, recipientPhone } = req; 
+  const {
+    senderLat,
+    senderLng,
+    recipientLat,
+    recipientLng,
+    senderAddress,
+    recipientAddress,
+    senderName,
+    senderPhone,
+    recipientName,
+    recipientPhone
+  } = req;
   const quotation = await createQuotation({
     senderLat,
     senderLng,
@@ -53,45 +71,53 @@ const placeLalamoveOrder = async (req) => {
     .withSender({
       stopId: quotation.stops[0].id,
       name: senderName,
-      phone: senderPhone,
+      phone: senderPhone
     })
     .withRecipients([
       {
         stopId: quotation.stops[1].id,
         name: recipientName,
-        phone: recipientPhone,
-      },
+        phone: recipientPhone
+      }
     ])
     .withMetadata({
-      "internalId": "123123"
+      internalId: '123123'
     })
     .build();
-  const order = await sdkClient.Order.create("SG", orderPayload);
+  const order = await sdkClient.Order.create('SG', orderPayload);
   return order;
 };
 
-const getLalamoveOrder = async (req,) => {
+const getLalamoveOrder = async (req) => {
   const { id } = req;
-  const order = await sdkClient.Order.retrieve("SG", id);
+  const order = await sdkClient.Order.retrieve('SG', id);
   return order;
 };
 
 const cancelLalamoveOrder = async (req) => {
   const { orderId } = req;
-  await sdkClient.Order.cancel("SG", orderId);
+  await sdkClient.Order.cancel('SG', orderId);
 };
 
 const getDriverDetails = async (req) => {
   const { id } = req;
   const deliveryOrder = await deliveryModel.findDeliveryOrderById({ id });
-  const order = await getLalamoveOrder({ id: deliveryOrder.shippitTrackingNum });
-  return await sdkClient.Driver.retrieve("SG", order.driverId, deliveryOrder.shippitTrackingNum);
+  const order = await getLalamoveOrder({
+    id: deliveryOrder.shippitTrackingNum
+  });
+  return await sdkClient.Driver.retrieve(
+    'SG',
+    order.driverId,
+    deliveryOrder.shippitTrackingNum
+  );
 };
 
 const fetchLatestStatusFromLalamoveAndAddToStatus = async (req) => {
   const { orderId } = req;
   const lalamoveOrder = await getLalamoveOrder({ id: orderId });
-  const deliveryOrder = await deliveryModel.findDeliveryOrderByLalamoveOrderId({ orderId });
+  const deliveryOrder = await deliveryModel.findDeliveryOrderByLalamoveOrderId({
+    orderId
+  });
   const latestStatus = lalamoveOrder.status;
   const deliveryStatus = await prisma.DeliveryStatus.findMany({
     where: {
@@ -99,13 +125,18 @@ const fetchLatestStatusFromLalamoveAndAddToStatus = async (req) => {
       status: latestStatus
     }
   });
-  if (deliveryStatus[0] === undefined) {
+  if (
+    deliveryStatus[0] === undefined ||
+    deliveryStatus[0].status === 'ASSIGNING_DRIVER'
+  ) {
     await prisma.DeliveryStatus.create({
       data: {
         status: latestStatus,
         statusOwner: '',
         date: new Date(Date.now()).toLocaleDateString(),
-        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', { timeZone: 'Asia/Singapore' }),
+        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+          timeZone: 'Asia/Singapore'
+        }),
         deliveryOrder: {
           connect: {
             id: deliveryOrder.id
@@ -121,4 +152,5 @@ exports.placeLalamoveOrder = placeLalamoveOrder;
 exports.getLalamoveOrder = getLalamoveOrder;
 exports.cancelLalamoveOrder = cancelLalamoveOrder;
 exports.getDriverDetails = getDriverDetails;
-exports.fetchLatestStatusFromLalamoveAndAddToStatus = fetchLatestStatusFromLalamoveAndAddToStatus;
+exports.fetchLatestStatusFromLalamoveAndAddToStatus =
+  fetchLatestStatusFromLalamoveAndAddToStatus;
