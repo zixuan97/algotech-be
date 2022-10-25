@@ -69,12 +69,12 @@ const createManualDeliveryOrder = async (req, res) => {
     };
     let number = salesOrder.customerContactNo;
 
-    if (number !== null) {
-      sns.sendOTP({
-        number,
-        message: 'Your delivery is on the way to you soon!'
-      });
-    }
+    // if (number !== null) {
+    //   sns.sendOTP({
+    //     number,
+    //     message: 'Your delivery is on the way to you soon!'
+    //   });
+    // }
     log.out('OK_DELIVERYORDER_CREATE-MANUAL-DO', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
@@ -178,13 +178,13 @@ const createShippitDeliveryOrder = async (req, res) => {
         }
       };
       let number = salesOrder.customerContactNo;
-      if (number !== null && !number.startsWith('+65')) number = `+65${number}`;
-      if (number !== null) {
-        sns.sendOTP({
-          number,
-          message: `Your delivery is on the way to you soon! Track your order here: https://app.staging.shippit.com/tracking/${soShippit.response.tracking_number}`
-        });
-      }
+      // if (number !== null && !number.startsWith('+65')) number = `+65${number}`;
+      // if (number !== null) {
+      //   sns.sendOTP({
+      //     number,
+      //     message: `Your delivery is on the way to you soon! Track your order here: https://app.staging.shippit.com/tracking/${soShippit.response.tracking_number}`
+      //   });
+      // }
       log.out('OK_DELIVERYORDER_CREATE-DO', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(result)
@@ -275,12 +275,12 @@ const createLalamoveDeliveryOrder = async (req, res) => {
         }),
         deliveryOrderId: data.id
       });
-      if (customerPhone !== null) {
-        sns.sendOTP({
-          number: customerPhone,
-          message: `Your delivery is on the way to you soon! Track you delivery here: ${soLalamove.shareLink}`
-        });
-      }
+      // if (customerPhone !== null) {
+      //   sns.sendOTP({
+      //     number: customerPhone,
+      //     message: `Your delivery is on the way to you soon! Track you delivery here: ${soLalamove.shareLink}`
+      //   });
+      // }
       log.out('OK_DELIVERYORDER_CREATE-DO', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)

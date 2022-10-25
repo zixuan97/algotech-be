@@ -18,11 +18,33 @@ async function main() {
 
   await prisma.User.create({
     data: {
+      firstName: 'Kelly',
+      lastName: 'Ng',
+      email: 'ng.kelly.jl@gmail.com',
+      password: encryptedPassword,
+      role: 'ADMIN',
+      isVerified: true
+    }
+  });
+
+  await prisma.User.create({
+    data: {
       firstName: 'Wee Kek',
       lastName: 'Tan',
       email: 'tanwk+user@comp.nus.edu.sg',
       password: encryptedPassword,
       role: 'FULLTIME',
+      isVerified: false
+    }
+  });
+
+  await prisma.User.create({
+    data: {
+      firstName: 'Zi Kun',
+      lastName: 'Teng',
+      email: 'meleenoob971+b2b@gmail.com',
+      password: encryptedPassword,
+      role: 'B2B',
       isVerified: false
     }
   });
@@ -113,7 +135,7 @@ async function main() {
   await prisma.product.create({
     data: {
       sku: 'SKU124',
-      name: 'Curry Popcorn',
+      name: 'Fish Head Curry Popcorn',
       brandId: 1,
       qtyThreshold: 20,
       productCategory: {
@@ -132,7 +154,7 @@ async function main() {
       stockQuantity: {
         create: [
           {
-            productName: 'Curry Popcorn',
+            productName: 'Fish Head Curry Popcorn',
             productSku: 'SKU124',
             quantity: 50,
             locationName: 'Punggol Warehouse',
@@ -144,6 +166,272 @@ async function main() {
           }
         ]
       }
+    }
+  });
+
+  await prisma.product.create({
+    data: {
+      sku: 'SKU125',
+      name: 'Salted Caramel Popcorn',
+      brandId: 1,
+      qtyThreshold: 20,
+      productCategory: {
+        create: [
+          {
+            categoryName: 'Asian Favourites',
+            productSku: 'SKU125',
+            category: {
+              connect: {
+                name: 'Asian Favourites'
+              }
+            }
+          }
+        ]
+      },
+      stockQuantity: {
+        create: [
+          {
+            productName: 'Salted Caramel Popcorn',
+            productSku: 'SKU125',
+            quantity: 50,
+            locationName: 'Punggol Warehouse',
+            location: {
+              connect: {
+                id: 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.product.create({
+    data: {
+      sku: 'SKU126',
+      name: 'Chocolate Popcorn',
+      brandId: 1,
+      qtyThreshold: 20,
+      productCategory: {
+        create: [
+          {
+            categoryName: 'Asian Favourites',
+            productSku: 'SKU126',
+            category: {
+              connect: {
+                name: 'Asian Favourites'
+              }
+            }
+          }
+        ]
+      },
+      stockQuantity: {
+        create: [
+          {
+            productName: 'Chocolate Popcorn',
+            productSku: 'SKU126',
+            quantity: 50,
+            locationName: 'Punggol Warehouse',
+            location: {
+              connect: {
+                id: 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.product.create({
+    data: {
+      sku: 'SKU127',
+      name: 'Pulut Hitam Popcorn',
+      brandId: 1,
+      qtyThreshold: 20,
+      productCategory: {
+        create: [
+          {
+            categoryName: 'Asian Favourites',
+            productSku: 'SKU127',
+            category: {
+              connect: {
+                name: 'Asian Favourites'
+              }
+            }
+          }
+        ]
+      },
+      stockQuantity: {
+        create: [
+          {
+            productName: 'Pulut Hitam Popcorn',
+            productSku: 'SKU127',
+            quantity: 50,
+            locationName: 'Punggol Warehouse',
+            location: {
+              connect: {
+                id: 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.bundle.create({
+    data: {
+      name: 'Nasi Lemak Mega Bundle (8 x 65g)',
+      description: '8 x Nasi Lemak Popcorn',
+      bundleProduct: {
+        create: [
+          {
+            productSku: 'SKU123',
+            productName: 'Nasi Lemak Popcorn',
+            bundleName: 'Nasi Lemak Mega Bundle (8 x 65g)',
+            quantity: 8,
+            product: {
+              connect: {
+                id: 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.bundle.create({
+    data: {
+      name: 'Fish Head Curry Mega Bundle (8 x 65g)',
+      description: '8 x Fish Head Curry Popcorn',
+      bundleProduct: {
+        create: [
+          {
+            productSku: 'SKU124',
+            productName: 'Fish Head Curry Popcorn',
+            bundleName: 'Fish Head Curry Mega Bundle (8 x 65g)',
+            quantity: 8,
+            product: {
+              connect: {
+                id: 2
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.bundle.create({
+    data: {
+      name: 'Classic Flavours Mini Bundle (4 x 65g)',
+      description: '4 x Classic Flavours Popcorn',
+      bundleProduct: {
+        create: [
+          {
+            productSku: 'SKU125',
+            productName: 'Salted Caramel Popcorn',
+            bundleName: 'Classic Flavours Mini Bundle (4 x 65g)',
+            quantity: 2,
+            product: {
+              connect: {
+                id: 3
+              }
+            }
+          },
+          {
+            productSku: 'SKU126',
+            productName: 'Chocolate Popcorn',
+            bundleName: 'Classic Flavours Mini Bundle (4 x 65g)',
+            quantity: 2,
+            product: {
+              connect: {
+                id: 4
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.bundle.create({
+    data: {
+      name: 'Shiok Ah! Specialty Bundle (6 x 65g)',
+      description: '6 x Specialty Popcorn',
+      bundleProduct: {
+        create: [
+          {
+            productSku: 'SKU124',
+            productName: 'Fish Head Curry Popcorn',
+            bundleName: 'Shiok Ah! Specialty Bundle (6 x 65g)',
+            quantity: 3,
+            product: {
+              connect: {
+                id: 2
+              }
+            }
+          },
+          {
+            productSku: 'SKU127',
+            productName: 'Pulut Hitam Popcorn',
+            bundleName: 'Shiok Ah! Specialty Bundle (6 x 65g)',
+            quantity: 3,
+            product: {
+              connect: {
+                id: 5
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.productCatalogue.create({
+    data: {
+      price: 5.0,
+      productId: 1,
+      description:
+        "Our signature flavour. You won't be able to tell the difference between this and the real thing!"
+    }
+  });
+
+  await prisma.productCatalogue.create({
+    data: {
+      price: 5.0,
+      productId: 3,
+      description:
+        "Can't go wrong with the classics. Sweet and salty at the same time."
+    }
+  });
+
+  await prisma.productCatalogue.create({
+    data: {
+      price: 5.0,
+      productId: 4,
+      description:
+        'Combining our favourite dessert with our favourite snack. Meet our take on Chocolate Popcorn!'
+    }
+  });
+
+  await prisma.bundleCatalogue.create({
+    data: {
+      price: 34.99,
+      bundleId: 1,
+      description:
+        "For those that just can't get enough of Nasi Lemak. Cheaper as a bundle!"
+    }
+  });
+
+  await prisma.bundleCatalogue.create({
+    data: {
+      price: 27.99,
+      bundleId: 4,
+      description:
+        'For those who love the basics. Cheaper when you buy a bundle!'
     }
   });
 
