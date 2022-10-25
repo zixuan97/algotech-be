@@ -119,32 +119,32 @@ const fetchLatestStatusFromLalamoveAndAddToStatus = async (req) => {
     orderId
   });
   const latestStatus = lalamoveOrder.status;
-  const deliveryStatus = await prisma.DeliveryStatus.findMany({
-    where: {
-      deliveryOrderId: deliveryOrder.id,
-      status: latestStatus
-    }
-  });
-  if (
-    deliveryStatus[0] === undefined ||
-    deliveryStatus[0].status === 'ASSIGNING_DRIVER'
-  ) {
-    await prisma.DeliveryStatus.create({
-      data: {
-        status: latestStatus,
-        statusOwner: '',
-        date: new Date(Date.now()).toLocaleDateString(),
-        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
-          timeZone: 'Asia/Singapore'
-        }),
-        deliveryOrder: {
-          connect: {
-            id: deliveryOrder.id
-          }
+  // const deliveryStatus = await prisma.DeliveryStatus.findMany({
+  //   where: {
+  //     deliveryOrderId: deliveryOrder.id,
+  //     status: latestStatus
+  //   }
+  // });
+  // if (
+  //   deliveryStatus[0] === undefined ||
+  //   deliveryStatus[0].status === 'ASSIGNING_DRIVER'
+  // ) {
+  await prisma.DeliveryStatus.create({
+    data: {
+      status: latestStatus,
+      statusOwner: '',
+      date: new Date(Date.now()).toLocaleDateString(),
+      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+        timeZone: 'Asia/Singapore'
+      }),
+      deliveryOrder: {
+        connect: {
+          id: deliveryOrder.id
         }
       }
-    });
-  }
+    }
+  });
+  //}
 };
 
 exports.createQuotation = createQuotation;
