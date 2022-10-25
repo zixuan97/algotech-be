@@ -72,53 +72,53 @@ const getAllLalamoveOrders = async () => {
   return deliveryOrders;
 };
 
-const getAllShippitDeliveryOrders = async () => {
-  let filterOrders = [];
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({
-    where: {
-      shippingType: ShippingType.SHIPPIT
-    },
-    include: {
-      salesOrder: true,
-      assignedUser: true,
-      deliveryStatus: true
-    }
-  });
-  for (let dor of deliveryOrders) {
-    let deliveryModeString = '';
-    if (dor.deliveryMode === DeliveryMode.STANDARD) {
-      deliveryModeString = 'STANDARD';
-    } else if (dor.deliveryMode === DeliveryMode.EXPRESS) {
-      deliveryModeString = 'EXPRESS';
-    } else if (dor.deliveryMode === DeliveryMode.PRIORITY) {
-      deliveryModeString = 'PRIORITY';
-    }
-    const data = {
-      shippitTrackingNum: dor.shippitTrackingNum,
-      deliveryDate: dor.deliveryDate,
-      comments: dor.comments,
-      eta: dor.eta,
-      deliveryMode: deliveryModeString,
-      shippingDate: dor.shippingDate,
-      shippingType: ShippingType.SHIPPIT,
-      recipient: {
-        name: dor.salesOrder.customerName,
-        email: dor.salesOrder.customerEmail,
-        phone: dor.salesOrder.customerContactNo
-      },
-      deliveryAddress: {
-        addressLine: dor.salesOrder.customerAddress,
-        countryCode: 'SG',
-        postcode: dor.salesOrder.postalCode,
-        state: 'Singapore',
-        suburb: 'Sg'
-      },
-      deliveryStatus: dor.deliveryStatus
-    };
-    filterOrders.push(data);
-  }
-  return filterOrders;
-};
+// const getAllShippitDeliveryOrders = async () => {
+//   let filterOrders = [];
+//   const deliveryOrders = await prisma.DeliveryOrder.findMany({
+//     where: {
+//       shippingType: ShippingType.SHIPPIT
+//     },
+//     include: {
+//       salesOrder: true,
+//       assignedUser: true,
+//       deliveryStatus: true
+//     }
+//   });
+//   for (let dor of deliveryOrders) {
+//     let deliveryModeString = '';
+//     if (dor.deliveryMode === DeliveryMode.STANDARD) {
+//       deliveryModeString = 'STANDARD';
+//     } else if (dor.deliveryMode === DeliveryMode.EXPRESS) {
+//       deliveryModeString = 'EXPRESS';
+//     } else if (dor.deliveryMode === DeliveryMode.PRIORITY) {
+//       deliveryModeString = 'PRIORITY';
+//     }
+//     const data = {
+//       shippitTrackingNum: dor.shippitTrackingNum,
+//       deliveryDate: dor.deliveryDate,
+//       comments: dor.comments,
+//       eta: dor.eta,
+//       deliveryMode: deliveryModeString,
+//       shippingDate: dor.shippingDate,
+//       shippingType: ShippingType.SHIPPIT,
+//       recipient: {
+//         name: dor.salesOrder.customerName,
+//         email: dor.salesOrder.customerEmail,
+//         phone: dor.salesOrder.customerContactNo
+//       },
+//       deliveryAddress: {
+//         addressLine: dor.salesOrder.customerAddress,
+//         countryCode: 'SG',
+//         postcode: dor.salesOrder.postalCode,
+//         state: 'Singapore',
+//         suburb: 'Sg'
+//       },
+//       deliveryStatus: dor.deliveryStatus
+//     };
+//     filterOrders.push(data);
+//   }
+//   return filterOrders;
+// };
 
 const findDeliveryOrderById = async (req) => {
   const { id } = req;
@@ -500,56 +500,56 @@ const findSalesOrderPostalCodeForUnassignedManualDeliveries = async (req) => {
   return salesOrders;
 };
 
-const findAssignedManualDeliveriesByUser = async (req) => {
-  const { id } = req;
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({
-    where: {
-      assignedUserId: Number(id),
-      shippingType: ShippingType.MANUAL
-    },
-    include: {
-      salesOrder: true,
-      assignedUser: true,
-      deliveryStatus: true
-    }
-  });
-  return deliveryOrders;
-};
+// const findAssignedManualDeliveriesByUser = async (req) => {
+//   const { id } = req;
+//   const deliveryOrders = await prisma.DeliveryOrder.findMany({
+//     where: {
+//       assignedUserId: Number(id),
+//       shippingType: ShippingType.MANUAL
+//     },
+//     include: {
+//       salesOrder: true,
+//       assignedUser: true,
+//       deliveryStatus: true
+//     }
+//   });
+//   return deliveryOrders;
+// };
 
-const findAllUnassignedManualDeliveries = async () => {
-  const deliveryOrders = await prisma.DeliveryOrder.findMany({
-    where: {
-      assignedUser: null,
-      shippingType: ShippingType.MANUAL
-    },
-    include: {
-      salesOrder: true,
-      assignedUser: true,
-      deliveryStatus: true
-    }
-  });
-  return deliveryOrders;
-};
+// const findAllUnassignedManualDeliveries = async () => {
+//   const deliveryOrders = await prisma.DeliveryOrder.findMany({
+//     where: {
+//       assignedUser: null,
+//       shippingType: ShippingType.MANUAL
+//     },
+//     include: {
+//       salesOrder: true,
+//       assignedUser: true,
+//       deliveryStatus: true
+//     }
+//   });
+//   return deliveryOrders;
+// };
 
-const findAllAssignedManualDeliveriesByDate = async (req) => {
-  const { time_from, time_to } = req;
-  const deliveryOrders =
-    await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
-  const filteredDeliveryOrders = deliveryOrders.filter(
-    (x) => x.shippingType === ShippingType.MANUAL && x.assignedUserId !== null
-  );
-  for (let d of filteredDeliveryOrders) {
-    const salesOrder = await salesOrderModel.findSalesOrderById({
-      id: d.salesOrderId
-    });
-    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
-      id: d.id
-    });
-    d.salesOrder = salesOrder;
-    d.deliveryStatus = deliveryStatus;
-  }
-  return filteredDeliveryOrders;
-};
+// const findAllAssignedManualDeliveriesByDate = async (req) => {
+//   const { time_from, time_to } = req;
+//   const deliveryOrders =
+//     await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+//   const filteredDeliveryOrders = deliveryOrders.filter(
+//     (x) => x.shippingType === ShippingType.MANUAL && x.assignedUserId !== null
+//   );
+//   for (let d of filteredDeliveryOrders) {
+//     const salesOrder = await salesOrderModel.findSalesOrderById({
+//       id: d.salesOrderId
+//     });
+//     const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
+//       id: d.id
+//     });
+//     d.salesOrder = salesOrder;
+//     d.deliveryStatus = deliveryStatus;
+//   }
+//   return filteredDeliveryOrders;
+// };
 
 const findDeliveryStatusByDeliveryOrderId = async (req) => {
   const { id } = req;
@@ -658,10 +658,30 @@ const getLatLngFromPostalCode = async (req) => {
     });
 };
 
+const findAllLalamoveDeliveriesByDate = async (req) => {
+  const { time_from, time_to } = req;
+  const deliveryOrders =
+    await prisma.$queryRaw`select * from "public"."DeliveryOrder" where "deliveryDate">=${time_from} and "deliveryDate"<=${time_to}`;
+  const filteredDeliveryOrders = deliveryOrders.filter(
+    (x) => x.shippingType === ShippingType.LALAMOVE
+  );
+  for (let d of filteredDeliveryOrders) {
+    const salesOrder = await salesOrderModel.findSalesOrderById({
+      id: d.salesOrderId
+    });
+    const deliveryStatus = await findDeliveryStatusByDeliveryOrderId({
+      id: d.id
+    });
+    d.salesOrder = salesOrder;
+    d.deliveryStatus = deliveryStatus;
+  }
+  return filteredDeliveryOrders;
+};
+
 exports.createDeliveryOrder = createDeliveryOrder;
 exports.getAllDeliveryOrders = getAllDeliveryOrders;
 exports.getAllManualDeliveryOrders = getAllManualDeliveryOrders;
-exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
+// exports.getAllShippitDeliveryOrders = getAllShippitDeliveryOrders;
 exports.getAllLalamoveOrders = getAllLalamoveOrders;
 exports.updateDeliveryOrder = updateDeliveryOrder;
 exports.deleteDeliveryOrder = deleteDeliveryOrder;
@@ -678,8 +698,8 @@ exports.findSalesOrderPostalCodeForManualDeliveriesWithTimeFilter =
 exports.findDeliveriesBasedOnTimeFilter = findDeliveriesBasedOnTimeFilter;
 exports.findDeliveriesWithTimeAndTypeFilter =
   findDeliveriesWithTimeAndTypeFilter;
-exports.findAssignedManualDeliveriesByUser = findAssignedManualDeliveriesByUser;
-exports.findAllUnassignedManualDeliveries = findAllUnassignedManualDeliveries;
+// exports.findAssignedManualDeliveriesByUser = findAssignedManualDeliveriesByUser;
+// exports.findAllUnassignedManualDeliveries = findAllUnassignedManualDeliveries;
 exports.findDeliveryOrderByTrackingNumber = findDeliveryOrderByTrackingNumber;
 exports.updateDeliveryStatus = updateDeliveryStatus;
 exports.findSalesOrderPostalCodeForUnassignedManualDeliveries =
@@ -688,8 +708,7 @@ exports.findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter =
   findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter;
 exports.fetchLatestStatusFromShippitAndAddToStatus =
   fetchLatestStatusFromShippitAndAddToStatus;
-exports.findAllAssignedManualDeliveriesByDate =
-  findAllAssignedManualDeliveriesByDate;
+// exports.findAllAssignedManualDeliveriesByDate = findAllAssignedManualDeliveriesByDate;
 exports.findAllUnassignedManualDeliveriesByDate =
   findAllUnassignedManualDeliveriesByDate;
 exports.findAllAssignedManualDeliveriesByDateByUser =
@@ -699,3 +718,4 @@ exports.findDeliveryStatusByDeliveryOrderId =
   findDeliveryStatusByDeliveryOrderId;
 exports.getLatLngFromPostalCode = getLatLngFromPostalCode;
 exports.findDeliveryOrderByLalamoveOrderId = findDeliveryOrderByLalamoveOrderId;
+exports.findAllLalamoveDeliveriesByDate = findAllLalamoveDeliveriesByDate;
