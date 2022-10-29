@@ -431,7 +431,7 @@ async function main() {
       price: 27.99,
       bundleId: 4,
       description:
-        'For those who love the basics. Cheaper when you buy a bundle!'
+        'For those who love specialty flavours. Cheaper when you buy a bundle!'
     }
   });
 
