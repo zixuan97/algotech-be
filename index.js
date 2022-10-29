@@ -89,11 +89,13 @@ app.use('/customer', require('./public/routes/customerRoutes'));
 app.use('/productCatalogue', require('./public/routes/productCatalogueRoutes'));
 app.use('/bundleCatalogue', require('./public/routes/bundleCatalogueRoutes'));
 app.use('/bulkOrder', require('./public/routes/bulkOrderRoutes'));
-app.use('/payment', require('./public/routes/paymentRoutes'));
+
 const port = process.env.PORT || 4000;
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
 
 module.exports = app;
