@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 // internal algotech-fe
-app.use('/user', whiteListInternal, require('./public/routes/userRoutes'));
+app.use('/user', require('./public/routes/userRoutes'));
 app.use(
   '/category',
   whiteListInternal,
