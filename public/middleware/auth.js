@@ -37,7 +37,8 @@ const whiteListInternal = (req, res, next) => {
   ];
   if (
     corsWhitelist.includes(req.headers.origin) |
-    ((req.hostname == 'localhost') | (req.hostname == 'algotech-be.vercel.app'))
+    (req.hostname == 'localhost')
+    // | (req.hostname == 'algotech-be.vercel.app'))
   ) {
     return next();
   } else {
