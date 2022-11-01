@@ -19,7 +19,7 @@ model User {
   company        String?
   contactNo      String?
   deliveryOrders DeliveryOrder[]
-  leaveBalance   LeaveBalance[]
+  leaveBalance   LeaveBalance?
   subjects       Subject[]
 }
 
@@ -296,89 +296,89 @@ model ScheduledNewsletter {
 }
 
 model Leave {
-  id                Int         @id @default(autoincrement())
-  applicationDate   DateTime
-  startDate         DateTime
-  endDate           DateTime
-  leaveType         LeaveType
-  status            LeaveStatus @default(PENDING)
-  description       String
-  vettedBy          String?
-  commentsByVetter  String?
-  lastUpdated       DateTime
-  employeeId        Int
+  id               Int         @id @default(autoincrement())
+  applicationDate  DateTime
+  startDate        DateTime
+  endDate          DateTime
+  leaveType        LeaveType
+  status           LeaveStatus @default(PENDING)
+  description      String
+  vettedBy         String?
+  commentsByVetter String?
+  lastUpdated      DateTime
+  employeeId       Int
 }
 
 model LeaveQuota {
-  employeeLevel     EmployeeLevel   @unique
-  medicalLeave      Int
-  parentalLeave     Int
-  paidLeave         Int
-  unpaidLeave       Int
+  employeeLevel EmployeeLevel @unique
+  medicalLeave  Int
+  parentalLeave Int
+  paidLeave     Int
+  unpaidLeave   Int
 }
 
 model LeaveBalance {
-  employeeId       Int             @unique
-  medicalLeave     Int
-  parentalLeave    Int
-  paidLeave        Int
-  unpaidLeave      Int
-  asOfDate         DateTime
-  employeeLevel    EmployeeLevel
-  user             User            @relation(fields: [employeeId], references: [id])
+  employeeId    Int           @unique
+  medicalLeave  Int
+  parentalLeave Int
+  paidLeave     Int
+  unpaidLeave   Int
+  asOfDate      DateTime
+  employeeLevel EmployeeLevel
+  user          User          @relation(fields: [employeeId], references: [id])
 }
 
 model Step {
-  id          Int               @id @default(autoincrement())
-  title       String            @unique
-  content     String
-  status      MaterialStatus    @default(DRAFT)
-  topicId     Int
-  topic       Topic             @relation(fields: [topicId], references: [id])
+  id      Int            @id @default(autoincrement())
+  title   String         @unique
+  content String
+  topicId Int
+  topic   Topic          @relation(fields: [topicId], references: [id])
 }
 
 model Topic {
-  id                Int              @id @default(autoincrement())
-  subjectOrder      Int
-  name              String           @unique
-  status            MaterialStatus   @default(DRAFT)
-  subjectId         Int
-  subject           Subject          @relation(fields: [subjectId], references: [id])
-  steps             Step[]
+  id           Int            @id @default(autoincrement())
+  subjectOrder Int
+  name         String         @unique
+  status       ContentStatus  @default(DRAFT)
+  subjectId    Int
+  subject      Subject        @relation(fields: [subjectId], references: [id])
+  steps        Step[]
 }
 
 model Subject {
-  id                  Int        @id @default(autoincrement())
-  description         String
-  isPublished         Boolean
-  completionRate      Int        @default(0)
-  usersAssigned       User[]
-  topic               Topic[]
-  quizzes             Quiz[]
+  id             Int     @id @default(autoincrement())
+  description    String
+  isPublished    Boolean
+  completionRate Int     @default(0)
+  quizzes        Quiz[]
+  topic          Topic[]
+  usersAssigned  User[]
 }
 
 model Quiz {
-  id                Int               @id @default(autoincrement())
-  subjectOrder      Int
-  title             String
-  description       String
-  passingScore      Int
-  completionRate    Int               @default(0)
-  questions         QuizQuestion[]
-  subjectId         Int
-  subject           Subject          @relation(fields: [subjectId], references: [id])
+  id             Int            @id @default(autoincrement())
+  subjectOrder   Int
+  title          String
+  description    String
+  passingScore   Int
+  completionRate Int            @default(0)
+  status         ContentStatus  @default(DRAFT)
+  subjectId      Int
+  subject        Subject        @relation(fields: [subjectId], references: [id])
+  questions      QuizQuestion[]
 }
 
 model QuizQuestion {
-  id             Int          @id @default(autoincrement())
-  question       String
-  type           AnswerType
-  options        String[]
-  writtenAnswer  String?
-  minWordCount   Int?
-  correctAnswer  String
-  quizId         Int
-  quiz           Quiz         @relation(fields: [quizId], references: [id])
+  id            Int        @id @default(autoincrement())
+  question      String
+  type          AnswerType
+  options       String[]
+  writtenAnswer String?
+  minWordCount  Int?
+  correctAnswer String
+  quizId        Int
+  quiz          Quiz       @relation(fields: [quizId], references: [id])
 }
 
 enum BulkOrderStatus {
@@ -487,7 +487,7 @@ enum AnswerType {
   WRITTEN
 }
 
-enum MaterialStatus {
+enum ContentStatus {
   DRAFT
   PENDING
   FINISHED
