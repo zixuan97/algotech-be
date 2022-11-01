@@ -33,9 +33,10 @@ const createUser = async (req, res) => {
         subject: 'Your generated password',
         content
       });
-      console.log('Email sent');
+      // console.log('Email sent');
     } catch (error) {
-      console.log('Error sending email');
+      res.status(400).send('Error sending email');
+      // console.log('Error sending email');
     }
     const { error } = await common.awaitWrap(
       userModel.createUser({
@@ -315,6 +316,7 @@ const disableUser = async (req, res) => {
 const changeUserRole = async (req, res) => {
   try {
     const { id, action } = req.params;
+    console.log(action);
     const user = await userModel.changeUserRole({ id, action });
     log.out('OK_USER_CHANGE-USER-ROLE', {
       req: { body: req.body, params: req.params },

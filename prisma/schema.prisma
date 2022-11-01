@@ -19,6 +19,8 @@ model User {
   company        String?
   contactNo      String?
   deliveryOrders DeliveryOrder[]
+  leaveBalance   LeaveBalance[]
+  subjects       Subject[]
 }
 
 model Category {
@@ -260,6 +262,17 @@ model DeliveryOrder {
   deliveryStatus     DeliveryStatus[]
 }
 
+model DeliveryStatus {
+  status          String
+  statusOwner     String
+  date            String
+  timestamp       String
+  deliveryOrderId Int
+  deliveryOrder   DeliveryOrder @relation(fields: [deliveryOrderId], references: [id])
+
+  @@id([deliveryOrderId, date, timestamp, status])
+}
+
 model SupplierProduct {
   supplierId Int
   productId  Int
@@ -282,15 +295,90 @@ model ScheduledNewsletter {
   newsletter     Newsletter @relation(fields: [newsletterId], references: [id])
 }
 
-model DeliveryStatus {
-  status          String
-  statusOwner     String
-  date            String
-  timestamp       String
-  deliveryOrderId Int
-  deliveryOrder   DeliveryOrder @relation(fields: [deliveryOrderId], references: [id])
+model Leave {
+  id                Int         @id @default(autoincrement())
+  applicationDate   DateTime
+  startDate         DateTime
+  endDate           DateTime
+  leaveType         LeaveType
+  status            LeaveStatus @default(PENDING)
+  description       String
+  vettedBy          String?
+  commentsByVetter  String?
+  lastUpdated       DateTime
+  employeeId        Int
+}
 
-  @@id([deliveryOrderId, date, timestamp, status])
+model LeaveQuota {
+  employeeLevel     EmployeeLevel   @unique
+  medicalLeave      Int
+  parentalLeave     Int
+  paidLeave         Int
+  unpaidLeave       Int
+}
+
+model LeaveBalance {
+  employeeId       Int             @unique
+  medicalLeave     Int
+  parentalLeave    Int
+  paidLeave        Int
+  unpaidLeave      Int
+  asOfDate         DateTime
+  employeeLevel    EmployeeLevel
+  user             User            @relation(fields: [employeeId], references: [id])
+}
+
+model Step {
+  id          Int               @id @default(autoincrement())
+  title       String            @unique
+  content     String
+  status      MaterialStatus    @default(DRAFT)
+  topicId     Int
+  topic       Topic             @relation(fields: [topicId], references: [id])
+}
+
+model Topic {
+  id                Int              @id @default(autoincrement())
+  subjectOrder      Int
+  name              String           @unique
+  status            MaterialStatus   @default(DRAFT)
+  subjectId         Int
+  subject           Subject          @relation(fields: [subjectId], references: [id])
+  steps             Step[]
+}
+
+model Subject {
+  id                  Int        @id @default(autoincrement())
+  description         String
+  isPublished         Boolean
+  completionRate      Int        @default(0)
+  usersAssigned       User[]
+  topic               Topic[]
+  quizzes             Quiz[]
+}
+
+model Quiz {
+  id                Int               @id @default(autoincrement())
+  subjectOrder      Int
+  title             String
+  description       String
+  passingScore      Int
+  completionRate    Int               @default(0)
+  questions         QuizQuestion[]
+  subjectId         Int
+  subject           Subject          @relation(fields: [subjectId], references: [id])
+}
+
+model QuizQuestion {
+  id             Int          @id @default(autoincrement())
+  question       String
+  type           AnswerType
+  options        String[]
+  writtenAnswer  String?
+  minWordCount   Int?
+  correctAnswer  String
+  quizId         Int
+  quiz           Quiz         @relation(fields: [quizId], references: [id])
 }
 
 enum BulkOrderStatus {
@@ -371,4 +459,36 @@ enum ShippingType {
   SHIPPIT
   GRAB
   LALAMOVE
+}
+
+enum LeaveType {
+  MEDICAL
+  PAID
+  UNPAID
+  PARENTAL
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVE
+  REJECTED
+  CANCELLED
+}
+
+enum EmployeeLevel {
+  CSUITE
+  MANAGER
+  EMPLOYEE
+  INTERN
+}
+
+enum AnswerType {
+  MCQ
+  WRITTEN
+}
+
+enum MaterialStatus {
+  DRAFT
+  PENDING
+  FINISHED
 }
