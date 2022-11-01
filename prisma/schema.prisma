@@ -363,6 +363,7 @@ model Quiz {
   description    String
   passingScore   Int
   completionRate Int            @default(0)
+  status         ContentStatus  @default(DRAFT)
   subjectId      Int
   subject        Subject        @relation(fields: [subjectId], references: [id])
   questions      QuizQuestion[]
@@ -376,7 +377,6 @@ model QuizQuestion {
   writtenAnswer String?
   minWordCount  Int?
   correctAnswer String
-  status        ContentStatus  @default(DRAFT)
   quizId        Int
   quiz          Quiz       @relation(fields: [quizId], references: [id])
 }
