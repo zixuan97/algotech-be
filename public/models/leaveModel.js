@@ -86,6 +86,35 @@ const deleteLeave = async (req) => {
   });
 };
 
+const createLeaveQuota = async (req) => {
+  const {
+    employeeLevel,
+    endDate,
+    leaveType,
+    status,
+    description,
+    vettedBy,
+    commentsByVetter,
+    lastUpdated,
+    employeeId
+  } = req;
+  const leave = await prisma.leave.create({
+    data: {
+      applicationDate: new Date(),
+      startDate,
+      endDate,
+      leaveType,
+      status,
+      description,
+      vettedBy,
+      commentsByVetter,
+      lastUpdated,
+      employeeId
+    }
+  });
+  return leave;
+};
+
 exports.createLeave = createLeave;
 exports.getAllLeaves = getAllLeaves;
 exports.getLeaveById = getLeaveById;

@@ -123,8 +123,33 @@ const deleteSubject = async (req, res) => {
   }
 };
 
+const assignUsersToSubject = async (req, res) => {
+  const { id, users } = req.body;
+  const { data, error } = await common.awaitWrap(
+    subjectModel.assignUsersToSubject({
+      id,
+      users
+    })
+  );
+  if (error) {
+    log.error('ERR_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
 exports.getSubject = getSubject;
 exports.updateSubject = updateSubject;
 exports.deleteSubject = deleteSubject;
+exports.assignUsersToSubject = assignUsersToSubject;

@@ -29,12 +29,7 @@ const getAllTopicsBySubjectId = async (req) => {
     where: { subjectId: Number(subjectId) },
     include: {
       subject: true,
-      steps: true,
-      steps: {
-        include: {
-          topic: true
-        }
-      }
+      steps: true
     }
   });
   topics.sort((a, b) => {
@@ -49,29 +44,7 @@ const getTopicById = async (req) => {
     where: { id: Number(id) },
     include: {
       subject: true,
-      steps: true,
-      steps: {
-        include: {
-          topic: true
-        }
-      }
-    }
-  });
-  return topic;
-};
-
-const getTopicByName = async (req) => {
-  const { name } = req;
-  const topic = await prisma.topic.findUnique({
-    where: { name },
-    include: {
-      subject: true,
-      steps: true,
-      steps: {
-        include: {
-          topic: true
-        }
-      }
+      steps: true
     }
   });
   return topic;
@@ -89,12 +62,7 @@ const updateTopic = async (req) => {
     },
     include: {
       subject: true,
-      steps: true,
-      steps: {
-        include: {
-          topic: true
-        }
-      }
+      steps: true
     }
   });
   return topic;
@@ -107,6 +75,7 @@ const addStepsToTopic = async (req) => {
     data: {
       steps: {
         create: steps.map((s) => ({
+          topicOrder: s.topicOrder,
           title: s.title,
           content: s.content
         }))
@@ -114,13 +83,11 @@ const addStepsToTopic = async (req) => {
     },
     include: {
       subject: true,
-      steps: true,
-      steps: {
-        include: {
-          topic: true
-        }
-      }
+      steps: true
     }
+  });
+  topic.steps.sort((a, b) => {
+    return a.topicOrder - b.topicOrder;
   });
   return topic;
 };
@@ -147,7 +114,6 @@ const deleteTopic = async (req) => {
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopicById = getTopicById;
-exports.getTopicByName = getTopicByName;
 exports.updateTopic = updateTopic;
 exports.addStepsToTopic = addStepsToTopic;
 exports.deleteTopic = deleteTopic;

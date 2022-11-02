@@ -1,5 +1,6 @@
-const { ContentStatus } = require('@prisma/client');
 const { prisma } = require('./index.js');
+const topicModel = require('./topicModel.js');
+const quizModel = require('./quizModel.js');
 
 const createSubject = async (req) => {
   const { description, isPublished, type } = req;
@@ -45,23 +46,13 @@ const getAllSubjects = async () => {
       topics: true,
       topics: {
         include: {
-          steps: true,
-          steps: {
-            include: {
-              topic: true
-            }
-          }
+          steps: true
         }
       },
       quizzes: true,
       quizzes: {
         include: {
-          questions: true,
-          questions: {
-            include: {
-              quiz: true
-            }
-          }
+          questions: true
         }
       },
       usersAssigned: true
@@ -80,23 +71,13 @@ const getSubjectById = async (req) => {
       topics: true,
       topics: {
         include: {
-          steps: true,
-          steps: {
-            include: {
-              topic: true
-            }
-          }
+          steps: true
         }
       },
       quizzes: true,
       quizzes: {
         include: {
-          questions: true,
-          questions: {
-            include: {
-              quiz: true
-            }
-          }
+          questions: true
         }
       },
       usersAssigned: true
@@ -132,23 +113,13 @@ const updateSubject = async (req) => {
       topics: true,
       topics: {
         include: {
-          steps: true,
-          steps: {
-            include: {
-              topic: true
-            }
-          }
+          steps: true
         }
       },
       quizzes: true,
       quizzes: {
         include: {
-          questions: true,
-          questions: {
-            include: {
-              quiz: true
-            }
-          }
+          questions: true
         }
       },
       usersAssigned: true
@@ -159,6 +130,19 @@ const updateSubject = async (req) => {
 
 const deleteSubject = async (req) => {
   const { id } = req;
+  const topicsUnderSubject = await topicModel.getAllTopicsBySubjectId({
+    subjectId: id
+  });
+  console.log(topicsUnderSubject);
+  for (let t of topicsUnderSubject) {
+    topicModel.deleteTopic({ id: t.id });
+  }
+  const quizzesUnderSubject = await quizModel.getAllQuizzesBySubjectId({
+    subjectId: id
+  });
+  for (let q of quizzesUnderSubject) {
+    quizModel.deleteQuiz({ id: q.id });
+  }
   await prisma.subject.update({
     where: {
       id: Number(id)
@@ -182,8 +166,39 @@ const deleteSubject = async (req) => {
   });
 };
 
+const assignUsersToSubject = async (req) => {
+  const { id, users } = req;
+  const subject = await prisma.subject.update({
+    where: { id },
+    data: {
+      usersAssigned: {
+        connect: users.map((u) => ({
+          id: u.id
+        }))
+      }
+    },
+    include: {
+      topics: true,
+      topics: {
+        include: {
+          steps: true
+        }
+      },
+      quizzes: true,
+      quizzes: {
+        include: {
+          questions: true
+        }
+      },
+      usersAssigned: true
+    }
+  });
+  return subject;
+};
+
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
 exports.getSubjectById = getSubjectById;
 exports.updateSubject = updateSubject;
 exports.deleteSubject = deleteSubject;
+exports.assignUsersToSubject = assignUsersToSubject;

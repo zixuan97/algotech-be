@@ -6,5 +6,6 @@ router.get('/all/', subjectController.getAllSubjects);
 router.get('/:id', subjectController.getSubject);
 router.put('/', subjectController.updateSubject);
 router.delete('/:id', subjectController.deleteSubject);
+router.post('/users', subjectController.assignUsersToSubject);
 
 module.exports = router;

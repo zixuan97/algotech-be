@@ -25,12 +25,7 @@ const createQuiz = async (req) => {
           topics: true,
           topics: {
             include: {
-              steps: true,
-              steps: {
-                include: {
-                  topic: true
-                }
-              }
+              steps: true
             }
           },
           quizzes: true,
@@ -63,23 +58,13 @@ const getAllQuizzesBySubjectId = async (req) => {
           topics: true,
           topics: {
             include: {
-              steps: true,
-              steps: {
-                include: {
-                  topic: true
-                }
-              }
+              steps: true
             }
           },
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
           usersAssigned: true
@@ -101,23 +86,13 @@ const getQuizById = async (req) => {
           topics: true,
           topics: {
             include: {
-              steps: true,
-              steps: {
-                include: {
-                  topic: true
-                }
-              }
+              steps: true
             }
           },
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
           usersAssigned: true
@@ -155,23 +130,13 @@ const updateQuiz = async (req) => {
           topics: true,
           topics: {
             include: {
-              steps: true,
-              steps: {
-                include: {
-                  topic: true
-                }
-              }
+              steps: true
             }
           },
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
           usersAssigned: true
@@ -189,6 +154,7 @@ const addQuizQuestionsToQuiz = async (req) => {
     data: {
       questions: {
         create: questions.map((qn) => ({
+          quizOrder: qn.quizOrder,
           question: qn.question,
           type: qn.type,
           options: qn.options,
@@ -200,40 +166,27 @@ const addQuizQuestionsToQuiz = async (req) => {
     },
     include: {
       subject: true,
-      subject: {
-        include: {
-          topics: true,
-          topics: {
-            include: {
-              steps: true,
-              steps: {
-                include: {
-                  topic: true
-                }
-              }
-            }
-          },
-          quizzes: true,
-          quizzes: {
-            include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
-            }
-          },
-          usersAssigned: true
-        }
-      }
+      questions: true
     }
+  });
+  quiz.questions.sort((a, b) => {
+    return a.quizOrder - b.quizOrder;
   });
   return quiz;
 };
 
 const deleteQuiz = async (req) => {
   const { id } = req;
+  await prisma.quiz.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      questions: {
+        deleteMany: {}
+      }
+    }
+  });
   await prisma.quiz.delete({
     where: {
       id: Number(id)

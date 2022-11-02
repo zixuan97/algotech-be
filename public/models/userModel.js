@@ -76,6 +76,9 @@ const getUserDetails = async (req) => {
   const user = await prisma.User.findUnique({
     where: {
       id: Number(id)
+    },
+    include: {
+      subjects: true
     }
   });
   return user;
