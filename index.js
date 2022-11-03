@@ -91,6 +91,13 @@ app.use('/productCatalogue', require('./public/routes/productCatalogueRoutes'));
 app.use('/bundleCatalogue', require('./public/routes/bundleCatalogueRoutes'));
 app.use('/bulkOrder', require('./public/routes/bulkOrderRoutes'));
 
+//internal algotech-fe-hrm
+app.use('/step', require('./public/routes/stepRoutes'));
+app.use('/topic', require('./public/routes/topicRoutes'));
+app.use('/subject', require('./public/routes/subjectRoutes'));
+app.use('/quiz', require('./public/routes/quizRoutes'));
+app.use('/quizquestion', require('./public/routes/quizQuestionRoutes'));
+
 const port = process.env.PORT || 4000;
 
 if (process.env.NODE_ENV !== 'test') {

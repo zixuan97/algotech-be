@@ -1,103 +1,192 @@
 const { prisma } = require('./index.js');
 
 const createQuiz = async (req) => {
-  const { title, description, passingScore, completionRate, questions } = req;
+  const {
+    subjectOrder,
+    title,
+    description,
+    passingScore,
+    completionRate,
+    subjectId
+  } = req;
   const quiz = await prisma.quiz.create({
     data: {
+      subjectOrder,
       title,
       description,
       passingScore,
       completionRate,
-      questions
+      subjectId
+    },
+    include: {
+      subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true,
+              questions: {
+                include: {
+                  quiz: true
+                }
+              }
+            }
+          },
+          usersAssigned: true
+        }
+      }
     }
   });
   return quiz;
 };
 
-const connectOrCreateQuizQuestion = async (req) => {
-  const {
-    question,
-    type,
-    options,
-    writtenAnswer,
-    minWordCount,
-    correctAnswer,
-    quizId
-  } = req;
-  const quizQuestion = await prisma.QuizQuestion.upsert({
-    where: {
-      question_quizId: {
-        question,
-        quizId
+const getAllQuizzesBySubjectId = async (req) => {
+  const { subjectId } = req;
+  const quizzes = await prisma.quiz.findMany({
+    where: { subjectId: Number(subjectId) },
+    include: {
+      subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          usersAssigned: true
+        }
       }
-    },
-    update: {
-      type,
-      options,
-      writtenAnswer,
-      minWordCount,
-      correctAnswer
-    },
-    create: {
-      question,
-      type,
-      options,
-      writtenAnswer,
-      minWordCount,
-      correctAnswer,
-      quizId
     }
   });
-  return quizQuestion;
-};
-
-const getAllQuizzes = async () => {
-  const quizzes = await prisma.quiz.findMany({});
   return quizzes;
 };
 
 const getQuizById = async (req) => {
   const { id } = req;
   const quiz = await prisma.quiz.findUnique({
-    where: { id: Number(id) }
+    where: { id: Number(id) },
+    include: {
+      subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          usersAssigned: true
+        }
+      }
+    }
   });
   return quiz;
 };
 
-const getAllQuizQuestionsByQuizId = async () => {
-  const { quizId } = req;
-  const quizzes = await prisma.QuizQuestion.findMany({
-    where: { quizId: Number(quizId) }
-  });
-  return quizzes;
-};
-
 const updateQuiz = async (req) => {
-  const { title, description, passingScore, completionRate, questions } = req;
+  const {
+    id,
+    subjectOrder,
+    title,
+    description,
+    passingScore,
+    completionRate,
+    status
+  } = req;
   const quiz = await prisma.quiz.update({
     where: { id },
     data: {
+      subjectOrder,
       title,
       description,
       passingScore,
       completionRate,
-      questions
+      status
+    },
+    include: {
+      subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          usersAssigned: true
+        }
+      }
     }
   });
   return quiz;
 };
 
-const deleteQuizQuestion = async (req) => {
-  const { questionId } = req;
-  await prisma.quiz.delete({
-    where: {
-      questionId: Number(questionId)
+const addQuizQuestionsToQuiz = async (req) => {
+  const { id, questions } = req;
+  const quiz = await prisma.quiz.update({
+    where: { id },
+    data: {
+      questions: {
+        create: questions.map((qn) => ({
+          quizOrder: qn.quizOrder,
+          question: qn.question,
+          type: qn.type,
+          options: qn.options,
+          writtenAnswer: qn.writtenAnswer,
+          minWordCount: qn.minWordCount,
+          correctAnswer: qn.correctAnswer
+        }))
+      }
+    },
+    include: {
+      subject: true,
+      questions: true
     }
   });
+  quiz.questions.sort((a, b) => {
+    return a.quizOrder - b.quizOrder;
+  });
+  return quiz;
 };
 
 const deleteQuiz = async (req) => {
   const { id } = req;
+  await prisma.quiz.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      questions: {
+        deleteMany: {}
+      }
+    }
+  });
   await prisma.quiz.delete({
     where: {
       id: Number(id)
@@ -105,9 +194,9 @@ const deleteQuiz = async (req) => {
   });
 };
 
-exports.createLeave = createLeave;
-exports.getAllLeaves = getAllLeaves;
-exports.getLeaveById = getLeaveById;
-exports.getAllLeavesByEmployeeId = getAllLeavesByEmployeeId;
-exports.updateLeave = updateLeave;
-exports.deleteLeave = deleteLeave;
+exports.createQuiz = createQuiz;
+exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
+exports.getQuizById = getQuizById;
+exports.updateQuiz = updateQuiz;
+exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
+exports.deleteQuiz = deleteQuiz;

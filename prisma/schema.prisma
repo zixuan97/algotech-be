@@ -329,17 +329,18 @@ model LeaveBalance {
 }
 
 model Step {
-  id      Int            @id @default(autoincrement())
-  title   String         @unique
-  content String
-  topicId Int
-  topic   Topic          @relation(fields: [topicId], references: [id])
+  id           Int            @id @default(autoincrement())
+  topicOrder   Int
+  title        String
+  content      String
+  topicId      Int
+  topic        Topic          @relation(fields: [topicId], references: [id])
 }
 
 model Topic {
   id           Int            @id @default(autoincrement())
   subjectOrder Int
-  name         String         @unique
+  name         String
   status       ContentStatus  @default(DRAFT)
   subjectId    Int
   subject      Subject        @relation(fields: [subjectId], references: [id])
@@ -347,12 +348,14 @@ model Topic {
 }
 
 model Subject {
-  id             Int     @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   description    String
   isPublished    Boolean
-  completionRate Int     @default(0)
+  completionRate Float         @default(0)
+  lastUpdated    DateTime
+  type           SubjectType
   quizzes        Quiz[]
-  topic          Topic[]
+  topics         Topic[]
   usersAssigned  User[]
 }
 
@@ -361,8 +364,8 @@ model Quiz {
   subjectOrder   Int
   title          String
   description    String
-  passingScore   Int
-  completionRate Int            @default(0)
+  passingScore   Float
+  completionRate Float          @default(0)
   status         ContentStatus  @default(DRAFT)
   subjectId      Int
   subject        Subject        @relation(fields: [subjectId], references: [id])
@@ -371,6 +374,7 @@ model Quiz {
 
 model QuizQuestion {
   id            Int        @id @default(autoincrement())
+  quizOrder     Int 
   question      String
   type          AnswerType
   options       String[]
@@ -491,4 +495,10 @@ enum ContentStatus {
   DRAFT
   PENDING
   FINISHED
+}
+
+enum SubjectType {
+  COMPANY
+  POLICY
+  PROCESS
 }
