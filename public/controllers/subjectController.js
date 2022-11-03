@@ -1,4 +1,6 @@
 const subjectModel = require('../models/subjectModel');
+const topicModel = require('../models/topicModel');
+const quizModel = require('../models/quizModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -147,9 +149,65 @@ const assignUsersToSubject = async (req, res) => {
   }
 };
 
+const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
+  const { id } = req.params;
+  const { data: topicData, error: topicError } = await common.awaitWrap(
+    topicModel.getAllTopicsBySubjectId({
+      subjectId: id
+    })
+  );
+  topicData.map((t) => {
+    t.steps.sort((a, b) => {
+      return a.topicOrder - b.topicOrder;
+    });
+  });
+  topicData.sort((a, b) => {
+    return a.subjectOrder - b.subjectOrder;
+  });
+  const { data: quizData, error: quizError } = await common.awaitWrap(
+    quizModel.getAllQuizzesBySubjectId({
+      subjectId: id
+    })
+  );
+  quizData.map((q) => {
+    q.questions.sort((a, b) => {
+      return a.quizOrder - b.quizOrder;
+    });
+  });
+  quizData.sort((a, b) => {
+    return a.subjectOrder - b.subjectOrder;
+  });
+  const data = {
+    topics: topicData,
+    quizzes: quizData
+  };
+  if (topicError) {
+    log.error('ERR_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
+      err: topicError.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(topicError);
+    res.status(e.code).json(e.message);
+  } else if (quizError) {
+    log.error('ERR_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
+      err: quizError.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(quizError);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
 exports.getSubject = getSubject;
 exports.updateSubject = updateSubject;
 exports.deleteSubject = deleteSubject;
 exports.assignUsersToSubject = assignUsersToSubject;
+exports.getAllTopicsAndQuizzesBySubjectId = getAllTopicsAndQuizzesBySubjectId;

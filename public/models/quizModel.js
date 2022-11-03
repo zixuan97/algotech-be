@@ -53,23 +53,7 @@ const getAllQuizzesBySubjectId = async (req) => {
     where: { subjectId: Number(subjectId) },
     include: {
       subject: true,
-      subject: {
-        include: {
-          topics: true,
-          topics: {
-            include: {
-              steps: true
-            }
-          },
-          quizzes: true,
-          quizzes: {
-            include: {
-              questions: true
-            }
-          },
-          usersAssigned: true
-        }
-      }
+      questions: true
     }
   });
   return quizzes;
