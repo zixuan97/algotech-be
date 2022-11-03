@@ -11,7 +11,7 @@ const createBrand = async (req, res) => {
   );
   if (data) {
     log.error('ERR_BRAND_CREATE-BRAND', {
-      err: {message: 'brand name already exist'},
+      err: { message: 'brand name already exist' },
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Brand name already exists' });
@@ -43,7 +43,7 @@ const createBrand = async (req, res) => {
     } else {
       log.out('OK_BRAND_CREATE-BRAND', {
         req: { body: req.body, params: req.params },
-        res: {message: 'brand created'}
+        res: { message: 'brand created' }
       });
       res.json({ message: 'brand created' });
     }
