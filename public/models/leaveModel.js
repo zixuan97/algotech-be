@@ -128,6 +128,28 @@ const createLeaveQuota = async (req) => {
   return leaveQuota;
 };
 
+const updateLeaveQuota = async (req) => {
+  const { tier, medical, parental, paid, unpaid } = req;
+  const leaveQuota = await prisma.LeaveQuota.update({
+    where: { tier: Number(tier) },
+    data: {
+      medical,
+      parental,
+      paid,
+      unpaid
+    }
+  });
+  return leaveQuota;
+};
+
+const deleteLeaveQuota = async (req) => {
+  const { tier } = req;
+  const leaveQuota = await prisma.LeaveQuota.delete({
+    where: { tier: Number(tier) }
+  });
+  return leaveQuota;
+};
+
 const getLeaveQuota = async () => {
   const leaveQuota = await prisma.LeaveQuota.findMany({});
   return leaveQuota;
@@ -258,23 +280,87 @@ const updateTierByEmployeeId = async (req) => {
   const { medical, parental, paid, unpaid } = await getLeaveQuotaByTier({
     tier: newTier
   });
-  const currLeaveRecord = await getLeaveRecordByEmployeeId({ employeeId });
-  const medicalQuotaIncrement = medical - currLeaveRecord.medicalQuota;
-  const parentalQuotaIncrement = parental - currLeaveRecord.parentalQuota;
-  const paidQuotaIncrement = paid - currLeaveRecord.paidQuota;
-  const unpaidQuotaIncrement = unpaid - currLeaveRecord.unpaidQuota;
-  const updatedRecord = await updateLeaveRecordByEmployeeId({
+  // const currLeaveRecord = await getLeaveRecordByEmployeeId({ employeeId });
+  // const medicalQuotaIncrement = medical - currLeaveRecord.medicalQuota;
+  // const parentalQuotaIncrement = parental - currLeaveRecord.parentalQuota;
+  // const paidQuotaIncrement = paid - currLeaveRecord.paidQuota;
+  // const unpaidQuotaIncrement = unpaid - currLeaveRecord.unpaidQuota;
+  const updatedRecord = await updateEmployeeLeaveQuota({
     employeeId,
     medicalQuota: medical,
     parentalQuota: parental,
     paidQuota: paid,
-    unpaidQuota: unpaid,
-    medicalBalance: { increment: medicalQuotaIncrement },
-    parentalBalance: { increment: parentalQuotaIncrement },
-    paidBalance: { increment: paidQuotaIncrement },
-    unpaidBalance: { increment: unpaidQuotaIncrement }
+    unpaidQuota: unpaid
+    // medicalBalance: { increment: medicalQuotaIncrement },
+    // parentalBalance: { increment: parentalQuotaIncrement },
+    // paidBalance: { increment: paidQuotaIncrement },
+    // unpaidBalance: { increment: unpaidQuotaIncrement }
   });
+  const user = await userModel.findUserById({ id: employeeId });
+  const updatedUser = {
+    ...user,
+    tier: newTier
+  };
+  console.log(updatedUser);
+  await userModel.editUser({ updatedUser });
   return updatedRecord;
+};
+
+const getAllEmployeesByTier = async (req) => {
+  const { tier } = req;
+  const employees = await userModel.getUsers({});
+  return employees.filter((e) => e.tier === Number(tier));
+};
+
+const updateEmployeeLeaveQuota = async (req) => {
+  const { employeeId, medicalQuota, parentalQuota, paidQuota, unpaidQuota } =
+    req;
+  const leaveRecord = await getLeaveRecordByEmployeeId({
+    employeeId
+  });
+  const medicalQuotaIncrement =
+    medicalQuota < leaveRecord.medicalQuota &&
+    leaveRecord.medicalBalance < medicalQuota
+      ? 0
+      : medicalQuota - leaveRecord.medicalQuota;
+  const parentalQuotaIncrement =
+    parentalQuota < leaveRecord.parentalQuota &&
+    leaveRecord.parentalBalance < parentalQuota
+      ? 0
+      : parentalQuota - leaveRecord.parentalQuota;
+  const paidQuotaIncrement =
+    paidQuota < leaveRecord.paidQuota && leaveRecord.paidBalance < paidQuota
+      ? 0
+      : paidQuota - leaveRecord.paidQuota;
+  const unpaidQuotaIncrement =
+    unpaidQuota < leaveRecord.unpaidQuota &&
+    leaveRecord.unpaidBalance < unpaidQuota
+      ? 0
+      : unpaidQuota - leaveRecord.unpaidQuota;
+  const data = await updateLeaveRecordByEmployeeId({
+    employeeId,
+    medicalQuota,
+    parentalQuota,
+    paidQuota,
+    unpaidQuota,
+    medicalBalance:
+      medicalQuota < leaveRecord.medicalBalance
+        ? medicalQuota
+        : { increment: medicalQuotaIncrement },
+    parentalBalance:
+      parentalQuota < leaveRecord.parentalBalance
+        ? parentalQuota
+        : { increment: parentalQuotaIncrement },
+    paidBalance:
+      paidQuota < leaveRecord.paidBalance
+        ? paidQuota
+        : { increment: paidQuotaIncrement },
+    unpaidBalance:
+      unpaidQuota < leaveRecord.unpaidBalance
+        ? unpaidQuota
+        : { increment: unpaidQuotaIncrement }
+  });
+  return data;
 };
 
 exports.createLeaveApplication = createLeaveApplication;
@@ -287,6 +373,8 @@ exports.getAllLeaveApplicationsByEmployeeId =
 exports.updateLeaveApplication = updateLeaveApplication;
 exports.approveLeaveApplication = approveLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
+exports.updateLeaveQuota = updateLeaveQuota;
+exports.deleteLeaveQuota = deleteLeaveQuota;
 exports.getLeaveQuota = getLeaveQuota;
 exports.getLeaveQuotaByTier = getLeaveQuotaByTier;
 exports.createLeaveRecordByEmployeeId = createLeaveRecordByEmployeeId;
@@ -295,3 +383,5 @@ exports.updateLeaveRecordByEmployeeId = updateLeaveRecordByEmployeeId;
 exports.getLeaveTypeBalanceByEmployeeId = getLeaveTypeBalanceByEmployeeId;
 exports.updateLeaveTypeBalanceByEmployeeId = updateLeaveTypeBalanceByEmployeeId;
 exports.updateTierByEmployeeId = updateTierByEmployeeId;
+exports.getAllEmployeesByTier = getAllEmployeesByTier;
+exports.updateEmployeeLeaveQuota = updateEmployeeLeaveQuota;

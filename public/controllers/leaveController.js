@@ -87,6 +87,66 @@ const getLeaveQuota = async (req, res) => {
   }
 };
 
+const updateLeaveQuota = async (req, res) => {
+  const { tier, medical, parental, paid, unpaid } = req.body;
+  const { data, error } = await common.awaitWrap(
+    leaveModel.updateLeaveQuota({
+      tier,
+      medical,
+      parental,
+      paid,
+      unpaid
+    })
+  );
+  const employeesWithTier = await leaveModel.getAllEmployeesByTier({ tier });
+  for (let e of employeesWithTier) {
+    await leaveModel.updateEmployeeLeaveQuota({
+      employeeId: e.id,
+      medicalQuota: medical,
+      parentalQuota: parental,
+      paidQuota: paid,
+      unpaidQuota: unpaid
+    });
+  }
+  if (error) {
+    log.error('ERR_LEAVE_UPDATE-LEAVE-QUOTA', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_UPDATE-LEAVE-QUOTA', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const deleteLeaveQuotaByTier = async (req, res) => {
+  const { tier } = req.params;
+  const { data, error } = await common.awaitWrap(
+    leaveModel.deleteLeaveQuota({
+      tier
+    })
+  );
+  if (error) {
+    log.error('ERR_LEAVE_DELETE-LEAVE-RECORD', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_DELETE-LEAVE-RECORD', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.status(200).json({ message: 'Tier successfully deleted' });
+  }
+};
+
 const getEmployeeLeaveRecord = async (req, res) => {
   const { employeeId } = req.params;
   const { data, error } = await common.awaitWrap(
@@ -113,38 +173,47 @@ const getEmployeeLeaveRecord = async (req, res) => {
 const updateEmployeeLeaveQuota = async (req, res) => {
   const { employeeId, medicalQuota, parentalQuota, paidQuota, unpaidQuota } =
     req.body;
-  const leaveRecord = await leaveModel.getLeaveRecordByEmployeeId({
-    employeeId
-  });
-  const medicalQuotaIncrement = medicalQuota - leaveRecord.medicalQuota;
-  const parentalQuotaIncrement = parentalQuota - leaveRecord.parentalQuota;
-  const paidQuotaIncrement = paidQuota - leaveRecord.paidQuota;
-  const unpaidQuotaIncrement = unpaidQuota - leaveRecord.unpaidQuota;
   const { data, error } = await common.awaitWrap(
-    leaveModel.updateLeaveRecordByEmployeeId({
+    leaveModel.updateEmployeeLeaveQuota({
       employeeId,
       medicalQuota,
       parentalQuota,
       paidQuota,
-      unpaidQuota,
-      medicalBalance:
-        medicalQuota < leaveRecord.medicalBalance
-          ? medicalQuota
-          : { increment: medicalQuotaIncrement },
-      parentalBalance:
-        parentalQuota < leaveRecord.parentalBalance
-          ? parentalQuota
-          : { increment: parentalQuotaIncrement },
-      paidBalance:
-        paidQuota < leaveRecord.paidBalance
-          ? paidQuota
-          : { increment: paidQuotaIncrement },
-      unpaidBalance:
-        unpaidQuota < leaveRecord.unpaidBalance
-          ? unpaidQuota
-          : { increment: unpaidQuotaIncrement }
+      unpaidQuota
     })
   );
+  // const leaveRecord = await leaveModel.getLeaveRecordByEmployeeId({
+  //   employeeId
+  // });
+  // const medicalQuotaIncrement = medicalQuota - leaveRecord.medicalQuota;
+  // const parentalQuotaIncrement = parentalQuota - leaveRecord.parentalQuota;
+  // const paidQuotaIncrement = paidQuota - leaveRecord.paidQuota;
+  // const unpaidQuotaIncrement = unpaidQuota - leaveRecord.unpaidQuota;
+  // const { data, error } = await common.awaitWrap(
+  //   leaveModel.updateLeaveRecordByEmployeeId({
+  //     employeeId,
+  //     medicalQuota,
+  //     parentalQuota,
+  //     paidQuota,
+  //     unpaidQuota,
+  //     medicalBalance:
+  //       medicalQuota < leaveRecord.medicalBalance
+  //         ? medicalQuota
+  //         : { increment: medicalQuotaIncrement },
+  //     parentalBalance:
+  //       parentalQuota < leaveRecord.parentalBalance
+  //         ? parentalQuota
+  //         : { increment: parentalQuotaIncrement },
+  //     paidBalance:
+  //       paidQuota < leaveRecord.paidBalance
+  //         ? paidQuota
+  //         : { increment: paidQuotaIncrement },
+  //     unpaidBalance:
+  //       unpaidQuota < leaveRecord.unpaidBalance
+  //         ? unpaidQuota
+  //         : { increment: unpaidQuotaIncrement }
+  //   })
+  // );
   if (error) {
     log.error('ERR_LEAVE_UPDATE-EMPLOYEE-LEAVE-RECORD', {
       err: error.message,
@@ -506,6 +575,8 @@ const updateTierByEmployeeId = async (req, res) => {
 exports.createLeaveApplication = createLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
 exports.getLeaveQuota = getLeaveQuota;
+exports.updateLeaveQuota = updateLeaveQuota;
+exports.deleteLeaveQuotaByTier = deleteLeaveQuotaByTier;
 exports.getEmployeeLeaveRecord = getEmployeeLeaveRecord;
 exports.updateEmployeeLeaveQuota = updateEmployeeLeaveQuota;
 exports.getLeaveApplication = getLeaveApplication;

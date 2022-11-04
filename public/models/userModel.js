@@ -89,6 +89,7 @@ const getUserDetails = async (req) => {
 
 const editUser = async (req) => {
   const { updatedUser } = req;
+  console.log(updatedUser);
   const id = updatedUser.id;
   user = await prisma.User.update({
     where: { id: Number(id) },
@@ -100,7 +101,8 @@ const editUser = async (req) => {
       status: updatedUser.status,
       isVerified: updatedUser.isVerified,
       company: updatedUser.company,
-      contactNo: updatedUser.contactNo
+      contactNo: updatedUser.contactNo,
+      tier: updatedUser.tier
     }
   });
   return user;

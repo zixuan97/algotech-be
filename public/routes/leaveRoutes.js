@@ -5,8 +5,10 @@ const leaveController = require('../controllers/leaveController');
 router.post('/', leaveController.createLeaveApplication);
 router.post('/quota', leaveController.createLeaveQuota);
 router.get('/allquota', leaveController.getLeaveQuota);
+router.put('/quota', leaveController.updateLeaveQuota);
+router.delete('/quota/:tier', leaveController.deleteLeaveQuotaByTier);
 router.get('/quota/:employeeId', leaveController.getEmployeeLeaveRecord);
-router.put('/quota', leaveController.updateEmployeeLeaveQuota);
+router.put('/employee/quota', leaveController.updateEmployeeLeaveQuota);
 router.get(
   '/all/:employeeId',
   leaveController.getAllLeaveApplicationsByEmployeeId
