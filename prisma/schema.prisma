@@ -8,19 +8,21 @@ datasource db {
 }
 
 model User {
-  id             Int             @id @default(autoincrement())
-  firstName      String
-  lastName       String
-  email          String          @unique
-  password       String
-  role           UserRole        @default(ADMIN)
-  status         UserStatus      @default(ACTIVE)
-  isVerified     Boolean         @default(false)
-  company        String?
-  contactNo      String?
-  deliveryOrders DeliveryOrder[]
-  leaveBalance   LeaveBalance?
-  subjects       Subject[]
+  id                Int             @id @default(autoincrement())
+  firstName         String
+  lastName          String
+  email             String          @unique
+  password          String
+  role              UserRole        @default(ADMIN)
+  status            UserStatus      @default(ACTIVE)
+  isVerified        Boolean         @default(false)
+  company           String?
+  contactNo         String?
+  tier              Int?
+  deliveryOrders    DeliveryOrder[]
+  subjects          Subject[]
+  leaveApplications LeaveApplication[]
+  leaveRecord       EmployeeLeaveRecord?
 }
 
 model Category {
@@ -295,37 +297,41 @@ model ScheduledNewsletter {
   newsletter     Newsletter @relation(fields: [newsletterId], references: [id])
 }
 
-model Leave {
-  id               Int         @id @default(autoincrement())
+model LeaveApplication {
+  id               Int          @id @default(autoincrement())
   applicationDate  DateTime
   startDate        DateTime
   endDate          DateTime
   leaveType        LeaveType
-  status           LeaveStatus @default(PENDING)
+  status           LeaveStatus  @default(PENDING)
   description      String
   vettedBy         String?
   commentsByVetter String?
   lastUpdated      DateTime
   employeeId       Int
+  employee         User         @relation(fields: [employeeId], references: [id])
 }
 
 model LeaveQuota {
-  employeeLevel EmployeeLevel @unique
-  medicalLeave  Int
-  parentalLeave Int
-  paidLeave     Int
-  unpaidLeave   Int
+  tier        Int @unique
+  medical     Int
+  parental    Int
+  paid        Int
+  unpaid      Int
 }
 
-model LeaveBalance {
-  employeeId    Int           @unique
-  medicalLeave  Int
-  parentalLeave Int
-  paidLeave     Int
-  unpaidLeave   Int
-  asOfDate      DateTime
-  employeeLevel EmployeeLevel
-  user          User          @relation(fields: [employeeId], references: [id])
+model EmployeeLeaveRecord {
+  employeeId       Int           @unique
+  medicalQuota     Int
+  parentalQuota    Int
+  paidQuota        Int
+  unpaidQuota      Int
+  medicalBalance   Int
+  parentalBalance  Int
+  paidBalance      Int
+  unpaidBalance    Int
+  lastUpdated      DateTime
+  employee         User          @relation(fields: [employeeId], references: [id])
 }
 
 model Step {
@@ -474,16 +480,9 @@ enum LeaveType {
 
 enum LeaveStatus {
   PENDING
-  APPROVE
+  APPROVED
   REJECTED
   CANCELLED
-}
-
-enum EmployeeLevel {
-  CSUITE
-  MANAGER
-  EMPLOYEE
-  INTERN
 }
 
 enum AnswerType {

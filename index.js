@@ -97,6 +97,7 @@ app.use('/topic', require('./public/routes/topicRoutes'));
 app.use('/subject', require('./public/routes/subjectRoutes'));
 app.use('/quiz', require('./public/routes/quizRoutes'));
 app.use('/quizquestion', require('./public/routes/quizQuestionRoutes'));
+app.use('/leave', require('./public/routes/leaveRoutes'));
 
 const port = process.env.PORT || 4000;
 

@@ -1,4 +1,5 @@
 const userModel = require('../models/userModel');
+const leaveModel = require('../models/leaveModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const common = require('@kelchy/common');
@@ -8,7 +9,7 @@ const emailHelper = require('../helpers/email');
 const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req, res) => {
-  const { firstName, lastName, email, role, isVerified } = req.body;
+  const { firstName, lastName, email, role, isVerified, tier } = req.body;
 
   const user = await userModel.findUserByEmail({ email });
   if (user) {
@@ -33,21 +34,34 @@ const createUser = async (req, res) => {
         subject: 'Your generated password',
         content
       });
-      // console.log('Email sent');
     } catch (error) {
       res.status(400).send('Error sending email');
-      // console.log('Error sending email');
     }
-    const { error } = await common.awaitWrap(
+    const { data, error } = await common.awaitWrap(
       userModel.createUser({
         firstName,
         lastName,
         email,
         password: password.data,
         role,
-        isVerified
+        isVerified,
+        tier
       })
     );
+    if (tier !== undefined) {
+      try {
+        await leaveModel.createLeaveRecordByEmployeeId({
+          employeeId: data.id
+        });
+      } catch (error) {
+        log.error('ERR_USER_CREATE-USER', {
+          err: error.message,
+          req: { body: req.body, params: req.params }
+        });
+        const e = Error.http(error);
+        return res.status(e.code).json(e.message);
+      }
+    }
     if (error) {
       log.error('ERR_USER_CREATE-USER', {
         err: error.message,
@@ -105,9 +119,6 @@ const createB2BUser = async (req, res) => {
   }
 };
 
-/**
- * Gets user by ID
- */
 const getUser = async (req, res) => {
   try {
     const user = await userModel.findUserById({ id: req.user.userId });

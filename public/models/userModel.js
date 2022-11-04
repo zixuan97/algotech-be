@@ -12,7 +12,8 @@ const createUser = async (req) => {
     status,
     isVerified,
     company,
-    contactNo
+    contactNo,
+    tier
   } = req;
   let encryptedPassword = '';
   if (role !== UserRole.B2B) {
@@ -22,7 +23,7 @@ const createUser = async (req) => {
       status = UserStatus.PENDING;
     }
   }
-  await prisma.User.create({
+  const user = await prisma.User.create({
     data: {
       firstName,
       lastName,
@@ -32,9 +33,11 @@ const createUser = async (req) => {
       status,
       isVerified,
       company,
-      contactNo
+      contactNo,
+      tier
     }
   });
+  return user;
 };
 
 const getUsers = async () => {
@@ -105,7 +108,18 @@ const editUser = async (req) => {
 
 const deleteUserById = async (req) => {
   const { id } = req;
-  const user = await prisma.User.delete({
+  let user = await prisma.user.update({
+    where: { id: Number(id) },
+    data: {
+      leaveApplications: {
+        deleteMany: {}
+      },
+      leaveRecord: {
+        delete: true
+      }
+    }
+  });
+  user = await prisma.User.delete({
     where: {
       id: Number(id)
     }

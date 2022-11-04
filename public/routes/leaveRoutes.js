@@ -1,11 +1,27 @@
 const router = require('express').Router();
+const { rotate } = require('pdfkit');
 const leaveController = require('../controllers/leaveController');
 
-router.post('/', leaveController.createLeave);
-router.get('/all/:employeeId', leaveController.getAllLeavesByEmployeeId);
-router.get('/all', leaveController.getAllLeaves);
-router.get('/:id', leaveController.getLeave);
-router.put('/', leaveController.updateLeave);
-router.delete('/:id', leaveController.deleteLeave);
+router.post('/', leaveController.createLeaveApplication);
+router.post('/quota', leaveController.createLeaveQuota);
+router.get('/quota/:employeeId', leaveController.getEmployeeLeaveRecord);
+router.put('/quota', leaveController.updateEmployeeLeaveQuota);
+router.get(
+  '/all/:employeeId',
+  leaveController.getAllLeaveApplicationsByEmployeeId
+);
+router.get('/all', leaveController.getAllLeaveApplications);
+router.get('/approved/all', leaveController.getAllApprovedLeaveApplications);
+router.get('/pending/all', leaveController.getAllPendingLeaveApplications);
+router.get(
+  '/numberpending',
+  leaveController.getNumberOfPendingLeaveApplications
+);
+router.get('/:id', leaveController.getLeaveApplication);
+router.put('/', leaveController.updateLeaveApplication);
+router.post('/approve', leaveController.approveLeaveApplication);
+router.post('/cancel/:id', leaveController.cancelLeaveApplication);
+router.post('/reject', leaveController.rejectLeaveApplication);
+router.post('/tier', leaveController.updateTierByEmployeeId);
 
 module.exports = router;
