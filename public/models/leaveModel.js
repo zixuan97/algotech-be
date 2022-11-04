@@ -115,13 +115,16 @@ const approveLeaveApplication = async (req) => {
 };
 
 const createLeaveQuota = async (req) => {
-  const { tier, medical, parental, paid, unpaid } = req;
+  const { tier, annual, childcare, compassionate, parental, sick, unpaid } =
+    req;
   const leaveQuota = await prisma.LeaveQuota.create({
     data: {
       tier,
-      medical,
+      annual,
+      childcare,
+      compassionate,
       parental,
-      paid,
+      sick,
       unpaid
     }
   });
@@ -129,13 +132,16 @@ const createLeaveQuota = async (req) => {
 };
 
 const updateLeaveQuota = async (req) => {
-  const { tier, medical, parental, paid, unpaid } = req;
+  const { tier, annual, childcare, compassionate, parental, sick, unpaid } =
+    req;
   const leaveQuota = await prisma.LeaveQuota.update({
     where: { tier: Number(tier) },
     data: {
-      medical,
+      annual,
+      childcare,
+      compassionate,
       parental,
-      paid,
+      sick,
       unpaid
     }
   });
@@ -167,19 +173,24 @@ const getLeaveQuotaByTier = async (req) => {
 const createLeaveRecordByEmployeeId = async (req) => {
   const { employeeId } = req;
   const employee = await userModel.findUserById({ id: Number(employeeId) });
-  const { medical, parental, paid, unpaid } = await getLeaveQuotaByTier({
-    tier: employee.tier
-  });
+  const { annual, childcare, compassionate, parental, sick, unpaid } =
+    await getLeaveQuotaByTier({
+      tier: employee.tier
+    });
   const employeeLeaveRecord = await prisma.EmployeeLeaveRecord.create({
     data: {
       employeeId: Number(employeeId),
-      medicalQuota: medical,
+      annualQuota: annual,
+      childcareQuota: childcare,
+      compassionateQuota: compassionate,
       parentalQuota: parental,
-      paidQuota: paid,
+      sickQuota: sick,
       unpaidQuota: unpaid,
-      medicalBalance: medical,
+      annualBalance: annual,
+      childcareBalance: childcare,
+      compassionateBalance: compassionate,
       parentalBalance: parental,
-      paidBalance: paid,
+      sickBalance: sick,
       unpaidBalance: unpaid,
       lastUpdated: new Date(Date.now())
     }
@@ -203,25 +214,33 @@ const getLeaveRecordByEmployeeId = async (req) => {
 const updateLeaveRecordByEmployeeId = async (req) => {
   const {
     employeeId,
-    medicalQuota,
+    annualQuota,
+    childcareQuota,
+    compassionateQuota,
     parentalQuota,
-    paidQuota,
+    sickQuota,
     unpaidQuota,
-    medicalBalance,
+    annualBalance,
+    childcareBalance,
+    compassionateBalance,
     parentalBalance,
-    paidBalance,
+    sickBalance,
     unpaidBalance
   } = req;
   const leaveRecord = await prisma.EmployeeLeaveRecord.update({
     where: { employeeId: Number(employeeId) },
     data: {
-      medicalQuota,
+      annualQuota,
+      childcareQuota,
+      compassionateQuota,
       parentalQuota,
-      paidQuota,
+      sickQuota,
       unpaidQuota,
-      medicalBalance,
+      annualBalance,
+      childcareBalance,
+      compassionateBalance,
       parentalBalance,
-      paidBalance,
+      sickBalance,
       unpaidBalance,
       lastUpdated: new Date(Date.now())
     }
@@ -233,65 +252,86 @@ const getLeaveTypeBalanceByEmployeeId = async (req) => {
   const { employeeId, leaveType } = req;
   const employeeLeaveRecord = await getLeaveRecordByEmployeeId({ employeeId });
   switch (leaveType) {
-    case LeaveType.MEDICAL:
-      return employeeLeaveRecord.medicalBalance;
+    case LeaveType.ANNUAL:
+      return employeeLeaveRecord.annualBalance;
+    case LeaveType.CHILDCARE:
+      return employeeLeaveRecord.childcareBalance;
+    case LeaveType.COMPASSIONATE:
+      return employeeLeaveRecord.compassionateBalance;
     case LeaveType.PARENTAL:
       return employeeLeaveRecord.parentalBalance;
-    case LeaveType.PAID:
-      return employeeLeaveRecord.paidBalance;
+    case LeaveType.SICK:
+      return employeeLeaveRecord.sickBalance;
     case LeaveType.UNPAID:
       return employeeLeaveRecord.unpaidBalance;
     default:
-      res.status(e.code).json('Leave type does not exist');
+      return 0;
   }
 };
 
 const updateLeaveTypeBalanceByEmployeeId = async (req) => {
   const { employeeId, leaveType, isIncrement } = req;
-  let { medicalBalance, parentalBalance, paidBalance, unpaidBalance } =
-    await getLeaveRecordByEmployeeId({ employeeId });
+  let {
+    annualBalance,
+    childcareBalance,
+    compassionateBalance,
+    parentalBalance,
+    sickBalance,
+    unpaidBalance
+  } = await getLeaveRecordByEmployeeId({ employeeId });
   switch (leaveType) {
-    case LeaveType.MEDICAL:
-      isIncrement ? medicalBalance++ : medicalBalance--;
+    case LeaveType.ANNUAL:
+      isIncrement ? annualBalance++ : annualBalance--;
+      break;
+    case LeaveType.CHILDCARE:
+      isIncrement ? childcareBalance++ : childcareBalance--;
+      break;
+    case LeaveType.COMPASSIONATE:
+      isIncrement ? compassionateBalance++ : compassionateBalance--;
       break;
     case LeaveType.PARENTAL:
       isIncrement ? parentalBalance++ : parentalBalance--;
       break;
-    case LeaveType.PAID:
-      isIncrement ? paidBalance++ : paidBalance--;
+    case LeaveType.SICK:
+      isIncrement ? sickBalance++ : sickBalance--;
       break;
     case LeaveType.UNPAID:
       isIncrement ? unpaidBalance++ : unpaidBalance--;
       break;
     default:
-      res.status(e.code).json('Leave type does not exist');
+      break;
   }
   await updateLeaveRecordByEmployeeId({
     employeeId,
-    medicalBalance,
+    annualBalance,
+    childcareBalance,
+    compassionateBalance,
     parentalBalance,
-    paidBalance,
+    sickBalance,
     unpaidBalance
   });
 };
 
 const updateTierByEmployeeId = async (req) => {
   const { employeeId, newTier } = req;
-  const { medical, parental, paid, unpaid } = await getLeaveQuotaByTier({
-    tier: newTier
-  });
+  const { annual, childcare, compassionate, parental, sick, unpaid } =
+    await getLeaveQuotaByTier({
+      tier: newTier
+    });
   // const currLeaveRecord = await getLeaveRecordByEmployeeId({ employeeId });
-  // const medicalQuotaIncrement = medical - currLeaveRecord.medicalQuota;
+  // const sickQuotaIncrement = sick - currLeaveRecord.sickQuota;
   // const parentalQuotaIncrement = parental - currLeaveRecord.parentalQuota;
   // const paidQuotaIncrement = paid - currLeaveRecord.paidQuota;
   // const unpaidQuotaIncrement = unpaid - currLeaveRecord.unpaidQuota;
   const updatedRecord = await updateEmployeeLeaveQuota({
     employeeId,
-    medicalQuota: medical,
+    annualQuota: annual,
+    childcareQuota: childcare,
+    compassionateQuota: compassionate,
     parentalQuota: parental,
-    paidQuota: paid,
+    sickQuota: sick,
     unpaidQuota: unpaid
-    // medicalBalance: { increment: medicalQuotaIncrement },
+    // sickBalance: { increment: sickQuotaIncrement },
     // parentalBalance: { increment: parentalQuotaIncrement },
     // paidBalance: { increment: paidQuotaIncrement },
     // unpaidBalance: { increment: unpaidQuotaIncrement }
@@ -313,48 +353,81 @@ const getAllEmployeesByTier = async (req) => {
 };
 
 const updateEmployeeLeaveQuota = async (req) => {
-  const { employeeId, medicalQuota, parentalQuota, paidQuota, unpaidQuota } =
-    req;
+  const {
+    employeeId,
+    annualQuota,
+    childcareQuota,
+    compassionateQuota,
+    parentalQuota,
+    sickQuota,
+    unpaidQuota
+  } = req;
   const leaveRecord = await getLeaveRecordByEmployeeId({
     employeeId
   });
-  const medicalQuotaIncrement =
-    medicalQuota < leaveRecord.medicalQuota &&
-    leaveRecord.medicalBalance < medicalQuota
+  const annualQuotaIncrement =
+    annualQuota < leaveRecord.annualQuota &&
+    leaveRecord.annualBalance < annualQuota
       ? 0
-      : medicalQuota - leaveRecord.medicalQuota;
+      : annualQuota - leaveRecord.annualQuota;
+
+  const childcareQuotaIncrement =
+    childcareQuota < leaveRecord.childcareQuota &&
+    leaveRecord.childcareBalance < childcareQuota
+      ? 0
+      : childcareQuota - leaveRecord.childcareQuota;
+
+  const compassionateQuotaIncrement =
+    compassionateQuota < leaveRecord.compassionateQuota &&
+    leaveRecord.compassionateBalance < compassionateQuota
+      ? 0
+      : compassionateQuota - leaveRecord.compassionateQuota;
+
   const parentalQuotaIncrement =
     parentalQuota < leaveRecord.parentalQuota &&
     leaveRecord.parentalBalance < parentalQuota
       ? 0
       : parentalQuota - leaveRecord.parentalQuota;
-  const paidQuotaIncrement =
-    paidQuota < leaveRecord.paidQuota && leaveRecord.paidBalance < paidQuota
+
+  const sickQuotaIncrement =
+    sickQuota < leaveRecord.sickQuota && leaveRecord.sickBalance < sickQuota
       ? 0
-      : paidQuota - leaveRecord.paidQuota;
+      : sickQuota - leaveRecord.sickQuota;
+
   const unpaidQuotaIncrement =
     unpaidQuota < leaveRecord.unpaidQuota &&
     leaveRecord.unpaidBalance < unpaidQuota
       ? 0
       : unpaidQuota - leaveRecord.unpaidQuota;
+
   const data = await updateLeaveRecordByEmployeeId({
     employeeId,
-    medicalQuota,
+    annualQuota,
+    childcareQuota,
+    compassionateQuota,
     parentalQuota,
-    paidQuota,
+    sickQuota,
     unpaidQuota,
-    medicalBalance:
-      medicalQuota < leaveRecord.medicalBalance
-        ? medicalQuota
-        : { increment: medicalQuotaIncrement },
+    annualBalance:
+      annualQuota < leaveRecord.annualBalance
+        ? annualQuota
+        : { increment: annualQuotaIncrement },
+    childcareBalance:
+      childcareQuota < leaveRecord.childcareBalance
+        ? childcareQuota
+        : { increment: childcareQuotaIncrement },
+    compassionateBalance:
+      compassionateQuota < leaveRecord.compassionateBalance
+        ? compassionateQuota
+        : { increment: compassionateQuotaIncrement },
     parentalBalance:
       parentalQuota < leaveRecord.parentalBalance
         ? parentalQuota
         : { increment: parentalQuotaIncrement },
-    paidBalance:
-      paidQuota < leaveRecord.paidBalance
-        ? paidQuota
-        : { increment: paidQuotaIncrement },
+    sickBalance:
+      sickQuota < leaveRecord.sickBalance
+        ? sickQuota
+        : { increment: sickQuotaIncrement },
     unpaidBalance:
       unpaidQuota < leaveRecord.unpaidBalance
         ? unpaidQuota

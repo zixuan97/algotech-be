@@ -464,9 +464,11 @@ async function main() {
   await prisma.LeaveQuota.create({
     data: {
       tier: 0,
-      medical: 0,
+      annual: 0,
+      childcare: 0,
+      compassionate: 0,
       parental: 0,
-      paid: 0,
+      sick: 0,
       unpaid: 0
     }
   });
@@ -474,9 +476,11 @@ async function main() {
   await prisma.LeaveQuota.create({
     data: {
       tier: 1,
-      medical: 10,
+      annual: 10,
+      childcare: 10,
+      compassionate: 10,
       parental: 10,
-      paid: 10,
+      sick: 10,
       unpaid: 10
     }
   });
@@ -484,9 +488,11 @@ async function main() {
   await prisma.LeaveQuota.create({
     data: {
       tier: 2,
-      medical: 15,
+      annual: 15,
+      childcare: 15,
+      compassionate: 15,
       parental: 15,
-      paid: 15,
+      sick: 15,
       unpaid: 15
     }
   });
@@ -494,9 +500,11 @@ async function main() {
   await prisma.LeaveQuota.create({
     data: {
       tier: 3,
-      medical: 20,
+      annual: 20,
+      childcare: 20,
+      compassionate: 20,
       parental: 20,
-      paid: 20,
+      sick: 20,
       unpaid: 20
     }
   });

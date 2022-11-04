@@ -313,25 +313,31 @@ model LeaveApplication {
 }
 
 model LeaveQuota {
-  tier        Int @unique
-  medical     Int
-  parental    Int
-  paid        Int
-  unpaid      Int
+  tier          Int    @unique
+  annual        Int
+  childcare     Int
+  compassionate Int
+  parental      Int
+  sick          Int
+  unpaid        Int
 }
 
 model EmployeeLeaveRecord {
-  employeeId       Int           @unique
-  medicalQuota     Int
-  parentalQuota    Int
-  paidQuota        Int
-  unpaidQuota      Int
-  medicalBalance   Int
-  parentalBalance  Int
-  paidBalance      Int
-  unpaidBalance    Int
-  lastUpdated      DateTime
-  employee         User          @relation(fields: [employeeId], references: [id])
+  employeeId            Int           @unique
+  annualQuota           Int
+  childcareQuota        Int
+  compassionateQuota    Int
+  parentalQuota         Int
+  sickQuota             Int
+  unpaidQuota           Int
+  annualBalance         Int
+  childcareBalance      Int
+  compassionateBalance  Int
+  parentalBalance       Int
+  sickBalance           Int
+  unpaidBalance         Int
+  lastUpdated           DateTime
+  employee              User          @relation(fields: [employeeId], references: [id])
 }
 
 model Step {
@@ -472,10 +478,12 @@ enum ShippingType {
 }
 
 enum LeaveType {
-  MEDICAL
-  PAID
-  UNPAID
+  ANNUAL
+  CHILDCARE
+  COMPASSIONATE
   PARENTAL
+  SICK
+  UNPAID
 }
 
 enum LeaveStatus {

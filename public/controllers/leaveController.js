@@ -43,13 +43,16 @@ const createLeaveApplication = async (req, res) => {
 };
 
 const createLeaveQuota = async (req, res) => {
-  const { tier, medical, parental, paid, unpaid } = req.body;
+  const { tier, annual, childcare, compassionate, parental, sick, unpaid } =
+    req.body;
   const { data, error } = await common.awaitWrap(
     leaveModel.createLeaveQuota({
       tier,
-      medical,
+      annual,
+      childcare,
+      compassionate,
       parental,
-      paid,
+      sick,
       unpaid
     })
   );
@@ -88,13 +91,16 @@ const getLeaveQuota = async (req, res) => {
 };
 
 const updateLeaveQuota = async (req, res) => {
-  const { tier, medical, parental, paid, unpaid } = req.body;
+  const { tier, annual, childcare, compassionate, parental, sick, unpaid } =
+    req.body;
   const { data, error } = await common.awaitWrap(
     leaveModel.updateLeaveQuota({
       tier,
-      medical,
+      annual,
+      childcare,
+      compassionate,
       parental,
-      paid,
+      sick,
       unpaid
     })
   );
@@ -102,9 +108,11 @@ const updateLeaveQuota = async (req, res) => {
   for (let e of employeesWithTier) {
     await leaveModel.updateEmployeeLeaveQuota({
       employeeId: e.id,
-      medicalQuota: medical,
+      annualQuota: annual,
+      childcareQuota: childcare,
+      compassionateQuota: compassionate,
       parentalQuota: parental,
-      paidQuota: paid,
+      sickQuota: sick,
       unpaidQuota: unpaid
     });
   }
@@ -171,14 +179,23 @@ const getEmployeeLeaveRecord = async (req, res) => {
 };
 
 const updateEmployeeLeaveQuota = async (req, res) => {
-  const { employeeId, medicalQuota, parentalQuota, paidQuota, unpaidQuota } =
-    req.body;
+  const {
+    employeeId,
+    annualQuota,
+    childcareQuota,
+    compassionateQuota,
+    parentalQuota,
+    sickQuota,
+    unpaidQuota
+  } = req.body;
   const { data, error } = await common.awaitWrap(
     leaveModel.updateEmployeeLeaveQuota({
       employeeId,
-      medicalQuota,
+      annualQuota,
+      childcareQuota,
+      compassionateQuota,
       parentalQuota,
-      paidQuota,
+      sickQuota,
       unpaidQuota
     })
   );

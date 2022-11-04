@@ -32,7 +32,7 @@ CREATE TYPE "DeliveryMode" AS ENUM ('STANDARD', 'EXPRESS', 'PRIORITY');
 CREATE TYPE "ShippingType" AS ENUM ('MANUAL', 'SHIPPIT', 'GRAB', 'LALAMOVE');
 
 -- CreateEnum
-CREATE TYPE "LeaveType" AS ENUM ('MEDICAL', 'PAID', 'UNPAID', 'PARENTAL');
+CREATE TYPE "LeaveType" AS ENUM ('ANNUAL', 'CHILDCARE', 'COMPASSIONATE', 'PARENTAL', 'SICK', 'UNPAID');
 
 -- CreateEnum
 CREATE TYPE "LeaveStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
@@ -380,22 +380,28 @@ CREATE TABLE "LeaveApplication" (
 -- CreateTable
 CREATE TABLE "LeaveQuota" (
     "tier" INTEGER NOT NULL,
-    "medical" INTEGER NOT NULL,
+    "annual" INTEGER NOT NULL,
+    "childcare" INTEGER NOT NULL,
+    "compassionate" INTEGER NOT NULL,
     "parental" INTEGER NOT NULL,
-    "paid" INTEGER NOT NULL,
+    "sick" INTEGER NOT NULL,
     "unpaid" INTEGER NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "EmployeeLeaveRecord" (
     "employeeId" INTEGER NOT NULL,
-    "medicalQuota" INTEGER NOT NULL,
+    "annualQuota" INTEGER NOT NULL,
+    "childcareQuota" INTEGER NOT NULL,
+    "compassionateQuota" INTEGER NOT NULL,
     "parentalQuota" INTEGER NOT NULL,
-    "paidQuota" INTEGER NOT NULL,
+    "sickQuota" INTEGER NOT NULL,
     "unpaidQuota" INTEGER NOT NULL,
-    "medicalBalance" INTEGER NOT NULL,
+    "annualBalance" INTEGER NOT NULL,
+    "childcareBalance" INTEGER NOT NULL,
+    "compassionateBalance" INTEGER NOT NULL,
     "parentalBalance" INTEGER NOT NULL,
-    "paidBalance" INTEGER NOT NULL,
+    "sickBalance" INTEGER NOT NULL,
     "unpaidBalance" INTEGER NOT NULL,
     "lastUpdated" TIMESTAMP(3) NOT NULL
 );
