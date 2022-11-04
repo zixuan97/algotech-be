@@ -4,6 +4,7 @@ const leaveController = require('../controllers/leaveController');
 
 router.post('/', leaveController.createLeaveApplication);
 router.post('/quota', leaveController.createLeaveQuota);
+router.get('/allquota', leaveController.getLeaveQuota);
 router.get('/quota/:employeeId', leaveController.getEmployeeLeaveRecord);
 router.put('/quota', leaveController.updateEmployeeLeaveQuota);
 router.get(

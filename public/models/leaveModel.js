@@ -128,6 +128,11 @@ const createLeaveQuota = async (req) => {
   return leaveQuota;
 };
 
+const getLeaveQuota = async () => {
+  const leaveQuota = await prisma.LeaveQuota.findMany({});
+  return leaveQuota;
+};
+
 const getLeaveQuotaByTier = async (req) => {
   const { tier } = req;
   const leaveQuota = await prisma.LeaveQuota.findUnique({
@@ -282,6 +287,7 @@ exports.getAllLeaveApplicationsByEmployeeId =
 exports.updateLeaveApplication = updateLeaveApplication;
 exports.approveLeaveApplication = approveLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
+exports.getLeaveQuota = getLeaveQuota;
 exports.getLeaveQuotaByTier = getLeaveQuotaByTier;
 exports.createLeaveRecordByEmployeeId = createLeaveRecordByEmployeeId;
 exports.getLeaveRecordByEmployeeId = getLeaveRecordByEmployeeId;
