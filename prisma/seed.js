@@ -460,6 +460,46 @@ async function main() {
       supplierEmail: 'tanwk@comp.nus.edu.sg'
     }
   });
+
+  await prisma.LeaveQuota.create({
+    data: {
+      tier: 0,
+      medical: 0,
+      parental: 0,
+      paid: 0,
+      unpaid: 0
+    }
+  });
+
+  await prisma.LeaveQuota.create({
+    data: {
+      tier: 1,
+      medical: 10,
+      parental: 10,
+      paid: 10,
+      unpaid: 10
+    }
+  });
+
+  await prisma.LeaveQuota.create({
+    data: {
+      tier: 2,
+      medical: 15,
+      parental: 15,
+      paid: 15,
+      unpaid: 15
+    }
+  });
+
+  await prisma.LeaveQuota.create({
+    data: {
+      tier: 3,
+      medical: 20,
+      parental: 20,
+      paid: 20,
+      unpaid: 20
+    }
+  });
 }
 
 main()
