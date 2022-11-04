@@ -69,6 +69,24 @@ const createLeaveQuota = async (req, res) => {
   }
 };
 
+const getLeaveQuota = async (req, res) => {
+  const { data, error } = await common.awaitWrap(leaveModel.getLeaveQuota({}));
+  if (error) {
+    log.error('ERR_LEAVE_GET-LEAVE-QUOTA', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_GET-LEAVE-QUOTA', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 const getEmployeeLeaveRecord = async (req, res) => {
   const { employeeId } = req.params;
   const { data, error } = await common.awaitWrap(
@@ -487,6 +505,7 @@ const updateTierByEmployeeId = async (req, res) => {
 
 exports.createLeaveApplication = createLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
+exports.getLeaveQuota = getLeaveQuota;
 exports.getEmployeeLeaveRecord = getEmployeeLeaveRecord;
 exports.updateEmployeeLeaveQuota = updateEmployeeLeaveQuota;
 exports.getLeaveApplication = getLeaveApplication;
