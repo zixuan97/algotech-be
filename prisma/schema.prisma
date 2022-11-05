@@ -313,7 +313,7 @@ model LeaveApplication {
 }
 
 model LeaveQuota {
-  tier          Int    @unique
+  tier          String    @unique
   annual        Int
   childcare     Int
   compassionate Int

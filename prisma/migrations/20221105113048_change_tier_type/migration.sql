@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "LeaveQuota" ALTER COLUMN "tier" SET DATA TYPE TEXT;
