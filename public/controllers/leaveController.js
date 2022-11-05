@@ -90,41 +90,20 @@ const getLeaveQuota = async (req, res) => {
   }
 };
 
-const updateLeaveQuota = async (req, res) => {
-  const { tier, annual, childcare, compassionate, parental, sick, unpaid } =
-    req.body;
+const getLeaveQuotaById = async (req, res) => {
+  const { id } = req.params;
   const { data, error } = await common.awaitWrap(
-    leaveModel.updateLeaveQuota({
-      tier,
-      annual,
-      childcare,
-      compassionate,
-      parental,
-      sick,
-      unpaid
-    })
+    leaveModel.getLeaveQuotaById({ id })
   );
-  const employeesWithTier = await leaveModel.getAllEmployeesByTier({ tier });
-  for (let e of employeesWithTier) {
-    await leaveModel.updateEmployeeLeaveQuota({
-      employeeId: e.id,
-      annualQuota: annual,
-      childcareQuota: childcare,
-      compassionateQuota: compassionate,
-      parentalQuota: parental,
-      sickQuota: sick,
-      unpaidQuota: unpaid
-    });
-  }
   if (error) {
-    log.error('ERR_LEAVE_UPDATE-LEAVE-QUOTA', {
+    log.error('ERR_LEAVE_GET-LEAVE-QUOTA-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_LEAVE_UPDATE-LEAVE-QUOTA', {
+    log.out('OK_LEAVE_GET-LEAVE-QUOTA-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
@@ -132,11 +111,59 @@ const updateLeaveQuota = async (req, res) => {
   }
 };
 
-const deleteLeaveQuotaByTier = async (req, res) => {
-  const { tier } = req.params;
+const updateLeaveQuota = async (req, res) => {
+  const { id, tier, annual, childcare, compassionate, parental, sick, unpaid } =
+    req.body;
+  const curr = await leaveModel.getLeaveQuotaByTier({ tier });
+  if (curr && curr.id !== id) {
+    res.status(400).send('Tier name already exists');
+  } else {
+    const { data, error } = await common.awaitWrap(
+      leaveModel.updateLeaveQuota({
+        id,
+        tier,
+        annual,
+        childcare,
+        compassionate,
+        parental,
+        sick,
+        unpaid
+      })
+    );
+    const employeesWithTier = await leaveModel.getAllEmployeesByTier({ tier });
+    for (let e of employeesWithTier) {
+      await leaveModel.updateEmployeeLeaveQuota({
+        employeeId: e.id,
+        annualQuota: annual,
+        childcareQuota: childcare,
+        compassionateQuota: compassionate,
+        parentalQuota: parental,
+        sickQuota: sick,
+        unpaidQuota: unpaid
+      });
+    }
+    if (error) {
+      log.error('ERR_LEAVE_UPDATE-LEAVE-QUOTA', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_LEAVE_UPDATE-LEAVE-QUOTA', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
+  }
+};
+
+const deleteLeaveQuotaById = async (req, res) => {
+  const { id } = req.params;
   const { data, error } = await common.awaitWrap(
     leaveModel.deleteLeaveQuota({
-      tier
+      id
     })
   );
   if (error) {
@@ -171,6 +198,29 @@ const getEmployeeLeaveRecord = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_GET-EMPLOYEE-LEAVE-RECORD', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const getLeaveRecordById = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await common.awaitWrap(
+    leaveModel.getLeaveRecordById({
+      id
+    })
+  );
+  if (error) {
+    log.error('ERR_LEAVE_GET-LEAVE-RECORD-BY-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_GET-LEAVE-RECORD-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
@@ -592,9 +642,11 @@ const updateTierByEmployeeId = async (req, res) => {
 exports.createLeaveApplication = createLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
 exports.getLeaveQuota = getLeaveQuota;
+exports.getLeaveQuotaById = getLeaveQuotaById;
 exports.updateLeaveQuota = updateLeaveQuota;
-exports.deleteLeaveQuotaByTier = deleteLeaveQuotaByTier;
+exports.deleteLeaveQuotaById = deleteLeaveQuotaById;
 exports.getEmployeeLeaveRecord = getEmployeeLeaveRecord;
+exports.getLeaveRecordById = getLeaveRecordById;
 exports.updateEmployeeLeaveQuota = updateEmployeeLeaveQuota;
 exports.getLeaveApplication = getLeaveApplication;
 exports.getAllLeaveApplicationsByEmployeeId =
