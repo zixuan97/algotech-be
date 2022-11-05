@@ -313,6 +313,7 @@ model LeaveApplication {
 }
 
 model LeaveQuota {
+  id            Int       @id      @default(autoincrement())
   tier          String    @unique
   annual        Int
   childcare     Int
@@ -323,6 +324,7 @@ model LeaveQuota {
 }
 
 model EmployeeLeaveRecord {
+  id                    Int           @id      @default(autoincrement())
   employeeId            Int           @unique
   annualQuota           Int
   childcareQuota        Int

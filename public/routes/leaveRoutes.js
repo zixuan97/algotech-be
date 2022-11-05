@@ -1,13 +1,14 @@
 const router = require('express').Router();
-const { rotate } = require('pdfkit');
 const leaveController = require('../controllers/leaveController');
 
 router.post('/', leaveController.createLeaveApplication);
 router.post('/quota', leaveController.createLeaveQuota);
 router.get('/allquota', leaveController.getLeaveQuota);
+router.get('/quota/:id', leaveController.getLeaveQuotaById);
 router.put('/quota', leaveController.updateLeaveQuota);
-router.delete('/quota/:tier', leaveController.deleteLeaveQuotaByTier);
-router.get('/quota/:employeeId', leaveController.getEmployeeLeaveRecord);
+router.delete('/quota/:id', leaveController.deleteLeaveQuotaById);
+router.get('/record/:id', leaveController.getLeaveRecordById);
+router.get('/employee/:employeeId', leaveController.getEmployeeLeaveRecord);
 router.put('/employee/quota', leaveController.updateEmployeeLeaveQuota);
 router.get(
   '/all/:employeeId',
