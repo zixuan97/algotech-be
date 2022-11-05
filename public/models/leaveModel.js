@@ -135,7 +135,7 @@ const updateLeaveQuota = async (req) => {
   const { tier, annual, childcare, compassionate, parental, sick, unpaid } =
     req;
   const leaveQuota = await prisma.LeaveQuota.update({
-    where: { tier: Number(tier) },
+    where: { tier },
     data: {
       annual,
       childcare,
@@ -151,7 +151,7 @@ const updateLeaveQuota = async (req) => {
 const deleteLeaveQuota = async (req) => {
   const { tier } = req;
   const leaveQuota = await prisma.LeaveQuota.delete({
-    where: { tier: Number(tier) }
+    where: { tier }
   });
   return leaveQuota;
 };
@@ -164,7 +164,7 @@ const getLeaveQuota = async () => {
 const getLeaveQuotaByTier = async (req) => {
   const { tier } = req;
   const leaveQuota = await prisma.LeaveQuota.findUnique({
-    where: { tier: Number(tier) }
+    where: { tier }
   });
   console.log(leaveQuota);
   return leaveQuota;
@@ -349,7 +349,7 @@ const updateTierByEmployeeId = async (req) => {
 const getAllEmployeesByTier = async (req) => {
   const { tier } = req;
   const employees = await userModel.getUsers({});
-  return employees.filter((e) => e.tier === Number(tier));
+  return employees.filter((e) => e.tier === tier);
 };
 
 const updateEmployeeLeaveQuota = async (req) => {
