@@ -132,11 +132,12 @@ const createLeaveQuota = async (req) => {
 };
 
 const updateLeaveQuota = async (req) => {
-  const { tier, annual, childcare, compassionate, parental, sick, unpaid } =
+  const { id, tier, annual, childcare, compassionate, parental, sick, unpaid } =
     req;
   const leaveQuota = await prisma.LeaveQuota.update({
-    where: { tier: Number(tier) },
+    where: { id: Number(id) },
     data: {
+      tier,
       annual,
       childcare,
       compassionate,
@@ -149,9 +150,9 @@ const updateLeaveQuota = async (req) => {
 };
 
 const deleteLeaveQuota = async (req) => {
-  const { tier } = req;
+  const { id } = req;
   const leaveQuota = await prisma.LeaveQuota.delete({
-    where: { tier: Number(tier) }
+    where: { id: Number(id) }
   });
   return leaveQuota;
 };
@@ -161,12 +162,19 @@ const getLeaveQuota = async () => {
   return leaveQuota;
 };
 
+const getLeaveQuotaById = async (req) => {
+  const { id } = req;
+  const leaveQuota = await prisma.LeaveQuota.findUnique({
+    where: { id: Number(id) }
+  });
+  return leaveQuota;
+};
+
 const getLeaveQuotaByTier = async (req) => {
   const { tier } = req;
   const leaveQuota = await prisma.LeaveQuota.findUnique({
-    where: { tier: Number(tier) }
+    where: { tier }
   });
-  console.log(leaveQuota);
   return leaveQuota;
 };
 
@@ -202,6 +210,19 @@ const getLeaveRecordByEmployeeId = async (req) => {
   const { employeeId } = req;
   let employeeLeaveRecord = await prisma.EmployeeLeaveRecord.findUnique({
     where: { employeeId: Number(employeeId) }
+  });
+  if (employeeLeaveRecord === null) {
+    employeeLeaveRecord = await createLeaveRecordByEmployeeId({
+      employeeId
+    });
+  }
+  return employeeLeaveRecord;
+};
+
+const getLeaveRecordById = async (req) => {
+  const { id } = req;
+  let employeeLeaveRecord = await prisma.EmployeeLeaveRecord.findUnique({
+    where: { id: Number(id) }
   });
   if (employeeLeaveRecord === null) {
     employeeLeaveRecord = await createLeaveRecordByEmployeeId({
@@ -349,7 +370,7 @@ const updateTierByEmployeeId = async (req) => {
 const getAllEmployeesByTier = async (req) => {
   const { tier } = req;
   const employees = await userModel.getUsers({});
-  return employees.filter((e) => e.tier === Number(tier));
+  return employees.filter((e) => e.tier === tier);
 };
 
 const updateEmployeeLeaveQuota = async (req) => {
@@ -449,8 +470,10 @@ exports.createLeaveQuota = createLeaveQuota;
 exports.updateLeaveQuota = updateLeaveQuota;
 exports.deleteLeaveQuota = deleteLeaveQuota;
 exports.getLeaveQuota = getLeaveQuota;
+exports.getLeaveQuotaById = getLeaveQuotaById;
 exports.getLeaveQuotaByTier = getLeaveQuotaByTier;
 exports.createLeaveRecordByEmployeeId = createLeaveRecordByEmployeeId;
+exports.getLeaveRecordById = getLeaveRecordById;
 exports.getLeaveRecordByEmployeeId = getLeaveRecordByEmployeeId;
 exports.updateLeaveRecordByEmployeeId = updateLeaveRecordByEmployeeId;
 exports.getLeaveTypeBalanceByEmployeeId = getLeaveTypeBalanceByEmployeeId;
