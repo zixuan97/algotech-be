@@ -327,7 +327,6 @@ const disableUser = async (req, res) => {
 const changeUserRole = async (req, res) => {
   try {
     const { id, action } = req.params;
-    console.log(action);
     const user = await userModel.changeUserRole({ id, action });
     log.out('OK_USER_CHANGE-USER-ROLE', {
       req: { body: req.body, params: req.params },
@@ -403,33 +402,35 @@ const verifyPassword = async (req, res) => {
       res
         .status(400)
         .json({ message: 'Old and new password cannot be the same' });
-    }
-    const user = await userModel.findUserByEmail({ email: userEmail });
-    if (user) {
-      const is_equal = await userModel.verifyPassword({
-        userEmail,
-        currentPassword,
-        newPassword
-      });
-      if (is_equal) {
-        log.out('OK_USER_SVERIFY-PW', {
-          req: { body: req.body, params: req.params },
-          res: { message: 'Password verified' }
+    } else {
+      const user = await userModel.findUserByEmail({ email: userEmail });
+
+      if (user) {
+        const is_equal = await userModel.verifyPassword({
+          userEmail,
+          currentPassword,
+          newPassword
         });
-        res.status(200).json({ message: 'Password verified' });
+        if (is_equal) {
+          log.out('OK_USER_SVERIFY-PW', {
+            req: { body: req.body, params: req.params },
+            res: { message: 'Password verified' }
+          });
+          res.status(200).json({ message: 'Password verified' });
+        } else {
+          log.error('ERR_USER_VERIFY-PW', {
+            err: 'Passwords do not match',
+            req: { body: req.body, params: req.params }
+          });
+          res.status(400).json({ message: 'Passwords do not match' });
+        }
       } else {
         log.error('ERR_USER_VERIFY-PW', {
-          err: 'Passwords do not match',
+          err: 'User does not exist',
           req: { body: req.body, params: req.params }
         });
-        res.status(400).json({ message: 'Passwords do not match' });
+        res.status(400).json({ message: 'User does not exist' });
       }
-    } else {
-      log.error('ERR_USER_VERIFY-PW', {
-        err: 'User does not exist',
-        req: { body: req.body, params: req.params }
-      });
-      res.status(400).json({ message: 'User does not exist' });
     }
   } catch (error) {
     log.error('ERR_USER_VERIFY-PW', {
