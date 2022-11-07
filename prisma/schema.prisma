@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id                Int             @id @default(autoincrement())
+  id                Int                  @id @default(autoincrement())
   firstName         String
   lastName          String
-  email             String          @unique
+  email             String               @unique
   password          String
-  role              UserRole        @default(ADMIN)
-  status            UserStatus      @default(ACTIVE)
-  isVerified        Boolean         @default(false)
+  role              UserRole             @default(ADMIN)
+  status            UserStatus           @default(ACTIVE)
+  isVerified        Boolean              @default(false)
   company           String?
   contactNo         String?
   tier              String?
@@ -186,18 +186,20 @@ model SalesOrder {
 }
 
 model BulkOrder {
-  id              Int             @id @default(autoincrement())
-  amount          Float
-  paymentMode     PaymentMode
-  payeeName       String
-  payeeEmail      String
-  payeeRemarks    String?
-  bulkOrderStatus BulkOrderStatus
-  createdTime     DateTime        @default(now())
-  orderId         String          @unique
-  payeeContactNo  String
-  payeeCompany    String?
-  salesOrders     SalesOrder[]
+  id                Int             @id @default(autoincrement())
+  amount            Float
+  transactionAmount Float
+  discountCode      String
+  paymentMode       PaymentMode
+  payeeName         String
+  payeeEmail        String
+  payeeRemarks      String?
+  bulkOrderStatus   BulkOrderStatus
+  createdTime       DateTime        @default(now())
+  orderId           String          @unique
+  payeeContactNo    String
+  payeeCompany      String?
+  salesOrders       SalesOrder[]
 }
 
 model Newsletter {
@@ -298,23 +300,23 @@ model ScheduledNewsletter {
 }
 
 model LeaveApplication {
-  id               Int          @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   applicationDate  DateTime
   startDate        DateTime
   endDate          DateTime
   leaveType        LeaveType
-  status           LeaveStatus  @default(PENDING)
+  status           LeaveStatus @default(PENDING)
   description      String
   vettedBy         String?
   commentsByVetter String?
   lastUpdated      DateTime
   employeeId       Int
-  employee         User         @relation(fields: [employeeId], references: [id])
+  employee         User        @relation(fields: [employeeId], references: [id])
 }
 
 model LeaveQuota {
-  id            Int       @id      @default(autoincrement())
-  tier          String    @unique
+  id            Int    @id @default(autoincrement())
+  tier          String @unique
   annual        Int
   childcare     Int
   compassionate Int
@@ -324,48 +326,48 @@ model LeaveQuota {
 }
 
 model EmployeeLeaveRecord {
-  id                    Int           @id      @default(autoincrement())
-  employeeId            Int           @unique
-  annualQuota           Int
-  childcareQuota        Int
-  compassionateQuota    Int
-  parentalQuota         Int
-  sickQuota             Int
-  unpaidQuota           Int
-  annualBalance         Int
-  childcareBalance      Int
-  compassionateBalance  Int
-  parentalBalance       Int
-  sickBalance           Int
-  unpaidBalance         Int
-  lastUpdated           DateTime
-  employee              User          @relation(fields: [employeeId], references: [id])
+  id                   Int      @id @default(autoincrement())
+  employeeId           Int      @unique
+  annualQuota          Int
+  childcareQuota       Int
+  compassionateQuota   Int
+  parentalQuota        Int
+  sickQuota            Int
+  unpaidQuota          Int
+  annualBalance        Int
+  childcareBalance     Int
+  compassionateBalance Int
+  parentalBalance      Int
+  sickBalance          Int
+  unpaidBalance        Int
+  lastUpdated          DateTime
+  employee             User     @relation(fields: [employeeId], references: [id])
 }
 
 model Step {
-  id           Int            @id @default(autoincrement())
-  topicOrder   Int
-  title        String
-  content      String
-  topicId      Int
-  topic        Topic          @relation(fields: [topicId], references: [id])
+  id         Int    @id @default(autoincrement())
+  topicOrder Int
+  title      String
+  content    String
+  topicId    Int
+  topic      Topic  @relation(fields: [topicId], references: [id])
 }
 
 model Topic {
-  id           Int            @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   subjectOrder Int
   name         String
-  status       ContentStatus  @default(DRAFT)
+  status       ContentStatus @default(DRAFT)
   subjectId    Int
-  subject      Subject        @relation(fields: [subjectId], references: [id])
+  subject      Subject       @relation(fields: [subjectId], references: [id])
   steps        Step[]
 }
 
 model Subject {
-  id             Int           @id @default(autoincrement())
+  id             Int         @id @default(autoincrement())
   description    String
   isPublished    Boolean
-  completionRate Float         @default(0)
+  completionRate Float       @default(0)
   lastUpdated    DateTime
   type           SubjectType
   quizzes        Quiz[]
@@ -388,7 +390,7 @@ model Quiz {
 
 model QuizQuestion {
   id            Int        @id @default(autoincrement())
-  quizOrder     Int 
+  quizOrder     Int
   question      String
   type          AnswerType
   options       String[]
@@ -397,6 +399,27 @@ model QuizQuestion {
   correctAnswer String
   quizId        Int
   quiz          Quiz       @relation(fields: [quizId], references: [id])
+}
+
+model DiscountCode {
+  id             Int              @id @default(autoincrement())
+  discountCode   String
+  amount         Int
+  startDate      DateTime
+  endDate        DateTime?
+  customerEmails String[]
+  type           DiscountCodeType
+  userType       UserType
+}
+
+enum DiscountCodeType {
+  PERCENTAGE
+  FLAT_AMOUNT
+}
+
+enum UserType {
+  B2B
+  B2C
 }
 
 enum BulkOrderStatus {

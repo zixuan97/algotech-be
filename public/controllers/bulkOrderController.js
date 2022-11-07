@@ -20,6 +20,8 @@ const createBulkOrder = async (req, res) => {
     bulkOrderStatus,
     salesOrders,
     amount,
+    transactionAmount,
+    discountCode,
     payeeContactNo,
     payeeCompany
   } = req.body;
@@ -32,7 +34,7 @@ const createBulkOrder = async (req, res) => {
     postalCode: '',
     contactNo: payeeContactNo,
     company: payeeCompany,
-    totalSpent: amount,
+    totalSpent: transactionAmount,
     lastOrderDate: new Date(),
     daysSinceLastPurchase: 0
   });
@@ -65,6 +67,8 @@ const createBulkOrder = async (req, res) => {
       payeeCompany,
       salesOrders,
       amount,
+      transactionAmount,
+      discountCode,
       orderId
     })
   );
@@ -82,7 +86,7 @@ const createBulkOrder = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: data
       });
-      const { amount, orderId } = data;
+      const { transactionAmount: amount, orderId } = data;
       if (paymentMode === 'CREDIT_CARD') {
         const sessionURL = await paymentModel.payByStripeCreditCard({
           amount,
@@ -128,12 +132,12 @@ const getAllBulkOrders = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
+    log.out('OK_BULKORDER_GET-ALL-BO', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
   }
-  log.out('OK_BULKORDER_GET-ALL-BO', {
-    req: { body: req.body, params: req.params },
-    res: JSON.stringify(data)
-  });
-  res.json(data);
 };
 
 const findBulkOrderById = async (req, res) => {
@@ -299,7 +303,9 @@ const updateBulkOrder = async (req, res) => {
       salesOrders,
       payeeContactNo,
       payeeCompany,
-      amount
+      amount,
+      transactionAmount,
+      discountCode
     } = req.body;
 
     await Promise.all(
@@ -328,7 +334,9 @@ const updateBulkOrder = async (req, res) => {
       salesOrders,
       payeeContactNo,
       payeeCompany,
-      amount
+      amount,
+      transactionAmount,
+      discountCode
     });
     log.out('OK_BULKORDER_UPDATE-BULKORDER', {
       req: { body: req.body, params: req.params },

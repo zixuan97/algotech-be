@@ -48,6 +48,7 @@ const createUser = async (req, res) => {
         tier
       })
     );
+
     if (tier !== undefined) {
       try {
         await leaveModel.createLeaveRecordByEmployeeId({
@@ -62,6 +63,7 @@ const createUser = async (req, res) => {
         return res.status(e.code).json(e.message);
       }
     }
+
     if (error) {
       log.error('ERR_USER_CREATE-USER', {
         err: error.message,
