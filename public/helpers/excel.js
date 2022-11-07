@@ -156,7 +156,7 @@ const generateBulkOrderExcel = async (req) => {
     {
       column: 'Amount',
       type: Number,
-      value: (bo) => bo.amount
+      value: (bo) => bo.transactionAmount
     },
     {
       column: 'Customer Remarks',
