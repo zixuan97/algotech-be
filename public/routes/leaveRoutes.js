@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const leaveController = require('../controllers/leaveController');
+const { verifyToken } = require('../middleware/auth');
 
 router.post('/', leaveController.createLeaveApplication);
 router.post('/quota', leaveController.createLeaveQuota);
@@ -23,9 +24,10 @@ router.get(
 );
 router.get('/:id', leaveController.getLeaveApplication);
 router.put('/', leaveController.updateLeaveApplication);
-router.post('/approve', leaveController.approveLeaveApplication);
+router.put('/vet', verifyToken, leaveController.vetLeaveApplication);
+router.post('/approve', verifyToken, leaveController.approveLeaveApplication);
 router.post('/cancel/:id', leaveController.cancelLeaveApplication);
-router.post('/reject', leaveController.rejectLeaveApplication);
+router.post('/reject', verifyToken, leaveController.rejectLeaveApplication);
 router.post('/tier', leaveController.updateTierByEmployeeId);
 
 module.exports = router;

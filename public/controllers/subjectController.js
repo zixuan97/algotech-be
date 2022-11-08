@@ -7,10 +7,14 @@ const { log } = require('../helpers/logger');
 
 const createSubject = async (req, res) => {
   const { description, isPublished, type } = req.body;
+  const currUserId = req.user.userId;
+  console.log(currUserId);
   const { data, error } = await common.awaitWrap(
     subjectModel.createSubject({
       description,
       isPublished,
+      createdById: currUserId,
+      lastUpdatedById: currUserId,
       type
     })
   );
@@ -77,13 +81,14 @@ const updateSubject = async (req, res) => {
     topics,
     usersAssigned
   } = req.body;
+  const currUserId = req.user.userId;
   const { data, error } = await common.awaitWrap(
     subjectModel.updateSubject({
       id,
       description,
       isPublished,
       completionRate,
-      lastUpdated: Date.now(),
+      lastUpdatedById: currUserId,
       type,
       quizzes,
       topics,

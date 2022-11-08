@@ -3,37 +3,32 @@ const topicModel = require('./topicModel.js');
 const quizModel = require('./quizModel.js');
 
 const createSubject = async (req) => {
-  const { description, isPublished, type } = req;
+  const { description, isPublished, createdById, lastUpdatedById, type } = req;
   const subject = await prisma.subject.create({
     data: {
       description,
       isPublished,
-      lastUpdated: new Date(Date.now()),
+      createdAt: new Date(Date.now()),
+      lastUpdatedAt: new Date(Date.now()),
+      createdById,
+      lastUpdatedById,
       type
     },
     include: {
       topics: true,
       topics: {
         include: {
-          steps: true,
-          steps: {
-            include: {
-              topic: true
-            }
-          }
+          steps: true
         }
       },
       quizzes: true,
       quizzes: {
         include: {
-          questions: true,
-          questions: {
-            include: {
-              quiz: true
-            }
-          }
+          questions: true
         }
       },
+      createdBy: true,
+      lastUpdatedBy: true,
       usersAssigned: true
     }
   });
@@ -55,6 +50,8 @@ const getAllSubjects = async () => {
           questions: true
         }
       },
+      createdBy: true,
+      lastUpdatedBy: true,
       usersAssigned: true
     }
   });
@@ -80,6 +77,8 @@ const getSubjectById = async (req) => {
           questions: true
         }
       },
+      createdBy: true,
+      lastUpdatedBy: true,
       usersAssigned: true
     }
   });
@@ -92,6 +91,7 @@ const updateSubject = async (req) => {
     description,
     isPublished,
     completionRate,
+    lastUpdatedById,
     type,
     quizzes,
     topics,
@@ -103,7 +103,8 @@ const updateSubject = async (req) => {
       description,
       isPublished,
       completionRate,
-      lastUpdated: new Date(Date.now()),
+      lastUpdatedById,
+      lastUpdatedAt: new Date(Date.now()),
       type,
       quizzes,
       topics,
@@ -122,6 +123,8 @@ const updateSubject = async (req) => {
           questions: true
         }
       },
+      createdBy: true,
+      lastUpdatedBy: true,
       usersAssigned: true
     }
   });
@@ -133,7 +136,6 @@ const deleteSubject = async (req) => {
   const topicsUnderSubject = await topicModel.getAllTopicsBySubjectId({
     subjectId: id
   });
-  console.log(topicsUnderSubject);
   for (let t of topicsUnderSubject) {
     topicModel.deleteTopic({ id: t.id });
   }
@@ -153,6 +155,12 @@ const deleteSubject = async (req) => {
       },
       quizzes: {
         deleteMany: {}
+      },
+      createdBy: {
+        delete: true
+      },
+      lastUpdatedBy: {
+        delete: true
       },
       usersAssigned: {
         deleteMany: {}
@@ -190,6 +198,8 @@ const assignUsersToSubject = async (req) => {
           questions: true
         }
       },
+      createdBy: true,
+      lastUpdatedBy: true,
       usersAssigned: true
     }
   });

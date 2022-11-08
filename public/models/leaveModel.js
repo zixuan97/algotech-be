@@ -13,6 +13,10 @@ const createLeaveApplication = async (req) => {
       description,
       lastUpdated: new Date(Date.now()),
       employeeId
+    },
+    include: {
+      employee: true,
+      vettedBy: true
     }
   });
   return leave;
@@ -21,7 +25,8 @@ const createLeaveApplication = async (req) => {
 const getAllLeaveApplications = async () => {
   const leaveApplications = await prisma.LeaveApplication.findMany({
     include: {
-      employee: true
+      employee: true,
+      vettedBy: true
     }
   });
   return leaveApplications;
@@ -31,7 +36,8 @@ const getAllPendingLeaveApplications = async () => {
   const leaveApplications = await prisma.LeaveApplication.findMany({
     where: { status: LeaveStatus.PENDING },
     include: {
-      employee: true
+      employee: true,
+      vettedBy: true
     }
   });
   return leaveApplications;
@@ -41,7 +47,8 @@ const getAllApprovedLeaveApplications = async () => {
   const leaveApplications = await prisma.LeaveApplication.findMany({
     where: { status: LeaveStatus.APPROVED },
     include: {
-      employee: true
+      employee: true,
+      vettedBy: true
     }
   });
   return leaveApplications;
@@ -52,7 +59,8 @@ const getLeaveApplicationById = async (req) => {
   const leaveApplication = await prisma.LeaveApplication.findUnique({
     where: { id: Number(id) },
     include: {
-      employee: true
+      employee: true,
+      vettedBy: true
     }
   });
   return leaveApplication;
@@ -63,7 +71,8 @@ const getAllLeaveApplicationsByEmployeeId = async (req) => {
   const leaveApplications = await prisma.LeaveApplication.findMany({
     where: { employeeId: Number(employeeId) },
     include: {
-      employee: true
+      employee: true,
+      vettedBy: true
     }
   });
   return leaveApplications;
@@ -77,7 +86,7 @@ const updateLeaveApplication = async (req) => {
     leaveType,
     status,
     description,
-    vettedBy,
+    vettedById,
     commentsByVetter
   } = req;
   const leaveApplication = await prisma.LeaveApplication.update({
@@ -88,12 +97,13 @@ const updateLeaveApplication = async (req) => {
       leaveType,
       status,
       description,
-      vettedBy,
+      vettedById,
       commentsByVetter,
       lastUpdated: new Date(Date.now())
     },
     include: {
-      employee: true
+      employee: true,
+      vettedBy: true
     }
   });
   return leaveApplication;
@@ -109,6 +119,10 @@ const approveLeaveApplication = async (req) => {
       vettedBy,
       commentsByVetter,
       lastUpdated: new Date(Date.now())
+    },
+    include: {
+      employee: true,
+      vettedBy: true
     }
   });
   return leaveApplication;
