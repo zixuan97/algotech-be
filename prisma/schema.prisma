@@ -8,22 +8,24 @@ datasource db {
 }
 
 model User {
-  id                Int                  @id @default(autoincrement())
-  firstName         String
-  lastName          String
-  email             String               @unique
-  password          String
-  role              UserRole             @default(ADMIN)
-  status            UserStatus           @default(ACTIVE)
-  isVerified        Boolean              @default(false)
-  company           String?
-  contactNo         String?
-  tier              String?
-  deliveryOrders    DeliveryOrder[]
-  leaveRecord       EmployeeLeaveRecord?
-  vettedLeaves      LeaveApplication[]   @relation("vettedBy")
-  leaveApplications LeaveApplication[]   @relation("appliedBy")
-  subjectsAssigned  Subject[]
+  id                    Int                  @id @default(autoincrement())
+  firstName             String
+  lastName              String
+  email                 String               @unique
+  password              String
+  role                  UserRole             @default(ADMIN)
+  status                UserStatus           @default(ACTIVE)
+  isVerified            Boolean              @default(false)
+  company               String?
+  contactNo             String?
+  tier                  String?
+  deliveryOrders        DeliveryOrder[]
+  leaveRecord           EmployeeLeaveRecord?
+  leaveApplications     LeaveApplication[]   @relation("appliedBy")
+  vettedLeaves          LeaveApplication[]   @relation("vettedBy")
+  createdSubjects       Subject[]            @relation("createdBy")
+  lastUpdatedSubjects   Subject[]            @relation("lastUpdatedBy")
+  assignedSubjects      Subject[]
 }
 
 model Category {
@@ -189,8 +191,6 @@ model SalesOrder {
 model BulkOrder {
   id                Int             @id @default(autoincrement())
   amount            Float
-  transactionAmount Float
-  discountCode      String
   paymentMode       PaymentMode
   payeeName         String
   payeeEmail        String
@@ -200,6 +200,8 @@ model BulkOrder {
   orderId           String          @unique
   payeeContactNo    String
   payeeCompany      String?
+  discountCode      String
+  transactionAmount Float
   salesOrders       SalesOrder[]
 }
 
@@ -366,15 +368,20 @@ model Topic {
 }
 
 model Subject {
-  id             Int         @id @default(autoincrement())
-  description    String
-  isPublished    Boolean
-  completionRate Float       @default(0)
-  lastUpdated    DateTime
-  type           SubjectType
-  quizzes        Quiz[]
-  topics         Topic[]
-  usersAssigned  User[]
+  id              Int         @id @default(autoincrement())
+  description     String
+  isPublished     Boolean
+  completionRate  Float       @default(0)
+  createdAt       DateTime
+  lastUpdatedAt   DateTime
+  createdById     Int
+  createdBy       User       @relation("createdBy", fields: [createdById], references: [id])
+  lastUpdatedById Int
+  lastUpdatedBy   User       @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
+  type            SubjectType
+  quizzes         Quiz[]
+  topics          Topic[]
+  usersAssigned   User[]
 }
 
 model Quiz {
@@ -405,23 +412,17 @@ model QuizQuestion {
 
 model DiscountCode {
   id             Int              @id @default(autoincrement())
-  discountCode   String
+  discountCode   String           @unique
   amount         Int
   startDate      DateTime
   endDate        DateTime?
   customerEmails String[]
   type           DiscountCodeType
-  userType       UserType
 }
 
 enum DiscountCodeType {
   PERCENTAGE
   FLAT_AMOUNT
-}
-
-enum UserType {
-  B2B
-  B2C
 }
 
 enum BulkOrderStatus {
@@ -434,7 +435,6 @@ enum BulkOrderStatus {
 
 enum PaymentMode {
   CREDIT_CARD
-  BANK_TRANSFER
   PAYNOW
 }
 
@@ -500,7 +500,6 @@ enum DeliveryMode {
 enum ShippingType {
   MANUAL
   SHIPPIT
-  GRAB
   LALAMOVE
 }
 
