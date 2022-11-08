@@ -189,6 +189,8 @@ model SalesOrder {
 model BulkOrder {
   id                Int             @id @default(autoincrement())
   amount            Float
+  transactionAmount Float
+  discountCode      String
   paymentMode       PaymentMode
   payeeName         String
   payeeEmail        String
@@ -198,8 +200,6 @@ model BulkOrder {
   orderId           String          @unique
   payeeContactNo    String
   payeeCompany      String?
-  discountCode      String
-  transactionAmount Float
   salesOrders       SalesOrder[]
 }
 
@@ -317,6 +317,7 @@ model LeaveApplication {
 }
 
 model LeaveQuota {
+  id            Int    @id @default(autoincrement())
   tier          String @unique
   annual        Int
   childcare     Int
@@ -324,10 +325,10 @@ model LeaveQuota {
   parental      Int
   sick          Int
   unpaid        Int
-  id            Int    @id @default(autoincrement())
 }
 
 model EmployeeLeaveRecord {
+  id                   Int      @id @default(autoincrement())
   employeeId           Int      @unique
   annualQuota          Int
   childcareQuota       Int
@@ -342,7 +343,6 @@ model EmployeeLeaveRecord {
   sickBalance          Int
   unpaidBalance        Int
   lastUpdated          DateTime
-  id                   Int      @id @default(autoincrement())
   employee             User     @relation(fields: [employeeId], references: [id])
 }
 
@@ -412,6 +412,16 @@ model DiscountCode {
   customerEmails String[]
   type           DiscountCodeType
   userType       UserType
+}
+
+enum DiscountCodeType {
+  PERCENTAGE
+  FLAT_AMOUNT
+}
+
+enum UserType {
+  B2B
+  B2C
 }
 
 enum BulkOrderStatus {
@@ -525,14 +535,4 @@ enum SubjectType {
   COMPANY
   POLICY
   PROCESS
-}
-
-enum DiscountCodeType {
-  PERCENTAGE
-  FLAT_AMOUNT
-}
-
-enum UserType {
-  B2B
-  B2C
 }

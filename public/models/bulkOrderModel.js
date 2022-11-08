@@ -9,6 +9,8 @@ const createBulkOrder = async (req) => {
     bulkOrderStatus,
     salesOrders,
     amount,
+    transactionAmount,
+    discountCode,
     orderId,
     payeeContactNo,
     payeeCompany
@@ -18,6 +20,8 @@ const createBulkOrder = async (req) => {
     data: {
       orderId,
       amount,
+      transactionAmount,
+      discountCode,
       paymentMode,
       payeeName,
       payeeEmail,
@@ -115,7 +119,9 @@ const updateBulkOrder = async (req) => {
     salesOrders,
     payeeContactNo,
     payeeCompany,
-    amount
+    amount,
+    transactionAmount,
+    discountCode
   } = req;
 
   await Promise.all(
@@ -147,6 +153,8 @@ const updateBulkOrder = async (req) => {
     data: {
       payeeContactNo,
       amount,
+      transactionAmount,
+      discountCode,
       paymentMode,
       payeeName,
       payeeEmail,
