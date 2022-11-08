@@ -1,5 +1,4 @@
 const stepModel = require('../models/stepModel');
-const topicModel = require('../models/topicModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');

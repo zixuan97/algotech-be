@@ -412,16 +412,7 @@ const getLeaveApplication = async (req, res) => {
 };
 
 const updateLeaveApplication = async (req, res) => {
-  const {
-    id,
-    startDate,
-    endDate,
-    leaveType,
-    status,
-    description,
-    vettedBy,
-    commentsByVetter
-  } = req.body;
+  const { id, startDate, endDate, leaveType, status, description } = req.body;
   const { data, error } = await common.awaitWrap(
     leaveModel.updateLeaveApplication({
       id,
@@ -429,9 +420,7 @@ const updateLeaveApplication = async (req, res) => {
       endDate,
       leaveType,
       status,
-      description,
-      vettedBy,
-      commentsByVetter
+      description
     })
   );
   if (error) {
@@ -450,12 +439,46 @@ const updateLeaveApplication = async (req, res) => {
   }
 };
 
+const vetLeaveApplication = async (req, res) => {
+  const { id, commentsByVetter } = req.body;
+  const currUserId = req.user.userId;
+  const { data, error } = await common.awaitWrap(
+    leaveModel.updateLeaveApplication({
+      id,
+      vettedById: currUserId,
+      commentsByVetter
+    })
+  );
+  const { employeeId } = await leaveModel.getLeaveApplicationById({ id });
+  if (currUserId === employeeId) {
+    log.out('ERR_LEAVE_VET-LEAVE', {
+      err: 'You cannot vet your own application',
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).json('You cannot vet your own application');
+  } else if (error) {
+    log.error('ERR_LEAVE_VET-LEAVE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_VET-LEAVE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 const approveLeaveApplication = async (req, res) => {
-  const { id, vettedBy, commentsByVetter } = req.body;
+  const { id, commentsByVetter } = req.body;
   const { leaveType, status, employeeId } =
     await leaveModel.getLeaveApplicationById({
       id
     });
+  const currUserId = req.user.userId;
   const leaveTypeBalance = await leaveModel.getLeaveTypeBalanceByEmployeeId({
     employeeId,
     leaveType
@@ -474,6 +497,12 @@ const approveLeaveApplication = async (req, res) => {
     res
       .status(400)
       .json('You cannot approve an application that has been cancelled');
+  } else if (currUserId === employeeId) {
+    log.out('ERR_LEAVE_APPROVE-LEAVE', {
+      err: 'You cannot approve your own application',
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).json('You cannot approve your own application');
   } else if (leaveTypeBalance === 0) {
     log.out('ERR_LEAVE_APPROVE-LEAVE', {
       err: `Employee does not have any leave balance for ${leaveType}`,
@@ -487,7 +516,7 @@ const approveLeaveApplication = async (req, res) => {
       leaveModel.updateLeaveApplication({
         id,
         status: LeaveStatus.APPROVED,
-        vettedBy,
+        vettedById: currUserId,
         commentsByVetter
       })
     );
@@ -523,7 +552,8 @@ const approveLeaveApplication = async (req, res) => {
 };
 
 const rejectLeaveApplication = async (req, res) => {
-  const { id, vettedBy, commentsByVetter } = req.body;
+  const { id, commentsByVetter } = req.body;
+  const currUserId = req.user.userId;
   const { leaveType, status, employeeId } =
     await leaveModel.getLeaveApplicationById({
       id
@@ -536,12 +566,18 @@ const rejectLeaveApplication = async (req, res) => {
     res
       .status(400)
       .json('You cannot reject an application that has been cancelled');
+  } else if (currUserId === employeeId) {
+    log.out('ERR_LEAVE_REJECT-LEAVE', {
+      err: 'You cannot reject your own application',
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).json('You cannot reject your own application');
   } else {
     const { data, error } = await common.awaitWrap(
       leaveModel.updateLeaveApplication({
         id,
         status: LeaveStatus.REJECTED,
-        vettedBy,
+        vettedById: currUserId,
         commentsByVetter
       })
     );
@@ -657,6 +693,7 @@ exports.getAllPendingLeaveApplications = getAllPendingLeaveApplications;
 exports.getNumberOfPendingLeaveApplications =
   getNumberOfPendingLeaveApplications;
 exports.updateLeaveApplication = updateLeaveApplication;
+exports.vetLeaveApplication = vetLeaveApplication;
 exports.approveLeaveApplication = approveLeaveApplication;
 exports.cancelLeaveApplication = cancelLeaveApplication;
 exports.rejectLeaveApplication = rejectLeaveApplication;

@@ -118,6 +118,18 @@ const deleteUserById = async (req) => {
       },
       leaveRecord: {
         delete: true
+      },
+      createdSubjects: {
+        deleteMany: {}
+      },
+      lastUpdatedSubjects: {
+        deleteMany: {}
+      },
+      subjectsAssigned: {
+        deleteMany: {}
+      },
+      vettedLeaves: {
+        deleteMany: {}
       }
     }
   });
