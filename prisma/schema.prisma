@@ -409,17 +409,11 @@ model DiscountCode {
   endDate        DateTime?
   customerEmails String[]
   type           DiscountCodeType
-  userType       UserType
 }
 
 enum DiscountCodeType {
   PERCENTAGE
   FLAT_AMOUNT
-}
-
-enum UserType {
-  B2B
-  B2C
 }
 
 enum BulkOrderStatus {
