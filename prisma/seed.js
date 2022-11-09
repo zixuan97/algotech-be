@@ -511,6 +511,32 @@ async function main() {
       tier: 'Tier 3'
     }
   });
+
+  await prisma.discountCode.create({
+    data: {
+      discountCode: 'XMAS2020',
+      minOrderAmount: 20.0,
+      amount: 10,
+      startDate: '2022-09-10T00:00:00.000Z',
+      endDate: '2022-12-10T00:00:00.000Z',
+      customerEmails: [],
+      type: 'FLAT_AMOUNT',
+      isEnabled: true
+    }
+  });
+
+  await prisma.discountCode.create({
+    data: {
+      discountCode: '10PERCENT',
+      minOrderAmount: 20.0,
+      amount: 10,
+      startDate: '2022-09-10T00:00:00.000Z',
+      endDate: '2022-12-10T00:00:00.000Z',
+      customerEmails: [],
+      type: 'PERCENTAGE',
+      isEnabled: true
+    }
+  });
 }
 
 main()
