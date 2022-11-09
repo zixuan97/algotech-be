@@ -47,7 +47,8 @@ async function main() {
     data: {
       email: 'tanwk@comp.nus.edu.sg',
       name: 'Wee Kek',
-      address: 'Blk 117 Ang Mo Kio Ave 4 #08-467'
+      address: 'Blk 117 Ang Mo Kio Ave 4 #08-467',
+      currency: 'SGD - Singapore Dollar'
     }
   });
 

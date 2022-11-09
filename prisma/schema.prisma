@@ -141,6 +141,7 @@ model Supplier {
   email           String            @unique
   name            String
   address         String
+  currency        String
   supplierProduct SupplierProduct[]
 }
 
@@ -285,7 +286,6 @@ model SupplierProduct {
   supplierId Int
   productId  Int
   rate       Float
-  currency   String
   product    Product  @relation(fields: [productId], references: [id])
   supplier   Supplier @relation(fields: [supplierId], references: [id])
 
@@ -362,9 +362,9 @@ model Step {
 model Topic {
   id           Int           @id @default(autoincrement())
   subjectOrder Int
-  title        String
   status       ContentStatus @default(DRAFT)
   subjectId    Int
+  title        String
   subject      Subject       @relation(fields: [subjectId], references: [id])
   steps        Step[]
 }

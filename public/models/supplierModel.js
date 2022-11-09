@@ -3,12 +3,13 @@ const axios = require('axios').default;
 const { log } = require('../helpers/logger');
 
 const createSupplier = async (req) => {
-  const { email, name, address } = req;
+  const { email, name, address, currency } = req;
   const supplier = await prisma.supplier.create({
     data: {
       email,
       name,
-      address
+      address,
+      currency
     }
   });
   return supplier;
@@ -47,19 +48,19 @@ const findSupplierByEmail = async (req) => {
 };
 
 const updateSupplier = async (req) => {
-  const { id, email, name, address, supplierProduct } = req;
+  const { id, email, name, address, currency, supplierProduct } = req;
   supplier = await prisma.supplier.update({
     where: { id },
     data: {
       email,
       name,
       address,
+      currency,
       supplierProduct: {
         deleteMany: {},
         create: supplierProduct.map((p) => ({
           productId: p.product.id,
-          rate: p.rate,
-          currency: p.currency
+          rate: p.rate
         }))
       }
     }
@@ -82,7 +83,7 @@ const deleteSupplier = async (req) => {
 };
 
 const connectOrCreateSupplierProduct = async (req) => {
-  const { supplierId, productId, rate, currency } = req;
+  const { supplierId, productId, rate } = req;
   const supplierProduct = await prisma.SupplierProduct.upsert({
     where: {
       supplierId_productId: {
@@ -91,14 +92,12 @@ const connectOrCreateSupplierProduct = async (req) => {
       }
     },
     update: {
-      rate,
-      currency
+      rate
     },
     create: {
       supplierId,
       productId,
-      rate,
-      currency
+      rate
     }
   });
   return supplierProduct;

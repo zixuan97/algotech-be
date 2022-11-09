@@ -5,7 +5,7 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createSupplier = async (req, res) => {
-  const { email, name, address, supplierProduct } = req.body;
+  const { email, name, address, currency, supplierProduct } = req.body;
   const supplier = await supplierModel.findSupplierByEmail({ email });
   if (supplier) {
     log.error('ERR_PRODUCT_CREATE-SUPPLIER', {
@@ -18,7 +18,8 @@ const createSupplier = async (req, res) => {
       supplierModel.createSupplier({
         email,
         name,
-        address
+        address,
+        currency
       })
     );
     if (error) {
@@ -33,8 +34,7 @@ const createSupplier = async (req, res) => {
           await supplierModel.connectOrCreateSupplierProduct({
             supplierId: data.id,
             productId: p.product.id,
-            rate: p.rate,
-            currency: p.currency
+            rate: p.rate
           });
         });
       }
@@ -144,13 +144,14 @@ const getSupplierByName = async (req, res) => {
 };
 
 const updateSupplier = async (req, res) => {
-  const { id, email, name, address, supplierProduct } = req.body;
+  const { id, email, name, address, currency, supplierProduct } = req.body;
   const { data, error } = await common.awaitWrap(
     supplierModel.updateSupplier({
       id,
       email,
       name,
       address,
+      currency,
       supplierProduct
     })
   );
@@ -223,7 +224,7 @@ const deleteSupplier = async (req, res) => {
 };
 
 const addProductToSupplier = async (req, res) => {
-  const { supplierId, productId, rate, currency } = req.body;
+  const { supplierId, productId, rate } = req.body;
   const supplier = supplierModel.findSupplierById({ id: supplierId });
   const product = productModel.findProductById({ id: productId });
   if (!supplier || !product) {
@@ -237,8 +238,7 @@ const addProductToSupplier = async (req, res) => {
     supplierModel.connectOrCreateSupplierProduct({
       supplierId,
       productId,
-      rate,
-      currency
+      rate
     })
   );
   if (error) {

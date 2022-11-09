@@ -24,5 +24,6 @@ router.get('/pending/count', UserController.getNumberOfPendingUsers);
 router.get('/employee/all', verifyToken, UserController.getAllEmployees);
 router.post('/jobrole', UserController.createJobRole);
 router.put('/jobrole', UserController.editJobRole);
+router.post('/jobroles', UserController.addJobRolesToUser);
 
 module.exports = router;
