@@ -4,12 +4,12 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createTopic = async (req, res) => {
-  const { subjectOrder, name, subjectId } = req.body;
+  const { subjectOrder, title, subjectId } = req.body;
 
   const { data, error } = await common.awaitWrap(
     topicModel.createTopic({
       subjectOrder,
-      name,
+      title,
       subjectId
     })
   );
@@ -75,12 +75,12 @@ const getTopic = async (req, res) => {
 };
 
 const updateTopic = async (req, res) => {
-  const { id, subjectOrder, name, status, subjectId } = req.body;
+  const { id, subjectOrder, title, status, subjectId } = req.body;
   const { data, error } = await common.awaitWrap(
     topicModel.updateTopic({
       id,
       subjectOrder,
-      name,
+      title,
       status,
       subjectId
     })
