@@ -366,10 +366,6 @@ const updateTierByEmployeeId = async (req) => {
     parentalQuota: parental,
     sickQuota: sick,
     unpaidQuota: unpaid
-    // sickBalance: { increment: sickQuotaIncrement },
-    // parentalBalance: { increment: parentalQuotaIncrement },
-    // paidBalance: { increment: paidQuotaIncrement },
-    // unpaidBalance: { increment: unpaidQuotaIncrement }
   });
   const user = await userModel.findUserById({ id: employeeId });
   const updatedUser = {
@@ -471,6 +467,34 @@ const updateEmployeeLeaveQuota = async (req) => {
   return data;
 };
 
+const updateEmployeesToNewTierForDeletedTier = async (req) => {
+  const { deletedTier, newTier } = req;
+  const employeesInDeletedTier = await getAllEmployeesByTier({
+    tier: deletedTier
+  });
+  for (let e of employeesInDeletedTier) {
+    const { annual, childcare, compassionate, parental, sick, unpaid } =
+      await getLeaveQuotaByTier({
+        tier: newTier
+      });
+    await updateEmployeeLeaveQuota({
+      employeeId: e.id,
+      annualQuota: annual,
+      childcareQuota: childcare,
+      compassionateQuota: compassionate,
+      parentalQuota: parental,
+      sickQuota: sick,
+      unpaidQuota: unpaid
+    });
+    const user = await userModel.findUserById({ id: e.id });
+    const updatedUser = {
+      ...user,
+      tier: newTier
+    };
+    await userModel.editUser({ updatedUser });
+  }
+};
+
 exports.createLeaveApplication = createLeaveApplication;
 exports.getAllLeaveApplications = getAllLeaveApplications;
 exports.getAllPendingLeaveApplications = getAllPendingLeaveApplications;
@@ -495,3 +519,5 @@ exports.updateLeaveTypeBalanceByEmployeeId = updateLeaveTypeBalanceByEmployeeId;
 exports.updateTierByEmployeeId = updateTierByEmployeeId;
 exports.getAllEmployeesByTier = getAllEmployeesByTier;
 exports.updateEmployeeLeaveQuota = updateEmployeeLeaveQuota;
+exports.updateEmployeesToNewTierForDeletedTier =
+  updateEmployeesToNewTierForDeletedTier;
