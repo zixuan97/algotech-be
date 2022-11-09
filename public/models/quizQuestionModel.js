@@ -23,7 +23,18 @@ const createQuizQuestion = async (req) => {
       quizId
     },
     include: {
-      quiz: true
+      quiz: true,
+      quiz: {
+        include: {
+          subject: true,
+          subject: {
+            include: {
+              createdBy: true,
+              lastUpdatedBy: true
+            }
+          }
+        }
+      }
     }
   });
   return quizQuestion;
@@ -37,7 +48,13 @@ const getAllQuizQuestionsByQuizId = async (req) => {
       quiz: true,
       quiz: {
         include: {
-          subject: true
+          subject: true,
+          subject: {
+            include: {
+              createdBy: true,
+              lastUpdatedBy: true
+            }
+          }
         }
       }
     }
@@ -53,7 +70,18 @@ const getQuizQuestionById = async (req) => {
   const quizQuestion = await prisma.QuizQuestion.findUnique({
     where: { id: Number(id) },
     include: {
-      quiz: true
+      quiz: true,
+      quiz: {
+        include: {
+          subject: true,
+          subject: {
+            include: {
+              createdBy: true,
+              lastUpdatedBy: true
+            }
+          }
+        }
+      }
     }
   });
   return quizQuestion;
@@ -84,7 +112,18 @@ const updateQuizQuestion = async (req) => {
       quizId
     },
     include: {
-      quiz: true
+      quiz: true,
+      quiz: {
+        include: {
+          subject: true,
+          subject: {
+            include: {
+              createdBy: true,
+              lastUpdatedBy: true
+            }
+          }
+        }
+      }
     }
   });
   return quizQuestion;

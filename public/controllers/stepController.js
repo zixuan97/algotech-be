@@ -1,10 +1,18 @@
 const stepModel = require('../models/stepModel');
+const topicModel = require('../models/topicModel');
+const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createStep = async (req, res) => {
   const { topicOrder, title, content, topicId } = req.body;
+  const { subjectId } = await topicModel.getTopicById({ id: topicId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     stepModel.createStep({
       topicOrder,
@@ -76,6 +84,12 @@ const getStep = async (req, res) => {
 
 const updateStep = async (req, res) => {
   const { id, topicOrder, title, content, topicId } = req.body;
+  const { subjectId } = await topicModel.getTopicById({ id: topicId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     stepModel.updateStep({
       id,
@@ -105,6 +119,13 @@ const updateStep = async (req, res) => {
 
 const deleteStep = async (req, res) => {
   const { id } = req.params;
+  const { topicId } = await stepModel.getStepById({ id });
+  const { subjectId } = await topicModel.getTopicById({ id: topicId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { error } = await common.awaitWrap(stepModel.deleteStep({ id }));
   if (error) {
     log.error('ERR_STEP_DELETE-STEP', {
