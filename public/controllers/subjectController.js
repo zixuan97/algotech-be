@@ -6,11 +6,12 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createSubject = async (req, res) => {
-  const { description, isPublished, type } = req.body;
+  const { title, description, isPublished, type } = req.body;
   const currUserId = req.user.userId;
   console.log(currUserId);
   const { data, error } = await common.awaitWrap(
     subjectModel.createSubject({
+      title,
       description,
       isPublished,
       createdById: currUserId,
@@ -73,6 +74,7 @@ const getSubject = async (req, res) => {
 const updateSubject = async (req, res) => {
   const {
     id,
+    title,
     description,
     isPublished,
     completionRate,
@@ -85,6 +87,7 @@ const updateSubject = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     subjectModel.updateSubject({
       id,
+      title,
       description,
       isPublished,
       completionRate,

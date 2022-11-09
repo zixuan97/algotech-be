@@ -3,9 +3,17 @@ const topicModel = require('./topicModel.js');
 const quizModel = require('./quizModel.js');
 
 const createSubject = async (req) => {
-  const { description, isPublished, createdById, lastUpdatedById, type } = req;
+  const {
+    title,
+    description,
+    isPublished,
+    createdById,
+    lastUpdatedById,
+    type
+  } = req;
   const subject = await prisma.subject.create({
     data: {
+      title,
       description,
       isPublished,
       createdAt: new Date(Date.now()),
@@ -88,6 +96,7 @@ const getSubjectById = async (req) => {
 const updateSubject = async (req) => {
   const {
     id,
+    title,
     description,
     isPublished,
     completionRate,
@@ -100,6 +109,7 @@ const updateSubject = async (req) => {
   const subject = await prisma.subject.update({
     where: { id },
     data: {
+      title,
       description,
       isPublished,
       completionRate,

@@ -33,7 +33,8 @@ const createSupplier = async (req, res) => {
           await supplierModel.connectOrCreateSupplierProduct({
             supplierId: data.id,
             productId: p.product.id,
-            rate: p.rate
+            rate: p.rate,
+            currency: p.currency
           });
         });
       }

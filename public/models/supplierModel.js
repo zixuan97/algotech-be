@@ -91,8 +91,8 @@ const connectOrCreateSupplierProduct = async (req) => {
       }
     },
     update: {
-      currency,
-      rate
+      rate,
+      currency
     },
     create: {
       supplierId,
