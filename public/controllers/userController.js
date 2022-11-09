@@ -621,6 +621,59 @@ const getNumberOfPendingUsers = async (req, res) => {
   res.json(filtered.length);
 };
 
+const getAllEmployees = async (req, res) => {
+  try {
+    const users = await userModel.getEmployees({});
+    log.out('OK_USER_GET-EMPLOYEES', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(users.filter((u) => u.id != req.user.userId))
+    });
+    res.json(users.filter((u) => u.id != req.user.userId));
+  } catch (error) {
+    log.error('ERR_USER_GET-EMPLOYEES', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting all employees');
+  }
+};
+
+const createJobRole = async (req, res) => {
+  const { jobRole } = req.body;
+  try {
+    const data = await userModel.createJobRole({ jobRole });
+    log.out('OK_USER_CREATE-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  } catch (error) {
+    log.error('ERR_USER_CREATE-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error creating job role');
+  }
+};
+
+const addJobRolesToUser = async (req, res) => {
+  const { id, jobRoles } = req.body;
+  try {
+    const data = await userModel.addJobRolesToUser({ id, jobRoles });
+    log.out('OK_USER_ADD-JOB-ROLES-TO-USER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  } catch (error) {
+    log.error('ERR_USER_ADD-JOB-ROLES-TO-USER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error adding job roles to users');
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -641,3 +694,6 @@ exports.getAllB2BUsers = getAllB2BUsers;
 exports.getAllPendingB2BUsers = getAllPendingB2BUsers;
 exports.getAllNonB2BUsers = getAllNonB2BUsers;
 exports.getNumberOfPendingUsers = getNumberOfPendingUsers;
+exports.getAllEmployees = getAllEmployees;
+exports.createJobRole = createJobRole;
+exports.addJobRolesToUser = addJobRolesToUser;

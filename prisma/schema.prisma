@@ -19,6 +19,7 @@ model User {
   company               String?
   contactNo             String?
   tier                  String?
+  jobRoles              JobRole[]
   deliveryOrders        DeliveryOrder[]
   leaveRecord           EmployeeLeaveRecord?
   leaveApplications     LeaveApplication[]   @relation("appliedBy")
@@ -284,6 +285,7 @@ model SupplierProduct {
   supplierId Int
   productId  Int
   rate       Float
+  currency   String
   product    Product  @relation(fields: [productId], references: [id])
   supplier   Supplier @relation(fields: [supplierId], references: [id])
 
@@ -418,6 +420,12 @@ model DiscountCode {
   endDate        DateTime?
   customerEmails String[]
   type           DiscountCodeType
+}
+
+model JobRole {
+  id               Int              @id @default(autoincrement())
+  jobRole          String           @unique
+  usersInJobRole   User[]
 }
 
 enum DiscountCodeType {

@@ -21,5 +21,7 @@ router.get('/b2b/all', UserController.getAllB2BUsers);
 router.get('/b2b/pending', UserController.getAllPendingB2BUsers);
 router.get('/nonb2b/all', verifyToken, UserController.getAllNonB2BUsers);
 router.get('/pending/count', UserController.getNumberOfPendingUsers);
+router.get('/employee/all', verifyToken, UserController.getAllEmployees);
+router.post('/jobrole', UserController.createJobRole);
 
 module.exports = router;
