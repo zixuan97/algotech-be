@@ -29,9 +29,13 @@ const createSupplier = async (req, res) => {
       res.json(Error.http(error));
     } else {
       if (supplierProduct !== []) {
-        supplierProduct.map(async p => {
-          await supplierModel.connectOrCreateSupplierProduct({ supplierId: data.id, productId: p.product.id, rate: p.rate })
-        })
+        supplierProduct.map(async (p) => {
+          await supplierModel.connectOrCreateSupplierProduct({
+            supplierId: data.id,
+            productId: p.product.id,
+            rate: p.rate
+          });
+        });
       }
       log.out('OK_SUPPLIER_CREATE-SUPPLIER', {
         req: { body: req.body, params: req.params },
@@ -102,7 +106,7 @@ const getSupplier = async (req, res) => {
       result = {
         ...supplier,
         supplierProduct: data
-      }
+      };
       log.out('OK_SUPPLIER_GET-SUPPLIER-BY-ID', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(result)
@@ -172,7 +176,7 @@ const deleteSupplier = async (req, res) => {
   );
   if (getAllProductsFromSupplierError) {
     log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER', {
-      err: getAllProductsFromSupplierError.message, 
+      err: getAllProductsFromSupplierError.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
@@ -183,7 +187,10 @@ const deleteSupplier = async (req, res) => {
   const { error: deleteProductsError } = await common.awaitWrap(
     Promise.allSettled(
       data.map(async (p) => {
-        await supplierModel.deleteProductBySupplier({ supplierId: id, productId: p.productId });
+        await supplierModel.deleteProductBySupplier({
+          supplierId: id,
+          productId: p.productId
+        });
       })
     )
   );
@@ -195,7 +202,9 @@ const deleteSupplier = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   }
-  const { error } = await common.awaitWrap(supplierModel.deleteSupplier({ id }));
+  const { error } = await common.awaitWrap(
+    supplierModel.deleteSupplier({ id })
+  );
   if (error) {
     log.error('ERR_SUPPLIER_DELETE-SUPPLIER', {
       err: error.message,
@@ -218,13 +227,17 @@ const addProductToSupplier = async (req, res) => {
   const product = productModel.findProductById({ id: productId });
   if (!supplier || !product) {
     log.error('ERR_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', {
-      err: 'Supplier or product does not exist.' ,
+      err: 'Supplier or product does not exist.',
       req: { body: req.body, params: req.params }
     });
-    res.json({ "message" : "Supplier or product does not exist." });
+    res.json({ message: 'Supplier or product does not exist.' });
   }
   const { data, error } = await common.awaitWrap(
-    supplierModel.connectOrCreateSupplierProduct({ supplierId, productId, rate })
+    supplierModel.connectOrCreateSupplierProduct({
+      supplierId,
+      productId,
+      rate
+    })
   );
   if (error) {
     log.error('ERR_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', {
@@ -294,9 +307,52 @@ const deleteProductBySupplier = async (req, res) => {
   } else {
     log.out('OK_SUPPLIER_DELETE-PRODUCT-BY-SUPPLIER', {
       req: { body: req.body, params: req.params },
-      res: { message: `Deleted product id: ${productId} from supplier id: ${supplierId}` }
+      res: {
+        message: `Deleted product id: ${productId} from supplier id: ${supplierId}`
+      }
     });
-    res.json({ message: `Deleted product id: ${productId} from supplier id: ${supplierId}` });
+    res.json({
+      message: `Deleted product id: ${productId} from supplier id: ${supplierId}`
+    });
+  }
+};
+
+const getAllCurrencies = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    supplierModel.getAllCurrencies({})
+  );
+  if (error) {
+    log.error('ERR_SUPPLIER_GET-ALL-CURRENCIES', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_SUPPLIER_GET-ALL-CURRENCIES', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const getCountryCodeBasedOnCurrency = async (req, res) => {
+  const { currency } = req.body;
+  const { data, error } = await common.awaitWrap(
+    supplierModel.getCountryCodeBasedOnCurrency({ currency })
+  );
+  if (error) {
+    log.error('ERR_SUPPLIER_GET-COUNTRY-CODE-BASED-ON-CURRENCY', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.json(Error.http(error));
+  } else {
+    log.out('OK_SUPPLIER_GET-COUNTRY-CODE-BASED-ON-CURRENCY', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
   }
 };
 
@@ -310,3 +366,5 @@ exports.addProductToSupplier = addProductToSupplier;
 exports.getAllSupplierProducts = getAllSupplierProducts;
 exports.getAllProductsBySupplier = getAllProductsBySupplier;
 exports.deleteProductBySupplier = deleteProductBySupplier;
+exports.getAllCurrencies = getAllCurrencies;
+exports.getCountryCodeBasedOnCurrency = getCountryCodeBasedOnCurrency;
