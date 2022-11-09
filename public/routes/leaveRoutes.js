@@ -29,5 +29,9 @@ router.post('/approve', verifyToken, leaveController.approveLeaveApplication);
 router.post('/cancel/:id', leaveController.cancelLeaveApplication);
 router.post('/reject', verifyToken, leaveController.rejectLeaveApplication);
 router.post('/tier', leaveController.updateTierByEmployeeId);
+router.post(
+  '/deletedtier/newtier',
+  leaveController.updateEmployeesToNewTierForDeletedTier
+);
 
 module.exports = router;
