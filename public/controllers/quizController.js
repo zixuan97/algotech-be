@@ -22,6 +22,8 @@ const createQuiz = async (req, res) => {
       subjectId
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_QUIZ_CREATE-QUIZ', {
       err: error.message,
@@ -42,6 +44,10 @@ const getAllQuizzesBySubjectId = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     quizModel.getAllQuizzesBySubjectId({ subjectId })
   );
+  for (let d of data) {
+    d.subject.createdBy.password = '';
+    d.subject.lastUpdatedBy.password = '';
+  }
   if (error) {
     log.error('ERR_QUIZ_GET-ALL-QUIZZES', {
       err: error.message,
@@ -61,6 +67,8 @@ const getQuiz = async (req, res) => {
   try {
     const { id } = req.params;
     const quiz = await quizModel.getQuizById({ id });
+    quiz.subject.createdBy.password = '';
+    quiz.subject.lastUpdatedBy.password = '';
     log.out('OK_QUIZ_GET-QUIZ-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(quiz)
@@ -98,6 +106,8 @@ const updateQuiz = async (req, res) => {
       subjectId
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_QUIZ_UPDATE-QUIZ', {
       err: error.message,
@@ -122,6 +132,8 @@ const addQuizQuestionsToQuiz = async (req, res) => {
       questions
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
       err: error.message,

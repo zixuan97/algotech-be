@@ -23,12 +23,7 @@ const createTopic = async (req) => {
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
           createdBy: true,
@@ -64,12 +59,7 @@ const getAllTopicsBySubjectId = async (req) => {
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
           createdBy: true,
@@ -103,12 +93,7 @@ const getTopicById = async (req) => {
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
           createdBy: true,
@@ -145,12 +130,7 @@ const updateTopic = async (req) => {
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
           createdBy: true,
@@ -190,12 +170,7 @@ const addStepsToTopic = async (req) => {
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
           createdBy: true,

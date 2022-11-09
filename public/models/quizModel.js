@@ -31,14 +31,11 @@ const createQuiz = async (req) => {
           quizzes: true,
           quizzes: {
             include: {
-              questions: true,
-              questions: {
-                include: {
-                  quiz: true
-                }
-              }
+              questions: true
             }
           },
+          createdBy: true,
+          lastUpdatedBy: true,
           usersAssigned: true
         }
       }
@@ -53,6 +50,25 @@ const getAllQuizzesBySubjectId = async (req) => {
     where: { subjectId: Number(subjectId) },
     include: {
       subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          createdBy: true,
+          lastUpdatedBy: true,
+          usersAssigned: true
+        }
+      },
       questions: true
     }
   });
@@ -79,9 +95,12 @@ const getQuizById = async (req) => {
               questions: true
             }
           },
+          createdBy: true,
+          lastUpdatedBy: true,
           usersAssigned: true
         }
-      }
+      },
+      questions: true
     }
   });
   return quiz;
@@ -123,9 +142,12 @@ const updateQuiz = async (req) => {
               questions: true
             }
           },
+          createdBy: true,
+          lastUpdatedBy: true,
           usersAssigned: true
         }
-      }
+      },
+      questions: true
     }
   });
   return quiz;
@@ -150,6 +172,25 @@ const addQuizQuestionsToQuiz = async (req) => {
     },
     include: {
       subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          createdBy: true,
+          lastUpdatedBy: true,
+          usersAssigned: true
+        }
+      },
       questions: true
     }
   });

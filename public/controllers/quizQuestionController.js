@@ -26,6 +26,8 @@ const createQuizQuestion = async (req, res) => {
       quizId
     })
   );
+  data.quiz.subject.createdBy.password = '';
+  data.quiz.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_QUIZQUESTION_CREATE-QUIZQUESTION', {
       err: error.message,
@@ -46,6 +48,10 @@ const getAllQuizQuestionsByQuizId = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     quizQuestionModel.getAllQuizQuestionsByQuizId({ quizId })
   );
+  for (let d of data) {
+    d.quiz.subject.createdBy.password = '';
+    d.quiz.subject.lastUpdatedBy.password = '';
+  }
   if (error) {
     log.error('ERR_QUIZQUESTION_GET-ALL-QUIZQUESTIONS', {
       err: error.message,
@@ -69,6 +75,8 @@ const getQuizQuestion = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(quizQuestion)
     });
+    quizQuestion.quiz.subject.createdBy.password = '';
+    quizQuestion.quiz.subject.lastUpdatedBy.password = '';
     res.json(quizQuestion);
   } catch (error) {
     log.error('ERR_QUIZQUESTION_GET-QUIZQUESTION-BY-ID', {
@@ -104,6 +112,8 @@ const updateQuizQuestion = async (req, res) => {
       quizId
     })
   );
+  data.quiz.subject.createdBy.password = '';
+  data.quiz.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_QUIZQUESTION_UPDATE-QUIZQUESTION', {
       err: error.message,
