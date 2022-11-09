@@ -201,7 +201,7 @@ model BulkOrder {
   orderId           String          @unique
   payeeContactNo    String
   payeeCompany      String?
-  discountCode      String
+  discountCode      String?
   transactionAmount Float
   salesOrders       SalesOrder[]
 }
@@ -362,7 +362,7 @@ model Step {
 model Topic {
   id           Int           @id @default(autoincrement())
   subjectOrder Int
-  name         String
+  title        String
   status       ContentStatus @default(DRAFT)
   subjectId    Int
   subject      Subject       @relation(fields: [subjectId], references: [id])
@@ -371,7 +371,6 @@ model Topic {
 
 model Subject {
   id              Int         @id @default(autoincrement())
-  title           String
   description     String
   isPublished     Boolean
   completionRate  Float       @default(0)
@@ -380,6 +379,7 @@ model Subject {
   createdById     Int
   lastUpdatedAt   DateTime
   lastUpdatedById Int
+  title           String
   createdBy       User        @relation("createdBy", fields: [createdById], references: [id])
   lastUpdatedBy   User        @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
   quizzes         Quiz[]
