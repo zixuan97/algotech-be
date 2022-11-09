@@ -8,24 +8,24 @@ datasource db {
 }
 
 model User {
-  id                    Int                  @id @default(autoincrement())
-  firstName             String
-  lastName              String
-  email                 String               @unique
-  password              String
-  role                  UserRole             @default(ADMIN)
-  status                UserStatus           @default(ACTIVE)
-  isVerified            Boolean              @default(false)
-  company               String?
-  contactNo             String?
-  tier                  String?
-  deliveryOrders        DeliveryOrder[]
-  leaveRecord           EmployeeLeaveRecord?
-  leaveApplications     LeaveApplication[]   @relation("appliedBy")
-  vettedLeaves          LeaveApplication[]   @relation("vettedBy")
-  createdSubjects       Subject[]            @relation("createdBy")
-  lastUpdatedSubjects   Subject[]            @relation("lastUpdatedBy")
-  assignedSubjects      Subject[]
+  id                  Int                  @id @default(autoincrement())
+  firstName           String
+  lastName            String
+  email               String               @unique
+  password            String
+  role                UserRole             @default(ADMIN)
+  status              UserStatus           @default(ACTIVE)
+  isVerified          Boolean              @default(false)
+  company             String?
+  contactNo           String?
+  tier                String?
+  deliveryOrders      DeliveryOrder[]
+  leaveRecord         EmployeeLeaveRecord?
+  leaveApplications   LeaveApplication[]   @relation("appliedBy")
+  vettedLeaves        LeaveApplication[]   @relation("vettedBy")
+  createdSubjects     Subject[]            @relation("createdBy")
+  lastUpdatedSubjects Subject[]            @relation("lastUpdatedBy")
+  assignedSubjects    Subject[]
 }
 
 model Category {
@@ -284,6 +284,7 @@ model SupplierProduct {
   supplierId Int
   productId  Int
   rate       Float
+  currency   String
   product    Product  @relation(fields: [productId], references: [id])
   supplier   Supplier @relation(fields: [supplierId], references: [id])
 
@@ -310,16 +311,15 @@ model LeaveApplication {
   leaveType        LeaveType
   status           LeaveStatus @default(PENDING)
   description      String
-  vettedById       Int?
-  vettedBy         User?       @relation("vettedBy", fields: [vettedById], references: [id])
   commentsByVetter String?
   lastUpdated      DateTime
   employeeId       Int
+  vettedById       Int?
   employee         User        @relation("appliedBy", fields: [employeeId], references: [id])
+  vettedBy         User?       @relation("vettedBy", fields: [vettedById], references: [id])
 }
 
 model LeaveQuota {
-  id            Int    @id @default(autoincrement())
   tier          String @unique
   annual        Int
   childcare     Int
@@ -327,10 +327,10 @@ model LeaveQuota {
   parental      Int
   sick          Int
   unpaid        Int
+  id            Int    @id @default(autoincrement())
 }
 
 model EmployeeLeaveRecord {
-  id                   Int      @id @default(autoincrement())
   employeeId           Int      @unique
   annualQuota          Int
   childcareQuota       Int
@@ -345,6 +345,7 @@ model EmployeeLeaveRecord {
   sickBalance          Int
   unpaidBalance        Int
   lastUpdated          DateTime
+  id                   Int      @id @default(autoincrement())
   employee             User     @relation(fields: [employeeId], references: [id])
 }
 
@@ -372,13 +373,13 @@ model Subject {
   description     String
   isPublished     Boolean
   completionRate  Float       @default(0)
-  createdAt       DateTime
-  lastUpdatedAt   DateTime
-  createdById     Int
-  createdBy       User       @relation("createdBy", fields: [createdById], references: [id])
-  lastUpdatedById Int
-  lastUpdatedBy   User       @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
   type            SubjectType
+  createdAt       DateTime
+  createdById     Int
+  lastUpdatedAt   DateTime
+  lastUpdatedById Int
+  createdBy       User        @relation("createdBy", fields: [createdById], references: [id])
+  lastUpdatedBy   User        @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
   quizzes         Quiz[]
   topics          Topic[]
   usersAssigned   User[]
@@ -413,11 +414,17 @@ model QuizQuestion {
 model DiscountCode {
   id             Int              @id @default(autoincrement())
   discountCode   String           @unique
+  minOrderAmount Float
   amount         Int
   startDate      DateTime
   endDate        DateTime?
   customerEmails String[]
   type           DiscountCodeType
+}
+
+model JobRole {
+  id      Int    @id @default(autoincrement())
+  jobRole String @unique
 }
 
 enum DiscountCodeType {

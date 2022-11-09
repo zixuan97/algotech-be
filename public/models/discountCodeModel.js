@@ -1,8 +1,15 @@
 const { prisma } = require('./index.js');
 
 const createDiscountCode = async (req) => {
-  const { discountCode, amount, startDate, endDate, customerEmails, type } =
-    req;
+  const {
+    discountCode,
+    amount,
+    startDate,
+    endDate,
+    customerEmails,
+    type,
+    minOrderAmount
+  } = req;
 
   await prisma.discountCode.create({
     data: {
@@ -11,21 +18,30 @@ const createDiscountCode = async (req) => {
       startDate,
       endDate,
       customerEmails,
-      type
+      type,
+      minOrderAmount
     }
   });
 };
 
 const getAllDiscountCodes = async () => {
-  const discountCodes = await prisma.discountCode.findMany({});
-  return discountCodes;
+  const codes = await prisma.discountCode.findMany({});
+  return codes;
 };
 
 const updateDiscountCode = async (req) => {
-  const { id, discountCode, amount, startDate, endDate, customerEmails, type } =
-    req;
+  const {
+    id,
+    discountCode,
+    amount,
+    startDate,
+    endDate,
+    customerEmails,
+    type,
+    minOrderAmount
+  } = req;
 
-  discountCode = await prisma.discountCode.update({
+  code = await prisma.discountCode.update({
     where: { id },
     data: {
       discountCode,
@@ -33,44 +49,45 @@ const updateDiscountCode = async (req) => {
       startDate,
       endDate,
       customerEmails,
-      type
+      type,
+      minOrderAmount
     }
   });
-  return discountCode;
+  return code;
 };
 
-const deleteBrand = async (req) => {
+const deleteDiscountCode = async (req) => {
   const { id } = req;
-  await prisma.brand.delete({
+  await prisma.discountCode.delete({
     where: {
       id: Number(id)
     }
   });
 };
 
-const findBrandById = async (req) => {
+const findDiscountCodeById = async (req) => {
   const { id } = req;
-  const brand = await prisma.brand.findUnique({
+  const code = await prisma.discountCode.findUnique({
     where: {
       id: Number(id)
     }
   });
-  return brand;
+  return code;
 };
 
-const findBrandByName = async (req) => {
-  const { name } = req;
-  const brand = await prisma.brand.findUnique({
+const findDiscountCode = async (req) => {
+  const { discountCode } = req;
+  const code = await prisma.brand.findUnique({
     where: {
-      name
+      discountCode
     }
   });
-  return brand;
+  return code;
 };
 
-exports.createBrand = createBrand;
-exports.getAllBrands = getAllBrands;
-exports.updateBrands = updateBrands;
-exports.deleteBrand = deleteBrand;
-exports.findBrandById = findBrandById;
-exports.findBrandByName = findBrandByName;
+exports.createDiscountCode = createDiscountCode;
+exports.getAllDiscountCodes = getAllDiscountCodes;
+exports.updateDiscountCode = updateDiscountCode;
+exports.deleteDiscountCode = deleteDiscountCode;
+exports.findDiscountCodeById = findDiscountCodeById;
+exports.findDiscountCode = findDiscountCode;
