@@ -5,50 +5,6 @@ const prisma = new PrismaClient();
 async function main() {
   const encryptedPassword = await bcrypt.hash('password', 10);
 
-  await prisma.User.create({
-    data: {
-      firstName: 'Wee Kek',
-      lastName: 'Tan',
-      email: 'tanwk@comp.nus.edu.sg',
-      password: encryptedPassword,
-      role: 'ADMIN',
-      isVerified: false
-    }
-  });
-
-  await prisma.User.create({
-    data: {
-      firstName: 'Kelly',
-      lastName: 'Ng',
-      email: 'ng.kelly.jl@gmail.com',
-      password: encryptedPassword,
-      role: 'ADMIN',
-      isVerified: true
-    }
-  });
-
-  await prisma.User.create({
-    data: {
-      firstName: 'Wee Kek',
-      lastName: 'Tan',
-      email: 'tanwk+user@comp.nus.edu.sg',
-      password: encryptedPassword,
-      role: 'FULLTIME',
-      isVerified: false
-    }
-  });
-
-  await prisma.User.create({
-    data: {
-      firstName: 'Zi Kun',
-      lastName: 'Teng',
-      email: 'meleenoob971+b2b@gmail.com',
-      password: encryptedPassword,
-      role: 'B2B',
-      isVerified: false
-    }
-  });
-
   await prisma.brand.create({
     data: {
       name: 'The Kettle Gourmet'
@@ -463,19 +419,7 @@ async function main() {
 
   await prisma.LeaveQuota.create({
     data: {
-      tier: '0',
-      annual: 0,
-      childcare: 0,
-      compassionate: 0,
-      parental: 0,
-      sick: 0,
-      unpaid: 0
-    }
-  });
-
-  await prisma.LeaveQuota.create({
-    data: {
-      tier: '1',
+      tier: 'Tier 1',
       annual: 10,
       childcare: 10,
       compassionate: 10,
@@ -487,7 +431,7 @@ async function main() {
 
   await prisma.LeaveQuota.create({
     data: {
-      tier: '2',
+      tier: 'Tier 2',
       annual: 15,
       childcare: 15,
       compassionate: 15,
@@ -499,13 +443,72 @@ async function main() {
 
   await prisma.LeaveQuota.create({
     data: {
-      tier: '3',
+      tier: 'Tier 3',
       annual: 20,
       childcare: 20,
       compassionate: 20,
       parental: 20,
       sick: 20,
       unpaid: 20
+    }
+  });
+
+  await prisma.User.create({
+    data: {
+      firstName: 'Destinee',
+      lastName: 'Ow',
+      email: 'destineeow32@gmail.com',
+      password: encryptedPassword,
+      role: 'ADMIN',
+      isVerified: true,
+      tier: 'Tier 3'
+    }
+  });
+  await prisma.User.create({
+    data: {
+      firstName: 'Wee Kek',
+      lastName: 'Tan',
+      email: 'tanwk@comp.nus.edu.sg',
+      password: encryptedPassword,
+      role: 'ADMIN',
+      isVerified: false,
+      tier: 'Tier 2'
+    }
+  });
+
+  await prisma.User.create({
+    data: {
+      firstName: 'Kelly',
+      lastName: 'Ng',
+      email: 'ng.kelly.jl@gmail.com',
+      password: encryptedPassword,
+      role: 'ADMIN',
+      isVerified: true,
+      tier: 'Tier 1'
+    }
+  });
+
+  await prisma.User.create({
+    data: {
+      firstName: 'Wee Kek',
+      lastName: 'Tan',
+      email: 'tanwk+user@comp.nus.edu.sg',
+      password: encryptedPassword,
+      role: 'FULLTIME',
+      isVerified: false,
+      tier: 'Tier 2'
+    }
+  });
+
+  await prisma.User.create({
+    data: {
+      firstName: 'Zi Kun',
+      lastName: 'Teng',
+      email: 'meleenoob971+b2b@gmail.com',
+      password: encryptedPassword,
+      role: 'B2B',
+      isVerified: false,
+      tier: 'Tier 3'
     }
   });
 }

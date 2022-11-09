@@ -3,7 +3,6 @@ const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
-const { da } = require('date-fns/locale');
 
 const createBundleCatalogue = async (req, res) => {
   const { price, bundle, image, description } = req.body;
@@ -195,7 +194,7 @@ const deleteBundleCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted bundle catalogue with id:${id}` }
     });
-    res.json({ message: `Deleted bundle category with id:${id}` });
+    res.json({ message: `Deleted bundle catalogue with id:${id}` });
   }
 };
 

@@ -85,6 +85,7 @@ app.use(
   require('./public/routes/newsletterRoutes')
 );
 app.use('/customer', require('./public/routes/customerRoutes'));
+app.use('/discountCode', require('./public/routes/discountCodeRoutes'));
 
 //external algotech-fe-b2b
 app.use('/productCatalogue', require('./public/routes/productCatalogueRoutes'));
