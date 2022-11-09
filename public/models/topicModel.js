@@ -12,6 +12,12 @@ const createTopic = async (req) => {
     },
     include: {
       subject: true,
+      subject: {
+        include: {
+          createdBy: true,
+          lastUpdatedBy: true
+        }
+      },
       steps: true,
       steps: {
         include: {
@@ -29,6 +35,12 @@ const getAllTopicsBySubjectId = async (req) => {
     where: { subjectId: Number(subjectId) },
     include: {
       subject: true,
+      subject: {
+        include: {
+          createdBy: true,
+          lastUpdatedBy: true
+        }
+      },
       steps: true
     }
   });
@@ -44,6 +56,12 @@ const getTopicById = async (req) => {
     where: { id: Number(id) },
     include: {
       subject: true,
+      subject: {
+        include: {
+          createdBy: true,
+          lastUpdatedBy: true
+        }
+      },
       steps: true
     }
   });
@@ -62,6 +80,12 @@ const updateTopic = async (req) => {
     },
     include: {
       subject: true,
+      subject: {
+        include: {
+          createdBy: true,
+          lastUpdatedBy: true
+        }
+      },
       steps: true
     }
   });
@@ -83,6 +107,12 @@ const addStepsToTopic = async (req) => {
     },
     include: {
       subject: true,
+      subject: {
+        include: {
+          createdBy: true,
+          lastUpdatedBy: true
+        }
+      },
       steps: true
     }
   });

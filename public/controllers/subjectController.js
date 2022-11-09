@@ -19,6 +19,8 @@ const createSubject = async (req, res) => {
       type
     })
   );
+  data.createdBy.password = '';
+  data.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_SUBJECT_CREATE-SUBJECT', {
       err: error.message,
@@ -38,6 +40,10 @@ const getAllSubjects = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     subjectModel.getAllSubjects({})
   );
+  for (let d of data) {
+    d.createdBy.password = '';
+    d.lastUpdatedBy.password = '';
+  }
   if (error) {
     log.error('ERR_SUBJECT_GET-ALL-SUBJECTS', {
       err: error.message,
@@ -61,6 +67,8 @@ const getSubject = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(subject)
     });
+    subject.createdBy.password = '';
+    subject.lastUpdatedBy.password = '';
     res.json(subject);
   } catch (error) {
     log.error('ERR_SUBJECT_GET-SUBJECT-BY-ID', {
@@ -72,17 +80,8 @@ const getSubject = async (req, res) => {
 };
 
 const updateSubject = async (req, res) => {
-  const {
-    id,
-    title,
-    description,
-    isPublished,
-    completionRate,
-    type,
-    quizzes,
-    topics,
-    usersAssigned
-  } = req.body;
+  const { id, title, description, isPublished, completionRate, type } =
+    req.body;
   const currUserId = req.user.userId;
   const { data, error } = await common.awaitWrap(
     subjectModel.updateSubject({
@@ -92,12 +91,14 @@ const updateSubject = async (req, res) => {
       isPublished,
       completionRate,
       lastUpdatedById: currUserId,
-      type,
-      quizzes,
-      topics,
-      usersAssigned
+      type
     })
   );
+  data.createdBy.password = '';
+  data.lastUpdatedBy.password = '';
+  for (u of data.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_SUBJECT_UPDATE-SUBJECT', {
       err: error.message,
@@ -141,6 +142,11 @@ const assignUsersToSubject = async (req, res) => {
       users
     })
   );
+  data.createdBy.password = '';
+  data.lastUpdatedBy.password = '';
+  for (let u of data.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
       err: error.message,
