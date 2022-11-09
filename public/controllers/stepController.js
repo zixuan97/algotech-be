@@ -13,6 +13,8 @@ const createStep = async (req, res) => {
       topicId
     })
   );
+  data.topic.subject.createdBy.password = '';
+  data.topic.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_STEP_CREATE-STEP', {
       err: error.message,
@@ -33,6 +35,10 @@ const getAllStepsByTopicId = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     stepModel.getAllStepsByTopicId({ topicId })
   );
+  for (let d of data) {
+    d.topic.subject.createdBy.password = '';
+    d.topic.subject.lastUpdatedBy.password = '';
+  }
   if (error) {
     log.error('ERR_STEP_GET-ALL-STEPS', {
       err: error.message,
@@ -56,6 +62,8 @@ const getStep = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(step)
     });
+    step.topic.subject.createdBy.password = '';
+    step.topic.subject.lastUpdatedBy.password = '';
     res.json(step);
   } catch (error) {
     log.error('ERR_STEP_GET-STEP-BY-ID', {
@@ -77,6 +85,8 @@ const updateStep = async (req, res) => {
       topicId
     })
   );
+  data.topic.subject.createdBy.password = '';
+  data.topic.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_STEP_UPDATE-STEP', {
       err: error.message,

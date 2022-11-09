@@ -13,6 +13,8 @@ const createTopic = async (req, res) => {
       subjectId
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_TOPIC_CREATE-TOPIC', {
       err: error.message,
@@ -33,6 +35,10 @@ const getAllTopicsBySubjectId = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     topicModel.getAllTopicsBySubjectId({ subjectId })
   );
+  for (let d of data) {
+    d.subject.createdBy.password = '';
+    d.subject.lastUpdatedBy.password = '';
+  }
   if (error) {
     log.error('ERR_TOPIC_GET-ALL-TOPICS', {
       err: error.message,
@@ -56,6 +62,8 @@ const getTopic = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(topic)
     });
+    topic.subject.createdBy.password = '';
+    topic.subject.lastUpdatedBy.password = '';
     res.json(topic);
   } catch (error) {
     log.error('ERR_TOPIC_GET-TOPIC-BY-ID', {
@@ -77,6 +85,8 @@ const updateTopic = async (req, res) => {
       subjectId
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_TOPIC_UPDATE-TOPIC', {
       err: error.message,
@@ -101,6 +111,9 @@ const addStepsToTopic = async (req, res) => {
       steps
     })
   );
+  console.log(data);
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_TOPIC_ADD-STEPS-TO-TOPIC', {
       err: error.message,

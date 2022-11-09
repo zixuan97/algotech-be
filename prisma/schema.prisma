@@ -380,7 +380,6 @@ model Subject {
   createdById     Int
   lastUpdatedAt   DateTime
   lastUpdatedById Int
-  title           String
   createdBy       User        @relation("createdBy", fields: [createdById], references: [id])
   lastUpdatedBy   User        @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
   quizzes         Quiz[]

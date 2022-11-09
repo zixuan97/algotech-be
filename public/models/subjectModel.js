@@ -101,10 +101,7 @@ const updateSubject = async (req) => {
     isPublished,
     completionRate,
     lastUpdatedById,
-    type,
-    quizzes,
-    topics,
-    usersAssigned
+    type
   } = req;
   const subject = await prisma.subject.update({
     where: { id },
@@ -115,10 +112,7 @@ const updateSubject = async (req) => {
       completionRate,
       lastUpdatedById,
       lastUpdatedAt: new Date(Date.now()),
-      type,
-      quizzes,
-      topics,
-      usersAssigned
+      type
     },
     include: {
       topics: true,
@@ -165,12 +159,6 @@ const deleteSubject = async (req) => {
       },
       quizzes: {
         deleteMany: {}
-      },
-      createdBy: {
-        delete: true
-      },
-      lastUpdatedBy: {
-        delete: true
       },
       usersAssigned: {
         deleteMany: {}
