@@ -136,6 +136,11 @@ const deleteSubject = async (req, res) => {
 
 const assignUsersToSubject = async (req, res) => {
   const { id, users } = req.body;
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     subjectModel.assignUsersToSubject({
       id,

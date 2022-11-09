@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const stepController = require('../controllers/stepController');
+const { verifyToken } = require('../middleware/auth');
 
-router.post('/', stepController.createStep);
+router.post('/', verifyToken, stepController.createStep);
 router.get('/all/:topicId', stepController.getAllStepsByTopicId);
 router.get('/:id', stepController.getStep);
-router.put('/', stepController.updateStep);
-router.delete('/:id', stepController.deleteStep);
+router.put('/', verifyToken, stepController.updateStep);
+router.delete('/:id', verifyToken, stepController.deleteStep);
 
 module.exports = router;

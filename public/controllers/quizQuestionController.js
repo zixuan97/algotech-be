@@ -1,4 +1,6 @@
 const quizQuestionModel = require('../models/quizQuestionModel');
+const quizModel = require('../models/quizModel');
+const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -14,6 +16,12 @@ const createQuizQuestion = async (req, res) => {
     correctAnswer,
     quizId
   } = req.body;
+  const { subjectId } = await quizModel.getQuizById({ id: quizId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     quizQuestionModel.createQuizQuestion({
       quizOrder,
@@ -99,6 +107,12 @@ const updateQuizQuestion = async (req, res) => {
     correctAnswer,
     quizId
   } = req.body;
+  const { subjectId } = await quizModel.getQuizById({ id: quizId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     quizQuestionModel.updateQuizQuestion({
       id,
@@ -132,6 +146,13 @@ const updateQuizQuestion = async (req, res) => {
 
 const deleteQuizQuestion = async (req, res) => {
   const { id } = req.params;
+  const { quizId } = await quizQuestionModel.getQuizQuestionById({ id });
+  const { subjectId } = await quizModel.getQuizById({ id: quizId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { error } = await common.awaitWrap(
     quizQuestionModel.deleteQuizQuestion({ id })
   );
