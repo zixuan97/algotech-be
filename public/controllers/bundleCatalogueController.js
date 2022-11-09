@@ -194,7 +194,7 @@ const deleteBundleCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted bundle catalogue with id:${id}` }
     });
-    res.json({ message: `Deleted bundle category with id:${id}` });
+    res.json({ message: `Deleted bundle catalogue with id:${id}` });
   }
 };
 

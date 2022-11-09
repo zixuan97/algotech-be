@@ -1,4 +1,4 @@
-const discoundCodeModel = require('../models/discountCodeModel');
+const discountCodeModel = require('../models/discountCodeModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -15,7 +15,7 @@ const createDiscountCode = async (req, res) => {
   } = req.body;
 
   const { error } = await common.awaitWrap(
-    discoundCodeModel.createDiscountCode({
+    discountCodeModel.createDiscountCode({
       discountCode,
       amount,
       startDate,
@@ -43,7 +43,7 @@ const createDiscountCode = async (req, res) => {
 
 const getAllDiscountCodes = async (req, res) => {
   const { data, error } = await common.awaitWrap(
-    discoundCodeModel.getAllDiscountCodes({})
+    discountCodeModel.getAllDiscountCodes({})
   );
 
   if (error) {
@@ -65,7 +65,7 @@ const getAllDiscountCodes = async (req, res) => {
 const getDiscountCodeById = async (req, res) => {
   try {
     const { id } = req.params;
-    const discountCode = await discoundCodeModel.findDiscountCodeById({
+    const discountCode = await discountCodeModel.findDiscountCodeById({
       id
     });
 
@@ -86,7 +86,7 @@ const getDiscountCodeById = async (req, res) => {
 const getDiscountCode = async (req, res) => {
   try {
     const { discountCode } = req.params;
-    const code = await discoundCodeModel.findDiscountCode({
+    const code = await discountCodeModel.findDiscountCode({
       discountCode
     });
 
@@ -117,7 +117,7 @@ const updateDiscountCode = async (req, res) => {
   } = req.body;
 
   const { error } = await common.awaitWrap(
-    discoundCodeModel.updateDiscountCode({
+    discountCodeModel.updateDiscountCode({
       id,
       discountCode,
       amount,
@@ -145,44 +145,30 @@ const updateDiscountCode = async (req, res) => {
   }
 };
 
-const deleteBundleCatalogue = async (req, res) => {
+const deleteDiscountCode = async (req, res) => {
   const { id } = req.params;
-  const bundleCatalogue = await bundleCatalogueModel.findBundleCatalogueById({
-    id
-  });
   const { error } = await common.awaitWrap(
-    bundleCatalogueModel.deleteBundleCatalogue({ id })
+    discountCodeModel.deleteDiscountCode({ id })
   );
   if (error) {
-    log.error('ERR_BUNDLECAT_DELETE_BUNDLECAT', {
+    log.error('ERR_DISCOUNTCODE_DELETE-DISCOUNTCODE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    const { error: deleteS3Error } = await common.awaitWrap(
-      deleteS3({
-        key: `bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`
-      })
-    );
-    if (deleteS3Error) {
-      log.error('ERR_BUNDLECAT_DELETE-S3', {
-        err: deleteS3Error.message,
-        req: { body: req.body, params: req.params }
-      });
-    }
-    log.out('OK_BUNDLECAT_DELETE-S3');
-    log.out('OK_BUNDLECAT_DELETE_BUNDLECAT', {
+    log.out('OK_DISCOUNTCODE_DELETE-DISCOUNTCODE', {
       req: { body: req.body, params: req.params },
-      res: { message: `Deleted bundle catalogue with id:${id}` }
+      res: { message: `Deleted discount code with id:${id}` }
     });
-    res.json({ message: `Deleted bundle category with id:${id}` });
+    res.json({ message: `Deleted discount code with id:${id}` });
   }
 };
 
-exports.createBundleCatalogue = createBundleCatalogue;
-exports.getBundleCatalogue = getBundleCatalogue;
-exports.updateBundleCatalogue = updateBundleCatalogue;
-exports.deleteBundleCatalogue = deleteBundleCatalogue;
-exports.getAllBundleCatalogue = getAllBundleCatalogue;
+exports.createDiscountCode = createDiscountCode;
+exports.getDiscountCode = getDiscountCode;
+exports.getDiscountCodeById = getDiscountCodeById;
+exports.updateDiscountCode = updateDiscountCode;
+exports.deleteDiscountCode = deleteDiscountCode;
+exports.getAllDiscountCodes = getAllDiscountCodes;
