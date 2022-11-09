@@ -222,7 +222,7 @@ const deleteSupplier = async (req, res) => {
 };
 
 const addProductToSupplier = async (req, res) => {
-  const { supplierId, productId, rate } = req.body;
+  const { supplierId, productId, rate, currency } = req.body;
   const supplier = supplierModel.findSupplierById({ id: supplierId });
   const product = productModel.findProductById({ id: productId });
   if (!supplier || !product) {
@@ -236,7 +236,8 @@ const addProductToSupplier = async (req, res) => {
     supplierModel.connectOrCreateSupplierProduct({
       supplierId,
       productId,
-      rate
+      rate,
+      currency
     })
   );
   if (error) {

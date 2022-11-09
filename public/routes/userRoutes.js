@@ -23,5 +23,6 @@ router.get('/nonb2b/all', verifyToken, UserController.getAllNonB2BUsers);
 router.get('/pending/count', UserController.getNumberOfPendingUsers);
 router.get('/employee/all', verifyToken, UserController.getAllEmployees);
 router.post('/jobrole', UserController.createJobRole);
+router.put('/jobrole', UserController.editJobRole);
 
 module.exports = router;
