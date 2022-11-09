@@ -13,7 +13,8 @@ const createUser = async (req) => {
     isVerified,
     company,
     contactNo,
-    tier
+    tier,
+    jobRoles
   } = req;
   let encryptedPassword = '';
   if (role !== UserRole.B2B) {
@@ -34,7 +35,8 @@ const createUser = async (req) => {
       isVerified,
       company,
       contactNo,
-      tier
+      tier,
+      jobRoles
     }
   });
   return user;
@@ -49,6 +51,24 @@ const getB2BUsers = async () => {
   const users = await prisma.User.findMany({
     where: {
       role: UserRole.B2B
+    }
+  });
+  return users;
+};
+
+const getEmployees = async () => {
+  const users = await prisma.User.findMany({
+    where: {
+      NOT: {
+        OR: [
+          {
+            role: UserRole.B2B
+          },
+          {
+            role: UserRole.CUSTOMER
+          }
+        ]
+      }
     }
   });
   return users;
@@ -89,7 +109,6 @@ const getUserDetails = async (req) => {
 
 const editUser = async (req) => {
   const { updatedUser } = req;
-  console.log(updatedUser);
   const id = updatedUser.id;
   user = await prisma.User.update({
     where: { id: Number(id) },
@@ -235,6 +254,64 @@ const updateB2BUserStatus = async (req) => {
   return user;
 };
 
+const createJobRole = async (req) => {
+  const { jobRole } = req;
+  const job = await prisma.JobRole.create({
+    data: {
+      jobRole
+    }
+  });
+  return job;
+};
+
+const editJobRole = async (req) => {
+  const { id, jobRole } = req;
+  const job = await prisma.JobRole.update({
+    where: { id: Number(id) },
+    data: {
+      jobRole
+    }
+  });
+  return job;
+};
+
+const getJobRole = async (req) => {
+  const { id } = req;
+  const job = await prisma.JobRole.findUnique({
+    where: {
+      id
+    }
+  });
+  return job;
+};
+
+const getJobRoleByName = async (req) => {
+  const { jobRole } = req;
+  const job = await prisma.JobRole.findUnique({
+    where: {
+      jobRole
+    }
+  });
+  return job;
+};
+
+const addJobRolesToUser = async (req) => {
+  const { id, jobRoles } = req;
+  jobRoles.map(async (j) => {
+    const currJob = await getJobRoleByName({ jobRole: j.jobRole });
+    if (!currJob) {
+      await createJobRole({ jobRole: j.jobRole });
+    }
+  });
+  const job = await prisma.user.update({
+    where: { id },
+    data: {
+      jobRoles
+    }
+  });
+  return job;
+};
+
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
@@ -250,3 +327,8 @@ exports.verifyPassword = verifyPassword;
 exports.changePassword = changePassword;
 exports.updateB2BUserStatus = updateB2BUserStatus;
 exports.getB2BUsers = getB2BUsers;
+exports.getEmployees = getEmployees;
+exports.createJobRole = createJobRole;
+exports.editJobRole = editJobRole;
+exports.getJobRole = getJobRole;
+exports.addJobRolesToUser = addJobRolesToUser;

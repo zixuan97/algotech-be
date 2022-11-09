@@ -19,6 +19,7 @@ model User {
   company             String?
   contactNo           String?
   tier                String?
+  jobRoles            JobRole[]
   deliveryOrders      DeliveryOrder[]
   leaveRecord         EmployeeLeaveRecord?
   leaveApplications   LeaveApplication[]   @relation("appliedBy")
@@ -423,8 +424,9 @@ model DiscountCode {
 }
 
 model JobRole {
-  id      Int    @id @default(autoincrement())
-  jobRole String @unique
+  id             Int    @id @default(autoincrement())
+  jobRole        String @unique
+  usersInJobRole User[]
 }
 
 enum DiscountCodeType {

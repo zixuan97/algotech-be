@@ -10,6 +10,14 @@ router.delete('/:id', supplierController.deleteSupplier);
 router.post('/addProduct', supplierController.addProductToSupplier);
 router.get('/products/all', supplierController.getAllSupplierProducts);
 router.get('/products/:id', supplierController.getAllProductsBySupplier);
-router.delete('/:supplierId/:productId', supplierController.deleteProductBySupplier);
+router.delete(
+  '/:supplierId/:productId',
+  supplierController.deleteProductBySupplier
+);
+router.get('/currencies/all', supplierController.getAllCurrencies);
+router.get(
+  '/currency/countrycode',
+  supplierController.getCountryCodeBasedOnCurrency
+);
 
 module.exports = router;
