@@ -296,20 +296,29 @@ const getJobRoleByName = async (req) => {
 };
 
 const addJobRolesToUser = async (req) => {
-  const { id, jobRoles } = req;
+  const { userId, jobRoles } = req;
+  const result = [];
   jobRoles.map(async (j) => {
     const currJob = await getJobRoleByName({ jobRole: j.jobRole });
     if (!currJob) {
       await createJobRole({ jobRole: j.jobRole });
     }
+    result.push(currJob);
   });
-  const job = await prisma.user.update({
-    where: { id },
+  const user = await prisma.user.update({
+    where: { id: userId },
     data: {
-      jobRoles
+      jobRoles: {
+        connect: result.map((r) => ({
+          id: r.id
+        }))
+      }
+    },
+    include: {
+      jobRoles: true
     }
   });
-  return job;
+  return user;
 };
 
 exports.createUser = createUser;

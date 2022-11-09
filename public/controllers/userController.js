@@ -675,13 +675,14 @@ const editJobRole = async (req, res) => {
 };
 
 const addJobRolesToUser = async (req, res) => {
-  const { id, jobRoles } = req.body;
+  const { userId, jobRoles } = req.body;
   try {
-    const data = await userModel.addJobRolesToUser({ id, jobRoles });
+    const data = await userModel.addJobRolesToUser({ userId, jobRoles });
     log.out('OK_USER_ADD-JOB-ROLES-TO-USER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
+    data.password = '';
     res.json(data);
   } catch (error) {
     log.error('ERR_USER_ADD-JOB-ROLES-TO-USER', {
