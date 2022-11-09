@@ -21,6 +21,9 @@ const createSubject = async (req, res) => {
   );
   data.createdBy.password = '';
   data.lastUpdatedBy.password = '';
+  for (let u of data.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_SUBJECT_CREATE-SUBJECT', {
       err: error.message,
@@ -43,6 +46,9 @@ const getAllSubjects = async (req, res) => {
   for (let d of data) {
     d.createdBy.password = '';
     d.lastUpdatedBy.password = '';
+    for (let u of d.usersAssigned) {
+      u.password = '';
+    }
   }
   if (error) {
     log.error('ERR_SUBJECT_GET-ALL-SUBJECTS', {
@@ -69,6 +75,9 @@ const getSubject = async (req, res) => {
     });
     subject.createdBy.password = '';
     subject.lastUpdatedBy.password = '';
+    for (let u of subject.usersAssigned) {
+      u.password = '';
+    }
     res.json(subject);
   } catch (error) {
     log.error('ERR_SUBJECT_GET-SUBJECT-BY-ID', {
@@ -183,6 +192,13 @@ const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
   topicData.sort((a, b) => {
     return a.subjectOrder - b.subjectOrder;
   });
+  for (let t of topicData) {
+    t.subject.createdBy.password = '';
+    t.subject.lastUpdatedBy.password = '';
+    for (let u of t.subject.usersAssigned) {
+      u.password = '';
+    }
+  }
   const { data: quizData, error: quizError } = await common.awaitWrap(
     quizModel.getAllQuizzesBySubjectId({
       subjectId: id
