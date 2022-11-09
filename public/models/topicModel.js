@@ -14,8 +14,26 @@ const createTopic = async (req) => {
       subject: true,
       subject: {
         include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true,
+              questions: {
+                include: {
+                  quiz: true
+                }
+              }
+            }
+          },
           createdBy: true,
-          lastUpdatedBy: true
+          lastUpdatedBy: true,
+          usersAssigned: true
         }
       },
       steps: true,
@@ -37,8 +55,26 @@ const getAllTopicsBySubjectId = async (req) => {
       subject: true,
       subject: {
         include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true,
+              questions: {
+                include: {
+                  quiz: true
+                }
+              }
+            }
+          },
           createdBy: true,
-          lastUpdatedBy: true
+          lastUpdatedBy: true,
+          usersAssigned: true
         }
       },
       steps: true
@@ -58,8 +94,26 @@ const getTopicById = async (req) => {
       subject: true,
       subject: {
         include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true,
+              questions: {
+                include: {
+                  quiz: true
+                }
+              }
+            }
+          },
           createdBy: true,
-          lastUpdatedBy: true
+          lastUpdatedBy: true,
+          usersAssigned: true
         }
       },
       steps: true
@@ -82,8 +136,26 @@ const updateTopic = async (req) => {
       subject: true,
       subject: {
         include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true,
+              questions: {
+                include: {
+                  quiz: true
+                }
+              }
+            }
+          },
           createdBy: true,
-          lastUpdatedBy: true
+          lastUpdatedBy: true,
+          usersAssigned: true
         }
       },
       steps: true
@@ -109,8 +181,26 @@ const addStepsToTopic = async (req) => {
       subject: true,
       subject: {
         include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true,
+              questions: {
+                include: {
+                  quiz: true
+                }
+              }
+            }
+          },
           createdBy: true,
-          lastUpdatedBy: true
+          lastUpdatedBy: true,
+          usersAssigned: true
         }
       },
       steps: true
