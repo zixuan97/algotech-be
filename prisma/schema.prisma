@@ -19,6 +19,8 @@ model User {
   company             String?
   contactNo           String?
   tier                String?
+  managerId           Int?
+  manager             User?                @relation("managedBy", fields: [managerId], references: [id])
   deliveryOrders      DeliveryOrder[]
   leaveRecord         EmployeeLeaveRecord?
   leaveApplications   LeaveApplication[]   @relation("appliedBy")
@@ -27,6 +29,7 @@ model User {
   lastUpdatedSubjects Subject[]            @relation("lastUpdatedBy")
   jobRoles            JobRole[]
   assignedSubjects    Subject[]
+  subordinates        User[]               @relation("managedBy")
 }
 
 model Category {
@@ -311,7 +314,7 @@ model LeaveApplication {
   endDate          DateTime
   leaveType        LeaveType
   status           LeaveStatus @default(PENDING)
-  description      String
+  description      String?
   commentsByVetter String?
   lastUpdated      DateTime
   employeeId       Int

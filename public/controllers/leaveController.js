@@ -383,7 +383,7 @@ const getLeaveApplication = async (req, res) => {
     const { id } = req.params;
     const leave = await leaveModel.getLeaveApplicationById({ id });
     leave.employee.password = '';
-    leave.vettedBy.password = '';
+    if (leave.vettedBy !== null) leave.vettedBy.password = '';
     log.out('OK_LEAVE_GET-LEAVE-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(leave)
