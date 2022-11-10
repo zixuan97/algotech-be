@@ -624,6 +624,9 @@ const getNumberOfPendingUsers = async (req, res) => {
 const getAllEmployees = async (req, res) => {
   try {
     const users = await userModel.getEmployees({});
+    for (let u of users) {
+      u.password = '';
+    }
     log.out('OK_USER_GET-EMPLOYEES', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(users.filter((u) => u.id != req.user.userId))
@@ -693,6 +696,24 @@ const addJobRolesToUser = async (req, res) => {
   }
 };
 
+const deleteJobRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await userModel.deleteJobRole({ id });
+    log.out('OK_USER_DELETE-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: { message: 'Job role deleted' }
+    });
+    res.json({ message: 'Job role deleted' });
+  } catch (error) {
+    log.error('ERR_USER_DELETE-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error deleting job role');
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -717,3 +738,4 @@ exports.getAllEmployees = getAllEmployees;
 exports.createJobRole = createJobRole;
 exports.editJobRole = editJobRole;
 exports.addJobRolesToUser = addJobRolesToUser;
+exports.deleteJobRole = deleteJobRole;

@@ -177,6 +177,40 @@ const assignUsersToSubject = async (req, res) => {
   }
 };
 
+const unassignUsersToSubject = async (req, res) => {
+  const { id, users } = req.body;
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id,
+    lastUpdatedById: currUserId
+  });
+  const { data, error } = await common.awaitWrap(
+    subjectModel.unassignUsersToSubject({
+      id,
+      users
+    })
+  );
+  data.createdBy.password = '';
+  data.lastUpdatedBy.password = '';
+  for (let u of data.usersAssigned) {
+    u.password = '';
+  }
+  if (error) {
+    log.error('ERR_SUBJECT_UNASSIGN-USERS-TO-SUBJECT', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_UNASSIGN-USERS-TO-SUBJECT', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
   const { id } = req.params;
   const { data: topicData, error: topicError } = await common.awaitWrap(
@@ -245,4 +279,5 @@ exports.getSubject = getSubject;
 exports.updateSubject = updateSubject;
 exports.deleteSubject = deleteSubject;
 exports.assignUsersToSubject = assignUsersToSubject;
+exports.unassignUsersToSubject = unassignUsersToSubject;
 exports.getAllTopicsAndQuizzesBySubjectId = getAllTopicsAndQuizzesBySubjectId;

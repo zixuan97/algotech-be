@@ -9,6 +9,11 @@ router.put('/', verifyToken, subjectController.updateSubject);
 router.delete('/:id', subjectController.deleteSubject);
 router.post('/users', verifyToken, subjectController.assignUsersToSubject);
 router.post(
+  '/unassign/users',
+  verifyToken,
+  subjectController.unassignUsersToSubject
+);
+router.post(
   '/topicquiz/:id',
   subjectController.getAllTopicsAndQuizzesBySubjectId
 );
