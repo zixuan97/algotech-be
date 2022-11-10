@@ -29,6 +29,12 @@ router.post('/jobrole', UserController.createJobRole);
 router.put('/jobrole', UserController.editJobRole);
 router.post('/jobroles', UserController.addJobRolesToUser);
 router.delete('/jobrole/:id', UserController.deleteJobRole);
+router.post('/assign/subordinates', UserController.assignSubordinatesToManager);
+router.post(
+  '/unassign/subordinates',
+  UserController.unassignSubordinatesToManager
+);
+
 router.post('/org', OrganisationalChartController.organisationChart);
 
 module.exports = router;

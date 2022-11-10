@@ -1,3 +1,5 @@
+const userModel = require('../models/userModel');
+
 class Employee {
   constructor(name) {
     this.name = name;
@@ -58,13 +60,23 @@ class OrgChart {
   }
 }
 
+function buildTree(node, child, tree) {
+  tree.add(node, child);
+  for (let n of node.subordinates) {
+    tree = buildTree(n, node, tree);
+  }
+}
+
 const organisationChart = async (req, res) => {
   let tree = new OrgChart();
-
-  tree.add('Employee1');
-  tree.add('Employee2', 'Employee1');
-  tree.add('Employee3', 'Employee1');
-  tree.add('Employee4', 'Employee2');
+  const employees = await userModel.getEmployees({});
+  for (let e of employees) {
+    buildTree(e, tree);
+  }
+  // tree.add('Employee1');
+  // tree.add('Employee2', 'Employee1');
+  // tree.add('Employee3', 'Employee1');
+  // tree.add('Employee4', 'Employee2');
   // console.log(tree.findBFS('Employee1'));
   const finalRes = [];
 

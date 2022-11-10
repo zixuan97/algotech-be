@@ -761,6 +761,64 @@ const getJobRoleByName = async (req, res) => {
   }
 };
 
+const assignSubordinatesToManager = async (req, res) => {
+  const { id, users } = req.body;
+  const { data, error } = await common.awaitWrap(
+    userModel.assignSubordinatesToManager({
+      id,
+      users
+    })
+  );
+  data.password = '';
+  data.manager.password = '';
+  for (let u of data.subordinates) {
+    u.password = '';
+  }
+  if (error) {
+    log.error('ERR_SUBJECT_ASSIGN-SUBORDINATES-TO-MANAGER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_ASSIGN-SUBORDINATES-TO-MANAGER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const unassignSubordinatesToManager = async (req, res) => {
+  const { id, users } = req.body;
+  const { data, error } = await common.awaitWrap(
+    userModel.unassignSubordinatesToManager({
+      id,
+      users
+    })
+  );
+  data.password = '';
+  data.manager.password = '';
+  for (let u of data.subordinates) {
+    u.password = '';
+  }
+  if (error) {
+    log.error('ERR_SUBJECT_UNASSIGN-SUBORDINATES-TO-MANAGER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_UNASSIGN-SUBORDINATES-TO-MANAGER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -788,3 +846,5 @@ exports.addJobRolesToUser = addJobRolesToUser;
 exports.deleteJobRole = deleteJobRole;
 exports.getJobRoleById = getJobRoleById;
 exports.getJobRoleByName = getJobRoleByName;
+exports.assignSubordinatesToManager = assignSubordinatesToManager;
+exports.unassignSubordinatesToManager = unassignSubordinatesToManager;
