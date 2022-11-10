@@ -104,7 +104,7 @@ const getUserDetails = async (req) => {
       id: Number(id)
     },
     include: {
-      subjects: true
+      jobRoles: true
     }
   });
   return user;
@@ -147,7 +147,7 @@ const deleteUserById = async (req) => {
       lastUpdatedSubjects: {
         deleteMany: {}
       },
-      subjectsAssigned: {
+      assignedSubjects: {
         deleteMany: {}
       },
       vettedLeaves: {
@@ -296,6 +296,9 @@ const getJobRoleByName = async (req) => {
   const job = await prisma.JobRole.findUnique({
     where: {
       jobRole
+    },
+    include: {
+      usersInJobRole: true
     }
   });
   return job;

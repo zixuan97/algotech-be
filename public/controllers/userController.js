@@ -723,6 +723,9 @@ const getJobRoleById = async (req, res) => {
   const { id } = req.params;
   try {
     const job = await userModel.getJobRole({ id });
+    for (let j of job.usersInJobRole) {
+      j.password = '';
+    }
     log.out('OK_USER_GET-JOB-ROLE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(job)
@@ -738,9 +741,12 @@ const getJobRoleById = async (req, res) => {
 };
 
 const getJobRoleByName = async (req, res) => {
-  const { jobRole } = req.body;
+  const { jobRole } = req.params;
   try {
     const job = await userModel.getJobRoleByName({ jobRole });
+    for (let j of job.usersInJobRole) {
+      j.password = '';
+    }
     log.out('OK_USER_GET-JOB-ROLE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(job)
