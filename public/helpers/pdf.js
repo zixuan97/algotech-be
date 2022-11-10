@@ -65,9 +65,6 @@ const generateProcurementPdfTemplate = async (req) => {
     .fontSize(8)
     .text(warehouseAddress, leftAlign + 200, 225, { width: 120 });
   // doc
-  //   .fill('black')
-  //   .fontSize(8)
-  //   .text(id, leftAlign + 420, 211);
   doc
     .fill('black')
     .fontSize(8)
@@ -499,9 +496,13 @@ const generateBulkOrderPDF = async (req) => {
   let tableY = 230;
   for (let i = 0; i < bulkOrder.salesOrders.length; i++) {
     salesOrder = bulkOrder.salesOrders[i];
-    tableY += 35;
+    if (i === 0) {
+      tableY += 35;
+    } else {
+      tableY += 15;
+    }
     // new page after certain limit
-    if (tableY > 500) {
+    if (tableY > 550) {
       doc.addPage();
       tableY = 50;
       doc.rect(0, 0, 600, 35).fillOpacity(1).fillAndStroke('#E9E8EC');
@@ -580,8 +581,9 @@ const generateBulkOrderPDF = async (req) => {
       },
       hideHeader: true,
       minRowHeight: 0,
-      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
-        doc.font('Helvetica').fontSize(9)
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+        doc.font('Helvetica').fontSize(9);
+      }
     });
     doc.rect(20, tableY2, 560, 35).fillOpacity(1).fillAndStroke('#E9E8EC');
     let tableY3 = tableY2 + 10;
@@ -637,8 +639,9 @@ const generateBulkOrderPDF = async (req) => {
       },
       hideHeader: true,
       minRowHeight: 0,
-      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
-        doc.font('Helvetica-Bold').fontSize(9)
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+        doc.font('Helvetica-Bold').fontSize(9);
+      }
     });
     let tableY4 = tableY3 + 35;
 
@@ -694,14 +697,69 @@ const generateBulkOrderPDF = async (req) => {
       hideHeader: true,
       minRowHeight: 20,
       prepareHeader: () => doc.font('Helvetica-Bold').fontSize(12),
-      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
-        doc.font('Helvetica').fontSize(9)
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+        doc.font('Helvetica').fontSize(9);
+      }
     });
 
-    tableY = tableY4 + 30 * salesOrder.salesOrderItems.length;
-    // line added if it is not last item
-    if (i < bulkOrder.salesOrders.length - 1) {
-      doc.moveTo(0, tableY).lineTo(600, tableY).stroke();
+    tableY = tableY4 + 28 * salesOrder.salesOrderItems.length;
+    // line added after each item
+    doc.moveTo(0, tableY).lineTo(600, tableY).stroke();
+
+    // last item add subtotal
+    if (i === bulkOrder.salesOrders.length - 1) {
+      // subtotal
+      doc
+        .fill('black')
+        .font('Helvetica-Bold')
+        .fontSize(9)
+        .text('Subtotal (S$)', 420, tableY + 15);
+
+      doc
+        .fill('black')
+        .font('Helvetica')
+        .fontSize(9)
+        .text(bulkOrder.amount.toFixed(2), 420, tableY + 15, {
+          align: 'right'
+        });
+      // discounts
+      doc
+        .fill('black')
+        .font('Helvetica-Bold')
+        .fontSize(9)
+        .text('Discount applied (S$)', 420, tableY + 35);
+
+      doc
+        .fill('black')
+        .font('Helvetica')
+        .fontSize(9)
+        .text(
+          `${(bulkOrder.transactionAmount - bulkOrder.amount).toFixed(2)}`,
+          420,
+          tableY + 35,
+          {
+            align: 'right'
+          }
+        );
+      // line between subtotal and total
+      doc
+        .moveTo(420, tableY + 55)
+        .lineTo(580, tableY + 55)
+        .stroke();
+      // total
+      doc
+        .fill('black')
+        .font('Helvetica-Bold')
+        .fontSize(9)
+        .text('Total (S$)', 420, tableY + 65);
+
+      doc
+        .fill('black')
+        .font('Helvetica')
+        .fontSize(9)
+        .text(bulkOrder.transactionAmount.toFixed(2), 420, tableY + 65, {
+          align: 'right'
+        });
     }
   }
 

@@ -1,11 +1,11 @@
 const userModel = require('../models/userModel');
 
-const buildTree = (id, xs) =>
+const buildOrgChart = (id, xs) =>
   xs
     .filter(({ manager }) => manager == id)
     .map(({ id }) => ({
       id,
-      subordinates: buildTree(id, xs)
+      subordinates: buildOrgChart(id, xs)
     }));
 
 const organisationChart = async (req, res) => {
@@ -15,7 +15,7 @@ const organisationChart = async (req, res) => {
     if (e.manager === null) e.managerId = 0;
     adjList.push({ id: e.id, manager: e.managerId });
   }
-  res.status(200).json(buildTree(0, adjList));
+  res.status(200).json(buildOrgChart(0, adjList));
 };
 
 exports.organisationChart = organisationChart;

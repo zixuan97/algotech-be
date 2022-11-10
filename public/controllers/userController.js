@@ -626,6 +626,10 @@ const getAllEmployees = async (req, res) => {
     const users = await userModel.getEmployees({});
     for (let u of users) {
       u.password = '';
+      if (u.manager !== null) u.manager.password = '';
+      for (let s of u.subordinates) {
+        s.password = '';
+      }
     }
     log.out('OK_USER_GET-EMPLOYEES', {
       req: { body: req.body, params: req.params },
