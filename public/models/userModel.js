@@ -71,11 +71,32 @@ const getEmployees = async () => {
       }
     },
     include: {
+      manager: true,
       jobRoles: true,
       subordinates: true
     }
   });
   return users;
+};
+
+const findEmployeeById = async (req) => {
+  const { id } = req;
+  const user = await prisma.User.findUnique({
+    where: {
+      id: Number(id)
+    },
+    include: {
+      manager: true,
+      subordinates: true,
+      subordinates: {
+        include: {
+          manager: true,
+          subordinates: true
+        }
+      }
+    }
+  });
+  return user;
 };
 
 const findUserById = async (req) => {
@@ -393,6 +414,7 @@ exports.changePassword = changePassword;
 exports.updateB2BUserStatus = updateB2BUserStatus;
 exports.getB2BUsers = getB2BUsers;
 exports.getEmployees = getEmployees;
+exports.findEmployeeById = findEmployeeById;
 exports.createJobRole = createJobRole;
 exports.editJobRole = editJobRole;
 exports.getJobRole = getJobRole;

@@ -770,7 +770,7 @@ const assignSubordinatesToManager = async (req, res) => {
     })
   );
   data.password = '';
-  data.manager.password = '';
+  if (data.manager !== null) data.manager.password = '';
   for (let u of data.subordinates) {
     u.password = '';
   }
@@ -799,7 +799,7 @@ const unassignSubordinatesToManager = async (req, res) => {
     })
   );
   data.password = '';
-  data.manager.password = '';
+  if (data.manager !== null) data.manager.password = '';
   for (let u of data.subordinates) {
     u.password = '';
   }
