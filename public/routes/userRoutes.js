@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const UserController = require('../controllers/userController');
+const OrganisationalChartController = require('../controllers/organisationalChartController');
 const { verifyToken } = require('../middleware/auth');
 
 router.post('/', UserController.createUser);
@@ -22,8 +23,18 @@ router.get('/b2b/pending', UserController.getAllPendingB2BUsers);
 router.get('/nonb2b/all', verifyToken, UserController.getAllNonB2BUsers);
 router.get('/pending/count', UserController.getNumberOfPendingUsers);
 router.get('/employee/all', verifyToken, UserController.getAllEmployees);
+router.get('/jobrole/:id', UserController.getJobRoleById);
+router.get('/jobrole/name/:jobRole', UserController.getJobRoleByName);
 router.post('/jobrole', UserController.createJobRole);
 router.put('/jobrole', UserController.editJobRole);
 router.post('/jobroles', UserController.addJobRolesToUser);
+router.delete('/jobrole/:id', UserController.deleteJobRole);
+router.post('/assign/subordinates', UserController.assignSubordinatesToManager);
+router.post(
+  '/unassign/subordinates',
+  UserController.unassignSubordinatesToManager
+);
+
+router.post('/org', OrganisationalChartController.organisationChart);
 
 module.exports = router;

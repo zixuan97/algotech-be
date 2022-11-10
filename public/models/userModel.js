@@ -69,6 +69,10 @@ const getEmployees = async () => {
           }
         ]
       }
+    },
+    include: {
+      jobRoles: true,
+      subordinates: true
     }
   });
   return users;
@@ -101,7 +105,7 @@ const getUserDetails = async (req) => {
       id: Number(id)
     },
     include: {
-      subjects: true
+      jobRoles: true
     }
   });
   return user;
@@ -144,7 +148,7 @@ const deleteUserById = async (req) => {
       lastUpdatedSubjects: {
         deleteMany: {}
       },
-      subjectsAssigned: {
+      assignedSubjects: {
         deleteMany: {}
       },
       vettedLeaves: {
@@ -279,7 +283,10 @@ const getJobRole = async (req) => {
   const { id } = req;
   const job = await prisma.JobRole.findUnique({
     where: {
-      id
+      id: Number(id)
+    },
+    include: {
+      usersInJobRole: true
     }
   });
   return job;
@@ -290,6 +297,9 @@ const getJobRoleByName = async (req) => {
   const job = await prisma.JobRole.findUnique({
     where: {
       jobRole
+    },
+    include: {
+      usersInJobRole: true
     }
   });
   return job;
@@ -297,25 +307,71 @@ const getJobRoleByName = async (req) => {
 
 const addJobRolesToUser = async (req) => {
   const { userId, jobRoles } = req;
-  const result = [];
-  jobRoles.map(async (j) => {
-    const currJob = await getJobRoleByName({ jobRole: j.jobRole });
-    if (!currJob) {
-      await createJobRole({ jobRole: j.jobRole });
-    }
-    result.push(currJob);
-  });
   const user = await prisma.user.update({
     where: { id: userId },
     data: {
       jobRoles: {
-        connect: result.map((r) => ({
-          id: r.id
+        set: [],
+        connectOrCreate: jobRoles.map((j) => ({
+          where: {
+            jobRole: j.jobRole
+          },
+          create: {
+            jobRole: j.jobRole
+          }
         }))
       }
     },
     include: {
       jobRoles: true
+    }
+  });
+  return user;
+};
+
+const deleteJobRole = async (req) => {
+  const { id } = req;
+  jobRole = await prisma.JobRole.delete({
+    where: {
+      id: Number(id)
+    }
+  });
+  return id;
+};
+
+const assignSubordinatesToManager = async (req) => {
+  const { id, users } = req;
+  const user = await prisma.user.update({
+    where: { id },
+    data: {
+      subordinates: {
+        connect: users.map((u) => ({
+          id: u.id
+        }))
+      }
+    },
+    include: {
+      manager: true,
+      subordinates: true
+    }
+  });
+  return user;
+};
+
+const unassignSubordinatesToManager = async (req) => {
+  const { id, users } = req;
+  const user = await prisma.user.update({
+    where: { id },
+    data: {
+      subordinates: {
+        disconnect: users.map((u) => ({
+          id: u.id
+        }))
+      }
+    },
+    include: {
+      manager: true,
+      subordinates: true
     }
   });
   return user;
@@ -340,4 +396,8 @@ exports.getEmployees = getEmployees;
 exports.createJobRole = createJobRole;
 exports.editJobRole = editJobRole;
 exports.getJobRole = getJobRole;
+exports.getJobRoleByName = getJobRoleByName;
 exports.addJobRolesToUser = addJobRolesToUser;
+exports.deleteJobRole = deleteJobRole;
+exports.assignSubordinatesToManager = assignSubordinatesToManager;
+exports.unassignSubordinatesToManager = unassignSubordinatesToManager;

@@ -383,7 +383,7 @@ const getLeaveApplication = async (req, res) => {
     const { id } = req.params;
     const leave = await leaveModel.getLeaveApplicationById({ id });
     leave.employee.password = '';
-    leave.vettedBy.password = '';
+    if (leave.vettedBy !== null) leave.vettedBy.password = '';
     log.out('OK_LEAVE_GET-LEAVE-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(leave)
@@ -692,6 +692,29 @@ const updateEmployeesToNewTierForDeletedTier = async (req, res) => {
   }
 };
 
+const getNumberOfEmployeesInTier = async (req, res) => {
+  const { tier } = req.params;
+  const { data, error } = await common.awaitWrap(
+    leaveModel.getAllEmployeesByTier({
+      tier
+    })
+  );
+  if (error) {
+    log.error('ERR_LEAVE_GET-NUM-EMPLOYEES-BY-TIER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_GET-NUM-EMPLOYEES-BY-TIER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.status(200).json(data.length);
+  }
+};
+
 exports.createLeaveApplication = createLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
 exports.getLeaveQuota = getLeaveQuota;
@@ -717,3 +740,4 @@ exports.rejectLeaveApplication = rejectLeaveApplication;
 exports.updateTierByEmployeeId = updateTierByEmployeeId;
 exports.updateEmployeesToNewTierForDeletedTier =
   updateEmployeesToNewTierForDeletedTier;
+exports.getNumberOfEmployeesInTier = getNumberOfEmployeesInTier;

@@ -75,6 +75,7 @@ const getAllSuppliers = async (req, res) => {
         email: d.email,
         name: d.name,
         address: d.address,
+        currency: d.currency,
         supplierProduct: supplierProducts
       };
       finalRes.push(result);

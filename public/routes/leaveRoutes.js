@@ -33,5 +33,6 @@ router.post(
   '/deletedtier/newtier',
   leaveController.updateEmployeesToNewTierForDeletedTier
 );
+router.get('/size/tier/:tier', leaveController.getNumberOfEmployeesInTier);
 
 module.exports = router;

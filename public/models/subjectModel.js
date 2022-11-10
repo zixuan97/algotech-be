@@ -204,9 +204,42 @@ const assignUsersToSubject = async (req) => {
   return subject;
 };
 
+const unassignUsersToSubject = async (req) => {
+  const { id, users } = req;
+  const subject = await prisma.subject.update({
+    where: { id },
+    data: {
+      usersAssigned: {
+        disconnect: users.map((u) => ({
+          id: u.id
+        }))
+      }
+    },
+    include: {
+      topics: true,
+      topics: {
+        include: {
+          steps: true
+        }
+      },
+      quizzes: true,
+      quizzes: {
+        include: {
+          questions: true
+        }
+      },
+      createdBy: true,
+      lastUpdatedBy: true,
+      usersAssigned: true
+    }
+  });
+  return subject;
+};
+
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
 exports.getSubjectById = getSubjectById;
 exports.updateSubject = updateSubject;
 exports.deleteSubject = deleteSubject;
 exports.assignUsersToSubject = assignUsersToSubject;
+exports.unassignUsersToSubject = unassignUsersToSubject;

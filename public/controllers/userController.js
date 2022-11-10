@@ -624,6 +624,9 @@ const getNumberOfPendingUsers = async (req, res) => {
 const getAllEmployees = async (req, res) => {
   try {
     const users = await userModel.getEmployees({});
+    for (let u of users) {
+      u.password = '';
+    }
     log.out('OK_USER_GET-EMPLOYEES', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(users.filter((u) => u.id != req.user.userId))
@@ -658,19 +661,24 @@ const createJobRole = async (req, res) => {
 
 const editJobRole = async (req, res) => {
   const { id, jobRole } = req.body;
-  try {
-    const data = await userModel.editJobRole({ id, jobRole });
-    log.out('OK_USER_EDIT-JOB-ROLE', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  } catch (error) {
-    log.error('ERR_USER_EDIT-JOB-ROLE', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.status(400).send('Error editing job role');
+  const j = await userModel.getJobRoleByName({ jobRole });
+  if (j !== null && id !== j.id) {
+    res.status(400).send('Job role already exists!');
+  } else {
+    try {
+      const data = await userModel.editJobRole({ id, jobRole });
+      log.out('OK_USER_EDIT-JOB-ROLE', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    } catch (error) {
+      log.error('ERR_USER_EDIT-JOB-ROLE', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      res.status(400).send('Error editing job role');
+    }
   }
 };
 
@@ -690,6 +698,124 @@ const addJobRolesToUser = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     res.status(400).send('Error adding job roles to users');
+  }
+};
+
+const deleteJobRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await userModel.deleteJobRole({ id });
+    log.out('OK_USER_DELETE-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: { message: 'Job role deleted' }
+    });
+    res.json({ message: 'Job role deleted' });
+  } catch (error) {
+    log.error('ERR_USER_DELETE-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error deleting job role');
+  }
+};
+
+const getJobRoleById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const job = await userModel.getJobRole({ id });
+    for (let j of job.usersInJobRole) {
+      j.password = '';
+    }
+    log.out('OK_USER_GET-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(job)
+    });
+    res.json(job);
+  } catch (error) {
+    log.error('ERR_USER_GET-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting job role');
+  }
+};
+
+const getJobRoleByName = async (req, res) => {
+  const { jobRole } = req.params;
+  try {
+    const job = await userModel.getJobRoleByName({ jobRole });
+    for (let j of job.usersInJobRole) {
+      j.password = '';
+    }
+    log.out('OK_USER_GET-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(job)
+    });
+    res.json(job);
+  } catch (error) {
+    log.error('ERR_USER_GET-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting job role by name');
+  }
+};
+
+const assignSubordinatesToManager = async (req, res) => {
+  const { id, users } = req.body;
+  const { data, error } = await common.awaitWrap(
+    userModel.assignSubordinatesToManager({
+      id,
+      users
+    })
+  );
+  data.password = '';
+  data.manager.password = '';
+  for (let u of data.subordinates) {
+    u.password = '';
+  }
+  if (error) {
+    log.error('ERR_SUBJECT_ASSIGN-SUBORDINATES-TO-MANAGER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_ASSIGN-SUBORDINATES-TO-MANAGER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const unassignSubordinatesToManager = async (req, res) => {
+  const { id, users } = req.body;
+  const { data, error } = await common.awaitWrap(
+    userModel.unassignSubordinatesToManager({
+      id,
+      users
+    })
+  );
+  data.password = '';
+  data.manager.password = '';
+  for (let u of data.subordinates) {
+    u.password = '';
+  }
+  if (error) {
+    log.error('ERR_SUBJECT_UNASSIGN-SUBORDINATES-TO-MANAGER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_UNASSIGN-SUBORDINATES-TO-MANAGER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
   }
 };
 
@@ -717,3 +843,8 @@ exports.getAllEmployees = getAllEmployees;
 exports.createJobRole = createJobRole;
 exports.editJobRole = editJobRole;
 exports.addJobRolesToUser = addJobRolesToUser;
+exports.deleteJobRole = deleteJobRole;
+exports.getJobRoleById = getJobRoleById;
+exports.getJobRoleByName = getJobRoleByName;
+exports.assignSubordinatesToManager = assignSubordinatesToManager;
+exports.unassignSubordinatesToManager = unassignSubordinatesToManager;
