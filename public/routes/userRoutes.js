@@ -25,5 +25,6 @@ router.get('/employee/all', verifyToken, UserController.getAllEmployees);
 router.post('/jobrole', UserController.createJobRole);
 router.put('/jobrole', UserController.editJobRole);
 router.post('/jobroles', UserController.addJobRolesToUser);
+router.delete('/jobrole/:id', UserController.deleteJobRole);
 
 module.exports = router;
