@@ -1,5 +1,5 @@
 const getStream = require('get-stream');
-const PDFDocument = require('pdfkit');
+const PDFDocument = require('pdfkit-table');
 
 const generatePdfTemplate = async () => {
   // Create a document
@@ -188,7 +188,17 @@ const generateProcurementPdfTemplate = async (req) => {
 };
 
 const generateDeliveryOrderPdfTemplate = async (req) => {
-  const { id, createdAtFormatted, shippingDateFormatted, carrier, comments, deliveryMode, shippingType, salesOrder, assignedUser } = req;
+  const {
+    id,
+    createdAtFormatted,
+    shippingDateFormatted,
+    carrier,
+    comments,
+    deliveryMode,
+    shippingType,
+    salesOrder,
+    assignedUser
+  } = req;
 
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
@@ -205,7 +215,7 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
 
   //company name
   doc.font('Helvetica-Bold').fontSize(10).text('The Savoury Nosh Pte Ltd', {
-    align: 'left',
+    align: 'left'
   });
 
   const leftAlign = 73;
@@ -215,7 +225,9 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
     .fontSize(8)
     .text('zac@thekettlegourmet.com', leftAlign, 90, { align: 'left' });
   doc.fontSize(8).text('www.thekettlegourmet.com', { align: 'left' });
-  doc.fontSize(8).text('Company Registration No. 201906356G', { align: 'left' });
+  doc
+    .fontSize(8)
+    .text('Company Registration No. 201906356G', { align: 'left' });
 
   //vendor information
   doc.fill('black').fontSize(18).text('Delivery Note', leftAlign, 160);
@@ -240,7 +252,10 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
     .fill('grey')
     .fontSize(10)
     .text('DATE', leftAlign + 390, 225);
-  doc.fill('black').fontSize(8).text(salesOrder.customerAddress, leftAlign, 225, { width: 120 });
+  doc
+    .fill('black')
+    .fontSize(8)
+    .text(salesOrder.customerAddress, leftAlign, 225, { width: 120 });
   doc
     .fill('black')
     .fontSize(8)
@@ -252,7 +267,12 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
   doc
     .fill('black')
     .fontSize(8)
-    .text(`POC: ${salesOrder.customerName} (${salesOrder.customerContactNo})`, leftAlign + 130, 260, { width: 90 });
+    .text(
+      `POC: ${salesOrder.customerName} (${salesOrder.customerContactNo})`,
+      leftAlign + 130,
+      260,
+      { width: 90 }
+    );
   doc
     .fill('black')
     .fontSize(8)
@@ -294,10 +314,10 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
   salesOrderItems.map((s) => {
     soList.push({
       name: s.productName,
-      quantity: s.quantity,
+      quantity: s.quantity
     });
   });
-  
+
   //table
   const tableTop = 310;
   let currentPosY = tableTop;
@@ -318,14 +338,389 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
 
   const paylahPath = process.cwd() + '/paylahQR.png';
   doc.image(
-      paylahPath,
-      leftAlign,
-      currentPosY + 40,
-      { fit: [120, 120] },
-      { width: 300, linebreak: true, lineGap: 50 }
-    );
+    paylahPath,
+    leftAlign,
+    currentPosY + 40,
+    { fit: [120, 120] },
+    { width: 300, linebreak: true, lineGap: 50 }
+  );
 
   // Finalize PDF file Inclusive of SST
+  doc.end();
+  return await getStream.buffer(doc);
+};
+
+const generateBulkOrderPDF = async (req) => {
+  const { createdDate, bulkOrder } = req;
+
+  // Create a document
+  const doc = new PDFDocument({
+    bufferPages: true,
+    tagged: true,
+    size: 'A4',
+    margins: {
+      top: 25,
+      bottom: 0,
+      left: 25,
+      right: 25
+    }
+  });
+  const path = process.cwd() + '/logo.png';
+  // Add an image, constrain it to a given size, and center it vertically and horizontally
+  //logo
+  doc.image(
+    path,
+    5,
+    5,
+    { fit: [160, 160] },
+    { width: 300, linebreak: true, lineGap: 50 }
+  );
+
+  //company name
+  doc
+    .font('Helvetica-Bold')
+    .fontSize(20)
+    .text('The Savoury Nosh Pte Ltd', 160, 25);
+
+  // payee details table
+  const table = {
+    headers: [
+      { label: 'Name', property: 'first', width: 140, renderer: null },
+      {
+        label: 'Order ID',
+        property: 'second',
+        width: 140
+      },
+      { label: 'Remarks', property: 'third', width: 140, renderer: null }
+    ],
+    datas: [
+      {
+        first: 'Name' + '\n' + bulkOrder.payeeName + '\n ',
+        second: 'Order ID' + '\n' + bulkOrder.orderId,
+        third: `Discount Code \n${bulkOrder.discountCode ?? '-'}`
+      },
+      {
+        first: 'Contact Number' + '\n' + bulkOrder.payeeContactNo + '\n ',
+        second: 'Order Date' + '\n' + createdDate,
+        third: `Remarks \n${bulkOrder.remarks ?? '-'}`
+      },
+      {
+        first: 'Email' + '\n' + bulkOrder.payeeEmail + '\n ',
+        second: 'Payment Status' + '\n' + bulkOrder.bulkOrderStatus
+      }
+    ]
+  };
+  // payee details table
+  await doc.table(table, {
+    width: 600,
+    x: 160,
+    y: 50,
+    divider: {
+      header: { disabled: false, width: 1, opacity: 1 },
+      horizontal: { disabled: true, width: 0.5, opacity: 0.5 }
+    },
+    hideHeader: true,
+    minRowHeight: 0,
+    prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
+      doc.font('Helvetica-Bold').fontSize(8.5)
+  });
+
+  //total amount
+  doc.rect(0, 160, 600, 60).fillOpacity(1).fillAndStroke('#1F1646');
+  doc
+    .fill('white')
+    .font('Helvetica-Bold')
+    .fontSize(9)
+    .text('Total Amount Payable', 400, 170, { align: 'right' });
+  doc
+    .fill('white')
+    .font('Helvetica-Bold')
+    .fontSize(25)
+    .text(`S$ ${bulkOrder.transactionAmount.toFixed(2)}`, 400, 190, {
+      align: 'right'
+    });
+
+  //individual customer headers
+  doc.rect(0, 220, 600, 35).fillOpacity(1).fillAndStroke('#E9E8EC');
+  const table2 = {
+    headers: [
+      { label: 'Customer Name', property: 'name', width: 100, renderer: null },
+      {
+        label: 'Contact Number',
+        property: 'number',
+        width: 80
+      },
+      {
+        label: 'Address',
+        property: 'address',
+        width: 120,
+        renderer: null,
+        padding: 8
+      },
+      { label: 'Postal Code', property: 'postal', width: 80, renderer: null },
+      { label: 'Message', property: 'message', width: 90, renderer: null },
+      {
+        label: 'Amount',
+        property: 'amount',
+        width: 75,
+        renderer: null,
+        align: 'right',
+        padding: 10
+      }
+    ],
+    datas: [
+      {
+        name: 'Customer Name',
+        number: 'Contact Number',
+        address: 'Address',
+        postal: 'Postal Code',
+        message: 'Message',
+        amount: 'Amount (S$)'
+      }
+    ]
+  };
+
+  // header
+  await doc.table(table2, {
+    width: 600,
+    x: 25,
+    y: 230,
+    divider: {
+      header: { disabled: false, width: 1, opacity: 1 },
+      horizontal: { disabled: true, width: 0.5, opacity: 0.5 }
+    },
+    hideHeader: true,
+    minRowHeight: 0,
+    prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
+      doc.font('Helvetica-Bold').fontSize(9)
+  });
+
+  let tableX = 25;
+  let tableY = 230;
+  for (let i = 0; i < bulkOrder.salesOrders.length; i++) {
+    salesOrder = bulkOrder.salesOrders[i];
+    tableY += 35;
+    // new page after certain limit
+    if (tableY > 500) {
+      doc.addPage();
+      tableY = 50;
+      doc.rect(0, 0, 600, 35).fillOpacity(1).fillAndStroke('#E9E8EC');
+      await doc.table(table2, {
+        width: 600,
+        x: 25,
+        y: 10,
+        divider: {
+          header: { disabled: false, width: 1, opacity: 1 },
+          horizontal: { disabled: true, width: 0.5, opacity: 0.5 }
+        },
+        hideHeader: true,
+        minRowHeight: 0,
+        prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
+          doc.font('Helvetica-Bold').fontSize(9)
+      });
+    }
+    // individual customer details
+    const table3 = {
+      headers: [
+        {
+          label: 'Customer Name',
+          property: 'name',
+          width: 100,
+          renderer: null
+        },
+        {
+          label: 'Contact Number',
+          property: 'number',
+          width: 80
+        },
+        {
+          label: 'Address',
+          property: 'address',
+          width: 120,
+          renderer: null,
+          padding: 8
+        },
+        {
+          label: 'Postal Code',
+          property: 'postal',
+          width: 80,
+          renderer: null
+        },
+        { label: 'Message', property: 'message', width: 90, renderer: null },
+        {
+          label: 'Amount',
+          property: 'amount',
+          width: 75,
+          renderer: null,
+          align: 'right',
+          padding: 10
+        }
+      ],
+      datas: [
+        {
+          name: salesOrder.customerName,
+          number: salesOrder.customerContactNo,
+          address: salesOrder.customerAddress,
+          postal: salesOrder.postalCode,
+          message: salesOrder.customerRemarks ?? '-',
+          amount: salesOrder.amount.toFixed(2)
+        }
+      ]
+    };
+
+    let tableY2 = tableY + 40;
+    // width
+    await doc.table(table3, {
+      width: 600,
+      x: tableX,
+      y: tableY,
+      divider: {
+        header: { disabled: false, width: 1, opacity: 1 },
+        horizontal: { disabled: true, width: 0.5, opacity: 0.5 }
+      },
+      hideHeader: true,
+      minRowHeight: 0,
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
+        doc.font('Helvetica').fontSize(9)
+    });
+    doc.rect(20, tableY2, 560, 35).fillOpacity(1).fillAndStroke('#E9E8EC');
+    let tableY3 = tableY2 + 10;
+
+    //customer items headers
+    const table4 = {
+      headers: [
+        {
+          label: 'Item Name',
+          property: 'name',
+          width: 230,
+          renderer: null,
+          padding: 10
+        },
+        {
+          label: 'Quantity',
+          property: 'quantity',
+          width: 100,
+          align: 'right'
+        },
+        {
+          label: 'Unit Price(S$)',
+          property: 'price',
+          width: 100,
+          renderer: null,
+          align: 'right'
+        },
+        {
+          label: 'Subtotal(S$)',
+          property: 'subtotal',
+          width: 100,
+          renderer: null,
+          align: 'right'
+        }
+      ],
+      datas: [
+        {
+          name: 'Item Name',
+          quantity: 'Quantity',
+          price: 'Unit Price (S$)',
+          subtotal: 'Subtotal (S$)'
+        }
+      ]
+    };
+
+    await doc.table(table4, {
+      width: 600,
+      x: 25,
+      y: tableY3,
+      divider: {
+        header: { disabled: false, width: 1, opacity: 1 },
+        horizontal: { disabled: true, width: 0.5, opacity: 0.5 }
+      },
+      hideHeader: true,
+      minRowHeight: 0,
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
+        doc.font('Helvetica-Bold').fontSize(9)
+    });
+    let tableY4 = tableY3 + 35;
+
+    //customer specific items
+    const table5 = {
+      headers: [
+        {
+          label: 'Item Name',
+          property: 'name',
+          width: 230,
+          renderer: null,
+          padding: 10
+        },
+        {
+          label: 'Quantity',
+          property: 'quantity',
+          width: 100,
+          align: 'right'
+        },
+        {
+          label: 'Unit Price(S$)',
+          property: 'price',
+          width: 100,
+          renderer: null,
+          align: 'right'
+        },
+        {
+          label: 'Subtotal (S$)',
+          property: 'subtotal',
+          width: 100,
+          renderer: null,
+          align: 'right'
+        }
+      ],
+      datas: salesOrder.salesOrderItems.map((soi) => {
+        return {
+          name: soi.productName,
+          quantity: soi.quantity,
+          price: soi.price.toFixed(2),
+          subtotal: (soi.price * soi.quantity).toFixed(2)
+        };
+      })
+    };
+
+    await doc.table(table5, {
+      width: 600,
+      x: tableX,
+      y: tableY4,
+      divider: {
+        header: { disabled: true, width: 1, opacity: 1 },
+        horizontal: { disabled: true, width: 0.5, opacity: 0.5 }
+      },
+      hideHeader: true,
+      minRowHeight: 20,
+      prepareHeader: () => doc.font('Helvetica-Bold').fontSize(12),
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) =>
+        doc.font('Helvetica').fontSize(9)
+    });
+
+    tableY = tableY4 + 30 * salesOrder.salesOrderItems.length;
+    // line added if it is not last item
+    if (i < bulkOrder.salesOrders.length - 1) {
+      doc.moveTo(0, tableY).lineTo(600, tableY).stroke();
+    }
+  }
+
+  // add footer
+  const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
+  for (
+    i = range.start, end = range.start + range.count, range.start <= end;
+    i < end;
+    i++
+  ) {
+    doc.switchToPage(i);
+    doc.rect(0, 820, 600, 23).fillOpacity(1).fillAndStroke('#1F1646');
+    doc
+      .fill('white')
+      .font('Helvetica-Bold')
+      .fontSize(9)
+      .text(`Page ${i + 1} of ${range.count}`, 500, 827, { align: 'right' });
+  }
+
   doc.end();
   return await getStream.buffer(doc);
 };
@@ -333,3 +728,4 @@ const generateDeliveryOrderPdfTemplate = async (req) => {
 exports.generatePdfTemplate = generatePdfTemplate;
 exports.generateProcurementPdfTemplate = generateProcurementPdfTemplate;
 exports.generateDeliveryOrderPdfTemplate = generateDeliveryOrderPdfTemplate;
+exports.generateBulkOrderPDF = generateBulkOrderPDF;
