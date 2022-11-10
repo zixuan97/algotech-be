@@ -22,6 +22,8 @@ router.get('/b2b/pending', UserController.getAllPendingB2BUsers);
 router.get('/nonb2b/all', verifyToken, UserController.getAllNonB2BUsers);
 router.get('/pending/count', UserController.getNumberOfPendingUsers);
 router.get('/employee/all', verifyToken, UserController.getAllEmployees);
+router.get('/jobrole/:id', UserController.getJobRoleById);
+router.get('/jobrole/name', UserController.getJobRoleByName);
 router.post('/jobrole', UserController.createJobRole);
 router.put('/jobrole', UserController.editJobRole);
 router.post('/jobroles', UserController.addJobRolesToUser);

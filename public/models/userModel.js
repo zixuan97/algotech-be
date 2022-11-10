@@ -282,7 +282,10 @@ const getJobRole = async (req) => {
   const { id } = req;
   const job = await prisma.JobRole.findUnique({
     where: {
-      id
+      id: Number(id)
+    },
+    include: {
+      usersInJobRole: true
     }
   });
   return job;
