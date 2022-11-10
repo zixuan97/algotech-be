@@ -11,4 +11,5 @@ router.put('/', bulkOrderController.updateBulkOrder);
 router.put('/status', bulkOrderController.updateBulkOrderStatus);
 router.put('/salesOrderStatus', bulkOrderController.massUpdateSalesOrderStatus);
 router.post('/excel', bulkOrderController.generateExcel);
+router.post('/pdf/:id', bulkOrderController.generateBulkOrderSummaryPDF);
 module.exports = router;

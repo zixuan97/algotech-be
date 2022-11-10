@@ -127,46 +127,72 @@ const applyDiscountCode = async (req, res) => {
       discountCode
     });
     const today = new Date();
-    const isValid =
-      code.startDate <= today &&
-      (code.endDate === null || code.endDate >= today);
-    let transactionAmount = amount;
-    if (
-      (code.customerEmails.includes(email) ||
-        code.customerEmails.length === 0) &&
-      code.isEnabled &&
-      isValid &&
-      amount >= code.minOrderAmount
-    ) {
-      if (code.type === 'PERCENTAGE') {
-        transactionAmount = (amount * (100 - code.amount)) / 100;
-      } else {
-        transactionAmount = amount - code.amount;
-      }
-      log.out('OK_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
-        req: { body: req.body, params: req.params },
-        res: JSON.stringify({
+    if (code) {
+      const isValid =
+        code.startDate <= today &&
+        (code.endDate === null || code.endDate >= today);
+      let transactionAmount = amount;
+      if (
+        (code.customerEmails.includes(email) ||
+          code.customerEmails.length === 0) &&
+        code.isEnabled &&
+        isValid &&
+        amount >= code.minOrderAmount
+      ) {
+        if (code.type === 'PERCENTAGE') {
+          transactionAmount = (amount * (100 - code.amount)) / 100;
+        } else {
+          transactionAmount = amount - code.amount;
+        }
+        log.out('OK_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
+          req: { body: req.body, params: req.params },
+          res: JSON.stringify({
+            transactionAmount,
+            discountType: code.type,
+            discountAmount: code.amount
+          })
+        });
+        res.json({
           transactionAmount,
           discountType: code.type,
           discountAmount: code.amount
-        })
-      });
-      res.json({
-        transactionAmount,
-        discountType: code.type,
-        discountAmount: code.amount
-      });
-    } else if (
-      !code.customerEmails.includes(email) &&
-      code.customerEmails.length !== 0
-    ) {
-      res.json({ message: 'Invalid Email!' });
-    } else if (!isValid) {
-      res.json({ message: 'Promo code is expired' });
-    } else if (amount < code.minOrderAmount) {
-      res.json({ message: `Min amount of ${code.amount} is required!` });
+        });
+      } else if (
+        !code.customerEmails.includes(email) &&
+        code.customerEmails.length !== 0
+      ) {
+        log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
+          req: { body: req.body, params: req.params },
+          res: { message: 'Invalid Email!' }
+        });
+        res.status(400).json({ message: 'Invalid Email!' });
+      } else if (!isValid) {
+        log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
+          req: { body: req.body, params: req.params },
+          res: { message: 'Promo code has expired!' }
+        });
+        res.status(400).json({ message: 'Promo code has expired!' });
+      } else if (amount < code.minOrderAmount) {
+        log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
+          req: { body: req.body, params: req.params },
+          res: { message: `Min amount of ${code.amount} is required!` }
+        });
+        res
+          .status(400)
+          .json({ message: `Min amount of ${code.amount} is required!` });
+      } else {
+        log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
+          req: { body: req.body, params: req.params },
+          res: { message: 'Invalid promo code!' }
+        });
+        res.status(400).json({ message: 'Invalid promo code!' });
+      }
     } else {
-      res.json({ message: 'Invalid Promo code' });
+      log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
+        req: { body: req.body, params: req.params },
+        res: { message: 'Invalid promo code!' }
+      });
+      res.status(400).json({ message: 'Invalid promo code!' });
     }
   } catch (error) {
     log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
