@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const UserController = require('../controllers/userController');
+const OrganisationalChartController = require('../controllers/organisationalChartController');
 const { verifyToken } = require('../middleware/auth');
 
 router.post('/', UserController.createUser);
@@ -28,5 +29,6 @@ router.post('/jobrole', UserController.createJobRole);
 router.put('/jobrole', UserController.editJobRole);
 router.post('/jobroles', UserController.addJobRolesToUser);
 router.delete('/jobrole/:id', UserController.deleteJobRole);
+router.post('/org', OrganisationalChartController.organisationChart);
 
 module.exports = router;
