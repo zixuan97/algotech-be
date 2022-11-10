@@ -2,7 +2,6 @@ const { prisma } = require('./index.js');
 
 const createBrand = async (req) => {
   const { name } = req;
-
   await prisma.brand.create({
     data: {
       name

@@ -201,7 +201,7 @@ model BulkOrder {
   orderId           String          @unique
   payeeContactNo    String
   payeeCompany      String?
-  discountCode      String
+  discountCode      String?
   transactionAmount Float
   salesOrders       SalesOrder[]
 }

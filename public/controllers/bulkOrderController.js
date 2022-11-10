@@ -10,6 +10,7 @@ const { generateBulkOrderExcel } = require('../helpers/excel');
 const { format } = require('date-fns');
 const { uuid } = require('uuidv4');
 const sns = require('../helpers/sns');
+const { generateBulkOrderPDF } = require('../helpers/pdf');
 
 const createBulkOrder = async (req, res) => {
   const {
@@ -269,8 +270,7 @@ const massUpdateSalesOrderStatus = async (req, res) => {
       if (bulkOrder.payeeContactNo !== null) {
         sns.sendOTP({
           number: bulkOrder.payeeContactNo,
-          message:
-            'Your order is being prepared and delivery is on the way to you soon!'
+          message: `Your order: ${bulkOrder.orderId} is being prepared and delivery is on the way to you soon!`
         });
       }
     }
@@ -379,6 +379,33 @@ const generateExcel = async (req, res) => {
     });
 };
 
+const generateBulkOrderSummaryPDF = async (req, res) => {
+  const { id } = req.params;
+  const bulkOrder = await bulkOrderModel.findBulkOrderById({ id });
+
+  const createdDate = format(bulkOrder.createdTime, 'dd MMM yyyy');
+  await generateBulkOrderPDF({
+    bulkOrder,
+    createdDate
+  })
+    .then((pdfBuffer) => {
+      res
+        .writeHead(200, {
+          'Content-Length': Buffer.byteLength(pdfBuffer),
+          'Content-Type': 'application/pdf',
+          'Content-disposition': 'attachment; filename = test.pdf'
+        })
+        .end(pdfBuffer);
+    })
+    .catch((error) => {
+      log.error('ERR_BULKORDER_GENERATE-BO-PDF', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      return res.status(error).json(error.message);
+    });
+};
+
 exports.createBulkOrder = createBulkOrder;
 exports.getAllBulkOrders = getAllBulkOrders;
 exports.findBulkOrderById = findBulkOrderById;
@@ -389,3 +416,4 @@ exports.getAllBulkOrdersWithTimeFilter = getAllBulkOrdersWithTimeFilter;
 exports.updateBulkOrderStatus = updateBulkOrderStatus;
 exports.massUpdateSalesOrderStatus = massUpdateSalesOrderStatus;
 exports.generateExcel = generateExcel;
+exports.generateBulkOrderSummaryPDF = generateBulkOrderSummaryPDF;
