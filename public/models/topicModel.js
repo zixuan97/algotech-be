@@ -31,12 +31,7 @@ const createTopic = async (req) => {
           usersAssigned: true
         }
       },
-      steps: true,
-      steps: {
-        include: {
-          topic: true
-        }
-      }
+      steps: true
     }
   });
   return topic;

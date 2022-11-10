@@ -661,19 +661,24 @@ const createJobRole = async (req, res) => {
 
 const editJobRole = async (req, res) => {
   const { id, jobRole } = req.body;
-  try {
-    const data = await userModel.editJobRole({ id, jobRole });
-    log.out('OK_USER_EDIT-JOB-ROLE', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  } catch (error) {
-    log.error('ERR_USER_EDIT-JOB-ROLE', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.status(400).send('Error editing job role');
+  const j = await userModel.getJobRoleByName({ jobRole });
+  if (j !== null && id !== j.id) {
+    res.status(400).send('Job role already exists!');
+  } else {
+    try {
+      const data = await userModel.editJobRole({ id, jobRole });
+      log.out('OK_USER_EDIT-JOB-ROLE', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    } catch (error) {
+      log.error('ERR_USER_EDIT-JOB-ROLE', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      res.status(400).send('Error editing job role');
+    }
   }
 };
 
@@ -714,6 +719,42 @@ const deleteJobRole = async (req, res) => {
   }
 };
 
+const getJobRoleById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const job = await userModel.getJobRole({ id });
+    log.out('OK_USER_GET-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(job)
+    });
+    res.json(job);
+  } catch (error) {
+    log.error('ERR_USER_GET-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting job role');
+  }
+};
+
+const getJobRoleByName = async (req, res) => {
+  const { jobRole } = req.body;
+  try {
+    const job = await userModel.getJobRoleByName({ jobRole });
+    log.out('OK_USER_GET-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(job)
+    });
+    res.json(job);
+  } catch (error) {
+    log.error('ERR_USER_GET-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting job role by name');
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -739,3 +780,5 @@ exports.createJobRole = createJobRole;
 exports.editJobRole = editJobRole;
 exports.addJobRolesToUser = addJobRolesToUser;
 exports.deleteJobRole = deleteJobRole;
+exports.getJobRoleById = getJobRoleById;
+exports.getJobRoleByName = getJobRoleByName;

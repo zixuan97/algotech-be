@@ -38,7 +38,8 @@ const createQuiz = async (req) => {
           lastUpdatedBy: true,
           usersAssigned: true
         }
-      }
+      },
+      questions: true
     }
   });
   return quiz;
