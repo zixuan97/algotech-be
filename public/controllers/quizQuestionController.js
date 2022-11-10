@@ -1,4 +1,6 @@
 const quizQuestionModel = require('../models/quizQuestionModel');
+const quizModel = require('../models/quizModel');
+const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -14,6 +16,12 @@ const createQuizQuestion = async (req, res) => {
     correctAnswer,
     quizId
   } = req.body;
+  const { subjectId } = await quizModel.getQuizById({ id: quizId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     quizQuestionModel.createQuizQuestion({
       quizOrder,
@@ -26,6 +34,8 @@ const createQuizQuestion = async (req, res) => {
       quizId
     })
   );
+  data.quiz.subject.createdBy.password = '';
+  data.quiz.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_QUIZQUESTION_CREATE-QUIZQUESTION', {
       err: error.message,
@@ -46,6 +56,10 @@ const getAllQuizQuestionsByQuizId = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     quizQuestionModel.getAllQuizQuestionsByQuizId({ quizId })
   );
+  for (let d of data) {
+    d.quiz.subject.createdBy.password = '';
+    d.quiz.subject.lastUpdatedBy.password = '';
+  }
   if (error) {
     log.error('ERR_QUIZQUESTION_GET-ALL-QUIZQUESTIONS', {
       err: error.message,
@@ -69,6 +83,8 @@ const getQuizQuestion = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(quizQuestion)
     });
+    quizQuestion.quiz.subject.createdBy.password = '';
+    quizQuestion.quiz.subject.lastUpdatedBy.password = '';
     res.json(quizQuestion);
   } catch (error) {
     log.error('ERR_QUIZQUESTION_GET-QUIZQUESTION-BY-ID', {
@@ -91,6 +107,12 @@ const updateQuizQuestion = async (req, res) => {
     correctAnswer,
     quizId
   } = req.body;
+  const { subjectId } = await quizModel.getQuizById({ id: quizId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     quizQuestionModel.updateQuizQuestion({
       id,
@@ -104,6 +126,8 @@ const updateQuizQuestion = async (req, res) => {
       quizId
     })
   );
+  data.quiz.subject.createdBy.password = '';
+  data.quiz.subject.lastUpdatedBy.password = '';
   if (error) {
     log.error('ERR_QUIZQUESTION_UPDATE-QUIZQUESTION', {
       err: error.message,
@@ -122,6 +146,13 @@ const updateQuizQuestion = async (req, res) => {
 
 const deleteQuizQuestion = async (req, res) => {
   const { id } = req.params;
+  const { quizId } = await quizQuestionModel.getQuizQuestionById({ id });
+  const { subjectId } = await quizModel.getQuizById({ id: quizId });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { error } = await common.awaitWrap(
     quizQuestionModel.deleteQuizQuestion({ id })
   );

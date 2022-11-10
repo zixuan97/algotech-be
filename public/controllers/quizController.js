@@ -1,4 +1,5 @@
 const quizModel = require('../models/quizModel');
+const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -12,6 +13,11 @@ const createQuiz = async (req, res) => {
     questions,
     subjectId
   } = req.body;
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     quizModel.createQuiz({
       subjectOrder,
@@ -22,6 +28,11 @@ const createQuiz = async (req, res) => {
       subjectId
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
+  for (let u of data.subject.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_QUIZ_CREATE-QUIZ', {
       err: error.message,
@@ -42,6 +53,13 @@ const getAllQuizzesBySubjectId = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     quizModel.getAllQuizzesBySubjectId({ subjectId })
   );
+  for (let d of data) {
+    d.subject.createdBy.password = '';
+    d.subject.lastUpdatedBy.password = '';
+    for (let u of d.subject.usersAssigned) {
+      u.password = '';
+    }
+  }
   if (error) {
     log.error('ERR_QUIZ_GET-ALL-QUIZZES', {
       err: error.message,
@@ -61,6 +79,11 @@ const getQuiz = async (req, res) => {
   try {
     const { id } = req.params;
     const quiz = await quizModel.getQuizById({ id });
+    quiz.subject.createdBy.password = '';
+    quiz.subject.lastUpdatedBy.password = '';
+    for (let u of quiz.subject.usersAssigned) {
+      u.password = '';
+    }
     log.out('OK_QUIZ_GET-QUIZ-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(quiz)
@@ -86,6 +109,11 @@ const updateQuiz = async (req, res) => {
     completionRate,
     subjectId
   } = req.body;
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     quizModel.updateQuiz({
       id,
@@ -98,6 +126,11 @@ const updateQuiz = async (req, res) => {
       subjectId
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
+  for (let u of data.subject.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_QUIZ_UPDATE-QUIZ', {
       err: error.message,
@@ -116,12 +149,23 @@ const updateQuiz = async (req, res) => {
 
 const addQuizQuestionsToQuiz = async (req, res) => {
   const { id, questions } = req.body;
+  const { subjectId } = await quizModel.getQuizById({ id });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     quizModel.addQuizQuestionsToQuiz({
       id,
       questions
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
+  for (let u of data.subject.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
       err: error.message,
@@ -140,6 +184,12 @@ const addQuizQuestionsToQuiz = async (req, res) => {
 
 const deleteQuiz = async (req, res) => {
   const { id } = req.params;
+  const { subjectId } = await quizModel.getQuizById({ id });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { error } = await common.awaitWrap(quizModel.deleteQuiz({ id }));
   if (error) {
     log.error('ERR_QUIZ_DELETE-QUIZ', {

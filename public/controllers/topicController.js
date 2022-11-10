@@ -1,18 +1,28 @@
 const topicModel = require('../models/topicModel');
+const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createTopic = async (req, res) => {
-  const { subjectOrder, name, subjectId } = req.body;
-
+  const { subjectOrder, title, subjectId } = req.body;
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     topicModel.createTopic({
       subjectOrder,
-      name,
+      title,
       subjectId
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
+  for (let u of data.subject.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_TOPIC_CREATE-TOPIC', {
       err: error.message,
@@ -33,6 +43,13 @@ const getAllTopicsBySubjectId = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     topicModel.getAllTopicsBySubjectId({ subjectId })
   );
+  for (let d of data) {
+    d.subject.createdBy.password = '';
+    d.subject.lastUpdatedBy.password = '';
+    for (let u of d.subject.usersAssigned) {
+      u.password = '';
+    }
+  }
   if (error) {
     log.error('ERR_TOPIC_GET-ALL-TOPICS', {
       err: error.message,
@@ -56,6 +73,11 @@ const getTopic = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(topic)
     });
+    topic.subject.createdBy.password = '';
+    topic.subject.lastUpdatedBy.password = '';
+    for (let u of topic.subject.usersAssigned) {
+      u.password = '';
+    }
     res.json(topic);
   } catch (error) {
     log.error('ERR_TOPIC_GET-TOPIC-BY-ID', {
@@ -67,16 +89,26 @@ const getTopic = async (req, res) => {
 };
 
 const updateTopic = async (req, res) => {
-  const { id, subjectOrder, name, status, subjectId } = req.body;
+  const { id, subjectOrder, title, status, subjectId } = req.body;
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     topicModel.updateTopic({
       id,
       subjectOrder,
-      name,
+      title,
       status,
       subjectId
     })
   );
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
+  for (let u of data.subject.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_TOPIC_UPDATE-TOPIC', {
       err: error.message,
@@ -95,12 +127,24 @@ const updateTopic = async (req, res) => {
 
 const addStepsToTopic = async (req, res) => {
   const { id, steps } = req.body;
+  const { subjectId } = await topicModel.getTopicById({ id });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     topicModel.addStepsToTopic({
       id,
       steps
     })
   );
+  console.log(data);
+  data.subject.createdBy.password = '';
+  data.subject.lastUpdatedBy.password = '';
+  for (let u of data.subject.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_TOPIC_ADD-STEPS-TO-TOPIC', {
       err: error.message,
@@ -119,6 +163,12 @@ const addStepsToTopic = async (req, res) => {
 
 const deleteTopic = async (req, res) => {
   const { id } = req.params;
+  const { subjectId } = await topicModel.getTopicById({ id });
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id: subjectId,
+    lastUpdatedById: currUserId
+  });
   const { error } = await common.awaitWrap(topicModel.deleteTopic({ id }));
   if (error) {
     log.error('ERR_TOPIC_DELETE-TOPIC', {

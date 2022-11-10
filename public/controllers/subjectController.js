@@ -6,11 +6,12 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createSubject = async (req, res) => {
-  const { description, isPublished, type } = req.body;
+  const { title, description, isPublished, type } = req.body;
   const currUserId = req.user.userId;
   console.log(currUserId);
   const { data, error } = await common.awaitWrap(
     subjectModel.createSubject({
+      title,
       description,
       isPublished,
       createdById: currUserId,
@@ -18,6 +19,11 @@ const createSubject = async (req, res) => {
       type
     })
   );
+  data.createdBy.password = '';
+  data.lastUpdatedBy.password = '';
+  for (let u of data.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_SUBJECT_CREATE-SUBJECT', {
       err: error.message,
@@ -37,6 +43,13 @@ const getAllSubjects = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     subjectModel.getAllSubjects({})
   );
+  for (let d of data) {
+    d.createdBy.password = '';
+    d.lastUpdatedBy.password = '';
+    for (let u of d.usersAssigned) {
+      u.password = '';
+    }
+  }
   if (error) {
     log.error('ERR_SUBJECT_GET-ALL-SUBJECTS', {
       err: error.message,
@@ -60,6 +73,11 @@ const getSubject = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(subject)
     });
+    subject.createdBy.password = '';
+    subject.lastUpdatedBy.password = '';
+    for (let u of subject.usersAssigned) {
+      u.password = '';
+    }
     res.json(subject);
   } catch (error) {
     log.error('ERR_SUBJECT_GET-SUBJECT-BY-ID', {
@@ -71,30 +89,25 @@ const getSubject = async (req, res) => {
 };
 
 const updateSubject = async (req, res) => {
-  const {
-    id,
-    description,
-    isPublished,
-    completionRate,
-    type,
-    quizzes,
-    topics,
-    usersAssigned
-  } = req.body;
+  const { id, title, description, isPublished, completionRate, type } =
+    req.body;
   const currUserId = req.user.userId;
   const { data, error } = await common.awaitWrap(
     subjectModel.updateSubject({
       id,
+      title,
       description,
       isPublished,
       completionRate,
       lastUpdatedById: currUserId,
-      type,
-      quizzes,
-      topics,
-      usersAssigned
+      type
     })
   );
+  data.createdBy.password = '';
+  data.lastUpdatedBy.password = '';
+  for (u of data.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_SUBJECT_UPDATE-SUBJECT', {
       err: error.message,
@@ -132,12 +145,22 @@ const deleteSubject = async (req, res) => {
 
 const assignUsersToSubject = async (req, res) => {
   const { id, users } = req.body;
+  const currUserId = req.user.userId;
+  await subjectModel.updateSubject({
+    id,
+    lastUpdatedById: currUserId
+  });
   const { data, error } = await common.awaitWrap(
     subjectModel.assignUsersToSubject({
       id,
       users
     })
   );
+  data.createdBy.password = '';
+  data.lastUpdatedBy.password = '';
+  for (let u of data.usersAssigned) {
+    u.password = '';
+  }
   if (error) {
     log.error('ERR_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
       err: error.message,
@@ -169,6 +192,13 @@ const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
   topicData.sort((a, b) => {
     return a.subjectOrder - b.subjectOrder;
   });
+  for (let t of topicData) {
+    t.subject.createdBy.password = '';
+    t.subject.lastUpdatedBy.password = '';
+    for (let u of t.subject.usersAssigned) {
+      u.password = '';
+    }
+  }
   const { data: quizData, error: quizError } = await common.awaitWrap(
     quizModel.getAllQuizzesBySubjectId({
       subjectId: id

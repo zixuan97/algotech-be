@@ -5,7 +5,7 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createSupplier = async (req, res) => {
-  const { email, name, address, supplierProduct } = req.body;
+  const { email, name, address, currency, supplierProduct } = req.body;
   const supplier = await supplierModel.findSupplierByEmail({ email });
   if (supplier) {
     log.error('ERR_PRODUCT_CREATE-SUPPLIER', {
@@ -18,7 +18,8 @@ const createSupplier = async (req, res) => {
       supplierModel.createSupplier({
         email,
         name,
-        address
+        address,
+        currency
       })
     );
     if (error) {
@@ -143,13 +144,14 @@ const getSupplierByName = async (req, res) => {
 };
 
 const updateSupplier = async (req, res) => {
-  const { id, email, name, address, supplierProduct } = req.body;
+  const { id, email, name, address, currency, supplierProduct } = req.body;
   const { data, error } = await common.awaitWrap(
     supplierModel.updateSupplier({
       id,
       email,
       name,
       address,
+      currency,
       supplierProduct
     })
   );

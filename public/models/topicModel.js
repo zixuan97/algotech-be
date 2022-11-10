@@ -2,16 +2,35 @@ const { ContentStatus } = require('@prisma/client');
 const { prisma } = require('./index.js');
 
 const createTopic = async (req) => {
-  const { subjectOrder, name, subjectId } = req;
+  const { subjectOrder, title, subjectId } = req;
   const topic = await prisma.topic.create({
     data: {
       subjectOrder,
-      name,
+      title,
       status: ContentStatus.DRAFT,
       subjectId
     },
     include: {
       subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          createdBy: true,
+          lastUpdatedBy: true,
+          usersAssigned: true
+        }
+      },
       steps: true,
       steps: {
         include: {
@@ -29,6 +48,25 @@ const getAllTopicsBySubjectId = async (req) => {
     where: { subjectId: Number(subjectId) },
     include: {
       subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          createdBy: true,
+          lastUpdatedBy: true,
+          usersAssigned: true
+        }
+      },
       steps: true
     }
   });
@@ -44,6 +82,25 @@ const getTopicById = async (req) => {
     where: { id: Number(id) },
     include: {
       subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          createdBy: true,
+          lastUpdatedBy: true,
+          usersAssigned: true
+        }
+      },
       steps: true
     }
   });
@@ -51,17 +108,36 @@ const getTopicById = async (req) => {
 };
 
 const updateTopic = async (req) => {
-  const { id, subjectOrder, name, status, subjectId } = req;
+  const { id, subjectOrder, title, status, subjectId } = req;
   const topic = await prisma.topic.update({
     where: { id },
     data: {
       subjectOrder,
-      name,
+      title,
       status,
       subjectId
     },
     include: {
       subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          createdBy: true,
+          lastUpdatedBy: true,
+          usersAssigned: true
+        }
+      },
       steps: true
     }
   });
@@ -83,6 +159,25 @@ const addStepsToTopic = async (req) => {
     },
     include: {
       subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          },
+          createdBy: true,
+          lastUpdatedBy: true,
+          usersAssigned: true
+        }
+      },
       steps: true
     }
   });

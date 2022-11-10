@@ -10,7 +10,18 @@ const createStep = async (req) => {
       topicId
     },
     include: {
-      topic: true
+      topic: true,
+      topic: {
+        include: {
+          subject: true,
+          subject: {
+            include: {
+              createdBy: true,
+              lastUpdatedBy: true
+            }
+          }
+        }
+      }
     }
   });
   return step;
@@ -24,7 +35,13 @@ const getAllStepsByTopicId = async (req) => {
       topic: true,
       topic: {
         include: {
-          subject: true
+          subject: true,
+          subject: {
+            include: {
+              createdBy: true,
+              lastUpdatedBy: true
+            }
+          }
         }
       }
     }
@@ -40,7 +57,18 @@ const getStepById = async (req) => {
   const step = await prisma.step.findUnique({
     where: { id: Number(id) },
     include: {
-      topic: true
+      topic: true,
+      topic: {
+        include: {
+          subject: true,
+          subject: {
+            include: {
+              createdBy: true,
+              lastUpdatedBy: true
+            }
+          }
+        }
+      }
     }
   });
   return step;
@@ -57,7 +85,18 @@ const updateStep = async (req) => {
       topicId
     },
     include: {
-      topic: true
+      topic: true,
+      topic: {
+        include: {
+          subject: true,
+          subject: {
+            include: {
+              createdBy: true,
+              lastUpdatedBy: true
+            }
+          }
+        }
+      }
     }
   });
   return step;

@@ -7,7 +7,7 @@ router.get('/all', subjectController.getAllSubjects);
 router.get('/:id', subjectController.getSubject);
 router.put('/', verifyToken, subjectController.updateSubject);
 router.delete('/:id', subjectController.deleteSubject);
-router.post('/users', subjectController.assignUsersToSubject);
+router.post('/users', verifyToken, subjectController.assignUsersToSubject);
 router.post(
   '/topicquiz/:id',
   subjectController.getAllTopicsAndQuizzesBySubjectId

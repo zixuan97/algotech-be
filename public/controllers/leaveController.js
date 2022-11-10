@@ -26,6 +26,7 @@ const createLeaveApplication = async (req, res) => {
         employeeId
       })
     );
+    data.employee.password = '';
     if (error) {
       log.error('ERR_LEAVE_CREATE-LEAVE', {
         err: error.message,
@@ -249,38 +250,6 @@ const updateEmployeeLeaveQuota = async (req, res) => {
       unpaidQuota
     })
   );
-  // const leaveRecord = await leaveModel.getLeaveRecordByEmployeeId({
-  //   employeeId
-  // });
-  // const medicalQuotaIncrement = medicalQuota - leaveRecord.medicalQuota;
-  // const parentalQuotaIncrement = parentalQuota - leaveRecord.parentalQuota;
-  // const paidQuotaIncrement = paidQuota - leaveRecord.paidQuota;
-  // const unpaidQuotaIncrement = unpaidQuota - leaveRecord.unpaidQuota;
-  // const { data, error } = await common.awaitWrap(
-  //   leaveModel.updateLeaveRecordByEmployeeId({
-  //     employeeId,
-  //     medicalQuota,
-  //     parentalQuota,
-  //     paidQuota,
-  //     unpaidQuota,
-  //     medicalBalance:
-  //       medicalQuota < leaveRecord.medicalBalance
-  //         ? medicalQuota
-  //         : { increment: medicalQuotaIncrement },
-  //     parentalBalance:
-  //       parentalQuota < leaveRecord.parentalBalance
-  //         ? parentalQuota
-  //         : { increment: parentalQuotaIncrement },
-  //     paidBalance:
-  //       paidQuota < leaveRecord.paidBalance
-  //         ? paidQuota
-  //         : { increment: paidQuotaIncrement },
-  //     unpaidBalance:
-  //       unpaidQuota < leaveRecord.unpaidBalance
-  //         ? unpaidQuota
-  //         : { increment: unpaidQuotaIncrement }
-  //   })
-  // );
   if (error) {
     log.error('ERR_LEAVE_UPDATE-EMPLOYEE-LEAVE-RECORD', {
       err: error.message,
@@ -302,6 +271,10 @@ const getAllLeaveApplicationsByEmployeeId = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     leaveModel.getAllLeaveApplicationsByEmployeeId({ employeeId })
   );
+  for (let d of data) {
+    d.employee.password = '';
+    if (d.vettedBy !== null) d.vettedBy.password = '';
+  }
   if (error) {
     log.error('ERR_LEAVE_GET-ALL-LEAVES-BY-EMPLOYEE', {
       err: error.message,
@@ -321,6 +294,10 @@ const getAllLeaveApplications = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     leaveModel.getAllLeaveApplications({})
   );
+  for (let d of data) {
+    d.employee.password = '';
+    if (d.vettedBy !== null) d.vettedBy.password = '';
+  }
   if (error) {
     log.error('ERR_LEAVE_GET-ALL-LEAVES', {
       err: error.message,
@@ -340,6 +317,10 @@ const getAllApprovedLeaveApplications = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     leaveModel.getAllApprovedLeaveApplications({})
   );
+  for (let d of data) {
+    d.employee.password = '';
+    if (d.vettedBy !== null) d.vettedBy.password = '';
+  }
   if (error) {
     log.error('ERR_LEAVE_GET-ALL-APPROVED-LEAVES', {
       err: error.message,
@@ -359,6 +340,10 @@ const getAllPendingLeaveApplications = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     leaveModel.getAllPendingLeaveApplications({})
   );
+  for (let d of data) {
+    d.employee.password = '';
+    if (d.vettedBy !== null) d.vettedBy.password = '';
+  }
   if (error) {
     log.error('ERR_LEAVE_GET-ALL-PENDING-LEAVES', {
       err: error.message,
@@ -397,6 +382,8 @@ const getLeaveApplication = async (req, res) => {
   try {
     const { id } = req.params;
     const leave = await leaveModel.getLeaveApplicationById({ id });
+    leave.employee.password = '';
+    leave.vettedBy.password = '';
     log.out('OK_LEAVE_GET-LEAVE-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(leave)
@@ -423,6 +410,8 @@ const updateLeaveApplication = async (req, res) => {
       description
     })
   );
+  data.employee.password = '';
+  if (data.vettedBy !== null) data.vettedBy.password = '';
   if (error) {
     log.error('ERR_LEAVE_UPDATE-LEAVE', {
       err: error.message,
@@ -449,6 +438,8 @@ const vetLeaveApplication = async (req, res) => {
       commentsByVetter
     })
   );
+  data.employee.password = '';
+  data.vettedBy.password = '';
   const { employeeId } = await leaveModel.getLeaveApplicationById({ id });
   if (currUserId === employeeId) {
     log.out('ERR_LEAVE_VET-LEAVE', {
@@ -675,6 +666,32 @@ const updateTierByEmployeeId = async (req, res) => {
   }
 };
 
+const updateEmployeesToNewTierForDeletedTier = async (req, res) => {
+  const { deletedTier, newTier } = req.body;
+  const { data, error } = await common.awaitWrap(
+    leaveModel.updateEmployeesToNewTierForDeletedTier({
+      deletedTier,
+      newTier
+    })
+  );
+  if (error) {
+    log.error('ERR_LEAVE_UPDATE-EMPLOYEES-TO-NEW-TIER-FROM-DELETED-TIER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_UPDATE-EMPLOYEES-TO-NEW-TIER-FROM-DELETED-TIER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.status(200).json({
+      message: `All employees in ${deletedTier} have successfully been updated from ${deletedTier} to ${newTier}`
+    });
+  }
+};
+
 exports.createLeaveApplication = createLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
 exports.getLeaveQuota = getLeaveQuota;
@@ -698,3 +715,5 @@ exports.approveLeaveApplication = approveLeaveApplication;
 exports.cancelLeaveApplication = cancelLeaveApplication;
 exports.rejectLeaveApplication = rejectLeaveApplication;
 exports.updateTierByEmployeeId = updateTierByEmployeeId;
+exports.updateEmployeesToNewTierForDeletedTier =
+  updateEmployeesToNewTierForDeletedTier;

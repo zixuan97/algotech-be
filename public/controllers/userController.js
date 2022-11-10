@@ -656,14 +656,33 @@ const createJobRole = async (req, res) => {
   }
 };
 
-const addJobRolesToUser = async (req, res) => {
-  const { id, jobRoles } = req.body;
+const editJobRole = async (req, res) => {
+  const { id, jobRole } = req.body;
   try {
-    const data = await userModel.addJobRolesToUser({ id, jobRoles });
+    const data = await userModel.editJobRole({ id, jobRole });
+    log.out('OK_USER_EDIT-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  } catch (error) {
+    log.error('ERR_USER_EDIT-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error editing job role');
+  }
+};
+
+const addJobRolesToUser = async (req, res) => {
+  const { userId, jobRoles } = req.body;
+  try {
+    const data = await userModel.addJobRolesToUser({ userId, jobRoles });
     log.out('OK_USER_ADD-JOB-ROLES-TO-USER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
+    data.password = '';
     res.json(data);
   } catch (error) {
     log.error('ERR_USER_ADD-JOB-ROLES-TO-USER', {
@@ -696,4 +715,5 @@ exports.getAllNonB2BUsers = getAllNonB2BUsers;
 exports.getNumberOfPendingUsers = getNumberOfPendingUsers;
 exports.getAllEmployees = getAllEmployees;
 exports.createJobRole = createJobRole;
+exports.editJobRole = editJobRole;
 exports.addJobRolesToUser = addJobRolesToUser;
