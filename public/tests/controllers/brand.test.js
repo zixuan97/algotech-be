@@ -1,9 +1,9 @@
-const app = require('../../index');
+const app = require('../../../index');
 const supertest = require('supertest');
-const brandModel = require('../models/brandModel');
+const brandModel = require('../../models/brandModel');
 
 // mock logger to remove test logs
-jest.mock('../helpers/logger', () => {
+jest.mock('../../helpers/logger', () => {
   return {
     log: {
       out: jest.fn(),
@@ -13,7 +13,7 @@ jest.mock('../helpers/logger', () => {
   };
 });
 
-jest.mock('../models/brandModel', () => {
+jest.mock('../../models/brandModel', () => {
   return {
     createBrand: jest.fn().mockImplementation(async () => {}),
     findBrandById: jest.fn().mockImplementation(async () => {}),
@@ -24,7 +24,7 @@ jest.mock('../models/brandModel', () => {
   };
 });
 
-jest.mock('../models/productModel', () => {
+jest.mock('../../models/productModel', () => {
   return {
     deleteProduct: jest.fn().mockImplementation(async () => {}),
     getAllProductsByBrand: jest.fn().mockImplementation(async () => [])

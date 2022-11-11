@@ -94,7 +94,6 @@ const createBulkOrder = async (req, res) => {
           amount,
           orderId
         });
-        await sendBulkOrderEmail({ orderId });
         log.out('OK_BULKORDER_CREATE-CREDITCARD-PAYMENT-LINK', {
           req: { body: req.body, params: req.params },
           res: { paymentUrl: sessionURL, bulkOrder: JSON.stringify(data) }
@@ -447,3 +446,4 @@ exports.updateBulkOrderStatus = updateBulkOrderStatus;
 exports.massUpdateSalesOrderStatus = massUpdateSalesOrderStatus;
 exports.generateExcel = generateExcel;
 exports.generateBulkOrderSummaryPDF = generateBulkOrderSummaryPDF;
+exports.sendBulkOrderEmail = sendBulkOrderEmail;
