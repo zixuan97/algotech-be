@@ -21,7 +21,7 @@ const createTopic = async (req, res) => {
   data.subject.createdBy.password = '';
   data.subject.lastUpdatedBy.password = '';
   for (let u of data.subject.usersAssigned) {
-    u.password = '';
+    u.user.password = '';
   }
   if (error) {
     log.error('ERR_TOPIC_CREATE-TOPIC', {
@@ -47,7 +47,7 @@ const getAllTopicsBySubjectId = async (req, res) => {
     d.subject.createdBy.password = '';
     d.subject.lastUpdatedBy.password = '';
     for (let u of d.subject.usersAssigned) {
-      u.password = '';
+      u.user.password = '';
     }
   }
   if (error) {
@@ -76,7 +76,7 @@ const getTopic = async (req, res) => {
     topic.subject.createdBy.password = '';
     topic.subject.lastUpdatedBy.password = '';
     for (let u of topic.subject.usersAssigned) {
-      u.password = '';
+      u.user.password = '';
     }
     res.json(topic);
   } catch (error) {
@@ -107,7 +107,7 @@ const updateTopic = async (req, res) => {
   data.subject.createdBy.password = '';
   data.subject.lastUpdatedBy.password = '';
   for (let u of data.subject.usersAssigned) {
-    u.password = '';
+    u.user.password = '';
   }
   if (error) {
     log.error('ERR_TOPIC_UPDATE-TOPIC', {
@@ -143,7 +143,7 @@ const addStepsToTopic = async (req, res) => {
   data.subject.createdBy.password = '';
   data.subject.lastUpdatedBy.password = '';
   for (let u of data.subject.usersAssigned) {
-    u.password = '';
+    u.user.password = '';
   }
   if (error) {
     log.error('ERR_TOPIC_ADD-STEPS-TO-TOPIC', {

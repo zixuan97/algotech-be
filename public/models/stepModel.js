@@ -17,7 +17,13 @@ const createStep = async (req) => {
           subject: {
             include: {
               createdBy: true,
-              lastUpdatedBy: true
+              lastUpdatedBy: true,
+              usersAssigned: true,
+              usersAssigned: {
+                include: {
+                  user: true
+                }
+              }
             }
           }
         }
@@ -39,7 +45,13 @@ const getAllStepsByTopicId = async (req) => {
           subject: {
             include: {
               createdBy: true,
-              lastUpdatedBy: true
+              lastUpdatedBy: true,
+              usersAssigned: true,
+              usersAssigned: {
+                include: {
+                  user: true
+                }
+              }
             }
           }
         }
@@ -64,7 +76,13 @@ const getStepById = async (req) => {
           subject: {
             include: {
               createdBy: true,
-              lastUpdatedBy: true
+              lastUpdatedBy: true,
+              usersAssigned: true,
+              usersAssigned: {
+                include: {
+                  user: true
+                }
+              }
             }
           }
         }
@@ -92,7 +110,13 @@ const updateStep = async (req) => {
           subject: {
             include: {
               createdBy: true,
-              lastUpdatedBy: true
+              lastUpdatedBy: true,
+              usersAssigned: true,
+              usersAssigned: {
+                include: {
+                  user: true
+                }
+              }
             }
           }
         }

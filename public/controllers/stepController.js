@@ -23,6 +23,9 @@ const createStep = async (req, res) => {
   );
   data.topic.subject.createdBy.password = '';
   data.topic.subject.lastUpdatedBy.password = '';
+  for (let u of data.topic.subject.usersAssigned) {
+    u.user.password = '';
+  }
   if (error) {
     log.error('ERR_STEP_CREATE-STEP', {
       err: error.message,
@@ -46,6 +49,9 @@ const getAllStepsByTopicId = async (req, res) => {
   for (let d of data) {
     d.topic.subject.createdBy.password = '';
     d.topic.subject.lastUpdatedBy.password = '';
+    for (let u of d.topic.subject.usersAssigned) {
+      u.user.password = '';
+    }
   }
   if (error) {
     log.error('ERR_STEP_GET-ALL-STEPS', {
@@ -72,6 +78,9 @@ const getStep = async (req, res) => {
     });
     step.topic.subject.createdBy.password = '';
     step.topic.subject.lastUpdatedBy.password = '';
+    for (let u of step.topic.subject.usersAssigned) {
+      u.user.password = '';
+    }
     res.json(step);
   } catch (error) {
     log.error('ERR_STEP_GET-STEP-BY-ID', {
@@ -101,6 +110,9 @@ const updateStep = async (req, res) => {
   );
   data.topic.subject.createdBy.password = '';
   data.topic.subject.lastUpdatedBy.password = '';
+  for (let u of data.topic.subject.usersAssigned) {
+    u.user.password = '';
+  }
   if (error) {
     log.error('ERR_STEP_UPDATE-STEP', {
       err: error.message,
