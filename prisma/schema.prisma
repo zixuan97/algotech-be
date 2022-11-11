@@ -28,7 +28,7 @@ model User {
   createdSubjects     Subject[]            @relation("createdBy")
   lastUpdatedSubjects Subject[]            @relation("lastUpdatedBy")
   jobRoles            JobRole[]
-  assignedSubjects    Subject[]
+  assignedSubjects    EmployeeSubjectRecord[]
   subordinates        User[]               @relation("managedBy")
 }
 
@@ -372,6 +372,15 @@ model Topic {
   steps        Step[]
 }
 
+model EmployeeSubjectRecord {
+  subjectId       Int
+  userId          Int
+  completionRate  Float
+  subject         Subject     @relation(fields: [subjectId], references: [id])
+  usersAssigned   User        @relation(fields: [userId], references: [id])
+  @@id([subjectId, userId])
+}
+
 model Subject {
   id              Int         @id @default(autoincrement())
   description     String
@@ -387,7 +396,7 @@ model Subject {
   lastUpdatedBy   User        @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
   quizzes         Quiz[]
   topics          Topic[]
-  usersAssigned   User[]
+  usersAssigned   EmployeeSubjectRecord[]
 }
 
 model Quiz {

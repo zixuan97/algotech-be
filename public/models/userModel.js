@@ -71,6 +71,7 @@ const getEmployees = async () => {
       }
     },
     include: {
+      manager: true,
       jobRoles: true,
       subordinates: true
     }
