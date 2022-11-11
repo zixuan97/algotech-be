@@ -11,6 +11,7 @@ const { format } = require('date-fns');
 const { uuid } = require('uuidv4');
 const sns = require('../helpers/sns');
 const { generateBulkOrderPDF } = require('../helpers/pdf');
+const emailHelper = require('../helpers/email');
 
 const createBulkOrder = async (req, res) => {
   const {
@@ -93,6 +94,7 @@ const createBulkOrder = async (req, res) => {
           amount,
           orderId
         });
+        await sendBulkOrderEmail({ orderId });
         log.out('OK_BULKORDER_CREATE-CREDITCARD-PAYMENT-LINK', {
           req: { body: req.body, params: req.params },
           res: { paymentUrl: sessionURL, bulkOrder: JSON.stringify(data) }
@@ -404,6 +406,34 @@ const generateBulkOrderSummaryPDF = async (req, res) => {
       });
       return res.status(error).json(error.message);
     });
+};
+
+const sendBulkOrderEmail = async (req) => {
+  try {
+    const { orderId } = req;
+    console.log('here + ********');
+    const bulkOrder = await bulkOrderModel.findBulkOrderByOrderId({ orderId });
+    const createdDate = format(bulkOrder.createdTime, 'dd MMM yyyy');
+    await generateBulkOrderPDF({
+      bulkOrder,
+      createdDate
+    }).then(async (pdfBuffer) => {
+      const subject = `Order Summary ${createdDate}`;
+      const content =
+        'Thank you for ordering with The Kettle Gourmet. Please view attached order summary.';
+      const recipientEmail = bulkOrder.payeeEmail;
+      await emailHelper.sendEmailWithAttachment({
+        recipientEmail,
+        subject,
+        content,
+        data: pdfBuffer.toString('base64'),
+        filename: 'ordersummary.pdf'
+      });
+      console.log('EMAIL SENT');
+    });
+  } catch (error) {
+    log.error('ERR_BULKORDER_SEND-BULKORDER-EMAIL', error.message);
+  }
 };
 
 exports.createBulkOrder = createBulkOrder;
