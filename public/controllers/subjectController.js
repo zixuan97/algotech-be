@@ -156,11 +156,11 @@ const assignUsersToSubject = async (req, res) => {
       users
     })
   );
-  data.createdBy.password = '';
-  data.lastUpdatedBy.password = '';
-  for (let u of data.usersAssigned) {
-    u.password = '';
-  }
+  // data.createdBy.password = '';
+  // data.lastUpdatedBy.password = '';
+  // for (let u of data.usersAssigned) {
+  //   u.password = '';
+  // }
   if (error) {
     log.error('ERR_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
       err: error.message,
