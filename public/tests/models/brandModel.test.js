@@ -1,7 +1,7 @@
-const brandModel = require('../models/brandModel');
+const brandModel = require('../../models/brandModel');
 
 // mock logger to remove test logs
-jest.mock('../helpers/logger', () => {
+jest.mock('../../helpers/logger', () => {
   return {
     log: {
       out: jest.fn(),
@@ -11,7 +11,7 @@ jest.mock('../helpers/logger', () => {
   };
 });
 
-jest.mock('../models/index', () => {
+jest.mock('../../models/index', () => {
   return {
     prisma: {
       brand: {

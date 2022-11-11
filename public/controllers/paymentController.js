@@ -1,7 +1,7 @@
 const paymentModel = require('../models/paymentModel');
 const bulkOrderModel = require('../models/bulkOrderModel');
 const salesOrderModel = require('../models/salesOrderModel');
-const common = require('@kelchy/common');
+const { sendBulkOrderEmail } = require('./bulkOrderController');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 // const stripe = require('stripe')(process.env.STRIPE_API_KEY); //live
@@ -65,6 +65,8 @@ const stripeWebhook = async (req, res) => {
         );
 
         log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');
+
+        await sendBulkOrderEmail({ orderId });
       }
 
       if (session.payment_link) {
@@ -83,6 +85,8 @@ const stripeWebhook = async (req, res) => {
           orderId,
           bulkOrderStatus: 'PAYMENT_FAILED'
         });
+
+        await sendBulkOrderEmail({ orderId });
         log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');
       }
       if (session.payment_link) {

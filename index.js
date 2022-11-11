@@ -91,6 +91,7 @@ app.use('/discountCode', require('./public/routes/discountCodeRoutes'));
 app.use('/productCatalogue', require('./public/routes/productCatalogueRoutes'));
 app.use('/bundleCatalogue', require('./public/routes/bundleCatalogueRoutes'));
 app.use('/bulkOrder', require('./public/routes/bulkOrderRoutes'));
+app.use('/payment', require('./public/routes/paymentRoutes'));
 
 //internal algotech-fe-hrm
 app.use('/step', require('./public/routes/stepRoutes'));
