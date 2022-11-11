@@ -1,9 +1,9 @@
-const app = require('../../index');
+const app = require('../../../index');
 const supertest = require('supertest');
-const bulkOrderModel = require('../models/bulkOrderModel');
+const bulkOrderModel = require('../../models/bulkOrderModel');
 
 // mock logger to remove test logs
-jest.mock('../helpers/logger', () => {
+jest.mock('../../helpers/logger', () => {
   return {
     log: {
       out: jest.fn(),
@@ -13,7 +13,7 @@ jest.mock('../helpers/logger', () => {
   };
 });
 
-jest.mock('../models/bulkOrderModel', () => {
+jest.mock('../../models/bulkOrderModel', () => {
   return {
     createBulkOrder: jest.fn().mockImplementation(async () => {}),
     getAllBulkOrders: jest.fn().mockImplementation(async () => []),
@@ -36,13 +36,13 @@ jest.mock('../models/bulkOrderModel', () => {
   };
 });
 
-jest.mock('../models/customerModel', () => {
+jest.mock('../../models/customerModel', () => {
   return {
     connectOrCreateCustomer: jest.fn().mockImplementation(async () => {})
   };
 });
 
-jest.mock('../helpers/excel', () => {
+jest.mock('../../helpers/excel', () => {
   return {
     generateBulkOrderExcel: jest.fn().mockImplementation(async () => {
       return {};
@@ -50,7 +50,7 @@ jest.mock('../helpers/excel', () => {
   };
 });
 
-jest.mock('../models/paymentModel', () => {
+jest.mock('../../models/paymentModel', () => {
   return {
     payByStripeCreditCard: jest.fn().mockImplementation(async () => {}),
     payByStripePaynow: jest.fn().mockImplementation(async () => {})

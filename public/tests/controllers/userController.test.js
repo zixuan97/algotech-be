@@ -1,9 +1,9 @@
-const app = require('../../index');
+const app = require('../../../index');
 const supertest = require('supertest');
-const userModel = require('../models/userModel');
+const userModel = require('../../models/userModel');
 
 // mock logger to remove test logs
-jest.mock('../helpers/logger', () => {
+jest.mock('../../helpers/logger', () => {
   return {
     log: {
       out: jest.fn(),
@@ -13,7 +13,7 @@ jest.mock('../helpers/logger', () => {
   };
 });
 
-jest.mock('../models/userModel', () => {
+jest.mock('../../models/userModel', () => {
   return {
     createUser: jest.fn().mockImplementation(async () => {}),
     getUsers: jest.fn().mockImplementation(async () => {}),
@@ -37,7 +37,7 @@ jest.mock('../models/userModel', () => {
   };
 });
 
-jest.mock('../helpers/email', () => {
+jest.mock('../../helpers/email', () => {
   return {
     sendEmail: jest.fn().mockImplementation(async () => {})
   };

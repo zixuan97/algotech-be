@@ -1,8 +1,8 @@
-const app = require('../../index');
+const app = require('../../../index');
 const supertest = require('supertest');
 
 // mock logger to remove test logs
-jest.mock('../helpers/logger', () => {
+jest.mock('../../helpers/logger', () => {
   return {
     log: {
       out: jest.fn(),
@@ -12,7 +12,7 @@ jest.mock('../helpers/logger', () => {
   };
 });
 
-jest.mock('../models/productCatalogueModel', () => {
+jest.mock('../../models/productCatalogueModel', () => {
   return {
     createProdCatalogue: jest.fn().mockImplementation(async () => {}),
     getAllProdCatalogue: jest.fn().mockImplementation(async () => {}),

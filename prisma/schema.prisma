@@ -8,28 +8,28 @@ datasource db {
 }
 
 model User {
-  id                  Int                  @id @default(autoincrement())
+  id                  Int                     @id @default(autoincrement())
   firstName           String
   lastName            String
-  email               String               @unique
+  email               String                  @unique
   password            String
-  role                UserRole             @default(ADMIN)
-  status              UserStatus           @default(ACTIVE)
-  isVerified          Boolean              @default(false)
+  role                UserRole                @default(ADMIN)
+  status              UserStatus              @default(ACTIVE)
+  isVerified          Boolean                 @default(false)
   company             String?
   contactNo           String?
   tier                String?
   managerId           Int?
-  manager             User?                @relation("managedBy", fields: [managerId], references: [id])
+  manager             User?                   @relation("managedBy", fields: [managerId], references: [id])
   deliveryOrders      DeliveryOrder[]
   leaveRecord         EmployeeLeaveRecord?
-  leaveApplications   LeaveApplication[]   @relation("appliedBy")
-  vettedLeaves        LeaveApplication[]   @relation("vettedBy")
-  createdSubjects     Subject[]            @relation("createdBy")
-  lastUpdatedSubjects Subject[]            @relation("lastUpdatedBy")
-  jobRoles            JobRole[]
   assignedSubjects    EmployeeSubjectRecord[]
-  subordinates        User[]               @relation("managedBy")
+  leaveApplications   LeaveApplication[]      @relation("appliedBy")
+  vettedLeaves        LeaveApplication[]      @relation("vettedBy")
+  createdSubjects     Subject[]               @relation("createdBy")
+  lastUpdatedSubjects Subject[]               @relation("lastUpdatedBy")
+  subordinates        User[]                  @relation("managedBy")
+  jobRoles            JobRole[]
 }
 
 model Category {
@@ -373,30 +373,31 @@ model Topic {
 }
 
 model EmployeeSubjectRecord {
-  subjectId       Int
-  userId          Int
-  completionRate  Float
-  subject         Subject     @relation(fields: [subjectId], references: [id])
-  usersAssigned   User        @relation(fields: [userId], references: [id])
+  subjectId      Int
+  userId         Int
+  completionRate Float
+  subject        Subject @relation(fields: [subjectId], references: [id])
+  usersAssigned  User    @relation(fields: [userId], references: [id])
+
   @@id([subjectId, userId])
 }
 
 model Subject {
-  id              Int         @id @default(autoincrement())
+  id              Int                     @id @default(autoincrement())
   description     String
   isPublished     Boolean
-  completionRate  Float       @default(0)
+  completionRate  Float                   @default(0)
   type            SubjectType
   createdAt       DateTime
   createdById     Int
   lastUpdatedAt   DateTime
   lastUpdatedById Int
   title           String
-  createdBy       User        @relation("createdBy", fields: [createdById], references: [id])
-  lastUpdatedBy   User        @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
+  createdBy       User                    @relation("createdBy", fields: [createdById], references: [id])
+  lastUpdatedBy   User                    @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
+  usersAssigned   EmployeeSubjectRecord[]
   quizzes         Quiz[]
   topics          Topic[]
-  usersAssigned   EmployeeSubjectRecord[]
 }
 
 model Quiz {
