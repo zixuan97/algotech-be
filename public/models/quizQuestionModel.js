@@ -30,7 +30,13 @@ const createQuizQuestion = async (req) => {
           subject: {
             include: {
               createdBy: true,
-              lastUpdatedBy: true
+              lastUpdatedBy: true,
+              usersAssigned: true,
+              usersAssigned: {
+                include: {
+                  user: true
+                }
+              }
             }
           }
         }
@@ -52,7 +58,13 @@ const getAllQuizQuestionsByQuizId = async (req) => {
           subject: {
             include: {
               createdBy: true,
-              lastUpdatedBy: true
+              lastUpdatedBy: true,
+              usersAssigned: true,
+              usersAssigned: {
+                include: {
+                  user: true
+                }
+              }
             }
           }
         }
@@ -77,7 +89,13 @@ const getQuizQuestionById = async (req) => {
           subject: {
             include: {
               createdBy: true,
-              lastUpdatedBy: true
+              lastUpdatedBy: true,
+              usersAssigned: true,
+              usersAssigned: {
+                include: {
+                  user: true
+                }
+              }
             }
           }
         }
@@ -119,7 +137,13 @@ const updateQuizQuestion = async (req) => {
           subject: {
             include: {
               createdBy: true,
-              lastUpdatedBy: true
+              lastUpdatedBy: true,
+              usersAssigned: true,
+              usersAssigned: {
+                include: {
+                  user: true
+                }
+              }
             }
           }
         }

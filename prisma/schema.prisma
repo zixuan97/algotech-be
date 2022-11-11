@@ -377,7 +377,7 @@ model EmployeeSubjectRecord {
   userId          Int
   completionRate  Float
   subject         Subject     @relation(fields: [subjectId], references: [id])
-  usersAssigned   User        @relation(fields: [userId], references: [id])
+  user            User        @relation(fields: [userId], references: [id])
   @@id([subjectId, userId])
 }
 

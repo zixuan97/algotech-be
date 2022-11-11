@@ -31,7 +31,7 @@ const createQuiz = async (req, res) => {
   data.subject.createdBy.password = '';
   data.subject.lastUpdatedBy.password = '';
   for (let u of data.subject.usersAssigned) {
-    u.password = '';
+    u.user.password = '';
   }
   if (error) {
     log.error('ERR_QUIZ_CREATE-QUIZ', {
@@ -57,7 +57,7 @@ const getAllQuizzesBySubjectId = async (req, res) => {
     d.subject.createdBy.password = '';
     d.subject.lastUpdatedBy.password = '';
     for (let u of d.subject.usersAssigned) {
-      u.password = '';
+      u.user.password = '';
     }
   }
   if (error) {
@@ -82,7 +82,7 @@ const getQuiz = async (req, res) => {
     quiz.subject.createdBy.password = '';
     quiz.subject.lastUpdatedBy.password = '';
     for (let u of quiz.subject.usersAssigned) {
-      u.password = '';
+      u.user.password = '';
     }
     log.out('OK_QUIZ_GET-QUIZ-BY-ID', {
       req: { body: req.body, params: req.params },
@@ -129,7 +129,7 @@ const updateQuiz = async (req, res) => {
   data.subject.createdBy.password = '';
   data.subject.lastUpdatedBy.password = '';
   for (let u of data.subject.usersAssigned) {
-    u.password = '';
+    u.user.password = '';
   }
   if (error) {
     log.error('ERR_QUIZ_UPDATE-QUIZ', {
@@ -164,7 +164,7 @@ const addQuizQuestionsToQuiz = async (req, res) => {
   data.subject.createdBy.password = '';
   data.subject.lastUpdatedBy.password = '';
   for (let u of data.subject.usersAssigned) {
-    u.password = '';
+    u.user.password = '';
   }
   if (error) {
     log.error('ERR_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {

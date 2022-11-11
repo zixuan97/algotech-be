@@ -1,6 +1,7 @@
 const subjectModel = require('../models/subjectModel');
 const topicModel = require('../models/topicModel');
 const quizModel = require('../models/quizModel');
+const userModel = require('../models/userModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -47,7 +48,7 @@ const getAllSubjects = async (req, res) => {
     d.createdBy.password = '';
     d.lastUpdatedBy.password = '';
     for (let u of d.usersAssigned) {
-      u.password = '';
+      u.user.password = '';
     }
   }
   if (error) {
@@ -75,8 +76,8 @@ const getSubject = async (req, res) => {
     });
     subject.createdBy.password = '';
     subject.lastUpdatedBy.password = '';
-    for (let u of subject.usersAssigned) {
-      u.password = '';
+    for (u of subject.usersAssigned) {
+      u.user.password = '';
     }
     res.json(subject);
   } catch (error) {
@@ -91,36 +92,45 @@ const getSubject = async (req, res) => {
 const updateSubject = async (req, res) => {
   const { id, title, description, isPublished, completionRate, type } =
     req.body;
-  const currUserId = req.user.userId;
-  const { data, error } = await common.awaitWrap(
-    subjectModel.updateSubject({
-      id,
-      title,
-      description,
-      isPublished,
-      completionRate,
-      lastUpdatedById: currUserId,
-      type
-    })
-  );
-  data.createdBy.password = '';
-  data.lastUpdatedBy.password = '';
-  for (u of data.usersAssigned) {
-    u.password = '';
-  }
-  if (error) {
-    log.error('ERR_SUBJECT_UPDATE-SUBJECT', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  const subject = await subjectModel.getSubjectById({ id });
+  if (subject) {
+    const currUserId = req.user.userId;
+    const { data, error } = await common.awaitWrap(
+      subjectModel.updateSubject({
+        id,
+        title,
+        description,
+        isPublished,
+        completionRate,
+        lastUpdatedById: currUserId,
+        type
+      })
+    );
+    if (error) {
+      log.error('ERR_SUBJECT_UPDATE-SUBJECT', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      if (data) {
+        data.createdBy.password = '';
+        data.lastUpdatedBy.password = '';
+        for (u of data.usersAssigned) {
+          u.user.password = '';
+        }
+        log.out('OK_SUBJECT_UPDATE-SUBJECT', {
+          req: { body: req.body, params: req.params },
+          res: JSON.stringify(data)
+        });
+        res.json(data);
+      } else {
+        res.status(400).send('Subject does not exist');
+      }
+    }
   } else {
-    log.out('OK_SUBJECT_UPDATE-SUBJECT', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
+    res.status(400).send('Subject does not exist!');
   }
 };
 
@@ -145,69 +155,74 @@ const deleteSubject = async (req, res) => {
 
 const assignUsersToSubject = async (req, res) => {
   const { id, users } = req.body;
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id,
-    lastUpdatedById: currUserId
-  });
-  const { data, error } = await common.awaitWrap(
-    subjectModel.assignUsersToSubject({
+  const subject = await subjectModel.getSubjectById({ id });
+  if (subject) {
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
       id,
-      users
-    })
-  );
-  // data.createdBy.password = '';
-  // data.lastUpdatedBy.password = '';
-  // for (let u of data.usersAssigned) {
-  //   u.password = '';
-  // }
-  if (error) {
-    log.error('ERR_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
+      lastUpdatedById: currUserId
     });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    const { data, error } = await common.awaitWrap(
+      subjectModel.assignUsersToSubject({
+        id,
+        users
+      })
+    );
+    data.createdBy.password = '';
+    data.lastUpdatedBy.password = '';
+    for (let u of data.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   } else {
-    log.out('OK_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
+    res.status(400).send('Subject or user does not exist!');
   }
 };
 
 const unassignUsersToSubject = async (req, res) => {
   const { id, users } = req.body;
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id,
-    lastUpdatedById: currUserId
-  });
-  const { data, error } = await common.awaitWrap(
-    subjectModel.unassignUsersToSubject({
+  const subject = await subjectModel.getSubjectById({ id });
+  if (subject) {
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
       id,
-      users
-    })
-  );
-  data.createdBy.password = '';
-  data.lastUpdatedBy.password = '';
-  for (let u of data.usersAssigned) {
-    u.password = '';
-  }
-  if (error) {
-    log.error('ERR_SUBJECT_UNASSIGN-USERS-TO-SUBJECT', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
+      lastUpdatedById: currUserId
     });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    const { data, error } = await common.awaitWrap(
+      subjectModel.unassignUsersToSubject({
+        id,
+        users
+      })
+    );
+    if (error) {
+      log.error('ERR_SUBJECT_UNASSIGN-USERS-TO-SUBJECT', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_SUBJECT_UNASSIGN-USERS-TO-SUBJECT', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   } else {
-    log.out('OK_SUBJECT_UNASSIGN-USERS-TO-SUBJECT', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
+    res.status(400).send('Subject or user does not exist!');
   }
 };
 
@@ -230,7 +245,7 @@ const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
     t.subject.createdBy.password = '';
     t.subject.lastUpdatedBy.password = '';
     for (let u of t.subject.usersAssigned) {
-      u.password = '';
+      u.user.password = '';
     }
   }
   const { data: quizData, error: quizError } = await common.awaitWrap(
@@ -246,6 +261,13 @@ const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
   quizData.sort((a, b) => {
     return a.subjectOrder - b.subjectOrder;
   });
+  for (let q of quizData) {
+    q.subject.createdBy.password = '';
+    q.subject.lastUpdatedBy.password = '';
+    for (let u of q.subject.usersAssigned) {
+      u.user.password = '';
+    }
+  }
   const data = {
     topics: topicData,
     quizzes: quizData
@@ -273,6 +295,104 @@ const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
   }
 };
 
+const getCompletionRateBySubjectByEmployee = async (req, res) => {
+  const { subjectId, userId } = req.params;
+  const { data, error } = await common.awaitWrap(
+    subjectModel.getSubjectRecordBySubjectAndUser({
+      subjectId,
+      userId
+    })
+  );
+  if (error) {
+    log.error('ERR_SUBJECT_GET-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    if (data) {
+      data.user.password = '';
+      log.out('OK_SUBJECT_GET-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    } else {
+      res.status(400).send('Record does not exist!');
+    }
+  }
+};
+
+const updateCompletionRateBySubjectByEmployee = async (req, res) => {
+  const { subjectId, userId, completionRate } = req.body;
+  const subject = await subjectModel.getSubjectById({ id: subjectId });
+  const user = await userModel.getUserDetails({ id: userId });
+  if (subject && user) {
+    const { data, error } = await common.awaitWrap(
+      subjectModel.updateSubjectCompletionRateBySubjectByEmployee({
+        subjectId,
+        userId,
+        completionRate
+      })
+    );
+    if (error) {
+      log.error('ERR_SUBJECT_UPDATE-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      data.user.password = '';
+      log.out('OK_SUBJECT_UPDATE-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
+  } else {
+    res.status(400).send('Subject or user does not exist!');
+  }
+};
+
+const getSubjectsAssignedByUserId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('Reached here');
+    const subjects = await subjectModel.getSubjectsAssignedByUserId({ id });
+    log.out('OK_SUBJECT_GET-SUBJECTS-BY-USER-ID', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(subjects)
+    });
+    res.json(subjects);
+  } catch (error) {
+    log.error('ERR_SUBJECT_GET-SUBJECTS-BY-USER-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting subjects');
+  }
+};
+
+const getUsersAssignedBySubjectId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const users = await subjectModel.getUsersAssignedBySubjectId({ id });
+    log.out('OK_SUBJECT_GET-USERS-BY-SUBJECT-ID', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(users)
+    });
+    res.json(users);
+  } catch (error) {
+    log.error('ERR_SUBJECT_GET-USERS-BY-SUBJECT-ID', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting users');
+  }
+};
+
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
 exports.getSubject = getSubject;
@@ -281,3 +401,9 @@ exports.deleteSubject = deleteSubject;
 exports.assignUsersToSubject = assignUsersToSubject;
 exports.unassignUsersToSubject = unassignUsersToSubject;
 exports.getAllTopicsAndQuizzesBySubjectId = getAllTopicsAndQuizzesBySubjectId;
+exports.updateCompletionRateBySubjectByEmployee =
+  updateCompletionRateBySubjectByEmployee;
+exports.getCompletionRateBySubjectByEmployee =
+  getCompletionRateBySubjectByEmployee;
+exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
+exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;

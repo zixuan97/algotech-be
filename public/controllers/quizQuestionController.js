@@ -36,6 +36,9 @@ const createQuizQuestion = async (req, res) => {
   );
   data.quiz.subject.createdBy.password = '';
   data.quiz.subject.lastUpdatedBy.password = '';
+  for (let u of data.quiz.subject.usersAssigned) {
+    u.user.password = '';
+  }
   if (error) {
     log.error('ERR_QUIZQUESTION_CREATE-QUIZQUESTION', {
       err: error.message,
@@ -59,6 +62,9 @@ const getAllQuizQuestionsByQuizId = async (req, res) => {
   for (let d of data) {
     d.quiz.subject.createdBy.password = '';
     d.quiz.subject.lastUpdatedBy.password = '';
+    for (let u of d.quiz.subject.usersAssigned) {
+      u.user.password = '';
+    }
   }
   if (error) {
     log.error('ERR_QUIZQUESTION_GET-ALL-QUIZQUESTIONS', {
@@ -85,6 +91,9 @@ const getQuizQuestion = async (req, res) => {
     });
     quizQuestion.quiz.subject.createdBy.password = '';
     quizQuestion.quiz.subject.lastUpdatedBy.password = '';
+    for (let u of quizQuestion.quiz.subject.usersAssigned) {
+      u.user.password = '';
+    }
     res.json(quizQuestion);
   } catch (error) {
     log.error('ERR_QUIZQUESTION_GET-QUIZQUESTION-BY-ID', {
@@ -128,6 +137,9 @@ const updateQuizQuestion = async (req, res) => {
   );
   data.quiz.subject.createdBy.password = '';
   data.quiz.subject.lastUpdatedBy.password = '';
+  for (let u of data.quiz.subject.usersAssigned) {
+    u.user.password = '';
+  }
   if (error) {
     log.error('ERR_QUIZQUESTION_UPDATE-QUIZQUESTION', {
       err: error.message,

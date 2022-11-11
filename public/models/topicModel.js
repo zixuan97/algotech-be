@@ -1,4 +1,5 @@
 const { ContentStatus } = require('@prisma/client');
+const { transformDocument } = require('@prisma/client/runtime/index.js');
 const { prisma } = require('./index.js');
 
 const createTopic = async (req) => {
@@ -28,7 +29,12 @@ const createTopic = async (req) => {
           },
           createdBy: true,
           lastUpdatedBy: true,
-          usersAssigned: true
+          usersAssigned: true,
+          usersAssigned: {
+            include: {
+              user: true
+            }
+          }
         }
       },
       steps: true
@@ -59,7 +65,12 @@ const getAllTopicsBySubjectId = async (req) => {
           },
           createdBy: true,
           lastUpdatedBy: true,
-          usersAssigned: true
+          usersAssigned: true,
+          usersAssigned: {
+            include: {
+              user: true
+            }
+          }
         }
       },
       steps: true
@@ -93,7 +104,12 @@ const getTopicById = async (req) => {
           },
           createdBy: true,
           lastUpdatedBy: true,
-          usersAssigned: true
+          usersAssigned: true,
+          usersAssigned: {
+            include: {
+              user: true
+            }
+          }
         }
       },
       steps: true
@@ -130,7 +146,12 @@ const updateTopic = async (req) => {
           },
           createdBy: true,
           lastUpdatedBy: true,
-          usersAssigned: true
+          usersAssigned: true,
+          usersAssigned: {
+            include: {
+              user: true
+            }
+          }
         }
       },
       steps: true
@@ -170,7 +191,12 @@ const addStepsToTopic = async (req) => {
           },
           createdBy: true,
           lastUpdatedBy: true,
-          usersAssigned: true
+          usersAssigned: true,
+          usersAssigned: {
+            include: {
+              user: true
+            }
+          }
         }
       },
       steps: true
