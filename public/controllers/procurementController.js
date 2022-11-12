@@ -173,7 +173,6 @@ const getAllProcurementOrders = async (req, res) => {
           quantity: p.quantity
         });
       });
-      console.log(d);
       const result = {
         id: d.id,
         orderDate: d.orderDate,
