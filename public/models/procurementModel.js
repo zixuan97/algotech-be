@@ -36,7 +36,8 @@ const createProcurementOrder = async (req) => {
       supplierId: supplier.id,
       supplierName: supplier.name,
       supplierAddress: supplier.address,
-      supplierEmail: supplier.email
+      supplierEmail: supplier.email,
+      currency: supplier.currency
     }
   });
   return procOrder;

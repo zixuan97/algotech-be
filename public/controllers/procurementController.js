@@ -165,14 +165,15 @@ const getAllProcurementOrders = async (req, res) => {
       const po = await procurementModel.findProcurementOrderById({ id: d.id });
       const po_items = po.procOrderItems;
       let procOrderItemsPdt = [];
-      po_items.map(p => {
+      po_items.map((p) => {
         procOrderItemsPdt.push({
           productSku: p.productSku,
           productName: p.productName,
           rate: p.rate,
           quantity: p.quantity
-        })
-      })
+        });
+      });
+      console.log(d);
       const result = {
         id: d.id,
         orderDate: d.orderDate,
@@ -184,6 +185,7 @@ const getAllProcurementOrders = async (req, res) => {
           id: d.supplierId,
           email: d.supplierEmail,
           name: d.supplierName,
+          currency: d.currency,
           address: d.supplierAddress
         },
         warehouse: {
@@ -218,20 +220,21 @@ const getProcurementOrder = async (req, res) => {
       supplierAddress,
       supplierEmail,
       supplierName,
+      currency,
       totalAmount,
       warehouseName,
       warehouseAddress,
       procOrderItems
     } = po;
     let procOrderItemsPdt = [];
-    procOrderItems.map(p => {
+    procOrderItems.map((p) => {
       procOrderItemsPdt.push({
         productSku: p.productSku,
         productName: p.productName,
         rate: p.rate,
         quantity: p.quantity
-      })
-    })
+      });
+    });
     const result = {
       id,
       orderDate,
@@ -243,7 +246,8 @@ const getProcurementOrder = async (req, res) => {
         id: supplierId,
         email: supplierEmail,
         name: supplierName,
-        address: supplierAddress
+        address: supplierAddress,
+        currency: currency
       },
       warehouse: {
         id: 0,
