@@ -682,6 +682,7 @@ const updateEmployeesToNewTierForDeletedTier = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
+    await leaveModel.deleteLeaveQuotaByTier({ tier: deletedTier });
     log.out('OK_LEAVE_UPDATE-EMPLOYEES-TO-NEW-TIER-FROM-DELETED-TIER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)

@@ -171,6 +171,14 @@ const deleteLeaveQuota = async (req) => {
   return leaveQuota;
 };
 
+const deleteLeaveQuotaByTier = async (req) => {
+  const { tier } = req;
+  const leaveQuota = await prisma.LeaveQuota.delete({
+    where: { tier }
+  });
+  return leaveQuota;
+};
+
 const getLeaveQuota = async () => {
   const leaveQuota = await prisma.LeaveQuota.findMany({});
   return leaveQuota;
@@ -507,6 +515,7 @@ exports.approveLeaveApplication = approveLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
 exports.updateLeaveQuota = updateLeaveQuota;
 exports.deleteLeaveQuota = deleteLeaveQuota;
+exports.deleteLeaveQuotaByTier = deleteLeaveQuotaByTier;
 exports.getLeaveQuota = getLeaveQuota;
 exports.getLeaveQuotaById = getLeaveQuotaById;
 exports.getLeaveQuotaByTier = getLeaveQuotaByTier;
