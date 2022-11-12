@@ -125,6 +125,7 @@ model ProcurementOrder {
   supplierAddress  String
   supplierEmail    String
   supplierName     String
+  currency         String
   warehouseName    String
   procOrderItems   ProcurementOrderItem[]
 }
