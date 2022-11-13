@@ -30,21 +30,12 @@ const getAllDiscountCodes = async () => {
 };
 
 const updateDiscountCode = async (req) => {
-  const {
-    id,
-    amount,
-    startDate,
-    endDate,
-    customerEmails,
-    type,
-    minOrderAmount
-  } = req;
+  const { id, amount, endDate, customerEmails, type, minOrderAmount } = req;
 
   code = await prisma.discountCode.update({
     where: { id },
     data: {
       amount,
-      startDate,
       endDate,
       customerEmails,
       type,

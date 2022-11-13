@@ -70,7 +70,7 @@ const stripeWebhook = async (req, res) => {
         log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');
 
         await sendBulkOrderEmail({ orderId });
-
+        log.out('OK_BULKORDER_SENT-EMAIL');
         if (discountCode) {
           const code = await discountCodeModel.findDiscountCode({
             discountCode
@@ -82,8 +82,8 @@ const stripeWebhook = async (req, res) => {
               // only splice array when item is found
               code.customerEmails.splice(index, 1); // 2nd parameter means remove one item only
             }
-            console.log(code.customerEmails);
             discountCodeModel.updateDiscountCode(code);
+            log.out('OK_DISCOUNTCODE_REDEEM-VOUCHER');
           }
         }
       }
@@ -106,7 +106,7 @@ const stripeWebhook = async (req, res) => {
         });
 
         await sendBulkOrderEmail({ orderId });
-
+        log.out('OK_BULKORDER_SENT-EMAIL');
         if (discountCode) {
           const code = await discountCodeModel.findDiscountCode({
             discountCode
@@ -118,8 +118,8 @@ const stripeWebhook = async (req, res) => {
               // only splice array when item is found
               code.customerEmails.splice(index, 1); // 2nd parameter means remove one item only
             }
-            console.log(code.customerEmails);
             discountCodeModel.updateDiscountCode(code);
+            log.out('OK_DISCOUNTCODE_REDEEM-VOUCHER');
           }
         }
         log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');

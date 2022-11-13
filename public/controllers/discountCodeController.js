@@ -200,21 +200,13 @@ const applyDiscountCode = async (req, res) => {
 };
 
 const updateDiscountCode = async (req, res) => {
-  const {
-    id,
-    amount,
-    startDate,
-    endDate,
-    customerEmails,
-    type,
-    minOrderAmount
-  } = req.body;
+  const { id, amount, endDate, customerEmails, type, minOrderAmount } =
+    req.body;
 
   const { error } = await common.awaitWrap(
     discountCodeModel.updateDiscountCode({
       id,
       amount,
-      startDate,
       endDate,
       customerEmails,
       type,
