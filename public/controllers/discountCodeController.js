@@ -11,14 +11,12 @@ const createDiscountCode = async (req, res) => {
     endDate,
     customerEmails,
     type,
-    minOrderAmount,
-    isEnabled
+    minOrderAmount
   } = req.body;
 
   const { data: discountCodeObj } = await common.awaitWrap(
     discountCodeModel.findDiscountCode({ discountCode })
   );
-  console.log(discountCodeObj);
 
   // if exists throw error
   if (discountCodeObj) {
@@ -36,8 +34,7 @@ const createDiscountCode = async (req, res) => {
         endDate,
         customerEmails,
         type,
-        minOrderAmount,
-        isEnabled
+        minOrderAmount
       })
     );
     if (error) {
@@ -134,8 +131,7 @@ const applyDiscountCode = async (req, res) => {
       let transactionAmount = amount;
       if (
         (code.customerEmails.includes(email) ||
-          code.customerEmails.length === 0) &&
-        code.isEnabled &&
+          (code.customerEmails.length === 0 && code.endDate === null)) &&
         isValid &&
         amount >= code.minOrderAmount
       ) {
@@ -211,8 +207,7 @@ const updateDiscountCode = async (req, res) => {
     endDate,
     customerEmails,
     type,
-    minOrderAmount,
-    isEnabled
+    minOrderAmount
   } = req.body;
 
   const { error } = await common.awaitWrap(
@@ -223,8 +218,7 @@ const updateDiscountCode = async (req, res) => {
       endDate,
       customerEmails,
       type,
-      minOrderAmount,
-      isEnabled
+      minOrderAmount
     })
   );
 

@@ -8,8 +8,7 @@ const createDiscountCode = async (req) => {
     endDate,
     customerEmails,
     type,
-    minOrderAmount,
-    isEnabled
+    minOrderAmount
   } = req;
 
   await prisma.discountCode.create({
@@ -20,8 +19,7 @@ const createDiscountCode = async (req) => {
       endDate,
       customerEmails,
       type,
-      minOrderAmount,
-      isEnabled
+      minOrderAmount
     }
   });
 };
@@ -39,8 +37,7 @@ const updateDiscountCode = async (req) => {
     endDate,
     customerEmails,
     type,
-    minOrderAmount,
-    isEnabled
+    minOrderAmount
   } = req;
 
   code = await prisma.discountCode.update({
@@ -51,8 +48,7 @@ const updateDiscountCode = async (req) => {
       endDate,
       customerEmails,
       type,
-      minOrderAmount,
-      isEnabled
+      minOrderAmount
     }
   });
   return code;
