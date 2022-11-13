@@ -1,6 +1,7 @@
 const paymentModel = require('../models/paymentModel');
 const bulkOrderModel = require('../models/bulkOrderModel');
 const salesOrderModel = require('../models/salesOrderModel');
+const discountCodeModel = require('../models/discountCodeModel');
 const { sendBulkOrderEmail } = require('./bulkOrderController');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -25,7 +26,9 @@ const generatePaymentLink = async (req, res) => {
     const paymentLink = await paymentModel.generatePaymentLink({
       paymentMode,
       amount: bulkOrder.amount,
-      orderId
+      orderId,
+      payeeEmail: bulkOrder.payeeEmail,
+      discountCode: bulkOrder.discountCode
     });
     log.out('OK_PAYMENT_GENERATE-PAYMENT-LINK', {
       req: { body: req.body, params: req.params },
@@ -45,7 +48,7 @@ const generatePaymentLink = async (req, res) => {
 const stripeWebhook = async (req, res) => {
   const payload = req.body;
   const session = payload.data.object;
-  const { orderId } = session.metadata;
+  const { orderId, payeeEmail, discountCode } = session.metadata;
   switch (payload.type) {
     case 'checkout.session.async_payment_succeeded':
     case 'checkout.session.completed':
@@ -67,6 +70,22 @@ const stripeWebhook = async (req, res) => {
         log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');
 
         await sendBulkOrderEmail({ orderId });
+
+        if (discountCode) {
+          const code = await discountCodeModel.findDiscountCode({
+            discountCode
+          });
+          // if one time code remove payeeEmail
+          if (code.endDate) {
+            const index = code.customerEmails.indexOf(payeeEmail);
+            if (index > -1) {
+              // only splice array when item is found
+              code.customerEmails.splice(index, 1); // 2nd parameter means remove one item only
+            }
+            console.log(code.customerEmails);
+            discountCodeModel.updateDiscountCode(code);
+          }
+        }
       }
 
       if (session.payment_link) {
@@ -87,6 +106,22 @@ const stripeWebhook = async (req, res) => {
         });
 
         await sendBulkOrderEmail({ orderId });
+
+        if (discountCode) {
+          const code = await discountCodeModel.findDiscountCode({
+            discountCode
+          });
+          // if one time code remove payeeEmail
+          if (code.endDate) {
+            const index = code.customerEmails.indexOf(payeeEmail);
+            if (index > -1) {
+              // only splice array when item is found
+              code.customerEmails.splice(index, 1); // 2nd parameter means remove one item only
+            }
+            console.log(code.customerEmails);
+            discountCodeModel.updateDiscountCode(code);
+          }
+        }
         log.out('OK_BULKORDER_UPDATE-BULKORDER-STATUS');
       }
       if (session.payment_link) {
