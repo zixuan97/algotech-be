@@ -45,6 +45,7 @@ const createTopic = async (req) => {
 
 const getAllTopicsBySubjectId = async (req) => {
   const { subjectId } = req;
+  console.log(subjectId);
   const topics = await prisma.topic.findMany({
     where: { subjectId: Number(subjectId) },
     include: {
