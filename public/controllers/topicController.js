@@ -7,6 +7,7 @@ const { log } = require('../helpers/logger');
 const createTopic = async (req, res) => {
   const { subjectOrder, title, subjectId } = req.body;
   const currUserId = req.user.userId;
+  const topics = await topicModel.getAllTopicsBySubjectId({ id: subjectId });
   await subjectModel.updateSubject({
     id: subjectId,
     lastUpdatedById: currUserId
@@ -139,7 +140,6 @@ const addStepsToTopic = async (req, res) => {
       steps
     })
   );
-  console.log(data);
   data.subject.createdBy.password = '';
   data.subject.lastUpdatedBy.password = '';
   for (let u of data.subject.usersAssigned) {

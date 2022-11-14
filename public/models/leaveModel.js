@@ -231,7 +231,8 @@ const createLeaveRecordByEmployeeId = async (req) => {
 const getLeaveRecordByEmployeeId = async (req) => {
   const { employeeId } = req;
   let employeeLeaveRecord = await prisma.EmployeeLeaveRecord.findUnique({
-    where: { employeeId: Number(employeeId) }
+    where: { employeeId: Number(employeeId) },
+    include: { employee: true }
   });
   if (employeeLeaveRecord === null) {
     employeeLeaveRecord = await createLeaveRecordByEmployeeId({
@@ -239,6 +240,16 @@ const getLeaveRecordByEmployeeId = async (req) => {
     });
   }
   return employeeLeaveRecord;
+};
+
+const getAllEmployeeLeaveRecords = async (req) => {
+  const employees = await userModel.getEmployees({});
+  let data = [];
+  for (let e of employees) {
+    const record = await getLeaveRecordByEmployeeId({ employeeId: e.id });
+    data.push(record);
+  }
+  return data;
 };
 
 const getLeaveRecordById = async (req) => {
@@ -522,6 +533,7 @@ exports.getLeaveQuotaByTier = getLeaveQuotaByTier;
 exports.createLeaveRecordByEmployeeId = createLeaveRecordByEmployeeId;
 exports.getLeaveRecordById = getLeaveRecordById;
 exports.getLeaveRecordByEmployeeId = getLeaveRecordByEmployeeId;
+exports.getAllEmployeeLeaveRecords = getAllEmployeeLeaveRecords;
 exports.updateLeaveRecordByEmployeeId = updateLeaveRecordByEmployeeId;
 exports.getLeaveTypeBalanceByEmployeeId = getLeaveTypeBalanceByEmployeeId;
 exports.updateLeaveTypeBalanceByEmployeeId = updateLeaveTypeBalanceByEmployeeId;

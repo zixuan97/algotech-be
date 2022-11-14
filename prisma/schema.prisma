@@ -125,8 +125,8 @@ model ProcurementOrder {
   supplierAddress  String
   supplierEmail    String
   supplierName     String
-  currency         String
   warehouseName    String
+  currency         String
   procOrderItems   ProcurementOrderItem[]
 }
 
@@ -371,16 +371,18 @@ model Topic {
   title        String
   subject      Subject       @relation(fields: [subjectId], references: [id])
   steps        Step[]
+  records      EmployeeSubjectRecord[]
 }
 
 model EmployeeSubjectRecord {
-  subjectId      Int
-  userId         Int
-  completionRate Float
-  subject        Subject @relation(fields: [subjectId], references: [id])
-  user           User    @relation(fields: [userId], references: [id])
-
-  @@id([subjectId, userId])
+  id                        Int        @id @default(autoincrement())
+  subjectId                 Int
+  userId                    Int
+  completionRate            Float
+  completedQuizzes          Quiz[]
+  completedTopics           Topic[]
+  subject                   Subject   @relation(fields: [subjectId], references: [id])
+  user                      User      @relation(fields: [userId], references: [id])
 }
 
 model Subject {
@@ -412,6 +414,7 @@ model Quiz {
   subjectId      Int
   subject        Subject        @relation(fields: [subjectId], references: [id])
   questions      QuizQuestion[]
+  records        EmployeeSubjectRecord[]
 }
 
 model QuizQuestion {
@@ -436,7 +439,6 @@ model DiscountCode {
   customerEmails String[]
   type           DiscountCodeType
   minOrderAmount Float
-  isEnabled      Boolean
 }
 
 model JobRole {

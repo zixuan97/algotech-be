@@ -190,6 +190,7 @@ const getEmployeeLeaveRecord = async (req, res) => {
       employeeId
     })
   );
+  if (data.employee !== null) data.employee.password = '';
   if (error) {
     log.error('ERR_LEAVE_GET-EMPLOYEE-LEAVE-RECORD', {
       err: error.message,
@@ -199,6 +200,29 @@ const getEmployeeLeaveRecord = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_GET-EMPLOYEE-LEAVE-RECORD', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const getAllEmployeeLeaveRecords = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    leaveModel.getAllEmployeeLeaveRecords({})
+  );
+  for (let d of data) {
+    d.employee.password = '';
+  }
+  if (error) {
+    log.error('ERR_LEAVE_GET-ALL-EMPLOYEE-LEAVE-RECORDS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_GET-ALL-EMPLOYEE-LEAVE-RECORDS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
@@ -723,6 +747,7 @@ exports.getLeaveQuotaById = getLeaveQuotaById;
 exports.updateLeaveQuota = updateLeaveQuota;
 exports.deleteLeaveQuotaById = deleteLeaveQuotaById;
 exports.getEmployeeLeaveRecord = getEmployeeLeaveRecord;
+exports.getAllEmployeeLeaveRecords = getAllEmployeeLeaveRecords;
 exports.getLeaveRecordById = getLeaveRecordById;
 exports.updateEmployeeLeaveQuota = updateEmployeeLeaveQuota;
 exports.getLeaveApplication = getLeaveApplication;
