@@ -9,7 +9,6 @@ const { log } = require('../helpers/logger');
 const createSubject = async (req, res) => {
   const { title, description, isPublished, type } = req.body;
   const currUserId = req.user.userId;
-  console.log(currUserId);
   const { data, error } = await common.awaitWrap(
     subjectModel.createSubject({
       title,
@@ -359,7 +358,6 @@ const updateCompletionRateBySubjectByEmployee = async (req, res) => {
 const getSubjectsAssignedByUserId = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('Reached here');
     const subjects = await subjectModel.getSubjectsAssignedByUserId({ id });
     log.out('OK_SUBJECT_GET-SUBJECTS-BY-USER-ID', {
       req: { body: req.body, params: req.params },

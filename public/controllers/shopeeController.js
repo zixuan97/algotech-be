@@ -114,7 +114,6 @@ const addShopeeOrders = async (req, res) => {
           const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
             orderId: salesOrder.order_sn
           });
-          console.log(salesOrder);
           if (!salesOrderDB) {
             return await salesOrderModel.createSalesOrder({
               orderId: salesOrder.order_sn,
@@ -129,7 +128,6 @@ const addShopeeOrders = async (req, res) => {
               customerRemarks: salesOrder.message_to_seller,
               salesOrderItems: await Promise.all(
                 salesOrder.item_list.map(async (item) => {
-                  console.log(item.item_name.replace(/ *\[[^\]]*]/g, ''));
                   const bundle = await bundleModel.findBundleByName({
                     name: item.item_name.replace(/ *\[[^\]]*]/g, '')
                   });

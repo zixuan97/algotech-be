@@ -88,11 +88,18 @@ const createBulkOrder = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: data
       });
-      const { transactionAmount: amount, orderId } = data;
+      const {
+        transactionAmount: amount,
+        orderId,
+        payeeEmail,
+        discountCode
+      } = data;
       if (paymentMode === 'CREDIT_CARD') {
         const sessionURL = await paymentModel.payByStripeCreditCard({
           amount,
-          orderId
+          orderId,
+          payeeEmail,
+          discountCode
         });
         log.out('OK_BULKORDER_CREATE-CREDITCARD-PAYMENT-LINK', {
           req: { body: req.body, params: req.params },
@@ -102,7 +109,9 @@ const createBulkOrder = async (req, res) => {
       } else {
         const sessionURL = await paymentModel.payByStripePaynow({
           amount,
-          orderId
+          orderId,
+          payeeEmail,
+          discountCode
         });
         log.out('OK_BULKORDER_CREATE-PAYNOW-PAYMENT-LINK', {
           req: { body: req.body, params: req.params },
@@ -410,7 +419,6 @@ const generateBulkOrderSummaryPDF = async (req, res) => {
 const sendBulkOrderEmail = async (req) => {
   try {
     const { orderId } = req;
-    console.log('here + ********');
     const bulkOrder = await bulkOrderModel.findBulkOrderByOrderId({ orderId });
     const createdDate = format(bulkOrder.createdTime, 'dd MMM yyyy');
     await generateBulkOrderPDF({

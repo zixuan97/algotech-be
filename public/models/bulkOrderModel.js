@@ -123,7 +123,6 @@ const updateBulkOrder = async (req) => {
     transactionAmount,
     discountCode
   } = req;
-
   await Promise.all(
     salesOrders.map(async (so) => {
       await Promise.all(
@@ -216,7 +215,7 @@ const updateBulkOrder = async (req) => {
 
 const deleteBulkOrder = async (req) => {
   const { id } = req;
-  await prisma.bulkOrder.delete({
+  return await prisma.bulkOrder.delete({
     where: {
       id: Number(id)
     }
