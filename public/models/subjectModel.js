@@ -110,6 +110,16 @@ const getSubjectById = async (req) => {
   return subject;
 };
 
+const getSubjectByTitle = async (req) => {
+  const { title } = req;
+  const subject = await prisma.subject.findUnique({
+    where: {
+      title
+    }
+  });
+  return subject;
+};
+
 const updateSubject = async (req) => {
   const {
     id,
@@ -364,6 +374,7 @@ const getUsersAssignedBySubjectId = async (req) => {
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
 exports.getSubjectById = getSubjectById;
+exports.getSubjectByTitle = getSubjectByTitle;
 exports.updateSubject = updateSubject;
 exports.deleteSubject = deleteSubject;
 exports.assignUsersToSubject = assignUsersToSubject;

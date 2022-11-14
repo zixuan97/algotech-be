@@ -8,34 +8,39 @@ const { log } = require('../helpers/logger');
 
 const createSubject = async (req, res) => {
   const { title, description, isPublished, type } = req.body;
-  const currUserId = req.user.userId;
-  const { data, error } = await common.awaitWrap(
-    subjectModel.createSubject({
-      title,
-      description,
-      isPublished,
-      createdById: currUserId,
-      lastUpdatedById: currUserId,
-      type
-    })
-  );
-  data.createdBy.password = '';
-  data.lastUpdatedBy.password = '';
-  for (let u of data.usersAssigned) {
-    u.password = '';
-  }
-  if (error) {
-    log.error('ERR_SUBJECT_CREATE-SUBJECT', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
+  const existingSubject = await subjectModel.getSubjectByTitle({ title });
+  if (existingSubject !== null) {
+    res.status(400).send('Subject title already exists!');
   } else {
-    log.out('OK_SUBJECT_CREATE-SUBJECT', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
+    const currUserId = req.user.userId;
+    const { data, error } = await common.awaitWrap(
+      subjectModel.createSubject({
+        title,
+        description,
+        isPublished,
+        createdById: currUserId,
+        lastUpdatedById: currUserId,
+        type
+      })
+    );
+    data.createdBy.password = '';
+    data.lastUpdatedBy.password = '';
+    for (let u of data.usersAssigned) {
+      u.password = '';
+    }
+    if (error) {
+      log.error('ERR_SUBJECT_CREATE-SUBJECT', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_SUBJECT_CREATE-SUBJECT', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 
@@ -91,45 +96,50 @@ const getSubject = async (req, res) => {
 const updateSubject = async (req, res) => {
   const { id, title, description, isPublished, completionRate, type } =
     req.body;
-  const subject = await subjectModel.getSubjectById({ id });
-  if (subject) {
-    const currUserId = req.user.userId;
-    const { data, error } = await common.awaitWrap(
-      subjectModel.updateSubject({
-        id,
-        title,
-        description,
-        isPublished,
-        completionRate,
-        lastUpdatedById: currUserId,
-        type
-      })
-    );
-    if (error) {
-      log.error('ERR_SUBJECT_UPDATE-SUBJECT', {
-        err: error.message,
-        req: { body: req.body, params: req.params }
-      });
-      const e = Error.http(error);
-      res.status(e.code).json(e.message);
-    } else {
-      if (data) {
-        data.createdBy.password = '';
-        data.lastUpdatedBy.password = '';
-        for (u of data.usersAssigned) {
-          u.user.password = '';
-        }
-        log.out('OK_SUBJECT_UPDATE-SUBJECT', {
-          req: { body: req.body, params: req.params },
-          res: JSON.stringify(data)
-        });
-        res.json(data);
-      } else {
-        res.status(400).send('Subject does not exist');
-      }
-    }
+  const existingSubject = await subjectModel.getSubjectByTitle({ title });
+  if (existingSubject !== null && existingSubject.id !== id) {
+    res.status(400).send('Subject title already exists!');
   } else {
-    res.status(400).send('Subject does not exist!');
+    const subject = await subjectModel.getSubjectById({ id });
+    if (subject) {
+      const currUserId = req.user.userId;
+      const { data, error } = await common.awaitWrap(
+        subjectModel.updateSubject({
+          id,
+          title,
+          description,
+          isPublished,
+          completionRate,
+          lastUpdatedById: currUserId,
+          type
+        })
+      );
+      if (error) {
+        log.error('ERR_SUBJECT_UPDATE-SUBJECT', {
+          err: error.message,
+          req: { body: req.body, params: req.params }
+        });
+        const e = Error.http(error);
+        res.status(e.code).json(e.message);
+      } else {
+        if (data) {
+          data.createdBy.password = '';
+          data.lastUpdatedBy.password = '';
+          for (u of data.usersAssigned) {
+            u.user.password = '';
+          }
+          log.out('OK_SUBJECT_UPDATE-SUBJECT', {
+            req: { body: req.body, params: req.params },
+            res: JSON.stringify(data)
+          });
+          res.json(data);
+        } else {
+          res.status(400).send('Subject does not exist');
+        }
+      }
+    } else {
+      res.status(400).send('Subject does not exist!');
+    }
   }
 };
 

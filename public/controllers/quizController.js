@@ -1,4 +1,5 @@
 const quizModel = require('../models/quizModel');
+const quizQuestionModel = require('../models/quizQuestionModel');
 const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
@@ -13,38 +14,51 @@ const createQuiz = async (req, res) => {
     questions,
     subjectId
   } = req.body;
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
-  });
-  const { data, error } = await common.awaitWrap(
-    quizModel.createQuiz({
-      subjectOrder,
-      title,
-      description,
-      passingScore,
-      questions,
-      subjectId
-    })
-  );
-  data.subject.createdBy.password = '';
-  data.subject.lastUpdatedBy.password = '';
-  for (let u of data.subject.usersAssigned) {
-    u.user.password = '';
+  const currentOrders = [];
+  const currTitles = [];
+  const quizzes = await quizModel.getAllQuizzesBySubjectId({ subjectId });
+  for (let q of quizzes) {
+    currentOrders.push(q.subjectOrder);
+    currTitles.push(q.title);
   }
-  if (error) {
-    log.error('ERR_QUIZ_CREATE-QUIZ', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
+  if (currentOrders.includes(subjectOrder)) {
+    res.status(400).send('Subject order already exists!');
+  } else if (currTitles.includes(title)) {
+    res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
   } else {
-    log.out('OK_QUIZ_CREATE-QUIZ', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      quizModel.createQuiz({
+        subjectOrder,
+        title,
+        description,
+        passingScore,
+        questions,
+        subjectId
+      })
+    );
+    data.subject.createdBy.password = '';
+    data.subject.lastUpdatedBy.password = '';
+    for (let u of data.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_QUIZ_CREATE-QUIZ', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_QUIZ_CREATE-QUIZ', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 
@@ -109,76 +123,114 @@ const updateQuiz = async (req, res) => {
     completionRate,
     subjectId
   } = req.body;
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
-  });
-  const { data, error } = await common.awaitWrap(
-    quizModel.updateQuiz({
-      id,
-      subjectOrder,
-      title,
-      description,
-      passingScore,
-      status,
-      completionRate,
-      subjectId
-    })
-  );
-  data.subject.createdBy.password = '';
-  data.subject.lastUpdatedBy.password = '';
-  for (let u of data.subject.usersAssigned) {
-    u.user.password = '';
+  const currentOrders = [];
+  const currTitles = [];
+  const quizzes = await quizModel.getAllQuizzesBySubjectId({ subjectId });
+  for (let q of quizzes) {
+    currentOrders.push(q.subjectOrder);
+    currTitles.push(q.title);
   }
-  if (error) {
-    log.error('ERR_QUIZ_UPDATE-QUIZ', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  const currQuizByOrder = await topicModel.getQuizByTitleAndSubjectId({
+    subjectId,
+    subjectOrder
+  });
+  const currQuizByTitle = await topicModel.getQuizByTitleAndSubjectId({
+    subjectId,
+    title
+  });
+  if (currentOrders.includes(subjectOrder) && currQuizByOrder.id !== id) {
+    res.status(400).send('Subject order already exists!');
+  } else if (currTitles.includes(title) && currQuizByTitle.id !== id) {
+    res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
   } else {
-    log.out('OK_QUIZ_UPDATE-QUIZ', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      quizModel.updateQuiz({
+        id,
+        subjectOrder,
+        title,
+        description,
+        passingScore,
+        status,
+        completionRate,
+        subjectId
+      })
+    );
+    data.subject.createdBy.password = '';
+    data.subject.lastUpdatedBy.password = '';
+    for (let u of data.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_QUIZ_UPDATE-QUIZ', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_QUIZ_UPDATE-QUIZ', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 
 const addQuizQuestionsToQuiz = async (req, res) => {
   const { id, questions } = req.body;
-  const { subjectId } = await quizModel.getQuizById({ id });
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
+  const currentOrders = [];
+  let questionsToAdd = [];
+  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
+    quizId: id
   });
-  const { data, error } = await common.awaitWrap(
-    quizModel.addQuizQuestionsToQuiz({
-      id,
-      questions
-    })
-  );
-  data.subject.createdBy.password = '';
-  data.subject.lastUpdatedBy.password = '';
-  for (let u of data.subject.usersAssigned) {
-    u.user.password = '';
+  for (let q of quizQuestions) {
+    currentOrders.push(q.quizOrder);
   }
-  if (error) {
-    log.error('ERR_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  for (let qn of questions) {
+    if (!currentOrders.includes(qn.quizOrder)) {
+      questionsToAdd.push(qn);
+    }
+  }
+  if (questionsToAdd.length === 0) {
+    res.status(400).send('All quiz orders already exists!');
   } else {
-    log.out('OK_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const { subjectId } = await quizModel.getQuizById({ id });
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      quizModel.addQuizQuestionsToQuiz({
+        id,
+        questions: questionsToAdd
+      })
+    );
+    data.subject.createdBy.password = '';
+    data.subject.lastUpdatedBy.password = '';
+    for (let u of data.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 

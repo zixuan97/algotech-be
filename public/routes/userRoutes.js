@@ -22,9 +22,10 @@ router.get('/b2b/all', UserController.getAllB2BUsers);
 router.get('/b2b/pending', UserController.getAllPendingB2BUsers);
 router.get('/nonb2b/all', verifyToken, UserController.getAllNonB2BUsers);
 router.get('/pending/count', UserController.getNumberOfPendingUsers);
-router.get('/employee/all', verifyToken, UserController.getAllEmployees);
+router.get('/employee/all', UserController.getAllEmployees);
 router.get('/jobrole/:id', UserController.getJobRoleById);
 router.get('/jobrole/name/:jobRole', UserController.getJobRoleByName);
+router.get('/jobroles/all', UserController.getAllJobRoles);
 router.post('/jobrole', UserController.createJobRole);
 router.put('/jobrole', UserController.editJobRole);
 router.post('/jobroles', UserController.addJobRolesToUser);
@@ -34,6 +35,7 @@ router.post(
   '/unassign/subordinates',
   UserController.unassignSubordinatesToManager
 );
+router.put('/employee', UserController.updateEmployee);
 
 router.post('/org', OrganisationalChartController.organisationChart);
 
