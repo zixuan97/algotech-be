@@ -2,7 +2,7 @@ const { prisma } = require('./index.js');
 
 const createBrand = async (req) => {
   const { name } = req;
-  await prisma.brand.create({
+  return await prisma.brand.create({
     data: {
       name
     }
@@ -28,7 +28,7 @@ const updateBrands = async (req) => {
 
 const deleteBrand = async (req) => {
   const { id } = req;
-  await prisma.brand.delete({
+  return await prisma.brand.delete({
     where: {
       id: Number(id)
     }
