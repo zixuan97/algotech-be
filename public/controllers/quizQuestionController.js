@@ -127,43 +127,59 @@ const updateQuizQuestion = async (req, res) => {
     correctAnswer,
     quizId
   } = req.body;
-  const { subjectId } = await quizModel.getQuizById({ id: quizId });
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
+  const currentOrders = [];
+  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
+    quizId
   });
-  const { data, error } = await common.awaitWrap(
-    quizQuestionModel.updateQuizQuestion({
-      id,
-      quizOrder,
-      question,
-      type,
-      options,
-      writtenAnswer,
-      minWordCount,
-      correctAnswer,
-      quizId
-    })
-  );
-  data.quiz.subject.createdBy.password = '';
-  data.quiz.subject.lastUpdatedBy.password = '';
-  for (let u of data.quiz.subject.usersAssigned) {
-    u.user.password = '';
+  for (let q of quizQuestions) {
+    currentOrders.push(q.quizOrder);
   }
-  if (error) {
-    log.error('ERR_QUIZQUESTION_UPDATE-QUIZQUESTION', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
+  const currQuizQuestionByOrder =
+    await quizQuestionModel.getQuizQuestionByOrderAndQuizId({
+      quizId,
+      quizOrder
     });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  if (currentOrders.includes(quizOrder) && currQuizQuestionByOrder.id !== id) {
+    res.status(400).send('Quiz order already exists!');
   } else {
-    log.out('OK_QUIZQUESTION_UPDATE-QUIZQUESTION', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const { subjectId } = await quizModel.getQuizById({ id: quizId });
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      quizQuestionModel.updateQuizQuestion({
+        id,
+        quizOrder,
+        question,
+        type,
+        options,
+        writtenAnswer,
+        minWordCount,
+        correctAnswer,
+        quizId
+      })
+    );
+    data.quiz.subject.createdBy.password = '';
+    data.quiz.subject.lastUpdatedBy.password = '';
+    for (let u of data.quiz.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_QUIZQUESTION_UPDATE-QUIZQUESTION', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_QUIZQUESTION_UPDATE-QUIZQUESTION', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 

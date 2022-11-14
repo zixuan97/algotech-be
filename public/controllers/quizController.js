@@ -130,11 +130,11 @@ const updateQuiz = async (req, res) => {
     currentOrders.push(q.subjectOrder);
     currTitles.push(q.title);
   }
-  const currQuizByOrder = await topicModel.getQuizByTitleAndSubjectId({
+  const currQuizByOrder = await quizModel.getQuizByOrderAndSubjectId({
     subjectId,
     subjectOrder
   });
-  const currQuizByTitle = await topicModel.getQuizByTitleAndSubjectId({
+  const currQuizByTitle = await quizModel.getQuizByTitleAndSubjectId({
     subjectId,
     title
   });

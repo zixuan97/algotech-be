@@ -263,6 +263,17 @@ const updateOrderOfQuizArray = async (req) => {
   return res;
 };
 
+const getQuizByOrderAndSubjectId = async (req) => {
+  const { subjectId, subjectOrder } = req;
+  const quiz = await prisma.quiz.findMany({
+    where: {
+      subjectId: Number(subjectId),
+      subjectOrder
+    }
+  });
+  return quiz[0];
+};
+
 const getQuizByTitleAndSubjectId = async (req) => {
   const { subjectId, title } = req;
   const quiz = await prisma.quiz.findMany({
@@ -281,4 +292,5 @@ exports.updateQuiz = updateQuiz;
 exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
 exports.deleteQuiz = deleteQuiz;
 exports.updateOrderOfQuizArray = updateOrderOfQuizArray;
+exports.getQuizByOrderAndSubjectId = getQuizByOrderAndSubjectId;
 exports.getQuizByTitleAndSubjectId = getQuizByTitleAndSubjectId;
