@@ -306,6 +306,15 @@ const getJobRoleByName = async (req) => {
   return job;
 };
 
+const getAllJobRoles = async (req) => {
+  const jobroles = await prisma.JobRole.findMany({
+    include: {
+      usersInJobRole: true
+    }
+  });
+  return jobroles;
+};
+
 const addJobRolesToUser = async (req) => {
   const { userId, jobRoles } = req;
   const user = await prisma.user.update({
@@ -398,6 +407,7 @@ exports.createJobRole = createJobRole;
 exports.editJobRole = editJobRole;
 exports.getJobRole = getJobRole;
 exports.getJobRoleByName = getJobRoleByName;
+exports.getAllJobRoles = getAllJobRoles;
 exports.addJobRolesToUser = addJobRolesToUser;
 exports.deleteJobRole = deleteJobRole;
 exports.assignSubordinatesToManager = assignSubordinatesToManager;

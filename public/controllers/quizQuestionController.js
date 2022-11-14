@@ -16,41 +16,52 @@ const createQuizQuestion = async (req, res) => {
     correctAnswer,
     quizId
   } = req.body;
-  const { subjectId } = await quizModel.getQuizById({ id: quizId });
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
+  const currentOrders = [];
+  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
+    quizId
   });
-  const { data, error } = await common.awaitWrap(
-    quizQuestionModel.createQuizQuestion({
-      quizOrder,
-      question,
-      type,
-      options,
-      writtenAnswer,
-      minWordCount,
-      correctAnswer,
-      quizId
-    })
-  );
-  data.quiz.subject.createdBy.password = '';
-  data.quiz.subject.lastUpdatedBy.password = '';
-  for (let u of data.quiz.subject.usersAssigned) {
-    u.user.password = '';
+  for (let q of quizQuestions) {
+    currentOrders.push(q.quizOrder);
   }
-  if (error) {
-    log.error('ERR_QUIZQUESTION_CREATE-QUIZQUESTION', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
+  if (currentOrders.includes(quizOrder)) {
+    res.status(400).send('Quiz order already exists!');
   } else {
-    log.out('OK_QUIZQUESTION_CREATE-QUIZQUESTION', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const { subjectId } = await quizModel.getQuizById({ id: quizId });
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      quizQuestionModel.createQuizQuestion({
+        quizOrder,
+        question,
+        type,
+        options,
+        writtenAnswer,
+        minWordCount,
+        correctAnswer,
+        quizId
+      })
+    );
+    data.quiz.subject.createdBy.password = '';
+    data.quiz.subject.lastUpdatedBy.password = '';
+    for (let u of data.quiz.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_QUIZQUESTION_CREATE-QUIZQUESTION', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_QUIZQUESTION_CREATE-QUIZQUESTION', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 

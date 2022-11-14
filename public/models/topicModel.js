@@ -1,5 +1,4 @@
 const { ContentStatus } = require('@prisma/client');
-const { transformDocument } = require('@prisma/client/runtime/index.js');
 const { prisma } = require('./index.js');
 
 const createTopic = async (req) => {
@@ -45,7 +44,6 @@ const createTopic = async (req) => {
 
 const getAllTopicsBySubjectId = async (req) => {
   const { subjectId } = req;
-  console.log(subjectId);
   const topics = await prisma.topic.findMany({
     where: { subjectId: Number(subjectId) },
     include: {
@@ -246,6 +244,28 @@ const updateOrderOfTopicArray = async (req) => {
   return res;
 };
 
+const getTopicByOrderAndSubjectId = async (req) => {
+  const { subjectId, subjectOrder } = req;
+  const topic = await prisma.topic.findMany({
+    where: {
+      subjectId: Number(subjectId),
+      subjectOrder: Number(subjectOrder)
+    }
+  });
+  return topic[0];
+};
+
+const getTopicByTitleAndSubjectId = async (req) => {
+  const { subjectId, title } = req;
+  const topic = await prisma.topic.findMany({
+    where: {
+      subjectId: Number(subjectId),
+      title
+    }
+  });
+  return topic[0];
+};
+
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopicById = getTopicById;
@@ -253,3 +273,5 @@ exports.updateTopic = updateTopic;
 exports.addStepsToTopic = addStepsToTopic;
 exports.deleteTopic = deleteTopic;
 exports.updateOrderOfTopicArray = updateOrderOfTopicArray;
+exports.getTopicByOrderAndSubjectId = getTopicByOrderAndSubjectId;
+exports.getTopicByTitleAndSubjectId = getTopicByTitleAndSubjectId;

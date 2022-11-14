@@ -7,37 +7,48 @@ const { log } = require('../helpers/logger');
 
 const createStep = async (req, res) => {
   const { topicOrder, title, content, topicId } = req.body;
-  const { subjectId } = await topicModel.getTopicById({ id: topicId });
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
+  const currentOrders = [];
+  const steps = await stepModel.getAllStepsByTopicId({
+    topicId
   });
-  const { data, error } = await common.awaitWrap(
-    stepModel.createStep({
-      topicOrder,
-      title,
-      content,
-      topicId
-    })
-  );
-  data.topic.subject.createdBy.password = '';
-  data.topic.subject.lastUpdatedBy.password = '';
-  for (let u of data.topic.subject.usersAssigned) {
-    u.user.password = '';
+  for (let s of steps) {
+    currentOrders.push(s.topicOrder);
   }
-  if (error) {
-    log.error('ERR_STEP_CREATE-STEP', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
+  if (currentOrders.includes(topicOrder)) {
+    res.status(400).send('Topic order already exists!');
   } else {
-    log.out('OK_STEP_CREATE-STEP', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const { subjectId } = await topicModel.getTopicById({ id: topicId });
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      stepModel.createStep({
+        topicOrder,
+        title,
+        content,
+        topicId
+      })
+    );
+    data.topic.subject.createdBy.password = '';
+    data.topic.subject.lastUpdatedBy.password = '';
+    for (let u of data.topic.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_STEP_CREATE-STEP', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_STEP_CREATE-STEP', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 

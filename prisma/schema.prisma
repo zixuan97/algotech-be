@@ -364,25 +364,25 @@ model Step {
 }
 
 model Topic {
-  id           Int           @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   subjectOrder Int
-  status       ContentStatus @default(DRAFT)
+  status       ContentStatus           @default(DRAFT)
   subjectId    Int
   title        String
-  subject      Subject       @relation(fields: [subjectId], references: [id])
+  subject      Subject                 @relation(fields: [subjectId], references: [id])
   steps        Step[]
   records      EmployeeSubjectRecord[]
 }
 
 model EmployeeSubjectRecord {
-  id                        Int        @id @default(autoincrement())
-  subjectId                 Int
-  userId                    Int
-  completionRate            Float
-  completedQuizzes          Quiz[]
-  completedTopics           Topic[]
-  subject                   Subject   @relation(fields: [subjectId], references: [id])
-  user                      User      @relation(fields: [userId], references: [id])
+  subjectId        Int
+  userId           Int
+  completionRate   Float
+  id               Int     @id @default(autoincrement())
+  subject          Subject @relation(fields: [subjectId], references: [id])
+  user             User    @relation(fields: [userId], references: [id])
+  completedQuizzes Quiz[]
+  completedTopics  Topic[]
 }
 
 model Subject {
@@ -395,7 +395,7 @@ model Subject {
   createdById     Int
   lastUpdatedAt   DateTime
   lastUpdatedById Int
-  title           String
+  title           String                  @unique
   createdBy       User                    @relation("createdBy", fields: [createdById], references: [id])
   lastUpdatedBy   User                    @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
   usersAssigned   EmployeeSubjectRecord[]
@@ -404,15 +404,15 @@ model Subject {
 }
 
 model Quiz {
-  id             Int            @id @default(autoincrement())
+  id             Int                     @id @default(autoincrement())
   subjectOrder   Int
   title          String
   description    String
   passingScore   Float
-  completionRate Float          @default(0)
-  status         ContentStatus  @default(DRAFT)
+  completionRate Float                   @default(0)
+  status         ContentStatus           @default(DRAFT)
   subjectId      Int
-  subject        Subject        @relation(fields: [subjectId], references: [id])
+  subject        Subject                 @relation(fields: [subjectId], references: [id])
   questions      QuizQuestion[]
   records        EmployeeSubjectRecord[]
 }
