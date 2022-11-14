@@ -380,7 +380,6 @@ const updateTierByEmployeeId = async (req) => {
     ...user,
     tier: newTier
   };
-  console.log(updatedUser);
   await userModel.editUser({ updatedUser });
   return updatedRecord;
 };

@@ -419,7 +419,6 @@ const generateBulkOrderSummaryPDF = async (req, res) => {
 const sendBulkOrderEmail = async (req) => {
   try {
     const { orderId } = req;
-    console.log('here + ********');
     const bulkOrder = await bulkOrderModel.findBulkOrderByOrderId({ orderId });
     const createdDate = format(bulkOrder.createdTime, 'dd MMM yyyy');
     await generateBulkOrderPDF({

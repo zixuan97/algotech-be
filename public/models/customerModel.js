@@ -154,7 +154,6 @@ const findCustomerByFilter = async (req) => {
     allTimeOrderValue
   } = req;
   let customers = await prisma.customer.findMany({});
-  console.log(customers.length);
   if (daysSinceLastPurchase) {
     customers = customers.filter(
       (customer) => customer.daysSinceLastPurchase >= daysSinceLastPurchase

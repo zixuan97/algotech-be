@@ -101,7 +101,6 @@ const verifyWebhook = (req) => {
   const msg = CryptoJS.enc.Utf8.parse(data);
   const token = CryptoJS.enc.Hex.stringify(CryptoJS.HmacSHA256(msg, key));
 
-  console.log(token === hmac_header);
   return token === hmac_header;
 };
 

@@ -139,7 +139,6 @@ const addStepsToTopic = async (req, res) => {
       steps
     })
   );
-  console.log(data);
   data.subject.createdBy.password = '';
   data.subject.lastUpdatedBy.password = '';
   for (let u of data.subject.usersAssigned) {
