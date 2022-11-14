@@ -119,6 +119,9 @@ const getQuizById = async (req) => {
       questions: true
     }
   });
+  quiz.questions.sort((a, b) => {
+    return a.quizOrder - b.quizOrder;
+  });
   return quiz;
 };
 

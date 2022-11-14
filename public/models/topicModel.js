@@ -115,6 +115,9 @@ const getTopicById = async (req) => {
       steps: true
     }
   });
+  topic.steps.sort((a, b) => {
+    return a.topicOrder - b.topicOrder;
+  });
   return topic;
 };
 
