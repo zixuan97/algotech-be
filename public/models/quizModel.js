@@ -245,9 +245,25 @@ const deleteQuiz = async (req) => {
   });
 };
 
+const updateOrderOfQuizArray = async (req) => {
+  const { quizzes } = req;
+  let i = 1;
+  const res = [];
+  for (let q of quizzes) {
+    const newQuiz = await updateQuiz({
+      ...q,
+      subjectOrder: i
+    });
+    i++;
+    res.push(newQuiz);
+  }
+  return res;
+};
+
 exports.createQuiz = createQuiz;
 exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuizById = getQuizById;
 exports.updateQuiz = updateQuiz;
 exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
 exports.deleteQuiz = deleteQuiz;
+exports.updateOrderOfQuizArray = updateOrderOfQuizArray;
