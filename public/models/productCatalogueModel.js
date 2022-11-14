@@ -3,7 +3,7 @@ const { prisma } = require('./index.js');
 const createProdCatalogue = async (req) => {
   const { price, productId, description } = req;
 
-  await prisma.productCatalogue.create({
+  return await prisma.productCatalogue.create({
     data: {
       price,
       productId,
@@ -40,7 +40,7 @@ const updateProdCatalogue = async (req) => {
 
 const deleteProdCatalogue = async (req) => {
   const { id } = req;
-  await prisma.productCatalogue.delete({
+  return await prisma.productCatalogue.delete({
     where: {
       id: Number(id)
     }

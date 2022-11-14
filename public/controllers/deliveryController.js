@@ -857,6 +857,7 @@ const getLatLongForAssignedOrders = async (req, res) => {
       }
     );
   let dataRes = [];
+
   Promise.allSettled(
     salesOrders.map(async (p) => {
       const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p.postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
@@ -1302,6 +1303,114 @@ const getLalamoveStatusLink = async (req, res) => {
   }
 };
 
+const routePlanningForAssignedOrders = async (req, res) => {
+  const { time_from, time_to, id, startingPoint } = req.body;
+  const salesOrders =
+    await deliveryModel.findSalesOrderPostalCodeForAssignedManualDeliveriesWithTimeFilter(
+      {
+        time_from: new Date(time_from),
+        time_to: new Date(time_to),
+        id
+      }
+    );
+  let dataRes = [];
+  let latlongArr = [];
+  let start;
+  //get starting point latlong
+  await axios
+    .get(
+      `https://developers.onemap.sg/commonapi/search?searchVal=${startingPoint}&returnGeom=Y&getAddrDetails=Y&pageNum=1`
+    )
+    .then((response) => {
+      start = {
+        location_id: response.data.results[0].ADDRESS,
+        latitude: parseFloat(response.data.results[0].LATITUDE),
+        longtitude: parseFloat(response.data.results[0].LONGTITUDE)
+      };
+    })
+    .catch((error) => {
+      log.error('ERR_DELIVERY_GET-LAT-LONG', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+    });
+
+  //get lat long for all orders
+  Promise.allSettled(
+    salesOrders.map(async (p) => {
+      const url = `https://developers.onemap.sg/commonapi/search?searchVal=${p.postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+      return await axios
+        .get(url)
+        .then((response) => {
+          log.out('OK_DELIVERY_GET-LAT-LONG');
+          response.data.results[0].orders = p;
+          const location = {
+            location_id: p.postalCode,
+            latitude: parseFloat(response.data.results[0].LATITUDE),
+            longtitude: parseFloat(response.data.results[0].LONGTITUDE)
+          };
+          latlongArr.push(location);
+          dataRes.push(response.data.results[0]);
+        })
+        .catch((error) => {
+          log.error('ERR_DELIVERY_GET-LAT-LONG', {
+            err: error.message,
+            req: { body: req.body, params: req.params }
+          });
+        });
+    })
+  ).then(async () => {
+    // route planning graphhopper
+    const url = `https://graphhopper.com/api/1/vrp?key=${process.env.GRAPHHOPPER_KEY}`;
+    const services = [];
+    for (let i = 0; i < latlongArr.length; i++) {
+      services.push({
+        id: (i + 1).toString(),
+        address: {
+          location_id: latlongArr[i].location_id,
+          lon: latlongArr[i].longtitude,
+          lat: latlongArr[i].latitude
+        }
+      });
+    }
+    const body = {
+      vehicles: [
+        {
+          vehicle_id: 'custom_vehicle',
+          start_address: {
+            location_id: start.location_id,
+            lon: start.longtitude,
+            lat: start.latitude
+          }
+        }
+      ],
+      services
+    };
+    await axios
+      .post(url, body)
+      .then((response) => {
+        for (
+          let i = 0;
+          i < response.data.solution.routes[0].activities.length;
+          i++
+        ) {
+          const postal =
+            response.data.solution.routes[0].activities[i].address.location_id;
+          for (let j = 0; j < salesOrders.length; j++) {
+            if (postal === salesOrders[j].postalCode) {
+              response.data.solution.routes[0].activities[i].order =
+                salesOrders[j];
+            }
+          }
+        }
+        res.json(response.data.solution.routes[0].activities);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+};
+
 // create
 exports.createManualDeliveryOrder = createManualDeliveryOrder;
 exports.createShippitDeliveryOrder = createShippitDeliveryOrder;
@@ -1336,6 +1445,7 @@ exports.getBookingLabelLink = getBookingLabelLink;
 // map
 exports.getLatLong = getLatLong;
 exports.getLatLongForUnassignedOrders = getLatLongForUnassignedOrders;
+exports.routePlanningForAssignedOrders = routePlanningForAssignedOrders;
 exports.getLatLongForAssignedOrders = getLatLongForAssignedOrders;
 exports.getCurrentLocationLatLong = getCurrentLocationLatLong;
 // map with time
