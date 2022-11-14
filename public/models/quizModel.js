@@ -252,7 +252,7 @@ const updateOrderOfQuizArray = async (req) => {
   for (let q of quizzes) {
     const newQuiz = await updateQuiz({
       ...q,
-      subjectOrder: i
+      subjectOrder: q.subjectOrder
     });
     i++;
     res.push(newQuiz);
