@@ -141,11 +141,8 @@ const updateOrderOfStepsArray = async (req) => {
   const res = [];
   for (let s of steps) {
     const newStep = await updateStep({
-      id: s.id,
-      topicOrder: i,
-      title: s.title,
-      content: s.content,
-      topicId: s.topicId
+      ...s,
+      topicOrder: s.topicOrder
     });
     i++;
     res.push(newStep);

@@ -160,14 +160,14 @@ const updateOrderBasedOnStepsArray = async (req, res) => {
     stepModel.updateOrderOfStepsArray({ steps: req.body })
   );
   if (error) {
-    log.error('ERR_STEP_UPDATE-ORDER', {
+    log.error('ERR_STEP_UPDATE-ORDER-STEP', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_STEP_UPDATE-ORDER', {
+    log.out('OK_STEP_UPDATE-ORDER-STEP', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });

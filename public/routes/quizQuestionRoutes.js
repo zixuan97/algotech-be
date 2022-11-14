@@ -7,5 +7,6 @@ router.get('/all/:quizId', quizQuestionController.getAllQuizQuestionsByQuizId);
 router.get('/:id', quizQuestionController.getQuizQuestion);
 router.put('/', verifyToken, quizQuestionController.updateQuizQuestion);
 router.delete('/:id', verifyToken, quizQuestionController.deleteQuizQuestion);
+router.post('/order', quizQuestionController.updateOrderBasedOnQuestionsArray);
 
 module.exports = router;
