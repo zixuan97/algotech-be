@@ -24,7 +24,7 @@ const createUser = async (req) => {
       status = UserStatus.PENDING;
     }
   }
-  const user = await prisma.User.create({
+  const user = await prisma.user.create({
     data: {
       firstName,
       lastName,
@@ -43,12 +43,12 @@ const createUser = async (req) => {
 };
 
 const getUsers = async () => {
-  const users = await prisma.User.findMany({});
+  const users = await prisma.user.findMany({});
   return users;
 };
 
 const getB2BUsers = async () => {
-  const users = await prisma.User.findMany({
+  const users = await prisma.user.findMany({
     where: {
       role: UserRole.B2B
     }
@@ -57,7 +57,7 @@ const getB2BUsers = async () => {
 };
 
 const getEmployees = async () => {
-  const users = await prisma.User.findMany({
+  const users = await prisma.user.findMany({
     where: {
       NOT: {
         OR: [
@@ -81,7 +81,7 @@ const getEmployees = async () => {
 
 const findUserById = async (req) => {
   const { id } = req;
-  const user = await prisma.User.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id
     }
@@ -91,7 +91,7 @@ const findUserById = async (req) => {
 
 const findUserByEmail = async (req) => {
   const { email } = req;
-  const user = await prisma.User.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       email: email
     }
@@ -101,7 +101,7 @@ const findUserByEmail = async (req) => {
 
 const getUserDetails = async (req) => {
   const { id } = req;
-  const user = await prisma.User.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id: Number(id)
     },
@@ -115,7 +115,7 @@ const getUserDetails = async (req) => {
 const editUser = async (req) => {
   const { updatedUser } = req;
   const id = updatedUser.id;
-  user = await prisma.User.update({
+  user = await prisma.user.update({
     where: { id: Number(id) },
     data: {
       firstName: updatedUser.firstName,
@@ -157,7 +157,7 @@ const deleteUserById = async (req) => {
       }
     }
   });
-  user = await prisma.User.delete({
+  user = await prisma.user.delete({
     where: {
       id: Number(id)
     }
@@ -167,7 +167,7 @@ const deleteUserById = async (req) => {
 
 const enableUser = async (req) => {
   const { id } = req;
-  const user = await prisma.User.update({
+  const user = await prisma.user.update({
     where: { id: Number(id) },
     data: {
       status: UserStatus.ACTIVE
@@ -178,7 +178,7 @@ const enableUser = async (req) => {
 
 const disableUser = async (req) => {
   const { id } = req;
-  const user = await prisma.User.update({
+  const user = await prisma.user.update({
     where: { id: Number(id) },
     data: {
       status: UserStatus.DISABLED
@@ -200,7 +200,7 @@ const changeUserRole = async (req) => {
   } else if (action === 'admin') {
     newRole = UserRole.ADMIN;
   }
-  const user = await prisma.User.update({
+  const user = await prisma.user.update({
     where: { id: Number(id) },
     data: {
       role: newRole
@@ -222,10 +222,12 @@ const generatePassword = async (req) => {
 
 const verifyPassword = async (req) => {
   const { userEmail, currentPassword, newPassword } = req;
+
   let user = await findUserByEmail({ email: userEmail });
   const is_equal = await bcrypt.compare(currentPassword, user.password);
+
   if (is_equal) {
-    user = await prisma.User.update({
+    user = await prisma.user.update({
       where: { id: user.id },
       data: {
         password: await bcrypt.hash(newPassword, 10),
@@ -238,7 +240,7 @@ const verifyPassword = async (req) => {
 
 const changePassword = async (req) => {
   const { updatedUser } = req;
-  user = await prisma.User.update({
+  user = await prisma.user.update({
     where: { id: Number(updatedUser.id) },
     data: {
       password: await bcrypt.hash(updatedUser.password, 10),
@@ -250,7 +252,7 @@ const changePassword = async (req) => {
 
 const updateB2BUserStatus = async (req) => {
   const { id, status } = req;
-  const user = await prisma.User.update({
+  const user = await prisma.user.update({
     where: { id: Number(id) },
     data: {
       status
@@ -261,7 +263,7 @@ const updateB2BUserStatus = async (req) => {
 
 const createJobRole = async (req) => {
   const { jobRole } = req;
-  const job = await prisma.JobRole.create({
+  const job = await prisma.jobRole.create({
     data: {
       jobRole
     }
@@ -271,7 +273,7 @@ const createJobRole = async (req) => {
 
 const editJobRole = async (req) => {
   const { id, jobRole } = req;
-  const job = await prisma.JobRole.update({
+  const job = await prisma.jobRole.update({
     where: { id: Number(id) },
     data: {
       jobRole
@@ -282,7 +284,7 @@ const editJobRole = async (req) => {
 
 const getJobRole = async (req) => {
   const { id } = req;
-  const job = await prisma.JobRole.findUnique({
+  const job = await prisma.jobRole.findUnique({
     where: {
       id: Number(id)
     },
@@ -295,7 +297,7 @@ const getJobRole = async (req) => {
 
 const getJobRoleByName = async (req) => {
   const { jobRole } = req;
-  const job = await prisma.JobRole.findUnique({
+  const job = await prisma.jobRole.findUnique({
     where: {
       jobRole
     },
@@ -332,7 +334,7 @@ const addJobRolesToUser = async (req) => {
 
 const deleteJobRole = async (req) => {
   const { id } = req;
-  jobRole = await prisma.JobRole.delete({
+  jobRole = await prisma.jobRole.delete({
     where: {
       id: Number(id)
     }

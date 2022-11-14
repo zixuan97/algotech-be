@@ -1,4 +1,4 @@
-const bundleCatalogueModel = require('../../models/bundleCatalogueModel');
+const productCatalogueModel = require('../../models/productCatalogueModel');
 const { prisma } = require('../../models/index');
 // mock logger to remove test logs
 jest.mock('../../helpers/logger', () => {
@@ -64,39 +64,39 @@ test('create product catalogue model', async () => {
     };
   });
   await expect(
-    productCatalogueModel.createCatalogue(bundleCatalogue)
-  ).resolves.toEqual({ bundleCatalogue });
+    productCatalogueModel.createProdCatalogue(productCatalogue)
+  ).resolves.toEqual({ productCatalogue });
 });
 
-test('get all bundle catalogues', async () => {
-  await expect(bundleCatalogueModel.getAllBundleCatalogue()).resolves.toEqual(
+test('get all product catalogue', async () => {
+  await expect(productCatalogueModel.getAllProdCatalogue()).resolves.toEqual(
     []
   );
 });
 
-test('update bundle catalogue', async () => {
-  prisma.bundleCatalogue.update.mockImplementation(async () => {
-    return bundleCatalogue;
+test('update product catalogue', async () => {
+  prisma.productCatalogue.update.mockImplementation(async () => {
+    return productCatalogue;
   });
   await expect(
-    bundleCatalogueModel.updateBundleCatalogue(bundleCatalogue)
-  ).resolves.toEqual(bundleCatalogue);
+    productCatalogueModel.updateProdCatalogue(productCatalogue)
+  ).resolves.toEqual(productCatalogue);
 });
 
-test('delete bundle catalogue', async () => {
-  prisma.bundleCatalogue.delete.mockImplementation(async () => {
+test('delete product catalogue', async () => {
+  prisma.productCatalogue.delete.mockImplementation(async () => {
     return {};
   });
   await expect(
-    bundleCatalogueModel.deleteBundleCatalogue({ id: 1 })
+    productCatalogueModel.deleteProdCatalogue({ id: 1 })
   ).resolves.toEqual({});
 });
 
-test('find bundle catalogue by id', async () => {
-  prisma.bundleCatalogue.findUnique.mockImplementation(async () => {
-    return bundleCatalogue;
+test('find product catalogue by id', async () => {
+  prisma.productCatalogue.findUnique.mockImplementation(async () => {
+    return productCatalogue;
   });
   await expect(
-    bundleCatalogueModel.findBundleCatalogueById({ id: 1 })
-  ).resolves.toEqual(bundleCatalogue);
+    productCatalogueModel.findProdCatalogueById({ id: 1 })
+  ).resolves.toEqual(productCatalogue);
 });
