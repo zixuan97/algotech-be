@@ -150,9 +150,21 @@ const updateOrderOfStepsArray = async (req) => {
   return res;
 };
 
+const getStepByOrderAndTopicId = async (req) => {
+  const { topicId, topicOrder } = req;
+  const step = await prisma.step.findMany({
+    where: {
+      topicId: Number(topicId),
+      topicOrder
+    }
+  });
+  return step[0];
+};
+
 exports.createStep = createStep;
 exports.getAllStepsByTopicId = getAllStepsByTopicId;
 exports.getStepById = getStepById;
 exports.updateStep = updateStep;
 exports.deleteStep = deleteStep;
 exports.updateOrderOfStepsArray = updateOrderOfStepsArray;
+exports.getStepByOrderAndTopicId = getStepByOrderAndTopicId;

@@ -104,39 +104,52 @@ const getStep = async (req, res) => {
 
 const updateStep = async (req, res) => {
   const { id, topicOrder, title, content, topicId } = req.body;
-  const { subjectId } = await topicModel.getTopicById({ id: topicId });
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
-  });
-  const { data, error } = await common.awaitWrap(
-    stepModel.updateStep({
-      id,
-      topicOrder,
-      title,
-      content,
-      topicId
-    })
-  );
-  data.topic.subject.createdBy.password = '';
-  data.topic.subject.lastUpdatedBy.password = '';
-  for (let u of data.topic.subject.usersAssigned) {
-    u.user.password = '';
+  const currentOrders = [];
+  const steps = await stepModel.getAllStepsByTopicId({ topicId });
+  for (let s of steps) {
+    currentOrders.push(s.topicOrder);
   }
-  if (error) {
-    log.error('ERR_STEP_UPDATE-STEP', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  const currStepByOrder = await stepModel.getStepByOrderAndTopicId({
+    topicId,
+    topicOrder
+  });
+  if (currentOrders.includes(topicOrder) && currStepByOrder.id !== id) {
+    res.status(400).send('Topic order already exists!');
   } else {
-    log.out('OK_STEP_UPDATE-STEP', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const { subjectId } = await topicModel.getTopicById({ id: topicId });
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      stepModel.updateStep({
+        id,
+        topicOrder,
+        title,
+        content,
+        topicId
+      })
+    );
+    data.topic.subject.createdBy.password = '';
+    data.topic.subject.lastUpdatedBy.password = '';
+    for (let u of data.topic.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_STEP_UPDATE-STEP', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_STEP_UPDATE-STEP', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 

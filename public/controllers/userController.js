@@ -857,6 +857,7 @@ const updateEmployee = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     userModel.addJobRolesToUser({ userId: id, jobRoles })
   );
+  if (data !== null) data.password = '';
   if (error) {
     log.error('ERR_SUBJECT_UPDATE-EMPLOYEE', {
       err: error.message,

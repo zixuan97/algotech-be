@@ -177,9 +177,21 @@ const updateOrderOfQuestionsArray = async (req) => {
   return res;
 };
 
+const getQuizQuestionByOrderAndQuizId = async (req) => {
+  const { quizId, quizOrder } = req;
+  const quiz = await prisma.QuizQuestion.findMany({
+    where: {
+      quizId: Number(quizId),
+      quizOrder
+    }
+  });
+  return quiz[0];
+};
+
 exports.createQuizQuestion = createQuizQuestion;
 exports.getAllQuizQuestionsByQuizId = getAllQuizQuestionsByQuizId;
 exports.getQuizQuestionById = getQuizQuestionById;
 exports.updateQuizQuestion = updateQuizQuestion;
 exports.deleteQuizQuestion = deleteQuizQuestion;
 exports.updateOrderOfQuestionsArray = updateOrderOfQuestionsArray;
+exports.getQuizQuestionByOrderAndQuizId = getQuizQuestionByOrderAndQuizId;
