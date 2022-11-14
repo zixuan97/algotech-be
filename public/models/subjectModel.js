@@ -101,6 +101,12 @@ const getSubjectById = async (req) => {
       }
     }
   });
+  subject.topics.sort((a, b) => {
+    return a.subjectOrder - b.subjectOrder;
+  });
+  subject.quizzes.sort((a, b) => {
+    return a.subjectOrder - b.subjectOrder;
+  });
   return subject;
 };
 

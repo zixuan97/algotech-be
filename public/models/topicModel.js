@@ -45,6 +45,7 @@ const createTopic = async (req) => {
 
 const getAllTopicsBySubjectId = async (req) => {
   const { subjectId } = req;
+  console.log(subjectId);
   const topics = await prisma.topic.findMany({
     where: { subjectId: Number(subjectId) },
     include: {
@@ -114,6 +115,9 @@ const getTopicById = async (req) => {
       },
       steps: true
     }
+  });
+  topic.steps.sort((a, b) => {
+    return a.topicOrder - b.topicOrder;
   });
   return topic;
 };
