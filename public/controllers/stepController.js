@@ -156,7 +156,7 @@ const deleteStep = async (req, res) => {
 };
 
 const updateOrderBasedOnStepsArray = async (req, res) => {
-  const { error } = await common.awaitWrap(
+  const { data, error } = await common.awaitWrap(
     stepModel.updateOrderOfStepsArray({ steps: req.body })
   );
   if (error) {
@@ -169,9 +169,9 @@ const updateOrderBasedOnStepsArray = async (req, res) => {
   } else {
     log.out('OK_STEP_UPDATE-ORDER', {
       req: { body: req.body, params: req.params },
-      res: { message: 'Updated error of steps array' }
+      res: JSON.stringify(data)
     });
-    res.json({ message: 'Updated error of steps array' });
+    res.json(data);
   }
 };
 
