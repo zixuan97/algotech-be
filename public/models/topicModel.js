@@ -227,9 +227,25 @@ const deleteTopic = async (req) => {
   });
 };
 
+const updateOrderOfTopicArray = async (req) => {
+  const { topics } = req;
+  let i = 1;
+  const res = [];
+  for (let t of topics) {
+    const newTopic = await updateTopic({
+      ...t,
+      subjectOrder: t.subjectOrder
+    });
+    i++;
+    res.push(newTopic);
+  }
+  return res;
+};
+
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopicById = getTopicById;
 exports.updateTopic = updateTopic;
 exports.addStepsToTopic = addStepsToTopic;
 exports.deleteTopic = deleteTopic;
+exports.updateOrderOfTopicArray = updateOrderOfTopicArray;

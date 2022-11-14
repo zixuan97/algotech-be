@@ -186,9 +186,30 @@ const deleteTopic = async (req, res) => {
   }
 };
 
+const updateOrderBasedOnTopicArray = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    topicModel.updateOrderOfTopicArray({ topics: req.body })
+  );
+  if (error) {
+    log.error('ERR_STEP_UPDATE-ORDER-TOPIC', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_STEP_UPDATE-ORDER-TOPIC', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopic = getTopic;
 exports.updateTopic = updateTopic;
 exports.addStepsToTopic = addStepsToTopic;
 exports.deleteTopic = deleteTopic;
+exports.updateOrderBasedOnTopicArray = updateOrderBasedOnTopicArray;
