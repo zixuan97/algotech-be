@@ -184,8 +184,29 @@ const deleteQuizQuestion = async (req, res) => {
   }
 };
 
+const updateOrderBasedOnQuestionsArray = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    quizQuestionModel.updateOrderOfQuestionsArray({ questions: req.body })
+  );
+  if (error) {
+    log.error('ERR_STEP_UPDATE-ORDER-QUIZ-QUESTION', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_STEP_UPDATE-ORDER-QUIZ-QUESTION', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createQuizQuestion = createQuizQuestion;
 exports.getAllQuizQuestionsByQuizId = getAllQuizQuestionsByQuizId;
 exports.getQuizQuestion = getQuizQuestion;
 exports.updateQuizQuestion = updateQuizQuestion;
 exports.deleteQuizQuestion = deleteQuizQuestion;
+exports.updateOrderBasedOnQuestionsArray = updateOrderBasedOnQuestionsArray;

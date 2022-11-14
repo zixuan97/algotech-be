@@ -135,8 +135,24 @@ const deleteStep = async (req) => {
   });
 };
 
+const updateOrderOfStepsArray = async (req) => {
+  const { steps } = req;
+  let i = 1;
+  const res = [];
+  for (let s of steps) {
+    const newStep = await updateStep({
+      ...s,
+      topicOrder: s.topicOrder
+    });
+    i++;
+    res.push(newStep);
+  }
+  return res;
+};
+
 exports.createStep = createStep;
 exports.getAllStepsByTopicId = getAllStepsByTopicId;
 exports.getStepById = getStepById;
 exports.updateStep = updateStep;
 exports.deleteStep = deleteStep;
+exports.updateOrderOfStepsArray = updateOrderOfStepsArray;
