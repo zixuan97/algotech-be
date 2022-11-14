@@ -138,8 +138,9 @@ const deleteStep = async (req) => {
 const updateOrderOfStepsArray = async (req) => {
   const { steps } = req;
   let i = 1;
+  const res = [];
   for (let s of steps) {
-    await updateStep({
+    const newStep = await updateStep({
       id: s.id,
       topicOrder: i,
       title: s.title,
@@ -147,7 +148,9 @@ const updateOrderOfStepsArray = async (req) => {
       topicId: s.topicId
     });
     i++;
+    res.push(newStep);
   }
+  return res;
 };
 
 exports.createStep = createStep;
