@@ -1345,7 +1345,7 @@ const routePlanningForAssignedOrders = async (req, res) => {
           log.out('OK_DELIVERY_GET-LAT-LONG');
           response.data.results[0].orders = p;
           const location = {
-            location_id: response.data.results[0].ADDRESS,
+            location_id: p.postalCode,
             latitude: parseFloat(response.data.results[0].LATITUDE),
             longtitude: parseFloat(response.data.results[0].LONGTITUDE)
           };
@@ -1360,15 +1360,16 @@ const routePlanningForAssignedOrders = async (req, res) => {
         });
     })
   ).then(async () => {
+    // route planning graphhopper
     const url = `https://graphhopper.com/api/1/vrp?key=${process.env.GRAPHHOPPER_KEY}`;
     const services = [];
     for (let i = 0; i < latlongArr.length; i++) {
       services.push({
         id: (i + 1).toString(),
         address: {
-          location_id: latlongArr[0].location_id,
-          lon: latlongArr[0].longtitude,
-          lat: latlongArr[0].latitude
+          location_id: latlongArr[i].location_id,
+          lon: latlongArr[i].longtitude,
+          lat: latlongArr[i].latitude
         }
       });
     }
@@ -1385,19 +1386,28 @@ const routePlanningForAssignedOrders = async (req, res) => {
       ],
       services
     };
-    let finalRes = {};
     await axios
       .post(url, body)
-      .then((res) => {
-        finalRes.orders = dataRes;
-        finalRes.route = res.data.solution.routes[0].activities;
-        console.log(finalRes);
+      .then((response) => {
+        for (
+          let i = 0;
+          i < response.data.solution.routes[0].activities.length;
+          i++
+        ) {
+          const postal =
+            response.data.solution.routes[0].activities[i].address.location_id;
+          for (let j = 0; j < salesOrders.length; j++) {
+            if (postal === salesOrders[j].postalCode) {
+              response.data.solution.routes[0].activities[i].order =
+                salesOrders[j];
+            }
+          }
+        }
+        res.json(response.data.solution.routes[0].activities);
       })
       .catch((err) => {
         console.log(err);
       });
-
-    res.json(finalRes);
   });
 };
 

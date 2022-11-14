@@ -65,6 +65,25 @@ test('create user model', async () => {
   await expect(userModel.createUser(user)).resolves.toEqual({ user });
 });
 
+test('create user model not b2b', async () => {
+  const encryptedPassword = await bcrypt.hash('password', 10);
+  const userAdmin = (user = {
+    firstName: 'Zi Kun',
+    lastName: 'Teng',
+    email: 'meleenoob971+b2b@gmail.com',
+    password: encryptedPassword,
+    role: 'ADMIN',
+    isVerified: false,
+    tier: 'Tier 3'
+  });
+  prisma.user.create.mockImplementation(async () => {
+    return {
+      userAdmin
+    };
+  });
+  await expect(userModel.createUser(userAdmin)).resolves.toEqual({ userAdmin });
+});
+
 test('get all users', async () => {
   await expect(userModel.getUsers()).resolves.toEqual([]);
 });
@@ -129,6 +148,18 @@ test('change user role', async () => {
   await expect(
     userModel.changeUserRole({ id: 1, action: 'intern' })
   ).resolves.toEqual(user);
+  await expect(
+    userModel.changeUserRole({ id: 1, action: 'pt' })
+  ).resolves.toEqual(user);
+  await expect(
+    userModel.changeUserRole({ id: 1, action: 'ft' })
+  ).resolves.toEqual(user);
+  await expect(
+    userModel.changeUserRole({ id: 1, action: 'customer' })
+  ).resolves.toEqual(user);
+  await expect(
+    userModel.changeUserRole({ id: 1, action: 'admin' })
+  ).resolves.toEqual(user);
 });
 
 test('generate user password', async () => {
@@ -148,6 +179,19 @@ test('verify password', async () => {
   ).resolves.toEqual(true);
 });
 
+test('verify password wrong password', async () => {
+  prisma.user.update.mockImplementation(() => {
+    return user;
+  });
+  await expect(
+    userModel.verifyPassword({
+      userEmail: 'meleenoob971+b2b@gmail.com',
+      currentPassword: 'passwordwrong',
+      newPassword: 'hello123'
+    })
+  ).resolves.toEqual(false);
+});
+
 test('change password', async () => {
   prisma.user.update.mockImplementation(async () => {
     return user;
@@ -162,7 +206,7 @@ test('Update b2b user status', async () => {
     return user;
   });
   await expect(
-    userModel.editUser({ id: 1, status: 'ACTIVE' })
+    userModel.updateB2BUserStatus({ id: 1, status: 'ACTIVE' })
   ).resolves.toEqual(user);
 });
 
@@ -175,73 +219,69 @@ test('Get employees', async () => {
 });
 
 test('Create job role', async () => {
-  prisma.jobRole.update.mockImplementation(async () => {
+  prisma.jobRole.create.mockImplementation(async () => {
     return jobRole;
   });
-  await expect(userModel.editUser({ updatedUser: user })).resolves.toEqual(
-    user
-  );
+  await expect(
+    userModel.createJobRole({ jobRole: 'Assistant Director' })
+  ).resolves.toEqual(jobRole);
 });
 
 test('Edit job role', async () => {
-  prisma.user.update.mockImplementation(async () => {
-    return user;
+  prisma.jobRole.update.mockImplementation(async () => {
+    return jobRole;
   });
-  await expect(userModel.editUser({ updatedUser: user })).resolves.toEqual(
-    user
-  );
+  await expect(
+    userModel.editJobRole({ jobRole: 'Director', id: 1 })
+  ).resolves.toEqual(jobRole);
 });
 
 test('Get job role', async () => {
-  prisma.user.update.mockImplementation(async () => {
-    return user;
+  prisma.jobRole.findUnique.mockImplementation(async () => {
+    return jobRole;
   });
-  await expect(userModel.editUser({ updatedUser: user })).resolves.toEqual(
-    user
-  );
+  await expect(userModel.getJobRole({ id: 1 })).resolves.toEqual(jobRole);
 });
 
 test('Get job role by name', async () => {
-  prisma.user.update.mockImplementation(async () => {
-    return user;
+  prisma.jobRole.findUnique.mockImplementation(async () => {
+    return jobRole;
   });
-  await expect(userModel.editUser({ updatedUser: user })).resolves.toEqual(
-    user
-  );
+  await expect(
+    userModel.getJobRoleByName({ jobRole: 'Director' })
+  ).resolves.toEqual(jobRole);
 });
 
 test('Add job role to user', async () => {
   prisma.user.update.mockImplementation(async () => {
     return user;
   });
-  await expect(userModel.editUser({ updatedUser: user })).resolves.toEqual(
-    user
-  );
+  await expect(
+    userModel.addJobRolesToUser({ userId: 1, jobRoles: ['Director'] })
+  ).resolves.toEqual(user);
 });
 
 test('Delete job role', async () => {
-  prisma.user.update.mockImplementation(async () => {
-    return user;
+  prisma.jobRole.delete.mockImplementation(async () => {
+    return jobRole;
   });
-  await expect(userModel.editUser({ updatedUser: user })).resolves.toEqual(
-    user
-  );
+  await expect(userModel.deleteJobRole({ id: 1 })).resolves.toEqual(1);
 });
 
 test('Assign subordinates to manager', async () => {
   prisma.user.update.mockImplementation(async () => {
     return user;
   });
-  await expect(userModel.editUser({ updatedUser: user })).resolves.toEqual(
-    user
-  );
+  await expect(
+    userModel.assignSubordinatesToManager({ id: 1, users: [{ user }] })
+  ).resolves.toEqual(user);
 });
 
 test('Unassign subordinates to manager', async () => {
   prisma.user.update.mockImplementation(async () => {
     return user;
   });
-  await expect(userModel.editUser({ updatedUser: user })).resolves.toEqual(
-    user
-  );
+  await expect(
+    userModel.unassignSubordinatesToManager({ id: 1, users: [{ user }] })
+  ).resolves.toEqual(user);
 });
