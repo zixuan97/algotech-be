@@ -268,6 +268,7 @@ const getLeaveRecordById = async (req) => {
 const updateLeaveRecordByEmployeeId = async (req) => {
   const {
     employeeId,
+    tier,
     annualQuota,
     childcareQuota,
     compassionateQuota,
@@ -299,6 +300,12 @@ const updateLeaveRecordByEmployeeId = async (req) => {
       lastUpdated: new Date(Date.now())
     }
   });
+  const user = await userModel.findUserById({ id: employeeId });
+  const updatedUser = {
+    ...user,
+    tier
+  };
+  await userModel.editUser({ updatedUser });
   return leaveRecord;
 };
 
@@ -404,6 +411,7 @@ const getAllEmployeesByTier = async (req) => {
 const updateEmployeeLeaveQuota = async (req) => {
   const {
     employeeId,
+    tier,
     annualQuota,
     childcareQuota,
     compassionateQuota,
@@ -451,6 +459,7 @@ const updateEmployeeLeaveQuota = async (req) => {
 
   const data = await updateLeaveRecordByEmployeeId({
     employeeId,
+    tier,
     annualQuota,
     childcareQuota,
     compassionateQuota,

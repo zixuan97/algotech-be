@@ -256,6 +256,7 @@ const getLeaveRecordById = async (req, res) => {
 const updateEmployeeLeaveQuota = async (req, res) => {
   const {
     employeeId,
+    tier,
     annualQuota,
     childcareQuota,
     compassionateQuota,
@@ -266,6 +267,7 @@ const updateEmployeeLeaveQuota = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     leaveModel.updateEmployeeLeaveQuota({
       employeeId,
+      tier,
       annualQuota,
       childcareQuota,
       compassionateQuota,

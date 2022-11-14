@@ -874,6 +874,36 @@ const updateEmployee = async (req, res) => {
   }
 };
 
+const setCEO = async (req, res) => {
+  const { ceoId } = req.params;
+  const subordinates = (await userModel.getEmployees({})).filter(
+    (e) => e.id !== ceoId
+  );
+  const { data, error } = await common.awaitWrap(
+    userModel.assignSubordinatesToManager({
+      id: ceoId,
+      users: subordinates
+    })
+  );
+  for (let u of data.subordinates) {
+    u.password = '';
+  }
+  if (error) {
+    log.error('ERR_SUBJECT_SET-CEO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_SET-CEO', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -905,3 +935,4 @@ exports.getAllJobRoles = getAllJobRoles;
 exports.assignSubordinatesToManager = assignSubordinatesToManager;
 exports.unassignSubordinatesToManager = unassignSubordinatesToManager;
 exports.updateEmployee = updateEmployee;
+exports.setCEO = setCEO;
