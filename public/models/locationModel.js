@@ -3,7 +3,7 @@ const { prisma } = require('./index.js');
 const createLocation = async (req) => {
   const { name, address } = req;
 
-  await prisma.location.create({
+  return await prisma.location.create({
     data: {
       name,
       address
@@ -78,7 +78,7 @@ const deleteLocation = async (req) => {
       }
     }
   });
-  await prisma.location.delete({
+  return await prisma.location.delete({
     where: {
       id: Number(id)
     }
@@ -87,7 +87,7 @@ const deleteLocation = async (req) => {
 
 const addProductsToLocation = async (req) => {
   const { products, id } = req;
-  await prisma.location.update({
+  return await prisma.location.update({
     where: { id },
     data: {
       stockQuantity: {

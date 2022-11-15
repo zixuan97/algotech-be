@@ -444,5 +444,5 @@ exports.findBulkOrderByEmail = findBulkOrderByEmail;
 exports.getAllBulkOrdersWithTimeFilter = getAllBulkOrdersWithTimeFilter;
 exports.updateBulkOrderStatus = updateBulkOrderStatus;
 exports.updateBulkOrderStatusByOrderId = updateBulkOrderStatusByOrderId;
-exports.getBulkOrdersByMonthForCustomer = getBulkOrdersByMonthForCustomer;
+exports.getBulkOrdersByMonthForCustomer =getBulkOrdersByMonthForCustomer;
 exports.updateBulkOrderPaymentMode = updateBulkOrderPaymentMode;

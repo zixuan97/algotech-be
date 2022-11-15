@@ -339,26 +339,6 @@ const getAllCurrencies = async (req, res) => {
   }
 };
 
-const getCountryCodeBasedOnCurrency = async (req, res) => {
-  const { currency } = req.body;
-  const { data, error } = await common.awaitWrap(
-    supplierModel.getCountryCodeBasedOnCurrency({ currency })
-  );
-  if (error) {
-    log.error('ERR_SUPPLIER_GET-COUNTRY-CODE-BASED-ON-CURRENCY', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
-  } else {
-    log.out('OK_SUPPLIER_GET-COUNTRY-CODE-BASED-ON-CURRENCY', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  }
-};
-
 exports.createSupplier = createSupplier;
 exports.getAllSuppliers = getAllSuppliers;
 exports.updateSupplier = updateSupplier;
@@ -370,4 +350,3 @@ exports.getAllSupplierProducts = getAllSupplierProducts;
 exports.getAllProductsBySupplier = getAllProductsBySupplier;
 exports.deleteProductBySupplier = deleteProductBySupplier;
 exports.getAllCurrencies = getAllCurrencies;
-exports.getCountryCodeBasedOnCurrency = getCountryCodeBasedOnCurrency;
