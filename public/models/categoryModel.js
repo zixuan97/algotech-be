@@ -3,7 +3,7 @@ const { prisma } = require('./index.js');
 const createCategory = async (req) => {
   const { name } = req;
 
-  await prisma.category.create({
+  return await prisma.category.create({
     data: {
       name
     }
@@ -39,7 +39,7 @@ const deleteCategory = async (req) => {
       }
     }
   });
-  await prisma.category.delete({
+  return await prisma.category.delete({
     where: {
       id: Number(id)
     }
@@ -48,7 +48,7 @@ const deleteCategory = async (req) => {
 
 const connectOrCreateCategory = async (req) => {
   const { categories } = req;
-  await Promise.allSettled(
+  return await Promise.allSettled(
     categories.map(async (c) => {
       await prisma.category.upsert({
         where: {

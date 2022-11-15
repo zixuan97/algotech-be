@@ -15,9 +15,5 @@ router.delete(
   supplierController.deleteProductBySupplier
 );
 router.get('/currencies/all', supplierController.getAllCurrencies);
-router.get(
-  '/currency/countrycode',
-  supplierController.getCountryCodeBasedOnCurrency
-);
 
 module.exports = router;
