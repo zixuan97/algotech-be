@@ -257,6 +257,28 @@ const updateOrderBasedOnTopicArray = async (req, res) => {
   }
 };
 
+const markTopicAsCompletedByUser = async (req, res) => {
+  const { topicId, userId } = req.body;
+  const { data, error } = await common.awaitWrap(
+    topicModel.markTopicAsCompletedForUser({ topicId, userId })
+  );
+  data.user.password = '';
+  if (error) {
+    log.error('ERR_STEP_UPDATE-MARK-TOPIC-AS-COMPLETED', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_STEP_UPDATE-MARK-TOPIC-AS-COMPLETED', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopic = getTopic;
@@ -264,3 +286,4 @@ exports.updateTopic = updateTopic;
 exports.addStepsToTopic = addStepsToTopic;
 exports.deleteTopic = deleteTopic;
 exports.updateOrderBasedOnTopicArray = updateOrderBasedOnTopicArray;
+exports.markTopicAsCompletedByUser = markTopicAsCompletedByUser;

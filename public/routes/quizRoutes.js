@@ -13,5 +13,6 @@ router.post(
 );
 router.delete('/:id', verifyToken, quizController.deleteQuiz);
 router.post('/order', quizController.updateOrderBasedOnQuizArray);
+router.post('/completed', quizController.markQuizAsCompletedByUser);
 
 module.exports = router;

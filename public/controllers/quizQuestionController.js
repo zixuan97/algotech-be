@@ -6,16 +6,8 @@ const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 
 const createQuizQuestion = async (req, res) => {
-  const {
-    quizOrder,
-    question,
-    type,
-    options,
-    writtenAnswer,
-    minWordCount,
-    correctAnswer,
-    quizId
-  } = req.body;
+  const { quizOrder, question, type, options, correctAnswer, quizId } =
+    req.body;
   const currentOrders = [];
   const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
     quizId
@@ -38,8 +30,6 @@ const createQuizQuestion = async (req, res) => {
         question,
         type,
         options,
-        writtenAnswer,
-        minWordCount,
         correctAnswer,
         quizId
       })
@@ -116,17 +106,8 @@ const getQuizQuestion = async (req, res) => {
 };
 
 const updateQuizQuestion = async (req, res) => {
-  const {
-    id,
-    quizOrder,
-    question,
-    type,
-    options,
-    writtenAnswer,
-    minWordCount,
-    correctAnswer,
-    quizId
-  } = req.body;
+  const { id, quizOrder, question, type, options, correctAnswer, quizId } =
+    req.body;
   const currentOrders = [];
   const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
     quizId
@@ -155,8 +136,6 @@ const updateQuizQuestion = async (req, res) => {
         question,
         type,
         options,
-        writtenAnswer,
-        minWordCount,
         correctAnswer,
         quizId
       })

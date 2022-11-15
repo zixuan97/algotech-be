@@ -45,38 +45,59 @@ const createSubject = async (req) => {
 };
 
 const getAllSubjects = async () => {
-  const subjects = await prisma.subject.findMany({
-    include: {
-      topics: true,
-      topics: {
-        include: {
-          steps: true
-        }
+  const subjects = await prisma.subject.findMany({});
+  let res = [];
+  for (let s of subjects) {
+    const average = await getAverageCompletionRateOfSubject({ id: s.id });
+    s = await prisma.subject.update({
+      where: {
+        id: Number(s.id)
       },
-      quizzes: true,
-      quizzes: {
-        include: {
-          questions: true
-        }
+      data: {
+        completionRate: average
       },
-      createdBy: true,
-      lastUpdatedBy: true,
-      usersAssigned: true,
-      usersAssigned: {
-        include: {
-          user: true
+      include: {
+        topics: true,
+        topics: {
+          include: {
+            steps: true
+          }
+        },
+        quizzes: true,
+        quizzes: {
+          include: {
+            questions: true
+          }
+        },
+        createdBy: true,
+        lastUpdatedBy: true,
+        usersAssigned: true,
+        usersAssigned: {
+          include: {
+            user: true
+          }
         }
       }
-    }
-  });
-  return subjects;
+    });
+    res.push(s);
+  }
+  return res;
 };
 
 const getSubjectById = async (req) => {
   const { id } = req;
-  const subject = await prisma.subject.findUnique({
+  let subject = await prisma.subject.findUnique({
     where: {
       id: Number(id)
+    }
+  });
+  const average = await getAverageCompletionRateOfSubject({ id });
+  subject = await prisma.subject.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      completionRate: average
     },
     include: {
       topics: true,
@@ -226,6 +247,15 @@ const connectOrCreateEmployeeSubjectRecord = async (req) => {
       user: true
     }
   });
+  const average = await getAverageCompletionRateOfSubject({ id: subjectId });
+  s = await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
   return employeeSubjectRecord;
 };
 
@@ -237,6 +267,15 @@ const disconnectOrRemoveEmployeeSubjectRecord = async (req) => {
         subjectId,
         userId
       }
+    }
+  });
+  const average = await getAverageCompletionRateOfSubject({ id: subjectId });
+  s = await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
     }
   });
   return employeeSubjectRecord;
@@ -295,16 +334,40 @@ const updateSubjectCompletionRateBySubjectByEmployee = async (req) => {
 
 const getSubjectRecordBySubjectAndUser = async (req) => {
   const { subjectId, userId } = req;
-  const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.findUnique({
+  const record = await prisma.EmployeeSubjectRecord.findFirst({
     where: {
-      subjectId_userId: {
-        subjectId: Number(subjectId),
-        userId: Number(userId)
-      }
+      AND: [
+        {
+          subjectId: Number(subjectId)
+        },
+        {
+          userId: Number(userId)
+        }
+      ]
+    },
+    include: {
+      completedTopics: true,
+      completedQuizzes: true
+    }
+  });
+  const totalInSubject = await getNumberOfTopicsAndQuizInSubject({
+    id: subjectId
+  });
+  const totalCompleted =
+    record.completedTopics.length + record.completedQuizzes.length;
+  const completionRate = (totalCompleted / totalInSubject) * 100;
+  const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.update({
+    where: {
+      id: record.id
+    },
+    data: {
+      completionRate
     },
     include: {
       subject: true,
-      user: true
+      user: true,
+      completedTopics: true,
+      completedQuizzes: true
     }
   });
   return employeeSubjectRecord;
@@ -371,6 +434,31 @@ const getUsersAssignedBySubjectId = async (req) => {
   return users;
 };
 
+const getNumberOfTopicsAndQuizInSubject = async (req) => {
+  const { id } = req;
+  const subject = await getSubjectById({ id });
+  return subject.topics.length + subject.quizzes.length;
+};
+
+const getAverageCompletionRateOfSubject = async (req) => {
+  const { id } = req;
+  const records = await prisma.EmployeeSubjectRecord.findMany({
+    where: {
+      subjectId: Number(id)
+    }
+  });
+  if (records.length === 0) {
+    return 0;
+  }
+  let total = 0;
+  let size = 0;
+  records.map((r) => {
+    total += r.completionRate;
+    size++;
+  });
+  return total / size;
+};
+
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
 exports.getSubjectById = getSubjectById;
@@ -384,3 +472,5 @@ exports.updateSubjectCompletionRateBySubjectByEmployee =
 exports.getSubjectRecordBySubjectAndUser = getSubjectRecordBySubjectAndUser;
 exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
 exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;
+exports.getNumberOfTopicsAndQuizInSubject = getNumberOfTopicsAndQuizInSubject;
+exports.getAverageCompletionRateOfSubject = getAverageCompletionRateOfSubject;

@@ -876,18 +876,22 @@ const updateEmployee = async (req, res) => {
 
 const setCEO = async (req, res) => {
   const { ceoId } = req.params;
-  const subordinates = (await userModel.getEmployees({})).filter(
-    (e) => e.id !== ceoId
-  );
+  const subordinates = await userModel.getEmployees({});
+  await userModel.assignSubordinatesToManager({
+    id: Number(ceoId),
+    users: subordinates
+  });
+  let ceo = await userModel.findUserById({ id: Number(ceoId) });
   const { data, error } = await common.awaitWrap(
-    userModel.assignSubordinatesToManager({
-      id: ceoId,
-      users: subordinates
+    userModel.unassignSubordinatesToManager({
+      id: Number(ceoId),
+      users: [ceo]
     })
   );
   for (let u of data.subordinates) {
     u.password = '';
   }
+  data.password = '';
   if (error) {
     log.error('ERR_SUBJECT_SET-CEO', {
       err: error.message,

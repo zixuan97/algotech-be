@@ -383,6 +383,7 @@ model EmployeeSubjectRecord {
   user             User    @relation(fields: [userId], references: [id])
   completedQuizzes Quiz[]
   completedTopics  Topic[]
+  @@unique([subjectId, userId])
 }
 
 model Subject {
@@ -423,8 +424,6 @@ model QuizQuestion {
   question      String
   type          AnswerType
   options       String[]
-  writtenAnswer String?
-  minWordCount  Int?
   correctAnswer String
   quizId        Int
   quiz          Quiz       @relation(fields: [quizId], references: [id])
@@ -548,7 +547,7 @@ enum LeaveStatus {
 
 enum AnswerType {
   MCQ
-  WRITTEN
+  TRUEFALSE
 }
 
 enum ContentStatus {

@@ -1,24 +1,13 @@
 const { prisma } = require('./index.js');
 
 const createQuizQuestion = async (req) => {
-  const {
-    quizOrder,
-    question,
-    type,
-    options,
-    writtenAnswer,
-    minWordCount,
-    correctAnswer,
-    quizId
-  } = req;
+  const { quizOrder, question, type, options, correctAnswer, quizId } = req;
   const quizQuestion = await prisma.QuizQuestion.create({
     data: {
       quizOrder,
       question,
       type,
       options,
-      writtenAnswer,
-      minWordCount,
       correctAnswer,
       quizId
     },
@@ -106,17 +95,7 @@ const getQuizQuestionById = async (req) => {
 };
 
 const updateQuizQuestion = async (req) => {
-  const {
-    id,
-    quizOrder,
-    question,
-    type,
-    options,
-    writtenAnswer,
-    minWordCount,
-    correctAnswer,
-    quizId
-  } = req;
+  const { id, quizOrder, question, type, options, correctAnswer, quizId } = req;
   const quizQuestion = await prisma.QuizQuestion.update({
     where: { id },
     data: {
@@ -124,8 +103,6 @@ const updateQuizQuestion = async (req) => {
       question,
       type,
       options,
-      writtenAnswer,
-      minWordCount,
       correctAnswer,
       quizId
     },
