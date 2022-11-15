@@ -1,5 +1,6 @@
 const { ContentStatus } = require('@prisma/client');
 const { prisma } = require('./index.js');
+const subjectModel = require('./subjectModel.js');
 
 const createTopic = async (req) => {
   const { subjectOrder, title, subjectId } = req;
@@ -37,6 +38,17 @@ const createTopic = async (req) => {
         }
       },
       steps: true
+    }
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
     }
   });
   return topic;
@@ -266,6 +278,50 @@ const getTopicByTitleAndSubjectId = async (req) => {
   return topic[0];
 };
 
+const markTopicAsCompletedForUser = async (req) => {
+  const { topicId, userId } = req;
+  const topic = await prisma.topic.findUnique({
+    where: { id: Number(topicId) },
+    include: {
+      steps: true
+    }
+  });
+  let record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: topic.subjectId,
+    userId
+  });
+  record.completedTopics.push(topic);
+  await prisma.EmployeeSubjectRecord.update({
+    where: {
+      id: record.id
+    },
+    data: {
+      completedTopics: {
+        set: [],
+        connect: record.completedTopics.map((t) => ({
+          id: t.id
+        }))
+      }
+    }
+  });
+  record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: topic.subjectId,
+    userId
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: topic.subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(topic.subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
+  return record;
+};
+
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopicById = getTopicById;
@@ -275,3 +331,4 @@ exports.deleteTopic = deleteTopic;
 exports.updateOrderOfTopicArray = updateOrderOfTopicArray;
 exports.getTopicByOrderAndSubjectId = getTopicByOrderAndSubjectId;
 exports.getTopicByTitleAndSubjectId = getTopicByTitleAndSubjectId;
+exports.markTopicAsCompletedForUser = markTopicAsCompletedForUser;

@@ -279,6 +279,28 @@ const updateOrderBasedOnQuizArray = async (req, res) => {
   }
 };
 
+const markQuizAsCompletedByUser = async (req, res) => {
+  const { quizId, userId } = req.body;
+  const { data, error } = await common.awaitWrap(
+    quizModel.markQuizAsCompletedForUser({ quizId, userId })
+  );
+  data.user.password = '';
+  if (error) {
+    log.error('ERR_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createQuiz = createQuiz;
 exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuiz = getQuiz;
@@ -286,3 +308,4 @@ exports.updateQuiz = updateQuiz;
 exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
 exports.deleteQuiz = deleteQuiz;
 exports.updateOrderBasedOnQuizArray = updateOrderBasedOnQuizArray;
+exports.markQuizAsCompletedByUser = markQuizAsCompletedByUser;
