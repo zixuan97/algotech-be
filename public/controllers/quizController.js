@@ -301,6 +301,27 @@ const markQuizAsCompletedByUser = async (req, res) => {
   }
 };
 
+const getQuizResults = async (req, res) => {
+  const { quizId, userAnswers } = req.body;
+  const { data, error } = await common.awaitWrap(
+    quizModel.getQuizResults({ quizId, userAnswers })
+  );
+  if (error) {
+    log.error('ERR_STEP_GET-QUIZ-RESULTS', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_STEP_GET-QUIZ-RESULTS', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createQuiz = createQuiz;
 exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuiz = getQuiz;
@@ -309,3 +330,4 @@ exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
 exports.deleteQuiz = deleteQuiz;
 exports.updateOrderBasedOnQuizArray = updateOrderBasedOnQuizArray;
 exports.markQuizAsCompletedByUser = markQuizAsCompletedByUser;
+exports.getQuizResults = getQuizResults;

@@ -1,5 +1,6 @@
 const { prisma } = require('./index.js');
 const subjectModel = require('./subjectModel.js');
+const quizQuestionModel = require('./quizQuestionModel.js');
 
 const createQuiz = async (req) => {
   const {
@@ -339,6 +340,23 @@ const markQuizAsCompletedForUser = async (req) => {
   return record;
 };
 
+const getQuizResults = async (req) => {
+  const { quizId, userAnswers } = req;
+  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
+    quizId
+  });
+  const total = quizQuestions.length;
+  let totalCorrect = 0;
+  if (userAnswers.length === quizQuestions.length) {
+    for (let i = 0; i < quizQuestions.length; i++) {
+      if (userAnswers[i] === quizQuestions[i].correctAnswer) {
+        totalCorrect++;
+      }
+    }
+  }
+  return (totalCorrect / total) * 100;
+};
+
 exports.createQuiz = createQuiz;
 exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuizById = getQuizById;
@@ -349,3 +367,4 @@ exports.updateOrderOfQuizArray = updateOrderOfQuizArray;
 exports.getQuizByOrderAndSubjectId = getQuizByOrderAndSubjectId;
 exports.getQuizByTitleAndSubjectId = getQuizByTitleAndSubjectId;
 exports.markQuizAsCompletedForUser = markQuizAsCompletedForUser;
+exports.getQuizResults = getQuizResults;
