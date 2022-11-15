@@ -135,8 +135,36 @@ const deleteStep = async (req) => {
   });
 };
 
+const updateOrderOfStepsArray = async (req) => {
+  const { steps } = req;
+  let i = 1;
+  const res = [];
+  for (let s of steps) {
+    const newStep = await updateStep({
+      ...s,
+      topicOrder: s.topicOrder
+    });
+    i++;
+    res.push(newStep);
+  }
+  return res;
+};
+
+const getStepByOrderAndTopicId = async (req) => {
+  const { topicId, topicOrder } = req;
+  const step = await prisma.step.findMany({
+    where: {
+      topicId: Number(topicId),
+      topicOrder
+    }
+  });
+  return step[0];
+};
+
 exports.createStep = createStep;
 exports.getAllStepsByTopicId = getAllStepsByTopicId;
 exports.getStepById = getStepById;
 exports.updateStep = updateStep;
 exports.deleteStep = deleteStep;
+exports.updateOrderOfStepsArray = updateOrderOfStepsArray;
+exports.getStepByOrderAndTopicId = getStepByOrderAndTopicId;

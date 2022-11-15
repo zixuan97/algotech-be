@@ -1,3 +1,4 @@
+const stepModel = require('../models/stepModel');
 const topicModel = require('../models/topicModel');
 const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
@@ -6,35 +7,48 @@ const { log } = require('../helpers/logger');
 
 const createTopic = async (req, res) => {
   const { subjectOrder, title, subjectId } = req.body;
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
-  });
-  const { data, error } = await common.awaitWrap(
-    topicModel.createTopic({
-      subjectOrder,
-      title,
-      subjectId
-    })
-  );
-  data.subject.createdBy.password = '';
-  data.subject.lastUpdatedBy.password = '';
-  for (let u of data.subject.usersAssigned) {
-    u.user.password = '';
+  const currentOrders = [];
+  const currTitles = [];
+  const topics = await topicModel.getAllTopicsBySubjectId({ subjectId });
+  for (let t of topics) {
+    currentOrders.push(t.subjectOrder);
+    currTitles.push(t.title);
   }
-  if (error) {
-    log.error('ERR_TOPIC_CREATE-TOPIC', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.json(Error.http(error));
+  if (currentOrders.includes(subjectOrder)) {
+    res.status(400).send('Subject order already exists!');
+  } else if (currTitles.includes(title)) {
+    res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
   } else {
-    log.out('OK_TOPIC_CREATE-TOPIC', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      topicModel.createTopic({
+        subjectOrder,
+        title,
+        subjectId
+      })
+    );
+    data.subject.createdBy.password = '';
+    data.subject.lastUpdatedBy.password = '';
+    for (let u of data.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_TOPIC_CREATE-TOPIC', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      res.json(Error.http(error));
+    } else {
+      log.out('OK_TOPIC_CREATE-TOPIC', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 
@@ -90,74 +104,111 @@ const getTopic = async (req, res) => {
 
 const updateTopic = async (req, res) => {
   const { id, subjectOrder, title, status, subjectId } = req.body;
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
-  });
-  const { data, error } = await common.awaitWrap(
-    topicModel.updateTopic({
-      id,
-      subjectOrder,
-      title,
-      status,
-      subjectId
-    })
-  );
-  data.subject.createdBy.password = '';
-  data.subject.lastUpdatedBy.password = '';
-  for (let u of data.subject.usersAssigned) {
-    u.user.password = '';
+  const currentOrders = [];
+  const currTitles = [];
+  const topics = await topicModel.getAllTopicsBySubjectId({ subjectId });
+  for (let t of topics) {
+    currentOrders.push(t.subjectOrder);
+    currTitles.push(t.title);
   }
-  if (error) {
-    log.error('ERR_TOPIC_UPDATE-TOPIC', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  const currTopicByOrder = await topicModel.getTopicByOrderAndSubjectId({
+    subjectId,
+    subjectOrder
+  });
+  const currTopicByTitle = await topicModel.getTopicByTitleAndSubjectId({
+    subjectId,
+    title
+  });
+  if (currentOrders.includes(subjectOrder) && currTopicByOrder.id !== id) {
+    res.status(400).send('Subject order already exists!');
+  } else if (currTitles.includes(title) && currTopicByTitle.id !== id) {
+    res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
   } else {
-    log.out('OK_TOPIC_UPDATE-TOPIC', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      topicModel.updateTopic({
+        id,
+        subjectOrder,
+        title,
+        status,
+        subjectId
+      })
+    );
+    data.subject.createdBy.password = '';
+    data.subject.lastUpdatedBy.password = '';
+    for (let u of data.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_TOPIC_UPDATE-TOPIC', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_TOPIC_UPDATE-TOPIC', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 
 const addStepsToTopic = async (req, res) => {
   const { id, steps } = req.body;
-  const { subjectId } = await topicModel.getTopicById({ id });
-  const currUserId = req.user.userId;
-  await subjectModel.updateSubject({
-    id: subjectId,
-    lastUpdatedById: currUserId
+  const currentOrders = [];
+  let stepsToAdd = [];
+  const stepsInTopic = await stepModel.getAllStepsByTopicId({
+    topicId: id
   });
-  const { data, error } = await common.awaitWrap(
-    topicModel.addStepsToTopic({
-      id,
-      steps
-    })
-  );
-  console.log(data);
-  data.subject.createdBy.password = '';
-  data.subject.lastUpdatedBy.password = '';
-  for (let u of data.subject.usersAssigned) {
-    u.user.password = '';
+  for (let s of stepsInTopic) {
+    currentOrders.push(s.topicOrder);
   }
-  if (error) {
-    log.error('ERR_TOPIC_ADD-STEPS-TO-TOPIC', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  for (let st of steps) {
+    if (!currentOrders.includes(st.topicOrder)) {
+      stepsToAdd.push(st);
+    }
+  }
+  if (stepsToAdd.length === 0) {
+    res.status(400).send('All topic orders already exists!');
   } else {
-    log.out('OK_TOPIC_ADD-STEPS-TO-TOPIC', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    const { subjectId } = await topicModel.getTopicById({ id });
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
     });
-    res.json(data);
+    const { data, error } = await common.awaitWrap(
+      topicModel.addStepsToTopic({
+        id,
+        steps: stepsToAdd
+      })
+    );
+    data.subject.createdBy.password = '';
+    data.subject.lastUpdatedBy.password = '';
+    for (let u of data.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_TOPIC_ADD-STEPS-TO-TOPIC', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_TOPIC_ADD-STEPS-TO-TOPIC', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 
@@ -186,9 +237,53 @@ const deleteTopic = async (req, res) => {
   }
 };
 
+const updateOrderBasedOnTopicArray = async (req, res) => {
+  const { data, error } = await common.awaitWrap(
+    topicModel.updateOrderOfTopicArray({ topics: req.body })
+  );
+  if (error) {
+    log.error('ERR_STEP_UPDATE-ORDER-TOPIC', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_STEP_UPDATE-ORDER-TOPIC', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const markTopicAsCompletedByUser = async (req, res) => {
+  const { topicId, userId } = req.body;
+  const { data, error } = await common.awaitWrap(
+    topicModel.markTopicAsCompletedForUser({ topicId, userId })
+  );
+  data.user.password = '';
+  if (error) {
+    log.error('ERR_STEP_UPDATE-MARK-TOPIC-AS-COMPLETED', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_STEP_UPDATE-MARK-TOPIC-AS-COMPLETED', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopic = getTopic;
 exports.updateTopic = updateTopic;
 exports.addStepsToTopic = addStepsToTopic;
 exports.deleteTopic = deleteTopic;
+exports.updateOrderBasedOnTopicArray = updateOrderBasedOnTopicArray;
+exports.markTopicAsCompletedByUser = markTopicAsCompletedByUser;

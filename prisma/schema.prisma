@@ -126,6 +126,7 @@ model ProcurementOrder {
   supplierEmail    String
   supplierName     String
   warehouseName    String
+  currency         String
   procOrderItems   ProcurementOrderItem[]
 }
 
@@ -363,23 +364,26 @@ model Step {
 }
 
 model Topic {
-  id           Int           @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   subjectOrder Int
-  status       ContentStatus @default(DRAFT)
+  status       ContentStatus           @default(DRAFT)
   subjectId    Int
   title        String
-  subject      Subject       @relation(fields: [subjectId], references: [id])
+  subject      Subject                 @relation(fields: [subjectId], references: [id])
   steps        Step[]
+  records      EmployeeSubjectRecord[]
 }
 
 model EmployeeSubjectRecord {
-  subjectId      Int
-  userId         Int
-  completionRate Float
-  subject        Subject @relation(fields: [subjectId], references: [id])
-  user           User    @relation(fields: [userId], references: [id])
-
-  @@id([subjectId, userId])
+  subjectId        Int
+  userId           Int
+  completionRate   Float
+  id               Int     @id @default(autoincrement())
+  subject          Subject @relation(fields: [subjectId], references: [id])
+  user             User    @relation(fields: [userId], references: [id])
+  completedQuizzes Quiz[]
+  completedTopics  Topic[]
+  @@unique([subjectId, userId])
 }
 
 model Subject {
@@ -392,7 +396,7 @@ model Subject {
   createdById     Int
   lastUpdatedAt   DateTime
   lastUpdatedById Int
-  title           String
+  title           String                  @unique
   createdBy       User                    @relation("createdBy", fields: [createdById], references: [id])
   lastUpdatedBy   User                    @relation("lastUpdatedBy", fields: [lastUpdatedById], references: [id])
   usersAssigned   EmployeeSubjectRecord[]
@@ -401,16 +405,17 @@ model Subject {
 }
 
 model Quiz {
-  id             Int            @id @default(autoincrement())
+  id             Int                     @id @default(autoincrement())
   subjectOrder   Int
   title          String
   description    String
   passingScore   Float
-  completionRate Float          @default(0)
-  status         ContentStatus  @default(DRAFT)
+  completionRate Float                   @default(0)
+  status         ContentStatus           @default(DRAFT)
   subjectId      Int
-  subject        Subject        @relation(fields: [subjectId], references: [id])
+  subject        Subject                 @relation(fields: [subjectId], references: [id])
   questions      QuizQuestion[]
+  records        EmployeeSubjectRecord[]
 }
 
 model QuizQuestion {
@@ -419,8 +424,6 @@ model QuizQuestion {
   question      String
   type          AnswerType
   options       String[]
-  writtenAnswer String?
-  minWordCount  Int?
   correctAnswer String
   quizId        Int
   quiz          Quiz       @relation(fields: [quizId], references: [id])
@@ -435,7 +438,6 @@ model DiscountCode {
   customerEmails String[]
   type           DiscountCodeType
   minOrderAmount Float
-  isEnabled      Boolean
 }
 
 model JobRole {
@@ -545,7 +547,7 @@ enum LeaveStatus {
 
 enum AnswerType {
   MCQ
-  WRITTEN
+  TRUEFALSE
 }
 
 enum ContentStatus {

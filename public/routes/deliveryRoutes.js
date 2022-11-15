@@ -36,6 +36,10 @@ router.post(
   deliveryController.getLatLongForUnassignedOrders
 );
 router.post(
+  '/route/assigned',
+  deliveryController.routePlanningForAssignedOrders
+);
+router.post(
   '/latlong/assigned',
   deliveryController.getLatLongForAssignedOrders
 );

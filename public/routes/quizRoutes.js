@@ -12,5 +12,8 @@ router.post(
   quizController.addQuizQuestionsToQuiz
 );
 router.delete('/:id', verifyToken, quizController.deleteQuiz);
+router.post('/order', quizController.updateOrderBasedOnQuizArray);
+router.post('/completed', quizController.markQuizAsCompletedByUser);
+router.post('/results', quizController.getQuizResults);
 
 module.exports = router;

@@ -64,6 +64,7 @@ test('create user model', async () => {
   });
   await expect(userModel.createUser(user)).resolves.toEqual({ user });
 
+
   const encryptedPassword = await bcrypt.hash('password', 10);
   const userAdmin = {
     firstName: 'Zi Kun',
@@ -77,6 +78,7 @@ test('create user model', async () => {
   };
 
   await expect(userModel.createUser(userAdmin)).resolves.toEqual({ user });
+
 });
 
 test('create user model not b2b', async () => {
@@ -174,9 +176,11 @@ test('change user role', async () => {
   await expect(
     userModel.changeUserRole({ id: 1, action: 'admin' })
   ).resolves.toEqual(user);
+
   await expect(
     userModel.changeUserRole({ id: 1, action: 'nani' })
   ).resolves.toEqual(user);
+
 });
 
 test('generate user password', async () => {

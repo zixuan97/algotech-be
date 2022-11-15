@@ -50,7 +50,6 @@ const refreshToken = async (req, res) => {
 
 const addLazadaOrders = async (req, res) => {
   const { created_before, created_after, limit } = req.body;
-  console.log(req.body);
   const { data: access_token, error } = await common.awaitWrap(
     keyModel.findKeyByName({ key: 'lazada_access_token' })
   );
@@ -80,7 +79,6 @@ const addLazadaOrders = async (req, res) => {
           const salesOrderDB = await salesOrderModel.findSalesOrderByOrderId({
             orderId: salesOrder.order_number.toString()
           });
-          console.log(salesOrderDetails);
           if (!salesOrderDB) {
             return await salesOrderModel.createSalesOrder({
               orderId: salesOrder.order_number.toString(),

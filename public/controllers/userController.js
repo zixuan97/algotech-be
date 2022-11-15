@@ -633,9 +633,9 @@ const getAllEmployees = async (req, res) => {
     }
     log.out('OK_USER_GET-EMPLOYEES', {
       req: { body: req.body, params: req.params },
-      res: JSON.stringify(users.filter((u) => u.id != req.user.userId))
+      res: JSON.stringify(users)
     });
-    res.json(users.filter((u) => u.id != req.user.userId));
+    res.json(users);
   } catch (error) {
     log.error('ERR_USER_GET-EMPLOYEES', {
       err: error.message,
@@ -765,6 +765,28 @@ const getJobRoleByName = async (req, res) => {
   }
 };
 
+const getAllJobRoles = async (req, res) => {
+  try {
+    const jobs = await userModel.getAllJobRoles({});
+    for (let j of jobs) {
+      for (let u of j.usersInJobRole) {
+        u.password = '';
+      }
+    }
+    log.out('OK_USER_GET-ALL-JOB-ROLE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(jobs)
+    });
+    res.json(jobs);
+  } catch (error) {
+    log.error('ERR_USER_GET-ALL-JOB-ROLE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    res.status(400).send('Error getting all job roles');
+  }
+};
+
 const assignSubordinatesToManager = async (req, res) => {
   const { id, users } = req.body;
   const { data, error } = await common.awaitWrap(
@@ -823,6 +845,69 @@ const unassignSubordinatesToManager = async (req, res) => {
   }
 };
 
+const updateEmployee = async (req, res) => {
+  const { id, jobRoles, managerId } = req.body;
+  const employeeToUpdate = await userModel.findUserById({ id });
+  if (employeeToUpdate !== null && employeeToUpdate.managerId !== managerId) {
+    await userModel.assignSubordinatesToManager({
+      id: managerId,
+      users: [employeeToUpdate]
+    });
+  }
+  const { data, error } = await common.awaitWrap(
+    userModel.addJobRolesToUser({ userId: id, jobRoles })
+  );
+  if (data !== null) data.password = '';
+  if (error) {
+    log.error('ERR_SUBJECT_UPDATE-EMPLOYEE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_UPDATE-EMPLOYEE', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const setCEO = async (req, res) => {
+  const { ceoId } = req.params;
+  const subordinates = await userModel.getEmployees({});
+  await userModel.assignSubordinatesToManager({
+    id: Number(ceoId),
+    users: subordinates
+  });
+  let ceo = await userModel.findUserById({ id: Number(ceoId) });
+  const { data, error } = await common.awaitWrap(
+    userModel.unassignSubordinatesToManager({
+      id: Number(ceoId),
+      users: [ceo]
+    })
+  );
+  for (let u of data.subordinates) {
+    u.password = '';
+  }
+  data.password = '';
+  if (error) {
+    log.error('ERR_SUBJECT_SET-CEO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SUBJECT_SET-CEO', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
 exports.createUser = createUser;
 exports.getUser = getUser;
 exports.getUserDetails = getUserDetails;
@@ -850,5 +935,8 @@ exports.addJobRolesToUser = addJobRolesToUser;
 exports.deleteJobRole = deleteJobRole;
 exports.getJobRoleById = getJobRoleById;
 exports.getJobRoleByName = getJobRoleByName;
+exports.getAllJobRoles = getAllJobRoles;
 exports.assignSubordinatesToManager = assignSubordinatesToManager;
 exports.unassignSubordinatesToManager = unassignSubordinatesToManager;
+exports.updateEmployee = updateEmployee;
+exports.setCEO = setCEO;

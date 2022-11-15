@@ -8,5 +8,7 @@ router.get('/:id', topicController.getTopic);
 router.put('/', verifyToken, topicController.updateTopic);
 router.post('/addsteps', verifyToken, topicController.addStepsToTopic);
 router.delete('/:id', verifyToken, topicController.deleteTopic);
+router.post('/order', topicController.updateOrderBasedOnTopicArray);
+router.post('/completed', topicController.markTopicAsCompletedByUser);
 
 module.exports = router;

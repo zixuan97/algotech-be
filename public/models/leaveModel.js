@@ -231,7 +231,8 @@ const createLeaveRecordByEmployeeId = async (req) => {
 const getLeaveRecordByEmployeeId = async (req) => {
   const { employeeId } = req;
   let employeeLeaveRecord = await prisma.EmployeeLeaveRecord.findUnique({
-    where: { employeeId: Number(employeeId) }
+    where: { employeeId: Number(employeeId) },
+    include: { employee: true }
   });
   if (employeeLeaveRecord === null) {
     employeeLeaveRecord = await createLeaveRecordByEmployeeId({
@@ -239,6 +240,16 @@ const getLeaveRecordByEmployeeId = async (req) => {
     });
   }
   return employeeLeaveRecord;
+};
+
+const getAllEmployeeLeaveRecords = async (req) => {
+  const employees = await userModel.getEmployees({});
+  let data = [];
+  for (let e of employees) {
+    const record = await getLeaveRecordByEmployeeId({ employeeId: e.id });
+    data.push(record);
+  }
+  return data;
 };
 
 const getLeaveRecordById = async (req) => {
@@ -257,6 +268,7 @@ const getLeaveRecordById = async (req) => {
 const updateLeaveRecordByEmployeeId = async (req) => {
   const {
     employeeId,
+    tier,
     annualQuota,
     childcareQuota,
     compassionateQuota,
@@ -288,6 +300,12 @@ const updateLeaveRecordByEmployeeId = async (req) => {
       lastUpdated: new Date(Date.now())
     }
   });
+  const user = await userModel.findUserById({ id: employeeId });
+  const updatedUser = {
+    ...user,
+    tier
+  };
+  await userModel.editUser({ updatedUser });
   return leaveRecord;
 };
 
@@ -380,7 +398,6 @@ const updateTierByEmployeeId = async (req) => {
     ...user,
     tier: newTier
   };
-  console.log(updatedUser);
   await userModel.editUser({ updatedUser });
   return updatedRecord;
 };
@@ -394,6 +411,7 @@ const getAllEmployeesByTier = async (req) => {
 const updateEmployeeLeaveQuota = async (req) => {
   const {
     employeeId,
+    tier,
     annualQuota,
     childcareQuota,
     compassionateQuota,
@@ -441,6 +459,7 @@ const updateEmployeeLeaveQuota = async (req) => {
 
   const data = await updateLeaveRecordByEmployeeId({
     employeeId,
+    tier,
     annualQuota,
     childcareQuota,
     compassionateQuota,
@@ -522,6 +541,7 @@ exports.getLeaveQuotaByTier = getLeaveQuotaByTier;
 exports.createLeaveRecordByEmployeeId = createLeaveRecordByEmployeeId;
 exports.getLeaveRecordById = getLeaveRecordById;
 exports.getLeaveRecordByEmployeeId = getLeaveRecordByEmployeeId;
+exports.getAllEmployeeLeaveRecords = getAllEmployeeLeaveRecords;
 exports.updateLeaveRecordByEmployeeId = updateLeaveRecordByEmployeeId;
 exports.getLeaveTypeBalanceByEmployeeId = getLeaveTypeBalanceByEmployeeId;
 exports.updateLeaveTypeBalanceByEmployeeId = updateLeaveTypeBalanceByEmployeeId;

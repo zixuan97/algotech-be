@@ -165,14 +165,14 @@ const getAllProcurementOrders = async (req, res) => {
       const po = await procurementModel.findProcurementOrderById({ id: d.id });
       const po_items = po.procOrderItems;
       let procOrderItemsPdt = [];
-      po_items.map(p => {
+      po_items.map((p) => {
         procOrderItemsPdt.push({
           productSku: p.productSku,
           productName: p.productName,
           rate: p.rate,
           quantity: p.quantity
-        })
-      })
+        });
+      });
       const result = {
         id: d.id,
         orderDate: d.orderDate,
@@ -184,6 +184,7 @@ const getAllProcurementOrders = async (req, res) => {
           id: d.supplierId,
           email: d.supplierEmail,
           name: d.supplierName,
+          currency: d.currency,
           address: d.supplierAddress
         },
         warehouse: {
@@ -218,20 +219,21 @@ const getProcurementOrder = async (req, res) => {
       supplierAddress,
       supplierEmail,
       supplierName,
+      currency,
       totalAmount,
       warehouseName,
       warehouseAddress,
       procOrderItems
     } = po;
     let procOrderItemsPdt = [];
-    procOrderItems.map(p => {
+    procOrderItems.map((p) => {
       procOrderItemsPdt.push({
         productSku: p.productSku,
         productName: p.productName,
         rate: p.rate,
         quantity: p.quantity
-      })
-    })
+      });
+    });
     const result = {
       id,
       orderDate,
@@ -243,7 +245,8 @@ const getProcurementOrder = async (req, res) => {
         id: supplierId,
         email: supplierEmail,
         name: supplierName,
-        address: supplierAddress
+        address: supplierAddress,
+        currency: currency
       },
       warehouse: {
         id: 0,
@@ -270,12 +273,13 @@ const getProcurementOrder = async (req, res) => {
 const generatePO = async (req, res) => {
   const poId = req.params;
   const po = await procurementModel.findProcurementOrderById(poId);
-  const { supplierName, warehouseAddress, procOrderItems } = po;
+  const { supplierName, warehouseAddress, currency, procOrderItems } = po;
   const orderDate = new Date();
   const orderFormatted = format(orderDate, 'dd MMM yyyy');
   await generateProcurementPdfTemplate({
     orderFormatted,
     warehouseAddress,
+    currency,
     procOrderItems,
     supplierName
   })
@@ -306,6 +310,7 @@ const sendProcurementEmail = async (req, res) => {
       orderFormatted,
       supplierName: supplier.name,
       warehouseAddress,
+      currency: supplier.currency,
       procOrderItems
     }).then(async (pdfBuffer) => {
       const subject = 'Procurement Order';

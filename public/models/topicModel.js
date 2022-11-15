@@ -1,6 +1,6 @@
 const { ContentStatus } = require('@prisma/client');
-const { transformDocument } = require('@prisma/client/runtime/index.js');
 const { prisma } = require('./index.js');
+const subjectModel = require('./subjectModel.js');
 
 const createTopic = async (req) => {
   const { subjectOrder, title, subjectId } = req;
@@ -38,6 +38,17 @@ const createTopic = async (req) => {
         }
       },
       steps: true
+    }
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
     }
   });
   return topic;
@@ -114,6 +125,9 @@ const getTopicById = async (req) => {
       },
       steps: true
     }
+  });
+  topic.steps.sort((a, b) => {
+    return a.topicOrder - b.topicOrder;
   });
   return topic;
 };
@@ -227,9 +241,94 @@ const deleteTopic = async (req) => {
   });
 };
 
+const updateOrderOfTopicArray = async (req) => {
+  const { topics } = req;
+  let i = 1;
+  const res = [];
+  for (let t of topics) {
+    const newTopic = await updateTopic({
+      ...t,
+      subjectOrder: t.subjectOrder
+    });
+    i++;
+    res.push(newTopic);
+  }
+  return res;
+};
+
+const getTopicByOrderAndSubjectId = async (req) => {
+  const { subjectId, subjectOrder } = req;
+  const topic = await prisma.topic.findMany({
+    where: {
+      subjectId: Number(subjectId),
+      subjectOrder: Number(subjectOrder)
+    }
+  });
+  return topic[0];
+};
+
+const getTopicByTitleAndSubjectId = async (req) => {
+  const { subjectId, title } = req;
+  const topic = await prisma.topic.findMany({
+    where: {
+      subjectId: Number(subjectId),
+      title
+    }
+  });
+  return topic[0];
+};
+
+const markTopicAsCompletedForUser = async (req) => {
+  const { topicId, userId } = req;
+  const topic = await prisma.topic.findUnique({
+    where: { id: Number(topicId) },
+    include: {
+      steps: true
+    }
+  });
+  let record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: topic.subjectId,
+    userId
+  });
+  record.completedTopics.push(topic);
+  await prisma.EmployeeSubjectRecord.update({
+    where: {
+      id: record.id
+    },
+    data: {
+      completedTopics: {
+        set: [],
+        connect: record.completedTopics.map((t) => ({
+          id: t.id
+        }))
+      }
+    }
+  });
+  record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: topic.subjectId,
+    userId
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: topic.subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(topic.subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
+  return record;
+};
+
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopicById = getTopicById;
 exports.updateTopic = updateTopic;
 exports.addStepsToTopic = addStepsToTopic;
 exports.deleteTopic = deleteTopic;
+exports.updateOrderOfTopicArray = updateOrderOfTopicArray;
+exports.getTopicByOrderAndSubjectId = getTopicByOrderAndSubjectId;
+exports.getTopicByTitleAndSubjectId = getTopicByTitleAndSubjectId;
+exports.markTopicAsCompletedForUser = markTopicAsCompletedForUser;

@@ -16,8 +16,13 @@ const generatePdfTemplate = async () => {
 };
 
 const generateProcurementPdfTemplate = async (req) => {
-  const { orderFormatted, warehouseAddress, procOrderItems, supplierName } =
-    req;
+  const {
+    orderFormatted,
+    warehouseAddress,
+    procOrderItems,
+    supplierName,
+    currency
+  } = req;
 
   // Create a document
   const doc = new PDFDocument({ bufferPages: true });
@@ -133,11 +138,7 @@ const generateProcurementPdfTemplate = async (req) => {
   doc
     .fill('grey')
     .fontSize(8)
-    .text(
-      'Prices stated are in Malaysian Ringgit (MYR)',
-      leftAlign,
-      topAlign + 20
-    );
+    .text(`Prices stated are in ${currency}`, leftAlign, topAlign + 20);
   doc
     .fill('grey')
     .fontSize(8)

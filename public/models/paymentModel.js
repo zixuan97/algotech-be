@@ -8,7 +8,7 @@ const payByStripeCreditCard = async (req) => {
       ? 'https://algotech-fe-b2b.vercel.app'
       : 'http://localhost:3002';
 
-  const { amount, orderId } = req;
+  const { amount, orderId, payeeEmail, discountCode } = req;
   const expiryDate = Date.now() + 3600 * 1000;
   const session = await stripe.checkout.sessions.create({
     line_items: [
@@ -26,7 +26,7 @@ const payByStripeCreditCard = async (req) => {
     mode: 'payment',
     success_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&success=true`,
     cancel_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&canceled=true`,
-    metadata: { orderId }, // Store orderid and payee email in metadata
+    metadata: { orderId, payeeEmail, discountCode }, // Store orderid and payee email in metadata
     expires_at: Math.floor(expiryDate / 1000)
   });
 
@@ -39,7 +39,7 @@ const payByStripePaynow = async (req) => {
       ? 'https://algotech-fe-b2b.vercel.app'
       : 'http://localhost:3002';
 
-  const { amount, orderId } = req;
+  const { amount, orderId, payeeEmail, discountCode } = req;
   const expiryDate = Date.now() + 3600 * 1000;
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['paynow'], // identify for paynow payment
@@ -58,7 +58,7 @@ const payByStripePaynow = async (req) => {
     mode: 'payment',
     success_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&success=true`,
     cancel_url: `${domain}/bulkOrders/viewOrder?orderId=${orderId}&canceled=true`,
-    metadata: { orderId }, // Store orderid and payee email in metadata
+    metadata: { orderId, payeeEmail, discountCode }, // Store orderid and payee email in metadata
     expires_at: Math.floor(expiryDate / 1000)
   });
 
@@ -71,7 +71,7 @@ const generatePaymentLink = async (req) => {
       ? 'https://algotech-fe-b2b.vercel.app'
       : 'http://localhost:3002';
 
-  const { paymentMode, amount, orderId } = req;
+  const { paymentMode, amount, orderId, payeeEmail, discountCode } = req;
   let payment_method_types = [];
   if (paymentMode === 'CREDIT_CARD') {
     payment_method_types.push('card');
@@ -97,7 +97,7 @@ const generatePaymentLink = async (req) => {
       }
     },
     payment_method_types,
-    metadata: { orderId }
+    metadata: { orderId, payeeEmail, discountCode }
   });
 
   return paymentLink;

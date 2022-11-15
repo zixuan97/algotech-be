@@ -1,4 +1,6 @@
 const { prisma } = require('./index.js');
+const subjectModel = require('./subjectModel.js');
+const quizQuestionModel = require('./quizQuestionModel.js');
 
 const createQuiz = async (req) => {
   const {
@@ -45,6 +47,17 @@ const createQuiz = async (req) => {
         }
       },
       questions: true
+    }
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
     }
   });
   return quiz;
@@ -119,6 +132,9 @@ const getQuizById = async (req) => {
       questions: true
     }
   });
+  quiz.questions.sort((a, b) => {
+    return a.quizOrder - b.quizOrder;
+  });
   return quiz;
 };
 
@@ -185,8 +201,6 @@ const addQuizQuestionsToQuiz = async (req) => {
           question: qn.question,
           type: qn.type,
           options: qn.options,
-          writtenAnswer: qn.writtenAnswer,
-          minWordCount: qn.minWordCount,
           correctAnswer: qn.correctAnswer
         }))
       }
@@ -245,9 +259,112 @@ const deleteQuiz = async (req) => {
   });
 };
 
+const updateOrderOfQuizArray = async (req) => {
+  const { quizzes } = req;
+  let i = 1;
+  const res = [];
+  for (let q of quizzes) {
+    const newQuiz = await updateQuiz({
+      ...q,
+      subjectOrder: q.subjectOrder
+    });
+    i++;
+    res.push(newQuiz);
+  }
+  return res;
+};
+
+const getQuizByOrderAndSubjectId = async (req) => {
+  const { subjectId, subjectOrder } = req;
+  const quiz = await prisma.quiz.findMany({
+    where: {
+      subjectId: Number(subjectId),
+      subjectOrder
+    }
+  });
+  return quiz[0];
+};
+
+const getQuizByTitleAndSubjectId = async (req) => {
+  const { subjectId, title } = req;
+  const quiz = await prisma.quiz.findMany({
+    where: {
+      subjectId: Number(subjectId),
+      title
+    }
+  });
+  return quiz[0];
+};
+
+const markQuizAsCompletedForUser = async (req) => {
+  const { quizId, userId } = req;
+  const quiz = await prisma.quiz.findUnique({
+    where: { id: Number(quizId) },
+    include: {
+      questions: true
+    }
+  });
+  let record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: quiz.subjectId,
+    userId
+  });
+  record.completedQuizzes.push(quiz);
+  await prisma.EmployeeSubjectRecord.update({
+    where: {
+      id: record.id
+    },
+    data: {
+      completedQuizzes: {
+        set: [],
+        connect: record.completedQuizzes.map((q) => ({
+          id: q.id
+        }))
+      }
+    }
+  });
+  record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: quiz.subjectId,
+    userId
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: quiz.subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(quiz.subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
+  return record;
+};
+
+const getQuizResults = async (req) => {
+  const { quizId, userAnswers } = req;
+  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
+    quizId
+  });
+  const total = quizQuestions.length;
+  let totalCorrect = 0;
+  if (userAnswers.length === quizQuestions.length) {
+    for (let i = 0; i < quizQuestions.length; i++) {
+      if (userAnswers[i] === quizQuestions[i].correctAnswer) {
+        totalCorrect++;
+      }
+    }
+  }
+  return (totalCorrect / total) * 100;
+};
+
 exports.createQuiz = createQuiz;
 exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuizById = getQuizById;
 exports.updateQuiz = updateQuiz;
 exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
 exports.deleteQuiz = deleteQuiz;
+exports.updateOrderOfQuizArray = updateOrderOfQuizArray;
+exports.getQuizByOrderAndSubjectId = getQuizByOrderAndSubjectId;
+exports.getQuizByTitleAndSubjectId = getQuizByTitleAndSubjectId;
+exports.markQuizAsCompletedForUser = markQuizAsCompletedForUser;
+exports.getQuizResults = getQuizResults;
