@@ -849,10 +849,19 @@ const updateEmployee = async (req, res) => {
   const { id, jobRoles, managerId } = req.body;
   const employeeToUpdate = await userModel.findUserById({ id });
   if (employeeToUpdate !== null && employeeToUpdate.managerId !== managerId) {
-    await userModel.assignSubordinatesToManager({
-      id: managerId,
-      users: [employeeToUpdate]
-    });
+    if (managerId !== null) {
+      await userModel.assignSubordinatesToManager({
+        id: managerId,
+        users: [employeeToUpdate]
+      });
+    } else {
+      if (employeeToUpdate.managerId !== null) {
+        await userModel.unassignSubordinatesToManager({
+          id: employeeToUpdate.managerId,
+          users: [employeeToUpdate]
+        });
+      }
+    }
   }
   const { data, error } = await common.awaitWrap(
     userModel.addJobRolesToUser({ userId: id, jobRoles })

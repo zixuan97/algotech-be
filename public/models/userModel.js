@@ -294,11 +294,17 @@ const createJobRole = async (req) => {
 };
 
 const editJobRole = async (req) => {
-  const { id, jobRole } = req;
+  const { id, jobRole, usersInJobRole } = req;
   const job = await prisma.jobRole.update({
     where: { id: Number(id) },
     data: {
-      jobRole
+      jobRole,
+      usersInJobRole: {
+        set: [],
+        connect: usersInJobRole.map((u) => ({
+          id: u.id
+        }))
+      }
     }
   });
   return job;
