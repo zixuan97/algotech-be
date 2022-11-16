@@ -284,21 +284,31 @@ const updateB2BUserStatus = async (req) => {
 };
 
 const createJobRole = async (req) => {
-  const { jobRole } = req;
+  const { jobRole, description, usersInJobRole } = req;
   const job = await prisma.jobRole.create({
     data: {
-      jobRole
+      jobRole,
+      description,
+      usersInJobRole: {
+        connect: usersInJobRole.map((u) => ({
+          id: u.id
+        }))
+      }
+    },
+    include: {
+      usersInJobRole: true
     }
   });
   return job;
 };
 
 const editJobRole = async (req) => {
-  const { id, jobRole, usersInJobRole } = req;
+  const { id, jobRole, description, usersInJobRole } = req;
   const job = await prisma.jobRole.update({
     where: { id: Number(id) },
     data: {
       jobRole,
+      description,
       usersInJobRole: {
         set: [],
         connect: usersInJobRole.map((u) => ({
