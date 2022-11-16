@@ -180,22 +180,60 @@ const deleteStep = async (req, res) => {
 };
 
 const updateOrderBasedOnStepsArray = async (req, res) => {
+  const steps = req.body;
+  const stepsToAdd = [];
+  const canUpdateOrder = [];
+  const toAddToResData = [];
+  let newStep = {};
+  for (let s of steps) {
+    if (s.id === -1) {
+      stepsToAdd.push(s);
+    } else {
+      canUpdateOrder.push(s);
+    }
+  }
   const { data, error } = await common.awaitWrap(
-    stepModel.updateOrderOfStepsArray({ steps: req.body })
+    stepModel.updateOrderOfStepsArray({ steps: canUpdateOrder })
   );
-  if (error) {
-    log.error('ERR_STEP_UPDATE-ORDER-STEP', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
+  for (let st of stepsToAdd) {
+    newStep = await stepModel.createStep({
+      topicOrder: st.topicOrder,
+      title: st.title,
+      content: st.content,
+      topicId: st.topicId
     });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    toAddToResData.push(newStep);
+  }
+  if (toAddToResData.includes(0)) {
+    res.status(400).send('Error adding new step (duplicate topic order)!');
   } else {
-    log.out('OK_STEP_UPDATE-ORDER-STEP', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+    for (let n of toAddToResData) {
+      data.push(n);
+    }
+    for (let d of data) {
+      d.topic.subject.createdBy.password = '';
+      d.topic.subject.lastUpdatedBy.password = '';
+      for (let u of d.topic.subject.usersAssigned) {
+        u.user.password = '';
+      }
+    }
+    data.sort((a, b) => {
+      return a.topicOrder - b.topicOrder;
     });
-    res.json(data);
+    if (error) {
+      log.error('ERR_STEP_UPDATE-ORDER-STEP', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_STEP_UPDATE-ORDER-STEP', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 

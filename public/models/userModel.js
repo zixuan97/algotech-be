@@ -79,6 +79,28 @@ const getEmployees = async () => {
   return users;
 };
 
+const getEmployeesForOrgChart = async () => {
+  const users = await prisma.user.findMany({
+    where: {
+      NOT: {
+        OR: [
+          {
+            role: UserRole.B2B
+          },
+          {
+            role: UserRole.CUSTOMER
+          }
+        ]
+      }
+    },
+    include: {
+      manager: true,
+      jobRoles: true
+    }
+  });
+  return users;
+};
+
 const findUserById = async (req) => {
   const { id } = req;
   const user = await prisma.user.findUnique({
@@ -262,21 +284,40 @@ const updateB2BUserStatus = async (req) => {
 };
 
 const createJobRole = async (req) => {
-  const { jobRole } = req;
+  const { jobRole, description, usersInJobRole } = req;
   const job = await prisma.jobRole.create({
     data: {
-      jobRole
+      jobRole,
+      description,
+      usersInJobRole: {
+        connect: usersInJobRole.map((u) => ({
+          id: u.id
+        }))
+      }
+    },
+    include: {
+      usersInJobRole: true
     }
   });
   return job;
 };
 
 const editJobRole = async (req) => {
-  const { id, jobRole } = req;
+  const { id, jobRole, description, usersInJobRole } = req;
   const job = await prisma.jobRole.update({
     where: { id: Number(id) },
     data: {
-      jobRole
+      jobRole,
+      description,
+      usersInJobRole: {
+        set: [],
+        connect: usersInJobRole.map((u) => ({
+          id: u.id
+        }))
+      }
+    },
+    include: {
+      usersInJobRole: true
     }
   });
   return job;
@@ -404,6 +445,7 @@ exports.verifyPassword = verifyPassword;
 exports.changePassword = changePassword;
 exports.updateB2BUserStatus = updateB2BUserStatus;
 exports.getB2BUsers = getB2BUsers;
+exports.getEmployeesForOrgChart = getEmployeesForOrgChart;
 exports.getEmployees = getEmployees;
 exports.createJobRole = createJobRole;
 exports.editJobRole = editJobRole;

@@ -383,6 +383,7 @@ model EmployeeSubjectRecord {
   user             User    @relation(fields: [userId], references: [id])
   completedQuizzes Quiz[]
   completedTopics  Topic[]
+
   @@unique([subjectId, userId])
 }
 
@@ -443,6 +444,7 @@ model DiscountCode {
 model JobRole {
   id             Int    @id @default(autoincrement())
   jobRole        String @unique
+  description    String
   usersInJobRole User[]
 }
 

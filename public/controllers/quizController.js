@@ -280,9 +280,10 @@ const updateOrderBasedOnQuizArray = async (req, res) => {
 };
 
 const markQuizAsCompletedByUser = async (req, res) => {
-  const { quizId, userId } = req.body;
+  const { quizId } = req.body;
+  const currUserId = req.user.userId;
   const { data, error } = await common.awaitWrap(
-    quizModel.markQuizAsCompletedForUser({ quizId, userId })
+    quizModel.markQuizAsCompletedForUser({ quizId, userId: currUserId })
   );
   data.user.password = '';
   if (error) {

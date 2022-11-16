@@ -401,6 +401,7 @@ async function main() {
       fulfilmentStatus: 'CREATED',
       warehouseName: 'Punggol Warehouse',
       warehouseAddress: 'Blk 303B Punggol Central #05-792',
+      currency: 'SGD - Singapore Dollar',
       procOrderItems: {
         create: [
           {

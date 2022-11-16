@@ -2,35 +2,46 @@ const { prisma } = require('./index.js');
 
 const createStep = async (req) => {
   const { topicOrder, title, content, topicId } = req;
-  const step = await prisma.step.create({
-    data: {
-      topicOrder,
-      title,
-      content,
-      topicId
-    },
-    include: {
-      topic: true,
-      topic: {
-        include: {
-          subject: true,
-          subject: {
-            include: {
-              createdBy: true,
-              lastUpdatedBy: true,
-              usersAssigned: true,
-              usersAssigned: {
-                include: {
-                  user: true
+  const currentOrders = [];
+  const steps = await getAllStepsByTopicId({
+    topicId
+  });
+  for (let s of steps) {
+    currentOrders.push(s.topicOrder);
+  }
+  if (currentOrders.includes(topicOrder)) {
+    return 0;
+  } else {
+    const step = await prisma.step.create({
+      data: {
+        topicOrder,
+        title,
+        content,
+        topicId
+      },
+      include: {
+        topic: true,
+        topic: {
+          include: {
+            subject: true,
+            subject: {
+              include: {
+                createdBy: true,
+                lastUpdatedBy: true,
+                usersAssigned: true,
+                usersAssigned: {
+                  include: {
+                    user: true
+                  }
                 }
               }
             }
           }
         }
       }
-    }
-  });
-  return step;
+    });
+    return step;
+  }
 };
 
 const getAllStepsByTopicId = async (req) => {
@@ -137,14 +148,16 @@ const deleteStep = async (req) => {
 
 const updateOrderOfStepsArray = async (req) => {
   const { steps } = req;
-  let i = 1;
-  const res = [];
+  let res = [];
+  let newStep = {};
   for (let s of steps) {
-    const newStep = await updateStep({
-      ...s,
-      topicOrder: s.topicOrder
+    newStep = await updateStep({
+      id: s.id,
+      topicOrder: s.topicOrder,
+      title: s.title,
+      content: s.content,
+      topicId: s.topicId
     });
-    i++;
     res.push(newStep);
   }
   return res;

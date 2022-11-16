@@ -646,31 +646,51 @@ const getAllEmployees = async (req, res) => {
 };
 
 const createJobRole = async (req, res) => {
-  const { jobRole } = req.body;
-  try {
-    const data = await userModel.createJobRole({ jobRole });
-    log.out('OK_USER_CREATE-JOB-ROLE', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
-  } catch (error) {
-    log.error('ERR_USER_CREATE-JOB-ROLE', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.status(400).send('Error creating job role');
+  const { jobRole, description, usersInJobRole } = req.body;
+  const role = await userModel.getJobRoleByName({ jobRole });
+  if (role) {
+    res.status(400).send('Job role already exists!');
+  } else {
+    try {
+      const data = await userModel.createJobRole({
+        jobRole,
+        description,
+        usersInJobRole
+      });
+      for (let d of data.usersInJobRole) {
+        d.password = '';
+      }
+      log.out('OK_USER_CREATE-JOB-ROLE', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    } catch (error) {
+      log.error('ERR_USER_CREATE-JOB-ROLE', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      res.status(400).send('Error creating job role');
+    }
   }
 };
 
 const editJobRole = async (req, res) => {
-  const { id, jobRole } = req.body;
+  const { id, jobRole, description, usersInJobRole } = req.body;
   const j = await userModel.getJobRoleByName({ jobRole });
   if (j !== null && id !== j.id) {
     res.status(400).send('Job role already exists!');
   } else {
     try {
-      const data = await userModel.editJobRole({ id, jobRole });
+      const data = await userModel.editJobRole({
+        id,
+        jobRole,
+        description,
+        usersInJobRole
+      });
+      for (let d of data.usersInJobRole) {
+        d.password = '';
+      }
       log.out('OK_USER_EDIT-JOB-ROLE', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
@@ -849,10 +869,19 @@ const updateEmployee = async (req, res) => {
   const { id, jobRoles, managerId } = req.body;
   const employeeToUpdate = await userModel.findUserById({ id });
   if (employeeToUpdate !== null && employeeToUpdate.managerId !== managerId) {
-    await userModel.assignSubordinatesToManager({
-      id: managerId,
-      users: [employeeToUpdate]
-    });
+    if (managerId !== null) {
+      await userModel.assignSubordinatesToManager({
+        id: managerId,
+        users: [employeeToUpdate]
+      });
+    } else {
+      if (employeeToUpdate.managerId !== null) {
+        await userModel.unassignSubordinatesToManager({
+          id: employeeToUpdate.managerId,
+          users: [employeeToUpdate]
+        });
+      }
+    }
   }
   const { data, error } = await common.awaitWrap(
     userModel.addJobRolesToUser({ userId: id, jobRoles })
