@@ -79,6 +79,28 @@ const getEmployees = async () => {
   return users;
 };
 
+const getEmployeesForOrgChart = async () => {
+  const users = await prisma.user.findMany({
+    where: {
+      NOT: {
+        OR: [
+          {
+            role: UserRole.B2B
+          },
+          {
+            role: UserRole.CUSTOMER
+          }
+        ]
+      }
+    },
+    include: {
+      manager: true,
+      jobRoles: true
+    }
+  });
+  return users;
+};
+
 const findUserById = async (req) => {
   const { id } = req;
   const user = await prisma.user.findUnique({
@@ -404,6 +426,7 @@ exports.verifyPassword = verifyPassword;
 exports.changePassword = changePassword;
 exports.updateB2BUserStatus = updateB2BUserStatus;
 exports.getB2BUsers = getB2BUsers;
+exports.getEmployeesForOrgChart = getEmployeesForOrgChart;
 exports.getEmployees = getEmployees;
 exports.createJobRole = createJobRole;
 exports.editJobRole = editJobRole;

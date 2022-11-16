@@ -183,19 +183,32 @@ const updateOrderBasedOnStepsArray = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     stepModel.updateOrderOfStepsArray({ steps: req.body })
   );
-  if (error) {
-    log.error('ERR_STEP_UPDATE-ORDER-STEP', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
+  if (data.includes(0)) {
+    res.status(400).send('Error creating new step (duplicate topic order)!');
   } else {
-    log.out('OK_STEP_UPDATE-ORDER-STEP', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    res.json(data);
+    for (let d of data) {
+      if (d !== 0) {
+      }
+      d.topic.subject.createdBy.password = '';
+      d.topic.subject.lastUpdatedBy.password = '';
+      for (let u of d.topic.subject.usersAssigned) {
+        u.user.password = '';
+      }
+    }
+    if (error) {
+      log.error('ERR_STEP_UPDATE-ORDER-STEP', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_STEP_UPDATE-ORDER-STEP', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    }
   }
 };
 

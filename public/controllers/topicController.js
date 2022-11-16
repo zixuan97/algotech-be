@@ -258,9 +258,10 @@ const updateOrderBasedOnTopicArray = async (req, res) => {
 };
 
 const markTopicAsCompletedByUser = async (req, res) => {
-  const { topicId, userId } = req.body;
+  const { topicId } = req.body;
+  const currUserId = req.user.userId;
   const { data, error } = await common.awaitWrap(
-    topicModel.markTopicAsCompletedForUser({ topicId, userId })
+    topicModel.markTopicAsCompletedForUser({ topicId, userId: currUserId })
   );
   data.user.password = '';
   if (error) {
