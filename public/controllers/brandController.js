@@ -20,19 +20,13 @@ const createBrand = async (req, res) => {
       err: duplicateBrandNameError.message,
       req: { body: req.body, params: req.params }
     });
-    res
-      .status(400)
-      .json(
-        { message: 'Unable to find brand name' },
-        duplicateBrandNameError.message
-      );
+    res.status(400).json({ message: 'Unable to find brand name' });
   } else {
     const { error } = await common.awaitWrap(
       brandModel.createBrand({
         name
       })
     );
-
     if (error) {
       log.error('ERR_BRAND_CREATE-BRAND', {
         err: error.message,
@@ -112,7 +106,7 @@ const updateBrand = async (req, res) => {
   );
   if (data && data.id != id) {
     log.error('ERR_BRAND_UPDATE-BRAND', {
-      err: duplicateBrandNameError.message,
+      err: 'ERR_BRAND_UPDATE-BRAND',
       req: { body: req.body, params: req.params }
     });
     res.status(400).json({ message: 'Brand name already exists' });
@@ -121,12 +115,7 @@ const updateBrand = async (req, res) => {
       err: duplicateBrandNameError.message,
       req: { body: req.body, params: req.params }
     });
-    res
-      .status(400)
-      .json(
-        { message: 'Unable to find brand name' },
-        duplicateBrandNameError.message
-      );
+    res.status(400).json({ message: 'Unable to find brand name' });
   } else {
     const { error } = await common.awaitWrap(
       brandModel.updateBrands({ id, name })
@@ -150,10 +139,9 @@ const updateBrand = async (req, res) => {
 
 const deleteBrand = async (req, res) => {
   const { id } = req.params;
-  const { data: products, getAllProductsError } = await common.awaitWrap(
+  const { data: products, error: getAllProductsError } = await common.awaitWrap(
     productModel.getAllProductsByBrand({ brandId: id })
   );
-
   if (getAllProductsError) {
     log.error('ERR_BRAND_GET-ALL-PRODUCTS', {
       err: getAllProductsError.message,
@@ -163,36 +151,38 @@ const deleteBrand = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_BRAND_GET-ALL-PRODUCTS');
-  }
-  const { error: deleteProductsError } = await common.awaitWrap(
-    Promise.allSettled(
-      products.map(async (product) => {
-        await productModel.deleteProduct({ id: product.id });
-      })
-    )
-  );
-  if (deleteProductsError) {
-    log.error('ERR_PRODUCT_DELETE-ALL-PRODUCTS', {
-      err: deleteProductsError.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(deleteProductsError);
-    res.status(e.code).json(e.message);
-  }
-  const { error } = await common.awaitWrap(brandModel.deleteBrand({ id }));
-  if (error) {
-    log.error('ERR_BRAND_DELETE_BRAND', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    res.status(e.code).json(e.message);
-  } else {
-    log.out('OK_BRAND_DELETE_BRAND', {
-      req: { body: req.body, params: req.params },
-      res: { message: `Deleted brand with id:${id}` }
-    });
-    res.json({ message: `Deleted brand with id:${id}` });
+
+    const { error: deleteProductsError } = await common.awaitWrap(
+      Promise.all(
+        products.map(async (product) => {
+          await productModel.deleteProduct({ id: product.id });
+        })
+      )
+    );
+    if (deleteProductsError) {
+      log.error('ERR_PRODUCT_DELETE-ALL-PRODUCTS', {
+        err: deleteProductsError.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(deleteProductsError);
+      res.status(e.code).json(e.message);
+    } else {
+      const { error } = await common.awaitWrap(brandModel.deleteBrand({ id }));
+      if (error) {
+        log.error('ERR_BRAND_DELETE_BRAND', {
+          err: error.message,
+          req: { body: req.body, params: req.params }
+        });
+        const e = Error.http(error);
+        res.status(e.code).json(e.message);
+      } else {
+        log.out('OK_BRAND_DELETE_BRAND', {
+          req: { body: req.body, params: req.params },
+          res: { message: `Deleted brand with id:${id}` }
+        });
+        res.json({ message: `Deleted brand with id:${id}` });
+      }
+    }
   }
 };
 
