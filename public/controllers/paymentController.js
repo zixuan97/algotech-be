@@ -2,13 +2,16 @@ const paymentModel = require('../models/paymentModel');
 const bulkOrderModel = require('../models/bulkOrderModel');
 const salesOrderModel = require('../models/salesOrderModel');
 const discountCodeModel = require('../models/discountCodeModel');
-const { sendBulkOrderEmail } = require('./bulkOrderController');
+const { format } = require('date-fns');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
 // const stripe = require('stripe')(process.env.STRIPE_API_KEY); //live
 const stripe = require('stripe')(
   'sk_test_51LrBGjKgwBBPqmgaFEzCgBqD8OPqvLAeMq3UJsFmJrPQS3T2KJvPnBx007jiANN2Yn1sc37eqJ6OQUYb6XefpogS004C11Kb1r'
 );
+const emailHelper = require('../helpers/email');
+const { generateBulkOrderPDF } = require('../helpers/pdf');
+
 const payByStripeCreditCard = async (req, res) => {
   const { amount, orderId } = req.body;
   const sessionURL = await paymentModel.payByStripePaynow({
@@ -76,7 +79,7 @@ const stripeWebhook = async (req, res) => {
             discountCode
           });
           // if one time code remove payeeEmail
-          if (code.endDate) {
+          if (code?.endDate) {
             const index = code.customerEmails.indexOf(payeeEmail);
             if (index > -1) {
               // only splice array when item is found
@@ -141,6 +144,33 @@ const removePaymentLink = async (req, res) => {
 
   await paymentModel.removePaymentLink({ paymentLinkId });
   res.json('done');
+};
+
+const sendBulkOrderEmail = async (req) => {
+  try {
+    const { orderId } = req;
+    const bulkOrder = await bulkOrderModel.findBulkOrderByOrderId({ orderId });
+    const createdDate = format(bulkOrder.createdTime, 'dd MMM yyyy');
+    await generateBulkOrderPDF({
+      bulkOrder,
+      createdDate
+    }).then(async (pdfBuffer) => {
+      const subject = `Order Summary ${createdDate}`;
+      const content =
+        'Thank you for ordering with The Kettle Gourmet. Please view attached order summary.';
+      const recipientEmail = bulkOrder.payeeEmail;
+      await emailHelper.sendEmailWithAttachment({
+        recipientEmail,
+        subject,
+        content,
+        data: pdfBuffer.toString('base64'),
+        filename: 'ordersummary.pdf'
+      });
+      console.log('EMAIL SENT');
+    });
+  } catch (error) {
+    log.error('ERR_BULKORDER_SEND-BULKORDER-EMAIL', error.message);
+  }
 };
 
 exports.payByStripeCreditCard = payByStripeCreditCard;

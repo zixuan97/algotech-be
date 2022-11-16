@@ -75,7 +75,7 @@ const updateSupplier = async (req) => {
 
 const deleteSupplier = async (req) => {
   const { id } = req;
-  await prisma.supplier.delete({
+  return await prisma.supplier.delete({
     where: {
       id: Number(id)
     }
@@ -84,7 +84,7 @@ const deleteSupplier = async (req) => {
 
 const connectOrCreateSupplierProduct = async (req) => {
   const { supplierId, productId, rate } = req;
-  const supplierProduct = await prisma.SupplierProduct.upsert({
+  const supplierProduct = await prisma.supplierProduct.upsert({
     where: {
       supplierId_productId: {
         supplierId,
@@ -104,13 +104,13 @@ const connectOrCreateSupplierProduct = async (req) => {
 };
 
 const getAllSupplierProducts = async () => {
-  const supplierProducts = await prisma.SupplierProduct.findMany({});
+  const supplierProducts = await prisma.supplierProduct.findMany({});
   return supplierProducts;
 };
 
 const findProductsFromSupplier = async (req) => {
   const { id } = req;
-  const products = await prisma.SupplierProduct.findMany({
+  const products = await prisma.supplierProduct.findMany({
     where: {
       supplierId: Number(id)
     }
@@ -120,7 +120,7 @@ const findProductsFromSupplier = async (req) => {
 
 const deleteProductBySupplier = async (req) => {
   const { supplierId, productId } = req;
-  await prisma.SupplierProduct.delete({
+  return await prisma.supplierProduct.delete({
     where: {
       supplierId_productId: {
         supplierId: Number(supplierId),
@@ -133,25 +133,14 @@ const deleteProductBySupplier = async (req) => {
 const getAllCurrencies = async (req) => {
   const url = 'https://openexchangerates.org/api/currencies.json';
   let result = [];
-  return await axios
-    .get(url)
-    .then((res) => {
-      const response = res.data;
-      log.out('OK_ORDER_GET-ALL-CURRENCIES');
-      for (let key in response) {
-        result.push(`${key} - ${response[key]}`);
-      }
-      return result;
-    })
-    .catch((err) => {
-      log.error('ERR_GET-ALL-CURRENCIES', err.message);
-      throw err;
-    });
-};
-
-const getCountryCodeBasedOnCurrency = async (req) => {
-  const { currency } = req;
-  return currency.substring(0, 3);
+  return await axios.get(url).then((res) => {
+    const response = res.data;
+    log.out('OK_ORDER_GET-ALL-CURRENCIES');
+    for (let key in response) {
+      result.push(`${key} - ${response[key]}`);
+    }
+    return result;
+  });
 };
 
 exports.createSupplier = createSupplier;
@@ -165,4 +154,3 @@ exports.getAllSupplierProducts = getAllSupplierProducts;
 exports.findProductsFromSupplier = findProductsFromSupplier;
 exports.deleteProductBySupplier = deleteProductBySupplier;
 exports.getAllCurrencies = getAllCurrencies;
-exports.getCountryCodeBasedOnCurrency = getCountryCodeBasedOnCurrency;

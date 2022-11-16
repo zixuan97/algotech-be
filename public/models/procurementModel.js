@@ -16,7 +16,7 @@ const createProcurementOrder = async (req) => {
   procOrderItems.map((p) => {
     totalAmount += p.quantity * p.rate;
   });
-  procOrder = await prisma.ProcurementOrder.create({
+  procOrder = await prisma.procurementOrder.create({
     data: {
       orderDate,
       description,
@@ -54,7 +54,7 @@ const updateProcurementOrder = async (req) => {
     warehouseAddress,
     procOrderItems
   } = req;
-  procOrder = await prisma.ProcurementOrder.update({
+  procOrder = await prisma.procurementOrder.update({
     where: { id },
     data: {
       orderDate,
@@ -70,7 +70,7 @@ const updateProcurementOrder = async (req) => {
 };
 
 const getAllProcurementOrders = async () => {
-  const pos = await prisma.ProcurementOrder.findMany({
+  const pos = await prisma.procurementOrder.findMany({
     include: { procOrderItems: true }
   });
   return pos;
@@ -78,7 +78,7 @@ const getAllProcurementOrders = async () => {
 
 const findProcurementOrderById = async (req) => {
   const { id } = req;
-  const po = await prisma.ProcurementOrder.findUnique({
+  const po = await prisma.procurementOrder.findUnique({
     where: {
       id: Number(id)
     },

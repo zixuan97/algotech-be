@@ -22,7 +22,7 @@ jest.mock('../../models/bundleCatalogueModel', () => {
   };
 });
 
-test.skip('Create product catalogue', async () => {
+test.skip('Create bundle catalogue', async () => {
   const data = {
     price: 5.0,
     product: {
