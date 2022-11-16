@@ -180,21 +180,46 @@ const deleteStep = async (req, res) => {
 };
 
 const updateOrderBasedOnStepsArray = async (req, res) => {
+  const steps = req.body;
+  const stepsToAdd = [];
+  const canUpdateOrder = [];
+  const toAddToResData = [];
+  let newStep = {};
+  for (let s of steps) {
+    if (s.id === -1) {
+      stepsToAdd.push(s);
+    } else {
+      canUpdateOrder.push(s);
+    }
+  }
   const { data, error } = await common.awaitWrap(
-    stepModel.updateOrderOfStepsArray({ steps: req.body })
+    stepModel.updateOrderOfStepsArray({ steps: canUpdateOrder })
   );
-  if (data.includes(0)) {
-    res.status(400).send('Error creating new step (duplicate topic order)!');
+  for (let st of stepsToAdd) {
+    newStep = await stepModel.createStep({
+      topicOrder: st.topicOrder,
+      title: st.title,
+      content: st.content,
+      topicId: st.topicId
+    });
+    toAddToResData.push(newStep);
+  }
+  if (toAddToResData.includes(0)) {
+    res.status(400).send('Error adding new step (duplicate topic order)!');
   } else {
+    for (let n of toAddToResData) {
+      data.push(n);
+    }
     for (let d of data) {
-      if (d !== 0) {
-      }
       d.topic.subject.createdBy.password = '';
       d.topic.subject.lastUpdatedBy.password = '';
       for (let u of d.topic.subject.usersAssigned) {
         u.user.password = '';
       }
     }
+    data.sort((a, b) => {
+      return a.topicOrder - b.topicOrder;
+    });
     if (error) {
       log.error('ERR_STEP_UPDATE-ORDER-STEP', {
         err: error.message,
