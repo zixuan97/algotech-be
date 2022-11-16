@@ -305,6 +305,9 @@ const editJobRole = async (req) => {
           id: u.id
         }))
       }
+    },
+    include: {
+      usersInJobRole: true
     }
   });
   return job;

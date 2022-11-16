@@ -664,13 +664,21 @@ const createJobRole = async (req, res) => {
 };
 
 const editJobRole = async (req, res) => {
-  const { id, jobRole } = req.body;
+  const { id, jobRole, description, usersInJobRole } = req.body;
   const j = await userModel.getJobRoleByName({ jobRole });
   if (j !== null && id !== j.id) {
     res.status(400).send('Job role already exists!');
   } else {
     try {
-      const data = await userModel.editJobRole({ id, jobRole });
+      const data = await userModel.editJobRole({
+        id,
+        jobRole,
+        description,
+        usersInJobRole
+      });
+      for (let d of data.usersInJobRole) {
+        d.password = '';
+      }
       log.out('OK_USER_EDIT-JOB-ROLE', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
