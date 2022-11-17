@@ -120,6 +120,7 @@ const findProductBySku = async (req) => {
       }
     }
   });
+  console.log(product);
   return product;
 };
 

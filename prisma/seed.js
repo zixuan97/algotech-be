@@ -392,7 +392,7 @@ async function main() {
     }
   });
 
-  await prisma.ProcurementOrder.create({
+  await prisma.procurementOrder.create({
     data: {
       orderDate: new Date(),
       description: 'Procurement Order',
