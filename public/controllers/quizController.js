@@ -303,9 +303,10 @@ const markQuizAsCompletedByUser = async (req, res) => {
 };
 
 const getQuizResults = async (req, res) => {
-  const { quizId, userAnswers } = req.body;
+  const userAnswers = req.body;
+  const currUserId = req.user.userId;
   const { data, error } = await common.awaitWrap(
-    quizModel.getQuizResults({ quizId, userAnswers })
+    quizModel.getQuizResults({ userAnswers, userId: currUserId })
   );
   if (error) {
     log.error('ERR_STEP_GET-QUIZ-RESULTS', {

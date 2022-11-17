@@ -18,6 +18,6 @@ router.post(
   verifyToken,
   quizController.markQuizAsCompletedByUser
 );
-router.post('/results', quizController.getQuizResults);
+router.post('/results', verifyToken, quizController.getQuizResults);
 
 module.exports = router;

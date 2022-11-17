@@ -341,20 +341,35 @@ const markQuizAsCompletedForUser = async (req) => {
 };
 
 const getQuizResults = async (req) => {
-  const { quizId, userAnswers } = req;
-  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
-    quizId
-  });
-  const total = quizQuestions.length;
+  const { userAnswers, userId } = req;
+  let res = [];
   let totalCorrect = 0;
-  if (userAnswers.length === quizQuestions.length) {
-    for (let i = 0; i < quizQuestions.length; i++) {
-      if (userAnswers[i] === quizQuestions[i].correctAnswer) {
-        totalCorrect++;
+  for (let a of userAnswers) {
+    const { correctAnswer, quizId } =
+      await quizQuestionModel.getQuizQuestionById({
+        id: a.questionId
+      });
+    const qn = await prisma.EmployeeQuizQuestionRecord.create({
+      data: {
+        questionId: a.questionId,
+        userId,
+        userAnswer: a.userAnswer,
+        isCorrect: correctAnswer === a.userAnswer,
+        attemptedAt: new Date(Date.now()),
+        quizId
       }
-    }
+    });
+    if (correctAnswer === a.userAnswer) totalCorrect++;
+    res.push(qn);
   }
-  return (totalCorrect / total) * 100;
+  const results = (totalCorrect / userAnswers.length) * 100;
+  const finalRes = {
+    numQnsCorrect: totalCorrect,
+    totalQns: userAnswers.length,
+    results: results
+  };
+  finalRes.quizQuestions = res;
+  return finalRes;
 };
 
 exports.createQuiz = createQuiz;
