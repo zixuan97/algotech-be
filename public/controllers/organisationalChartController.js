@@ -16,7 +16,7 @@ const organisationChart = async (req, res) => {
       e.managerId = 0;
       e.manager = null;
     } else {
-      e.manager.password = '';
+      if (e.manager !== null) e.manager.password = '';
     }
     e.password = '';
     adjList.push({ managerId: e.id, manager: e.managerId, e });
