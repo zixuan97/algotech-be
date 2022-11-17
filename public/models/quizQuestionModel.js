@@ -133,6 +133,16 @@ const updateQuizQuestion = async (req) => {
 
 const deleteQuizQuestion = async (req) => {
   const { id } = req;
+  await prisma.QuizQuestion.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      questionRecords: {
+        deleteMany: {}
+      }
+    }
+  });
   await prisma.QuizQuestion.delete({
     where: {
       id: Number(id)
@@ -170,10 +180,12 @@ const createEmployeeQuizQuestionRecord = async (req) => {
   const { quizQuestions, userId } = req;
   let res = [];
   let totalCorrect = 0;
+  let overallQuizId;
   for (let q of quizQuestions) {
     const { correctAnswer, quizId } = await getQuizQuestionById({
       id: q.questionId
     });
+    overallQuizId = quizId;
     const qn = await prisma.EmployeeQuizQuestionRecord.upsert({
       where: {
         questionId_userId: {
@@ -199,10 +211,13 @@ const createEmployeeQuizQuestionRecord = async (req) => {
     if (correctAnswer === q.userAnswer) totalCorrect++;
     res.push(qn);
   }
-  const results = (totalCorrect / quizQuestions.length) * 100;
+  const qns = await getAllQuizQuestionsByQuizId({
+    quizId: overallQuizId
+  });
+  const results = (totalCorrect / qns.length) * 100;
   const finalRes = {
     numQnsCorrect: totalCorrect,
-    totalQns: quizQuestions.length,
+    totalQns: qns.length,
     results: results
   };
   finalRes.quizQuestions = res;
@@ -211,12 +226,7 @@ const createEmployeeQuizQuestionRecord = async (req) => {
 
 const updateEmployeeQuizQuestionRecord = async (req) => {
   const { quizQuestions, userId } = req;
-  let quiz = await getEmployeeQuizRecordsByQuizIdAndUser({
-    quizId: quizQuestions[0].quizId,
-    userId
-  });
   let res = [];
-  let totalCorrect = 0;
   for (let q of quizQuestions) {
     const { correctAnswer, quizId } = await getQuizQuestionById({
       id: q.questionId
@@ -233,16 +243,24 @@ const updateEmployeeQuizQuestionRecord = async (req) => {
         quizId
       }
     });
-    if (correctAnswer === q.userAnswer) totalCorrect++;
     res.push(qn);
   }
-  const results = (totalCorrect / quizQuestions.length) * 100;
+  const qns = await getAllQuizQuestionsByQuizId({
+    quizId: quizQuestions[0].quizId
+  });
+  const totalCorrect = await getEmployeeQuizRecordsByQuizIdAndUser({
+    quizId: quizQuestions[0].quizId,
+    userId
+  });
+  const numQnsCorrect = totalCorrect.filter((q) => q.isCorrect).length;
+  const results =
+    (totalCorrect.filter((q) => q.isCorrect).length / qns.length) * 100;
   const finalRes = {
-    numQnsCorrect: totalCorrect,
-    totalQns: quizQuestions.length,
+    numQnsCorrect,
+    totalQns: qns.length,
     results: results
   };
-  finalRes.quizQuestions = res;
+  finalRes.quizQuestions = totalCorrect;
   return finalRes;
 };
 

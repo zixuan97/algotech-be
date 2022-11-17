@@ -242,12 +242,21 @@ const addQuizQuestionsToQuiz = async (req) => {
 
 const deleteQuiz = async (req) => {
   const { id } = req;
+  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
+    quizId: id
+  });
+  for (let q of quizQuestions) {
+    quizQuestionModel.deleteQuizQuestion({ id: q.id });
+  }
   await prisma.quiz.update({
     where: {
       id: Number(id)
     },
     data: {
       questions: {
+        deleteMany: {}
+      },
+      records: {
         deleteMany: {}
       }
     }

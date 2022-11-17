@@ -430,6 +430,21 @@ const unassignSubordinatesToManager = async (req) => {
   return user;
 };
 
+const setCEOMangerIdToOwnId = async (req) => {
+  const { id } = req;
+  const user = await prisma.user.update({
+    where: { id },
+    data: {
+      managerId: id
+    },
+    include: {
+      manager: true,
+      subordinates: true
+    }
+  });
+  return user;
+};
+
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
@@ -456,3 +471,4 @@ exports.addJobRolesToUser = addJobRolesToUser;
 exports.deleteJobRole = deleteJobRole;
 exports.assignSubordinatesToManager = assignSubordinatesToManager;
 exports.unassignSubordinatesToManager = unassignSubordinatesToManager;
+exports.setCEOMangerIdToOwnId = setCEOMangerIdToOwnId;

@@ -231,6 +231,9 @@ const deleteTopic = async (req) => {
     data: {
       steps: {
         deleteMany: {}
+      },
+      records: {
+        deleteMany: {}
       }
     }
   });
