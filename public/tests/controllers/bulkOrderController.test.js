@@ -386,6 +386,69 @@ test('Mass Update bulkOrder status', async () => {
     });
 });
 
+test('Mass Update bulkOrder status, order status not prepared,', async () => {
+  bulkOrderModel.findBulkOrderById.mockImplementation(async () => {
+    return {
+      amount: 24,
+      discountCode: 'xmas2020',
+      transactionAmount: 20,
+      paymentMode: 'CREDIT_CARD',
+      payeeName: 'Lee Leonard',
+      payeeEmail: 'exleolee@gmail.com',
+      payeeRemarks: 'hi',
+      bulkOrderStatus: 'PAYMENT_PENDING',
+      orderStatus: 'PREPARED',
+      salesOrders: []
+    };
+  });
+
+  salesOrderModel.updateSalesOrderStatus.mockImplementation(async () => {
+    return {};
+  });
+
+  bulkOrderModel.updateBulkOrderStatus.mockImplementation(async () => {
+    return {};
+  });
+  await supertest(app)
+    .put('/bulkOrder/salesOrderStatus')
+    .set('origin', 'jest')
+    .send({
+      amount: 24,
+      discountCode: 'xmas2020',
+      transactionAmount: 20,
+      paymentMode: 'CREDIT_CARD',
+      payeeName: 'Lee Leonard',
+      payeeEmail: 'exleolee@gmail.com',
+      payeeRemarks: 'hi',
+      bulkOrderStatus: 'PAYMENT_PENDING',
+      orderStatus: 'CREATED',
+      payeeContactNo: '91114685',
+      salesOrders: []
+    })
+    .then(() => {
+      expect(200);
+    });
+
+  await supertest(app)
+    .put('/bulkOrder/salesOrderStatus')
+    .set('origin', 'jest')
+    .send({
+      amount: 24,
+      discountCode: 'xmas2020',
+      transactionAmount: 20,
+      paymentMode: 'CREDIT_CARD',
+      payeeName: 'Lee Leonard',
+      payeeEmail: 'exleolee@gmail.com',
+      payeeRemarks: 'hi',
+      bulkOrderStatus: 'PAYMENT_PENDING',
+      orderStatus: 'PREPARED',
+      salesOrders: []
+    })
+    .then(() => {
+      expect(200);
+    });
+});
+
 test('Mass Update bulkOrder status,prisma error', async () => {
   bulkOrderModel.findBulkOrderById.mockImplementation(async () => {
     return bulkOrder;
@@ -405,12 +468,15 @@ test('Mass Update bulkOrder status,prisma error', async () => {
 
 test('Generate bulk order excel', async () => {
   bulkOrderModel.findBulkOrderByEmail.mockImplementation(async () => {
-    return {};
+    return [{ bulkOrder }];
   });
 
-  excelHelper.generateBulkOrderExcel.mockImplementation(async () => {
-    return {};
-  });
+  excelHelper.generateBulkOrderExcel.mockImplementation(async () =>
+    Promise.resolve({
+      status: 200,
+      blob: () => 'Data'
+    })
+  );
   await supertest(app)
     .post('/bulkOrder/excel')
     .set('origin', 'jest')

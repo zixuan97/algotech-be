@@ -15,8 +15,6 @@ const createBundleCatalogue = async (req, res) => {
       });
     } catch (uploadS3Error) {
       log.error('ERR_BUNDLECAT_UPLOAD-S3', uploadS3Error.message);
-      const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
     }
   }
   log.out('OK_BUNDLE_UPLOAD-S3');
@@ -47,22 +45,6 @@ const getAllBundleCatalogue = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     bundleCatalogueModel.getAllBundleCatalogue({})
   );
-
-  await Promise.all(
-    data.map(async (bundleCatalogue) => {
-      const { data: productImg, error: getS3Error } = await common.awaitWrap(
-        getS3({
-          key: `bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`
-        })
-      );
-
-      if (getS3Error) {
-        log.error('ERR_BUNDLECAT_GET-S3', getS3Error.message);
-      }
-      bundleCatalogue.image = productImg;
-    })
-  );
-
   if (error) {
     log.error('ERR_BUNDLECAT_GET-ALL-BUNDLECAT', {
       err: error.message,
@@ -71,10 +53,24 @@ const getAllBundleCatalogue = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_BUNDLECAT_GET-ALL-BUNDLECAT', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
+    await Promise.all(
+      data.map(async (bundleCatalogue) => {
+        const { data: productImg, error: getS3Error } = await common.awaitWrap(
+          getS3({
+            key: `bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`
+          })
+        );
+
+        if (getS3Error) {
+          log.error('ERR_BUNDLECAT_GET-S3', getS3Error.message);
+        }
+        bundleCatalogue.image = productImg;
+        log.out('OK_BUNDLECAT_GET-ALL-BUNDLECAT', {
+          req: { body: req.body, params: req.params },
+          res: JSON.stringify(data)
+        });
+      })
+    );
     res.json(data);
   }
 };
@@ -124,8 +120,6 @@ const updateBundleCatalogue = async (req, res) => {
         err: uploadS3Error.message,
         req: { body: req.body, params: req.params }
       });
-      const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
     }
     log.out('OK_BUNDLECAT_UPLOAD-S3');
   } else {
