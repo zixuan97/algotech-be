@@ -286,7 +286,6 @@ const disconnectOrRemoveEmployeeSubjectRecord = async (req) => {
 const assignUsersToSubject = async (req) => {
   const { id, users } = req;
   for (let u of users) {
-    console.log(u);
     const user = await userModel.findUserById({ id: u.id });
     if (user) {
       await connectOrCreateEmployeeSubjectRecord({
@@ -374,6 +373,22 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
     }
   });
   return employeeSubjectRecord;
+};
+
+const getSubjectRecordsByUser = async (req) => {
+  const { userId } = req;
+  const employeeSubjectRecords = await prisma.EmployeeSubjectRecord.findMany({
+    where: {
+      userId: Number(userId)
+    },
+    include: {
+      subject: true,
+      user: true,
+      completedQuizzes: true,
+      completedTopics: true
+    }
+  });
+  return employeeSubjectRecords;
 };
 
 const getSubjectRecordBySubjectAndUserSimplified = async (req) => {
@@ -490,6 +505,7 @@ exports.unassignUsersToSubject = unassignUsersToSubject;
 exports.updateSubjectCompletionRateBySubjectByEmployee =
   updateSubjectCompletionRateBySubjectByEmployee;
 exports.getSubjectRecordBySubjectAndUser = getSubjectRecordBySubjectAndUser;
+exports.getSubjectRecordsByUser = getSubjectRecordsByUser;
 exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
 exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;
 exports.getNumberOfTopicsAndQuizInSubject = getNumberOfTopicsAndQuizInSubject;
