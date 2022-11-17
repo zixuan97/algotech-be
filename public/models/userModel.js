@@ -445,6 +445,15 @@ const setCEOMangerIdToOwnId = async (req) => {
   return user;
 };
 
+const getCEO = async (req) => {
+  const ceo = (await getEmployees({})).filter((e) => e.managerId === e.id);
+  if (ceo.length === 0) {
+    return null;
+  } else {
+    return ceo[0];
+  }
+};
+
 exports.createUser = createUser;
 exports.getUsers = getUsers;
 exports.findUserById = findUserById;
@@ -472,3 +481,4 @@ exports.deleteJobRole = deleteJobRole;
 exports.assignSubordinatesToManager = assignSubordinatesToManager;
 exports.unassignSubordinatesToManager = unassignSubordinatesToManager;
 exports.setCEOMangerIdToOwnId = setCEOMangerIdToOwnId;
+exports.getCEO = getCEO;

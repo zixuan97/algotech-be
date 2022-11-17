@@ -39,5 +39,7 @@ router.put('/employee', UserController.updateEmployee);
 
 router.post('/org', OrganisationalChartController.organisationChart);
 router.post('/ceo/:ceoId', UserController.setCEO);
+router.get('/ceo', UserController.getCEO);
+router.post('/changeceo/:ceoId', UserController.changeCEO);
 
 module.exports = router;

@@ -522,8 +522,7 @@ async function main() {
       startDate: '2022-09-10T00:00:00.000Z',
       endDate: '2022-12-10T00:00:00.000Z',
       customerEmails: [],
-      type: 'FLAT_AMOUNT',
-      isEnabled: true
+      type: 'FLAT_AMOUNT'
     }
   });
 
@@ -535,8 +534,7 @@ async function main() {
       startDate: '2022-09-10T00:00:00.000Z',
       endDate: '2022-12-10T00:00:00.000Z',
       customerEmails: [],
-      type: 'PERCENTAGE',
-      isEnabled: true
+      type: 'PERCENTAGE'
     }
   });
 }
