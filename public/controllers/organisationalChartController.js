@@ -14,6 +14,7 @@ const organisationChart = async (req, res) => {
   for (let e of employees) {
     if (e.managerId === e.id) {
       e.managerId = 0;
+      e.manager = null;
     } else {
       e.manager.password = '';
     }
