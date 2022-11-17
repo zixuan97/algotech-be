@@ -905,7 +905,9 @@ const updateEmployee = async (req, res) => {
 
 const setCEO = async (req, res) => {
   const { ceoId } = req.params;
-  const subordinates = await userModel.getEmployees({});
+  const subordinates = await (
+    await userModel.getEmployees({})
+  ).filter((e) => e.managerId === null && e.id !== ceoId);
   await userModel.assignSubordinatesToManager({
     id: Number(ceoId),
     users: subordinates

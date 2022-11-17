@@ -442,6 +442,8 @@ model EmployeeQuizQuestionRecord {
   userAnswer    Int
   isCorrect     Boolean
   attemptedAt   DateTime
+  
+  @@unique([questionId, userId])
 }
 
 model DiscountCode {
