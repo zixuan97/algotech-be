@@ -30,6 +30,7 @@ model User {
   lastUpdatedSubjects Subject[]               @relation("lastUpdatedBy")
   subordinates        User[]                  @relation("managedBy")
   jobRoles            JobRole[]
+  questionRecords     EmployeeQuizQuestionRecord[]
 }
 
 model Category {
@@ -420,14 +421,29 @@ model Quiz {
 }
 
 model QuizQuestion {
-  id            Int        @id @default(autoincrement())
-  quizOrder     Int
-  question      String
-  type          AnswerType
-  options       String[]
-  correctAnswer String
+  id                Int        @id @default(autoincrement())
+  quizOrder         Int
+  question          String
+  type              AnswerType
+  options           String[]
+  correctAnswer     Int
+  quizId            Int
+  quiz              Quiz       @relation(fields: [quizId], references: [id])
+  questionRecords   EmployeeQuizQuestionRecord[]
+}
+
+model EmployeeQuizQuestionRecord {
+  id            Int            @id @default(autoincrement())
+  questionId    Int
+  question      QuizQuestion   @relation(fields: [questionId], references: [id])
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id])
   quizId        Int
-  quiz          Quiz       @relation(fields: [quizId], references: [id])
+  userAnswer    Int
+  isCorrect     Boolean
+  attemptedAt   DateTime
+  
+  @@unique([questionId, userId])
 }
 
 model DiscountCode {

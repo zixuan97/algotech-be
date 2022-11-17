@@ -195,14 +195,88 @@ const updateOrderBasedOnQuestionsArray = async (req, res) => {
     quizQuestionModel.updateOrderOfQuestionsArray({ questions: req.body })
   );
   if (error) {
-    log.error('ERR_STEP_UPDATE-ORDER-QUIZ-QUESTION', {
+    log.error('ERR_QUIZQUESTION_UPDATE-ORDER-QUIZ-QUESTION', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_STEP_UPDATE-ORDER-QUIZ-QUESTION', {
+    log.out('OK_QUIZQUESTION_UPDATE-ORDER-QUIZ-QUESTION', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const createEmployeeQuizQuestionRecord = async (req, res) => {
+  const { quizQuestions } = req.body;
+  const currUserId = req.user.userId;
+  const { data, error } = await common.awaitWrap(
+    quizQuestionModel.createEmployeeQuizQuestionRecord({
+      quizQuestions,
+      userId: currUserId
+    })
+  );
+  if (error) {
+    log.error('ERR_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const updateEmployeeQuizQuestionRecord = async (req, res) => {
+  const { quizQuestions } = req.body;
+  const currUserId = req.user.userId;
+  const { data, error } = await common.awaitWrap(
+    quizQuestionModel.updateEmployeeQuizQuestionRecord({
+      quizQuestions,
+      userId: currUserId
+    })
+  );
+  if (error) {
+    log.error('ERR_QUIZQUESTION_UPDATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_QUIZQUESTION_UPDATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    res.json(data);
+  }
+};
+
+const getEmployeeQuizQuestionRecords = async (req, res) => {
+  const { quizId, userId } = req.body;
+  const { data, error } = await common.awaitWrap(
+    quizQuestionModel.getEmployeeQuizRecordsByQuizIdAndUser({
+      quizId,
+      userId
+    })
+  );
+  if (error) {
+    log.error('ERR_QUIZQUESTION_GET-EMPLOYEE-QUIZ-QUESTION-RECORD', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_QUIZQUESTION_GET-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
@@ -216,3 +290,6 @@ exports.getQuizQuestion = getQuizQuestion;
 exports.updateQuizQuestion = updateQuizQuestion;
 exports.deleteQuizQuestion = deleteQuizQuestion;
 exports.updateOrderBasedOnQuestionsArray = updateOrderBasedOnQuestionsArray;
+exports.createEmployeeQuizQuestionRecord = createEmployeeQuizQuestionRecord;
+exports.updateEmployeeQuizQuestionRecord = updateEmployeeQuizQuestionRecord;
+exports.getEmployeeQuizQuestionRecords = getEmployeeQuizQuestionRecords;

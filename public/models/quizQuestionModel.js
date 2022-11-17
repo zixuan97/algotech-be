@@ -1,4 +1,5 @@
 const { prisma } = require('./index.js');
+const { AnswerType } = require('@prisma/client');
 
 const createQuizQuestion = async (req) => {
   const { quizOrder, question, type, options, correctAnswer, quizId } = req;
@@ -132,6 +133,16 @@ const updateQuizQuestion = async (req) => {
 
 const deleteQuizQuestion = async (req) => {
   const { id } = req;
+  await prisma.QuizQuestion.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      questionRecords: {
+        deleteMany: {}
+      }
+    }
+  });
   await prisma.QuizQuestion.delete({
     where: {
       id: Number(id)
@@ -165,6 +176,111 @@ const getQuizQuestionByOrderAndQuizId = async (req) => {
   return quiz[0];
 };
 
+const createEmployeeQuizQuestionRecord = async (req) => {
+  const { quizQuestions, userId } = req;
+  let res = [];
+  let totalCorrect = 0;
+  let overallQuizId;
+  for (let q of quizQuestions) {
+    const { correctAnswer, quizId } = await getQuizQuestionById({
+      id: q.questionId
+    });
+    overallQuizId = quizId;
+    const qn = await prisma.EmployeeQuizQuestionRecord.upsert({
+      where: {
+        questionId_userId: {
+          questionId: Number(q.questionId),
+          userId
+        }
+      },
+      update: {
+        userAnswer: Number(q.userAnswer),
+        isCorrect: correctAnswer === q.userAnswer,
+        attemptedAt: new Date(Date.now()),
+        quizId
+      },
+      create: {
+        questionId: q.questionId,
+        userId,
+        userAnswer: q.userAnswer,
+        isCorrect: correctAnswer === q.userAnswer,
+        attemptedAt: new Date(Date.now()),
+        quizId
+      }
+    });
+    if (correctAnswer === q.userAnswer) totalCorrect++;
+    res.push(qn);
+  }
+  const qns = await getAllQuizQuestionsByQuizId({
+    quizId: overallQuizId
+  });
+  const results = (totalCorrect / qns.length) * 100;
+  const finalRes = {
+    numQnsCorrect: totalCorrect,
+    totalQns: qns.length,
+    results: results
+  };
+  finalRes.quizQuestions = res;
+  return finalRes;
+};
+
+const updateEmployeeQuizQuestionRecord = async (req) => {
+  const { quizQuestions, userId } = req;
+  let res = [];
+  for (let q of quizQuestions) {
+    const { correctAnswer, quizId } = await getQuizQuestionById({
+      id: q.questionId
+    });
+    const qn = await prisma.EmployeeQuizQuestionRecord.update({
+      where: {
+        id: Number(q.id)
+      },
+      data: {
+        questionId: q.questionId,
+        userId,
+        userAnswer: q.userAnswer,
+        isCorrect: correctAnswer === q.userAnswer,
+        quizId
+      }
+    });
+    res.push(qn);
+  }
+  const qns = await getAllQuizQuestionsByQuizId({
+    quizId: quizQuestions[0].quizId
+  });
+  const totalCorrect = await getEmployeeQuizRecordsByQuizIdAndUser({
+    quizId: quizQuestions[0].quizId,
+    userId
+  });
+  const numQnsCorrect = totalCorrect.filter((q) => q.isCorrect).length;
+  const results =
+    (totalCorrect.filter((q) => q.isCorrect).length / qns.length) * 100;
+  const finalRes = {
+    numQnsCorrect,
+    totalQns: qns.length,
+    results: results
+  };
+  finalRes.quizQuestions = totalCorrect;
+  return finalRes;
+};
+
+const getEmployeeQuizRecordsByQuizIdAndUser = async (req) => {
+  const { quizId, userId } = req;
+  const quizQuestions = await prisma.EmployeeQuizQuestionRecord.findMany({
+    where: {
+      quizId: Number(quizId),
+      userId
+    },
+    include: {
+      question: true
+    }
+  });
+  quizQuestions.sort((a, b) => {
+    return a.question.quizOrder - b.question.quizOrder;
+  });
+  return quizQuestions;
+};
+
 exports.createQuizQuestion = createQuizQuestion;
 exports.getAllQuizQuestionsByQuizId = getAllQuizQuestionsByQuizId;
 exports.getQuizQuestionById = getQuizQuestionById;
@@ -172,3 +288,7 @@ exports.updateQuizQuestion = updateQuizQuestion;
 exports.deleteQuizQuestion = deleteQuizQuestion;
 exports.updateOrderOfQuestionsArray = updateOrderOfQuestionsArray;
 exports.getQuizQuestionByOrderAndQuizId = getQuizQuestionByOrderAndQuizId;
+exports.createEmployeeQuizQuestionRecord = createEmployeeQuizQuestionRecord;
+exports.updateEmployeeQuizQuestionRecord = updateEmployeeQuizQuestionRecord;
+exports.getEmployeeQuizRecordsByQuizIdAndUser =
+  getEmployeeQuizRecordsByQuizIdAndUser;

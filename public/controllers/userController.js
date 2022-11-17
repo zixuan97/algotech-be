@@ -905,35 +905,90 @@ const updateEmployee = async (req, res) => {
 
 const setCEO = async (req, res) => {
   const { ceoId } = req.params;
-  const subordinates = await userModel.getEmployees({});
-  await userModel.assignSubordinatesToManager({
-    id: Number(ceoId),
-    users: subordinates
+  const employees = await userModel.getEmployees({});
+  const subordinates = employees.filter((e) => e.managerId === null);
+  await userModel.setCEOMangerIdToOwnId({
+    id: Number(ceoId)
   });
-  let ceo = await userModel.findUserById({ id: Number(ceoId) });
-  const { data, error } = await common.awaitWrap(
-    userModel.unassignSubordinatesToManager({
+  try {
+    const ceo = await userModel.assignSubordinatesToManager({
       id: Number(ceoId),
-      users: [ceo]
-    })
-  );
-  for (let u of data.subordinates) {
-    u.password = '';
-  }
-  data.password = '';
-  if (error) {
+      users: subordinates
+    });
+    ceo.password = '';
+    ceo.manager = ceoId;
+    for (let s of ceo.subordinates) {
+      s.password = '';
+    }
+    log.out('OK_SUBJECT_SET-CEO', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(ceo)
+    });
+    res.json(ceo);
+  } catch (error) {
     log.error('ERR_SUBJECT_SET-CEO', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
+  }
+};
+
+const getCEO = async (req, res) => {
+  const ceo = await userModel.getCEO({});
+  if (ceo === null) {
+    res.json(null);
   } else {
-    log.out('OK_SUBJECT_SET-CEO', {
+    ceo.password = '';
+    ceo.manager = null;
+    for (let s of ceo.subordinates) {
+      s.password = '';
+    }
+    log.out('OK_SUBJECT_GET-CEO', {
       req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
+      res: JSON.stringify(ceo)
     });
-    res.json(data);
+    res.status(200).json(ceo);
+  }
+};
+
+const changeCEO = async (req, res) => {
+  const { ceoId } = req.params;
+  const prevCeo = await userModel.getCEO({});
+  const employees = await userModel.getEmployees({});
+  const subordinates = employees.filter(
+    (e) => e.managerId === null || e.managerId === Number(prevCeo.id)
+  );
+  try {
+    await userModel.unassignSubordinatesToManager({
+      id: Number(prevCeo.id),
+      users: subordinates
+    });
+    const ceo = await userModel.assignSubordinatesToManager({
+      id: Number(ceoId),
+      users: subordinates
+    });
+    await userModel.setCEOMangerIdToOwnId({
+      id: Number(ceoId)
+    });
+    ceo.password = '';
+    ceo.manager = ceoId;
+    for (let s of ceo.subordinates) {
+      s.password = '';
+    }
+    log.out('OK_SUBJECT_CHANGE-CEO', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(ceo)
+    });
+    res.json(ceo);
+  } catch (error) {
+    log.error('ERR_SUBJECT_CHANGE-CEO', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
   }
 };
 
@@ -969,3 +1024,5 @@ exports.assignSubordinatesToManager = assignSubordinatesToManager;
 exports.unassignSubordinatesToManager = unassignSubordinatesToManager;
 exports.updateEmployee = updateEmployee;
 exports.setCEO = setCEO;
+exports.getCEO = getCEO;
+exports.changeCEO = changeCEO;

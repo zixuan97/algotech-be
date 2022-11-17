@@ -227,6 +227,8 @@ const deleteSubject = async (req) => {
 
 const connectOrCreateEmployeeSubjectRecord = async (req) => {
   const { subjectId, userId, completionRate } = req;
+  console.log('s', subjectId);
+  console.log('u', userId);
   const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.upsert({
     where: {
       subjectId_userId: {
@@ -300,7 +302,7 @@ const assignUsersToSubject = async (req) => {
 const unassignUsersToSubject = async (req) => {
   const { id, users } = req;
   for (let u of users) {
-    const record = await getSubjectRecordBySubjectAndUser({
+    const record = await getSubjectRecordBySubjectAndUserSimplified({
       subjectId: id,
       userId: u.id
     });
@@ -368,6 +370,39 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
       user: true,
       completedTopics: true,
       completedQuizzes: true
+    }
+  });
+  return employeeSubjectRecord;
+};
+
+const getSubjectRecordsByUser = async (req) => {
+  const { userId } = req;
+  const employeeSubjectRecords = await prisma.EmployeeSubjectRecord.findMany({
+    where: {
+      userId: Number(userId)
+    },
+    include: {
+      subject: true,
+      user: true,
+      completedQuizzes: true,
+      completedTopics: true
+    }
+  });
+  return employeeSubjectRecords;
+};
+
+const getSubjectRecordBySubjectAndUserSimplified = async (req) => {
+  const { subjectId, userId } = req;
+  const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.findFirst({
+    where: {
+      AND: [
+        {
+          subjectId: Number(subjectId)
+        },
+        {
+          userId: Number(userId)
+        }
+      ]
     }
   });
   return employeeSubjectRecord;
@@ -470,6 +505,7 @@ exports.unassignUsersToSubject = unassignUsersToSubject;
 exports.updateSubjectCompletionRateBySubjectByEmployee =
   updateSubjectCompletionRateBySubjectByEmployee;
 exports.getSubjectRecordBySubjectAndUser = getSubjectRecordBySubjectAndUser;
+exports.getSubjectRecordsByUser = getSubjectRecordsByUser;
 exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
 exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;
 exports.getNumberOfTopicsAndQuizInSubject = getNumberOfTopicsAndQuizInSubject;

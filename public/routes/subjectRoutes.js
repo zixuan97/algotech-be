@@ -21,6 +21,11 @@ router.get(
   '/completionrate/:subjectId/:userId',
   subjectController.getCompletionRateBySubjectByEmployee
 );
+router.get(
+  '/records/all',
+  verifyToken,
+  subjectController.getSubjectRecordsOfUser
+);
 router.post(
   '/completionrate',
   subjectController.updateCompletionRateBySubjectByEmployee

@@ -333,6 +333,36 @@ const getCompletionRateBySubjectByEmployee = async (req, res) => {
   }
 };
 
+const getSubjectRecordsOfUser = async (req, res) => {
+  const userId = req.user.userId;
+  const { data, error } = await common.awaitWrap(
+    subjectModel.getSubjectRecordsByUser({
+      userId
+    })
+  );
+  if (error) {
+    log.error('ERR_SUBJECT_GET-SUBJECT-RECORD-BY-EMPLOYEE', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    if (data) {
+      for (let d of data) {
+        d.user.password = '';
+      }
+      log.out('OK_SUBJECT_GET-SUBJECT-RECORD-BY-EMPLOYEE', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      res.json(data);
+    } else {
+      res.status(400).send('Record does not exist!');
+    }
+  }
+};
+
 const updateCompletionRateBySubjectByEmployee = async (req, res) => {
   const { subjectId, userId, completionRate } = req.body;
   const subject = await subjectModel.getSubjectById({ id: subjectId });
@@ -413,5 +443,6 @@ exports.updateCompletionRateBySubjectByEmployee =
   updateCompletionRateBySubjectByEmployee;
 exports.getCompletionRateBySubjectByEmployee =
   getCompletionRateBySubjectByEmployee;
+exports.getSubjectRecordsOfUser = getSubjectRecordsOfUser;
 exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
 exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;
