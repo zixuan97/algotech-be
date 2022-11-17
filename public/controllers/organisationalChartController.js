@@ -12,7 +12,7 @@ const organisationChart = async (req, res) => {
   const employees = await userModel.getEmployeesForOrgChart({});
   let adjList = [];
   for (let e of employees) {
-    if (e.manager === null) {
+    if (e.managerId === e.id) {
       e.managerId = 0;
     } else {
       e.manager.password = '';
