@@ -227,6 +227,8 @@ const deleteSubject = async (req) => {
 
 const connectOrCreateEmployeeSubjectRecord = async (req) => {
   const { subjectId, userId, completionRate } = req;
+  console.log('s', subjectId);
+  console.log('u', userId);
   const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.upsert({
     where: {
       subjectId_userId: {
@@ -284,6 +286,7 @@ const disconnectOrRemoveEmployeeSubjectRecord = async (req) => {
 const assignUsersToSubject = async (req) => {
   const { id, users } = req;
   for (let u of users) {
+    console.log(u);
     const user = await userModel.findUserById({ id: u.id });
     if (user) {
       await connectOrCreateEmployeeSubjectRecord({
@@ -300,7 +303,7 @@ const assignUsersToSubject = async (req) => {
 const unassignUsersToSubject = async (req) => {
   const { id, users } = req;
   for (let u of users) {
-    const record = await getSubjectRecordBySubjectAndUser({
+    const record = await getSubjectRecordBySubjectAndUserSimplified({
       subjectId: id,
       userId: u.id
     });
@@ -368,6 +371,23 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
       user: true,
       completedTopics: true,
       completedQuizzes: true
+    }
+  });
+  return employeeSubjectRecord;
+};
+
+const getSubjectRecordBySubjectAndUserSimplified = async (req) => {
+  const { subjectId, userId } = req;
+  const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.findFirst({
+    where: {
+      AND: [
+        {
+          subjectId: Number(subjectId)
+        },
+        {
+          userId: Number(userId)
+        }
+      ]
     }
   });
   return employeeSubjectRecord;
