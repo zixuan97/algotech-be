@@ -171,12 +171,23 @@ const createEmployeeQuizQuestionRecord = async (req) => {
   let res = [];
   let totalCorrect = 0;
   for (let q of quizQuestions) {
-    const { options, correctAnswer, type, quizId } = await getQuizQuestionById({
+    const { correctAnswer, quizId } = await getQuizQuestionById({
       id: q.questionId
     });
-    if (type === AnswerType.TRUEFALSE) options = ['T', 'F'];
-    const qn = await prisma.EmployeeQuizQuestionRecord.create({
-      data: {
+    const qn = await prisma.EmployeeQuizQuestionRecord.upsert({
+      where: {
+        questionId_userId: {
+          questionId: Number(q.questionId),
+          userId
+        }
+      },
+      update: {
+        userAnswer: Number(q.userAnswer),
+        isCorrect: correctAnswer === q.userAnswer,
+        attemptedAt: new Date(Date.now()),
+        quizId
+      },
+      create: {
         questionId: q.questionId,
         userId,
         userAnswer: q.userAnswer,
@@ -200,6 +211,10 @@ const createEmployeeQuizQuestionRecord = async (req) => {
 
 const updateEmployeeQuizQuestionRecord = async (req) => {
   const { quizQuestions, userId } = req;
+  let quiz = await getEmployeeQuizRecordsByQuizIdAndUser({
+    quizId: quizQuestions[0].quizId,
+    userId
+  });
   let res = [];
   let totalCorrect = 0;
   for (let q of quizQuestions) {
@@ -232,33 +247,21 @@ const updateEmployeeQuizQuestionRecord = async (req) => {
 };
 
 const getEmployeeQuizRecordsByQuizIdAndUser = async (req) => {
-  const { quizId, userId, attemptedAt } = req;
+  const { quizId, userId } = req;
   const quizQuestions = await prisma.EmployeeQuizQuestionRecord.findMany({
     where: {
       quizId: Number(quizId),
-      userId: Number(userId)
+      userId
+    },
+    include: {
+      question: true
     }
+  });
+  quizQuestions.sort((a, b) => {
+    return a.question.quizOrder - b.question.quizOrder;
   });
   return quizQuestions;
 };
-
-// const getLatestEmployeeQuizQuestionRecord = async (req) => {
-//   const { questionId } = req;
-//   const quizQuestions = await prisma.EmployeeQuizQuestionRecord.findMany({
-//   select: {
-//     branch: {
-//       select: {
-//         name: true,
-//         commits: {
-//           orderBy: {
-//             createdAt: 'desc',
-//           },
-//           take: 1,
-//         },
-//       },
-//     },
-//   },
-// });
 
 exports.createQuizQuestion = createQuizQuestion;
 exports.getAllQuizQuestionsByQuizId = getAllQuizQuestionsByQuizId;

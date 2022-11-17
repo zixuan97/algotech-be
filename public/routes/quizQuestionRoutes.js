@@ -20,7 +20,7 @@ router.put(
 );
 router.get(
   '/record/quiz',
-  quizQuestionController.getEmployeeQuizQuestionRecordsByTimestamp
+  quizQuestionController.getEmployeeQuizQuestionRecords
 );
 
 module.exports = router;

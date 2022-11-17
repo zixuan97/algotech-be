@@ -260,27 +260,23 @@ const updateEmployeeQuizQuestionRecord = async (req, res) => {
   }
 };
 
-const getEmployeeQuizQuestionRecordsByTimestamp = async (req, res) => {
-  const { quizId, userId, attemptedAt } = req.body;
+const getEmployeeQuizQuestionRecords = async (req, res) => {
+  const { quizId, userId } = req.body;
   const { data, error } = await common.awaitWrap(
     quizQuestionModel.getEmployeeQuizRecordsByQuizIdAndUser({
       quizId,
-      userId,
-      attemptedAt
+      userId
     })
   );
   if (error) {
-    log.error(
-      'ERR_QUIZQUESTION_GET-EMPLOYEE-QUIZ-QUESTION-RECORD-BY-TIMESTAMP',
-      {
-        err: error.message,
-        req: { body: req.body, params: req.params }
-      }
-    );
+    log.error('ERR_QUIZQUESTION_GET-EMPLOYEE-QUIZ-QUESTION-RECORD', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
-    log.out('OK_QUIZQUESTION_GET-EMPLOYEE-QUIZ-QUESTION-RECORD-BY-TIMESTAMP', {
+    log.out('OK_QUIZQUESTION_GET-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
@@ -296,5 +292,4 @@ exports.deleteQuizQuestion = deleteQuizQuestion;
 exports.updateOrderBasedOnQuestionsArray = updateOrderBasedOnQuestionsArray;
 exports.createEmployeeQuizQuestionRecord = createEmployeeQuizQuestionRecord;
 exports.updateEmployeeQuizQuestionRecord = updateEmployeeQuizQuestionRecord;
-exports.getEmployeeQuizQuestionRecordsByTimestamp =
-  getEmployeeQuizQuestionRecordsByTimestamp;
+exports.getEmployeeQuizQuestionRecords = getEmployeeQuizQuestionRecords;
