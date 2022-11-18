@@ -18,7 +18,7 @@ const payByStripeCreditCard = async (req, res) => {
     amount,
     orderId
   });
-  res.json(sessionURL);
+  return res.json(sessionURL);
 };
 
 const generatePaymentLink = async (req, res) => {
@@ -37,14 +37,14 @@ const generatePaymentLink = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: paymentLink
     });
-    res.json(paymentLink.url);
+    return res.json(paymentLink.url);
   } catch (error) {
     log.error('ERR_PAYMENT_GENERATE-PAYMENT-LINK', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -136,14 +136,14 @@ const stripeWebhook = async (req, res) => {
   }
 
   // Return a 200 response to acknowledge receipt of the event
-  res.send();
+  return res.send();
 };
 
 const removePaymentLink = async (req, res) => {
   const { paymentLinkId } = req.body;
 
   await paymentModel.removePaymentLink({ paymentLinkId });
-  res.json('done');
+  return res.json('done');
 };
 
 const sendBulkOrderEmail = async (req) => {

@@ -21,7 +21,7 @@ const organisationChart = async (req, res) => {
     e.password = '';
     adjList.push({ managerId: e.id, manager: e.managerId, e });
   }
-  res.status(200).json(buildOrgChart(0, adjList));
+  return res.status(200).json(buildOrgChart(0, adjList));
 };
 
 exports.organisationChart = organisationChart;

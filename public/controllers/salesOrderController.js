@@ -45,20 +45,20 @@ const createSalesOrder = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_SALESORDER_CREATE-SO', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   } else {
     log.error('ERR_SALESORDER_CREATE-SO', {
       err: 'Sales orderId already exist!',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Sales orderId already exist!' });
+    return res.status(400).json({ message: 'Sales orderId already exist!' });
   }
 };
 
@@ -73,14 +73,14 @@ const getAllSalesOrders = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
   }
   log.out('OK_SALESORDER_GET-ALL-SO', {
     req: { body: req.body, params: req.params },
     res: JSON.stringify(data)
   });
-  res.json(data);
+  return res.json(data);
 };
 
 const getAllSalesOrdersWithTimeFilter = async (req, res) => {
@@ -104,7 +104,7 @@ const getAllSalesOrdersWithTimeFilter = async (req, res) => {
     req: { body: req.body, params: req.params },
     res: JSON.stringify(data)
   });
-  res.json(data);
+  return res.json(data);
 };
 
 const getAverageNumberofSalesOrdersWithTimeFilter = async (req, res) => {
@@ -134,7 +134,7 @@ const getAverageNumberofSalesOrdersWithTimeFilter = async (req, res) => {
     res: JSON.stringify(avgNumOfOrders)
   });
 
-  res.json(avgNumOfOrders);
+  return res.json(avgNumOfOrders);
 };
 
 const getAverageValueofSalesOrdersWithTimeFilter = async (req, res) => {
@@ -163,7 +163,7 @@ const getAverageValueofSalesOrdersWithTimeFilter = async (req, res) => {
     req: { body: req.body, params: req.params },
     res: JSON.stringify(avgValueOfOrders)
   });
-  res.json(avgValueOfOrders);
+  return res.json(avgValueOfOrders);
 };
 
 const getAllSalesOrderItemsWithTimeFilter = async (req, res) => {
@@ -181,13 +181,13 @@ const getAllSalesOrderItemsWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
   log.out('OK_SALESORDER_GET-ALL-SOI-TIMEFILTER', {
     req: { body: req.body, params: req.params },
     res: JSON.stringify(data)
   });
-  res.json(data);
+  return res.json(data);
 };
 
 const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
@@ -205,7 +205,7 @@ const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-SO-BY-DAY-TIMEFILTER', {
       req: { body: req.body, params: req.params },
@@ -217,7 +217,7 @@ const getSalesOrdersByDayWithTimeFilter = async (req, res) => {
       )
     });
 
-    res.json(
+    return res.json(
       JSON.parse(
         JSON.stringify(
           data,
@@ -243,7 +243,7 @@ const getRevenueByDayWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-REVENUE-BY-DAY-TIMEFILTER', {
       req: { body: req.body, params: req.params },
@@ -254,7 +254,7 @@ const getRevenueByDayWithTimeFilter = async (req, res) => {
         )
       )
     });
-    res.json(
+    return res.json(
       JSON.parse(
         JSON.stringify(
           data,
@@ -280,7 +280,7 @@ const getBestSellerWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-BEST-SELLER-TIMEFILTER', {
       req: { body: req.body, params: req.params },
@@ -291,7 +291,7 @@ const getBestSellerWithTimeFilter = async (req, res) => {
         )
       )
     });
-    res.json(
+    return res.json(
       JSON.parse(
         JSON.stringify(
           data,
@@ -317,7 +317,7 @@ const getOrdersByPlatformWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-ORDERS-BY-PLATFORM-TIMEFILTER', {
       req: { body: req.body, params: req.params },
@@ -328,7 +328,7 @@ const getOrdersByPlatformWithTimeFilter = async (req, res) => {
         )
       )
     });
-    res.json(
+    return res.json(
       JSON.parse(
         JSON.stringify(
           data,
@@ -355,7 +355,7 @@ const getSalesOfProductOverTimeWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-SALES-OF-PRODUCT-OVER-TIME-TIMEFILTER', {
       req: { body: req.body, params: req.params },
@@ -366,7 +366,7 @@ const getSalesOfProductOverTimeWithTimeFilter = async (req, res) => {
         )
       )
     });
-    res.json(
+    return res.json(
       JSON.parse(
         JSON.stringify(
           data,
@@ -392,7 +392,7 @@ const getBestSellerSalesOrderItemWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-BESTSELLER-PRODUCT-TIMEFILTER', {
       req: { body: req.body, params: req.params },
@@ -403,7 +403,7 @@ const getBestSellerSalesOrderItemWithTimeFilter = async (req, res) => {
         )
       )
     });
-    res.json(
+    return res.json(
       JSON.parse(
         JSON.stringify(
           data,
@@ -422,14 +422,14 @@ const findSalesOrderById = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(salesOrder)
     });
-    res.json(salesOrder);
+    return res.json(salesOrder);
   } catch (error) {
     log.error('ERR_SALESORDER_GET-SALESORDER-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -443,14 +443,14 @@ const findSalesOrderByOrderId = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(salesOrder)
     });
-    res.json(salesOrder);
+    return res.json(salesOrder);
   } catch (error) {
     log.error('ERR_SALESORDER_GET-SALESORDER-BY-ORDER-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 const updateSalesOrderStatus = async (req, res) => {
@@ -464,7 +464,7 @@ const updateSalesOrderStatus = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Successfully updated sales order status with id: ${id}` }
     });
-    res.json({
+    return res.json({
       message: `Successfully updated sales order status with id: ${id}`
     });
   } catch (error) {
@@ -473,7 +473,7 @@ const updateSalesOrderStatus = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -535,14 +535,14 @@ const updateSalesOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Successfully updated sales order with id: ${id}` }
     });
-    res.json({ message: `Successfully updated sales order with id: ${id}` });
+    return res.json({ message: `Successfully updated sales order with id: ${id}` });
   } catch (error) {
     log.error('ERR_SALESORDER_UPDATE-SALESORDER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 

@@ -16,7 +16,7 @@ const createUser = async (req, res) => {
       err: 'User already exist',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'User already exists' });
+   return res.status(400).json({ message: 'User already exists' });
   } else {
     const password = await common.awaitWrap(userModel.generatePassword());
     const content =
@@ -34,7 +34,7 @@ const createUser = async (req, res) => {
         content
       });
     } catch (error) {
-      res.status(400).send('Error sending email');
+      return res.status(400).send('Error sending email');
       return;
     }
     const { data, error } = await common.awaitWrap(
@@ -55,7 +55,7 @@ const createUser = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       if (tier !== undefined) {
         try {
@@ -75,7 +75,7 @@ const createUser = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: { message: 'User created' }
       });
-      res.status(200).json({ message: 'User created' });
+      return res.status(200).json({ message: 'User created' });
     }
   }
 };
@@ -89,7 +89,7 @@ const createB2BUser = async (req, res) => {
       err: 'B2B user already exist',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'User already exists' });
+    return res.status(400).json({ message: 'User already exists' });
   } else {
     const { error } = await common.awaitWrap(
       userModel.createUser({
@@ -109,13 +109,13 @@ const createB2BUser = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_USER_CREATE-B2B-USER', {
         req: { body: req.body, params: req.params },
         res: { message: 'B2B User created' }
       });
-      res.status(200).json({ message: 'B2B User created' });
+      return res.status(200).json({ message: 'B2B User created' });
     }
   }
 };
@@ -128,13 +128,13 @@ const getUser = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(user)
     });
-    res.json(user);
+    return res.json(user);
   } catch (error) {
     log.error('ERR_USER_GET-USER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting user');
+    return res.status(400).send('Error getting user');
   }
 };
 
@@ -146,13 +146,13 @@ const getUserDetails = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(user)
     });
-    res.json(user);
+    return res.json(user);
   } catch (error) {
     log.error('ERR_USER_GET-USER-DETAILS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting user details');
+    return res.status(400).send('Error getting user details');
   }
 };
 
@@ -165,11 +165,11 @@ const auth = async (req, res) => {
     email
   });
   if (user && user.status === UserStatus.DISABLED) {
-    res.status(400).send('User has been disabled.');
+    return res.status(400).send('User has been disabled.');
   } else if (user && user.status === UserStatus.REJECTED) {
-    res.status(400).send('User has been rejected.');
+    return res.status(400).send('User has been rejected.');
   } else if (user && user.status === UserStatus.PENDING) {
-    res.status(400).send('User is still pending verification.');
+    return res.status(400).send('User is still pending verification.');
   } else if (
     user &&
     (await bcrypt.compare(password, user.password)) &&
@@ -188,14 +188,14 @@ const auth = async (req, res) => {
             err: err.message,
             req: { body: req.body, params: req.params }
           });
-          res.status(400).send('Error authenticating');
+        return res.status(400).send('Error authenticating');
         }
         log.out('OK_AUTH_LOGIN', {
           req: { body: req.body, params: req.params },
           res: JSON.stringify(token)
         });
         user.token = token;
-        res.json({ token });
+        return res.json({ token });
       }
     );
   } else {
@@ -203,7 +203,7 @@ const auth = async (req, res) => {
       err: 'Invalid Credentials',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Invalid Credentials');
+    return res.status(400).send('Invalid Credentials');
   }
 };
 
@@ -214,13 +214,13 @@ const getUsers = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: users.filter((u) => u.id != req.user.userId)
     });
-    res.json(users.filter((u) => u.id != req.user.userId));
+    return res.json(users.filter((u) => u.id != req.user.userId));
   } catch (error) {
     log.error('ERR_USER_GET-USERS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting users');
+    return res.status(400).send('Error getting users');
   }
 };
 
@@ -233,7 +233,7 @@ const editUser = async (req, res) => {
       err: 'User already exists',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'User already exists' });
+    return res.status(400).json({ message: 'User already exists' });
   } else {
     try {
       user = await userModel.editUser({ updatedUser: req.body });
@@ -244,7 +244,7 @@ const editUser = async (req, res) => {
           payload: user
         }
       });
-      res.json({
+      return res.json({
         message: 'User edited',
         payload: user
       });
@@ -253,7 +253,7 @@ const editUser = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.status(400).send('Error editing user');
+      return res.status(400).send('Error editing user');
     }
   }
 };
@@ -266,13 +266,13 @@ const deleteUser = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: 'User deleted' }
     });
-    res.json({ message: 'User deleted' });
+    return res.json({ message: 'User deleted' });
   } catch (error) {
     log.error('ERR_USER_DELETE-USER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error deleting user');
+    return res.status(400).send('Error deleting user');
   }
 };
 
@@ -287,7 +287,7 @@ const enableUser = async (req, res) => {
         payload: user
       }
     });
-    res.json({
+    return res.json({
       message: 'User enabled',
       payload: user
     });
@@ -296,7 +296,7 @@ const enableUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error enabling user');
+    return res.status(400).send('Error enabling user');
   }
 };
 
@@ -311,7 +311,7 @@ const disableUser = async (req, res) => {
         payload: user
       }
     });
-    res.json({
+    return res.json({
       message: 'User disabled',
       payload: user
     });
@@ -320,7 +320,7 @@ const disableUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error disabling user');
+    return res.status(400).send('Error disabling user');
   }
 };
 
@@ -336,7 +336,7 @@ const changeUserRole = async (req, res) => {
         payload: user
       }
     });
-    res.json({
+    return res.json({
       message: 'User role updated',
       payload: user
     });
@@ -345,7 +345,7 @@ const changeUserRole = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error changing user role');
+    return res.status(400).send('Error changing user role');
   }
 };
 
@@ -373,7 +373,7 @@ const sendForgetEmailPassword = async (req, res) => {
           message: 'Email sent'
         }
       });
-      res.json({
+      return res.json({
         message: 'Email sent'
       });
     } else {
@@ -381,14 +381,14 @@ const sendForgetEmailPassword = async (req, res) => {
         err: 'Failed to send email as user is not registered',
         req: { body: req.body, params: req.params }
       });
-      res.status(400).send('Failed to send email as user is not registered');
+      return res.status(400).send('Failed to send email as user is not registered');
     }
   } catch (error) {
     log.error('ERR_USER_SEND', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error sending forget email password');
+    return res.status(400).send('Error sending forget email password');
   }
 };
 
@@ -417,20 +417,20 @@ const verifyPassword = async (req, res) => {
             req: { body: req.body, params: req.params },
             res: { message: 'Password verified' }
           });
-          res.status(200).json({ message: 'Password verified' });
+          return res.status(200).json({ message: 'Password verified' });
         } else {
           log.error('ERR_USER_VERIFY-PW', {
             err: 'Passwords do not match',
             req: { body: req.body, params: req.params }
           });
-          res.status(400).json({ message: 'Passwords do not match' });
+          return res.status(400).json({ message: 'Passwords do not match' });
         }
       } else {
         log.error('ERR_USER_VERIFY-PW', {
           err: 'User does not exist',
           req: { body: req.body, params: req.params }
         });
-        res.status(400).json({ message: 'User does not exist' });
+        return res.status(400).json({ message: 'User does not exist' });
       }
     }
   } catch (error) {
@@ -438,7 +438,7 @@ const verifyPassword = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error verifying password');
+    return res.status(400).send('Error verifying password');
   }
 };
 
@@ -453,7 +453,7 @@ const changePassword = async (req, res) => {
         payload: user
       }
     });
-    res.json({
+    return res.json({
       message: 'Password changed',
       payload: user
     });
@@ -462,7 +462,7 @@ const changePassword = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error changing password');
+    return res.status(400).send('Error changing password');
   }
 };
 
@@ -501,7 +501,7 @@ const approveB2BUser = async (req, res) => {
         message: 'Account creation request approved.'
       }
     });
-    res.json({
+    return res.json({
       message: 'Account creation request approved.'
     });
   } catch (error) {
@@ -509,7 +509,7 @@ const approveB2BUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error approving B2B user');
+    return res.status(400).send('Error approving B2B user');
   }
 };
 
@@ -543,7 +543,7 @@ const rejectB2BUser = async (req, res) => {
         payload: user
       }
     });
-    res.json({
+    return res.json({
       message: 'Account creation request rejected.',
       payload: user
     });
@@ -552,7 +552,7 @@ const rejectB2BUser = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error rejecting B2B user');
+    return res.status(400).send('Error rejecting B2B user');
   }
 };
 
@@ -563,13 +563,13 @@ const getAllB2BUsers = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(users)
     });
-    res.json(users);
+    return res.json(users);
   } catch (error) {
     log.error('ERR_USER_GET-B2B-USERS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting all B2B users');
+    return res.status(400).send('Error getting all B2B users');
   }
 };
 
@@ -580,13 +580,13 @@ const getAllPendingB2BUsers = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: users.filter((u) => u.status === UserStatus.PENDING)
     });
-    res.json(users.filter((u) => u.status === UserStatus.PENDING));
+    return res.json(users.filter((u) => u.status === UserStatus.PENDING));
   } catch (error) {
     log.error('ERR_USER_GET-PENDING-B2B-USERS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting all pending B2B users');
+    return res.status(400).send('Error getting all pending B2B users');
   }
 };
 
@@ -600,13 +600,13 @@ const getAllNonB2BUsers = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(filteredUsers)
     });
-    res.json(filteredUsers);
+    return res.json(filteredUsers);
   } catch (error) {
     log.error('ERR_USER_GET-NON-B2B-USERS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting all non-B2B users');
+    return res.status(400).send('Error getting all non-B2B users');
   }
 };
 
@@ -617,7 +617,7 @@ const getNumberOfPendingUsers = async (req, res) => {
     req: { body: req.body, params: req.params },
     res: filtered.length
   });
-  res.json(filtered.length);
+  return res.json(filtered.length);
 };
 
 const getAllEmployees = async (req, res) => {
@@ -634,13 +634,13 @@ const getAllEmployees = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(users)
     });
-    res.json(users);
+    return res.json(users);
   } catch (error) {
     log.error('ERR_USER_GET-EMPLOYEES', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting all employees');
+    return res.status(400).send('Error getting all employees');
   }
 };
 
@@ -648,7 +648,7 @@ const createJobRole = async (req, res) => {
   const { jobRole, description, usersInJobRole } = req.body;
   const role = await userModel.getJobRoleByName({ jobRole });
   if (role) {
-    res.status(400).send('Job role already exists!');
+    return res.status(400).send('Job role already exists!');
   } else {
     try {
       const data = await userModel.createJobRole({
@@ -663,13 +663,13 @@ const createJobRole = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     } catch (error) {
       log.error('ERR_USER_CREATE-JOB-ROLE', {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.status(400).send('Error creating job role');
+      return res.status(400).send('Error creating job role');
     }
   }
 };
@@ -678,7 +678,7 @@ const editJobRole = async (req, res) => {
   const { id, jobRole, description, usersInJobRole } = req.body;
   const j = await userModel.getJobRoleByName({ jobRole });
   if (j !== null && id !== j.id) {
-    res.status(400).send('Job role already exists!');
+    return res.status(400).send('Job role already exists!');
   } else {
     try {
       const data = await userModel.editJobRole({
@@ -694,13 +694,13 @@ const editJobRole = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     } catch (error) {
       log.error('ERR_USER_EDIT-JOB-ROLE', {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.status(400).send('Error editing job role');
+      return res.status(400).send('Error editing job role');
     }
   }
 };
@@ -714,13 +714,13 @@ const addJobRolesToUser = async (req, res) => {
       res: JSON.stringify(data)
     });
     data.password = '';
-    res.json(data);
+    return res.json(data);
   } catch (error) {
     log.error('ERR_USER_ADD-JOB-ROLES-TO-USER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error adding job roles to users');
+    return res.status(400).send('Error adding job roles to users');
   }
 };
 
@@ -732,13 +732,13 @@ const deleteJobRole = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: 'Job role deleted' }
     });
-    res.json({ message: 'Job role deleted' });
+    return res.json({ message: 'Job role deleted' });
   } catch (error) {
     log.error('ERR_USER_DELETE-JOB-ROLE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error deleting job role');
+    return res.status(400).send('Error deleting job role');
   }
 };
 
@@ -753,13 +753,13 @@ const getJobRoleById = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(job)
     });
-    res.json(job);
+    return res.json(job);
   } catch (error) {
     log.error('ERR_USER_GET-JOB-ROLE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting job role');
+    return res.status(400).send('Error getting job role');
   }
 };
 
@@ -774,13 +774,13 @@ const getJobRoleByName = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(job)
     });
-    res.json(job);
+    return res.json(job);
   } catch (error) {
     log.error('ERR_USER_GET-JOB-ROLE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting job role by name');
+    return res.status(400).send('Error getting job role by name');
   }
 };
 
@@ -796,13 +796,13 @@ const getAllJobRoles = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(jobs)
     });
-    res.json(jobs);
+    return res.json(jobs);
   } catch (error) {
     log.error('ERR_USER_GET-ALL-JOB-ROLE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting all job roles');
+    return res.status(400).send('Error getting all job roles');
   }
 };
 
@@ -825,13 +825,13 @@ const assignSubordinatesToManager = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUBJECT_ASSIGN-SUBORDINATES-TO-MANAGER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -854,13 +854,13 @@ const unassignSubordinatesToManager = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUBJECT_UNASSIGN-SUBORDINATES-TO-MANAGER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -892,13 +892,13 @@ const updateEmployee = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUBJECT_UPDATE-EMPLOYEE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -926,21 +926,21 @@ const setCEO = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(ceo)
     });
-    res.json(ceo);
+    return res.json(ceo);
   } catch (error) {
     log.error('ERR_SUBJECT_SET-CEO', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
 const getCEO = async (req, res) => {
   const ceo = await userModel.getCEO({});
   if (ceo === null) {
-    res.json(null);
+    return res.json(null);
   } else {
     ceo.password = '';
     ceo.manager = null;
@@ -951,7 +951,7 @@ const getCEO = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(ceo)
     });
-    res.status(200).json(ceo);
+    return res.status(200).json(ceo);
   }
 };
 
@@ -983,14 +983,14 @@ const changeCEO = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(ceo)
     });
-    res.json(ceo);
+    return res.json(ceo);
   } catch (error) {
     log.error('ERR_SUBJECT_CHANGE-CEO', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
