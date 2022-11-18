@@ -307,6 +307,7 @@ const getQuizByTitleAndSubjectId = async (req) => {
 
 const markQuizAsCompletedForUser = async (req) => {
   const { quizId, userId } = req;
+  console.log('Reached here');
   const quiz = await prisma.quiz.findUnique({
     where: { id: Number(quizId) },
     include: {

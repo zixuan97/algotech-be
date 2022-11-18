@@ -937,14 +937,15 @@ const changeCEO = async (req, res) => {
   const { ceoId } = req.params;
   const prevCeo = await userModel.getCEO({});
   const employees = await userModel.getEmployees({});
-  const subordinates = employees.filter(
-    (e) => e.managerId === null || e.managerId === Number(prevCeo.id)
-  );
+  let subordinates = [];
+  if (prevCeo !== null) {
+    subordinates = employees.filter(
+      (e) => e.managerId === null || e.managerId === Number(prevCeo.id)
+    );
+  } else {
+    subordinates = employees.filter((e) => e.managerId === null);
+  }
   try {
-    // await userModel.unassignSubordinatesToManager({
-    //   id: Number(prevCeo.id),
-    //   users: subordinates
-    // });
     await userModel.setCEOMangerIdToOwnId({
       id: Number(ceoId)
     });
