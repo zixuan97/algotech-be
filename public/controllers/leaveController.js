@@ -15,7 +15,7 @@ const createLeaveApplication = async (req, res) => {
       err: `Employee does not have any leave balance for ${leaveType}`,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json(`You do not have any more ${leaveType} leave balance`);
+    return res.status(400).json(`You do not have any more ${leaveType} leave balance`);
   } else {
     const { data, error } = await common.awaitWrap(
       leaveModel.createLeaveApplication({
@@ -32,13 +32,13 @@ const createLeaveApplication = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.json(Error.http(error));
+      return res.json(Error.http(error));
     } else {
       log.out('OK_LEAVE_CREATE-LEAVE', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -63,13 +63,13 @@ const createLeaveQuota = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_CREATE-LEAVE-QUOTA', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -81,13 +81,13 @@ const getLeaveQuota = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_GET-LEAVE-QUOTA', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -124,13 +124,13 @@ const getLeaveQuotaById = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_GET-LEAVE-QUOTA-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -139,7 +139,7 @@ const updateLeaveQuota = async (req, res) => {
     req.body;
   const curr = await leaveModel.getLeaveQuotaByTier({ tier });
   if (curr && curr.id !== id) {
-    res.status(400).send('Tier name already exists');
+    return res.status(400).send('Tier name already exists');
   } else {
     const { data, error } = await common.awaitWrap(
       leaveModel.updateLeaveQuota({
@@ -171,13 +171,13 @@ const updateLeaveQuota = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_LEAVE_UPDATE-LEAVE-QUOTA', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -195,13 +195,13 @@ const deleteLeaveQuotaById = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_DELETE-LEAVE-RECORD', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.status(200).json({ message: 'Tier successfully deleted' });
+    return res.status(200).json({ message: 'Tier successfully deleted' });
   }
 };
 
@@ -219,13 +219,13 @@ const getEmployeeLeaveRecord = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_GET-EMPLOYEE-LEAVE-RECORD', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -242,13 +242,13 @@ const getAllEmployeeLeaveRecords = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_GET-ALL-EMPLOYEE-LEAVE-RECORDS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -265,13 +265,13 @@ const getLeaveRecordById = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_GET-LEAVE-RECORD-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -304,13 +304,13 @@ const updateEmployeeLeaveQuota = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_UPDATE-EMPLOYEE-LEAVE-RECORD', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -328,13 +328,13 @@ const getAllLeaveApplicationsByEmployeeId = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_LEAVE_GET-ALL-LEAVES-BY-EMPLOYEE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -351,13 +351,13 @@ const getAllLeaveApplications = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_LEAVE_GET-ALL-LEAVES', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -374,13 +374,13 @@ const getAllApprovedLeaveApplications = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_LEAVE_GET-ALL-APPROVED-LEAVES', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -397,13 +397,13 @@ const getAllPendingLeaveApplications = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_LEAVE_GET-ALL-PENDING-LEAVES', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -416,13 +416,13 @@ const getNumberOfPendingLeaveApplications = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_LEAVE_GET-NUM-OF-PENDING-LEAVES', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data.length)
     });
-    res.json(data.length);
+    return res.json(data.length);
   }
 };
 
@@ -436,13 +436,13 @@ const getLeaveApplication = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(leave)
     });
-    res.json(leave);
+    return res.json(leave);
   } catch (error) {
     log.error('ERR_LEAVE_GET-LEAVE-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting leave');
+    return res.status(400).send('Error getting leave');
   }
 };
 
@@ -466,13 +466,13 @@ const updateLeaveApplication = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_UPDATE-LEAVE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -494,20 +494,20 @@ const vetLeaveApplication = async (req, res) => {
       err: 'You cannot vet your own application',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json('You cannot vet your own application');
+    return res.status(400).json('You cannot vet your own application');
   } else if (error) {
     log.error('ERR_LEAVE_VET-LEAVE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_VET-LEAVE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -527,7 +527,7 @@ const approveLeaveApplication = async (req, res) => {
       err: 'Leave application has already been approved',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json('Leave application has already been approved');
+    return res.status(400).json('Leave application has already been approved');
   } else if (status === LeaveStatus.CANCELLED) {
     log.out('ERR_LEAVE_APPROVE-LEAVE', {
       err: 'You cannot approve an application that has been cancelled',
@@ -541,7 +541,7 @@ const approveLeaveApplication = async (req, res) => {
       err: 'You cannot approve your own application',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json('You cannot approve your own application');
+    return res.status(400).json('You cannot approve your own application');
   } else if (leaveTypeBalance === 0) {
     log.out('ERR_LEAVE_APPROVE-LEAVE', {
       err: `Employee does not have any leave balance for ${leaveType}`,
@@ -565,7 +565,7 @@ const approveLeaveApplication = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       try {
         await leaveModel.updateLeaveTypeBalanceByEmployeeId({
@@ -577,14 +577,14 @@ const approveLeaveApplication = async (req, res) => {
           req: { body: req.body, params: req.params },
           res: JSON.stringify(data)
         });
-        res.status(200).json({ message: 'Leave successfully approved' });
+        return res.status(200).json({ message: 'Leave successfully approved' });
       } catch (error) {
         log.error('ERR_LEAVE_APPROVE-LEAVE', {
           err: error.message,
           req: { body: req.body, params: req.params }
         });
         const e = Error.http(error);
-        res.status(e.code).json(e.message);
+        return res.status(e.code).json(e.message);
       }
     }
   }
@@ -610,7 +610,7 @@ const rejectLeaveApplication = async (req, res) => {
       err: 'You cannot reject your own application',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json('You cannot reject your own application');
+    return res.status(400).json('You cannot reject your own application');
   } else {
     const { data, error } = await common.awaitWrap(
       leaveModel.updateLeaveApplication({
@@ -626,7 +626,7 @@ const rejectLeaveApplication = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       try {
         if (status === LeaveStatus.APPROVED) {
@@ -640,14 +640,14 @@ const rejectLeaveApplication = async (req, res) => {
           req: { body: req.body, params: req.params },
           res: JSON.stringify(data)
         });
-        res.status(200).json({ message: 'Leave successfully rejected' });
+        return res.status(200).json({ message: 'Leave successfully rejected' });
       } catch (error) {
         log.error('ERR_LEAVE_REJECTED-LEAVE', {
           err: error.message,
           req: { body: req.body, params: req.params }
         });
         const e = Error.http(error);
-        res.status(e.code).json(e.message);
+        return res.status(e.code).json(e.message);
       }
     }
   }
@@ -679,13 +679,13 @@ const cancelLeaveApplication = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_LEAVE_CANCEL-LEAVE', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.status(200).json({ message: 'Leave successfully cancelled' });
+      return res.status(200).json({ message: 'Leave successfully cancelled' });
     }
   }
 };
@@ -704,13 +704,13 @@ const updateTierByEmployeeId = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_UPDATE-EMPLOYEE-TIER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -728,14 +728,14 @@ const updateEmployeesToNewTierForDeletedTier = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     await leaveModel.deleteLeaveQuotaByTier({ tier: deletedTier });
     log.out('OK_LEAVE_UPDATE-EMPLOYEES-TO-NEW-TIER-FROM-DELETED-TIER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.status(200).json({
+    return res.status(200).json({
       message: `All employees in ${deletedTier} have successfully been updated from ${deletedTier} to ${newTier}`
     });
   }
@@ -754,13 +754,13 @@ const getNumberOfEmployeesInTier = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LEAVE_GET-NUM-EMPLOYEES-BY-TIER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.status(200).json(data.length);
+    return res.status(200).json(data.length);
   }
 };
 

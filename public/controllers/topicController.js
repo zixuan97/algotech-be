@@ -15,9 +15,9 @@ const createTopic = async (req, res) => {
     currTitles.push(t.title);
   }
   if (currentOrders.includes(subjectOrder)) {
-    res.status(400).send('Subject order already exists!');
+    return res.status(400).send('Subject order already exists!');
   } else if (currTitles.includes(title)) {
-    res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
+    return res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
   } else {
     const currUserId = req.user.userId;
     await subjectModel.updateSubject({
@@ -41,13 +41,13 @@ const createTopic = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.json(Error.http(error));
+      return res.json(Error.http(error));
     } else {
       log.out('OK_TOPIC_CREATE-TOPIC', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -69,13 +69,13 @@ const getAllTopicsBySubjectId = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_TOPIC_GET-ALL-TOPICS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -92,13 +92,13 @@ const getTopic = async (req, res) => {
     for (let u of topic.subject.usersAssigned) {
       u.user.password = '';
     }
-    res.json(topic);
+    return res.json(topic);
   } catch (error) {
     log.error('ERR_TOPIC_GET-TOPIC-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting topic');
+    return res.status(400).send('Error getting topic');
   }
 };
 
@@ -120,9 +120,9 @@ const updateTopic = async (req, res) => {
     title
   });
   if (currentOrders.includes(subjectOrder) && currTopicByOrder.id !== id) {
-    res.status(400).send('Subject order already exists!');
+    return res.status(400).send('Subject order already exists!');
   } else if (currTitles.includes(title) && currTopicByTitle.id !== id) {
-    res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
+    return res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
   } else {
     const currUserId = req.user.userId;
     await subjectModel.updateSubject({
@@ -149,13 +149,13 @@ const updateTopic = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_TOPIC_UPDATE-TOPIC', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -176,7 +176,7 @@ const addStepsToTopic = async (req, res) => {
     }
   }
   if (stepsToAdd.length === 0) {
-    res.status(400).send('All topic orders already exists!');
+    return res.status(400).send('All topic orders already exists!');
   } else {
     const { subjectId } = await topicModel.getTopicById({ id });
     const currUserId = req.user.userId;
@@ -201,13 +201,13 @@ const addStepsToTopic = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_TOPIC_ADD-STEPS-TO-TOPIC', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -227,13 +227,13 @@ const deleteTopic = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_TOPIC_DELETE-TOPIC', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted topic with id:${id}` }
     });
-    res.json({ message: `Deleted topic with id:${id}` });
+    return res.json({ message: `Deleted topic with id:${id}` });
   }
 };
 
@@ -247,13 +247,13 @@ const updateOrderBasedOnTopicArray = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_STEP_UPDATE-ORDER-TOPIC', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -277,13 +277,13 @@ const markTopicAsCompletedByUser = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_STEP_UPDATE-MARK-TOPIC-AS-COMPLETED', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 

@@ -10,7 +10,7 @@ const createSubject = async (req, res) => {
   const { title, description, isPublished, type } = req.body;
   const existingSubject = await subjectModel.getSubjectByTitle({ title });
   if (existingSubject !== null) {
-    res.status(400).send('Subject title already exists!');
+    return res.status(400).send('Subject title already exists!');
   } else {
     const currUserId = req.user.userId;
     const { data, error } = await common.awaitWrap(
@@ -33,13 +33,13 @@ const createSubject = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.json(Error.http(error));
+      return res.json(Error.http(error));
     } else {
       log.out('OK_SUBJECT_CREATE-SUBJECT', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -60,13 +60,13 @@ const getAllSubjects = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_SUBJECT_GET-ALL-SUBJECTS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -83,13 +83,13 @@ const getSubject = async (req, res) => {
     for (u of subject.usersAssigned) {
       u.user.password = '';
     }
-    res.json(subject);
+    return res.json(subject);
   } catch (error) {
     log.error('ERR_SUBJECT_GET-SUBJECT-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting subject');
+    return res.status(400).send('Error getting subject');
   }
 };
 
@@ -98,7 +98,7 @@ const updateSubject = async (req, res) => {
     req.body;
   const existingSubject = await subjectModel.getSubjectByTitle({ title });
   if (existingSubject !== null && existingSubject.id !== id) {
-    res.status(400).send('Subject title already exists!');
+    return res.status(400).send('Subject title already exists!');
   } else {
     const subject = await subjectModel.getSubjectById({ id });
     if (subject) {
@@ -120,7 +120,7 @@ const updateSubject = async (req, res) => {
           req: { body: req.body, params: req.params }
         });
         const e = Error.http(error);
-        res.status(e.code).json(e.message);
+        return res.status(e.code).json(e.message);
       } else {
         if (data) {
           data.createdBy.password = '';
@@ -132,13 +132,13 @@ const updateSubject = async (req, res) => {
             req: { body: req.body, params: req.params },
             res: JSON.stringify(data)
           });
-          res.json(data);
+          return res.json(data);
         } else {
-          res.status(400).send('Subject does not exist');
+          return res.status(400).send('Subject does not exist');
         }
       }
     } else {
-      res.status(400).send('Subject does not exist!');
+      return res.status(400).send('Subject does not exist!');
     }
   }
 };
@@ -152,13 +152,13 @@ const deleteSubject = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUBJECT_DELETE-SUBJECT', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted subject with id:${id}` }
     });
-    res.json({ message: `Deleted subject with id:${id}` });
+    return res.json({ message: `Deleted subject with id:${id}` });
   }
 };
 
@@ -188,16 +188,16 @@ const assignUsersToSubject = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_SUBJECT_ASSIGN-USERS-TO-SUBJECT', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   } else {
-    res.status(400).send('Subject or user does not exist!');
+    return res.status(400).send('Subject or user does not exist!');
   }
 };
 
@@ -222,16 +222,16 @@ const unassignUsersToSubject = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_SUBJECT_UNASSIGN-USERS-TO-SUBJECT', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   } else {
-    res.status(400).send('Subject or user does not exist!');
+    return res.status(400).send('Subject or user does not exist!');
   }
 };
 
@@ -287,20 +287,20 @@ const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(topicError);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else if (quizError) {
     log.error('ERR_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
       err: quizError.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(quizError);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -318,7 +318,7 @@ const getSubjectRecordBySubjectByEmployee = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     if (data) {
       data.user.password = '';
@@ -326,9 +326,9 @@ const getSubjectRecordBySubjectByEmployee = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     } else {
-      res.status(400).send('Record does not exist!');
+      return res.status(400).send('Record does not exist!');
     }
   }
 };
@@ -346,7 +346,7 @@ const getSubjectRecordsOfUser = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     if (data) {
       for (let d of data) {
@@ -356,9 +356,9 @@ const getSubjectRecordsOfUser = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     } else {
-      res.status(400).send('Record does not exist!');
+      return res.status(400).send('Record does not exist!');
     }
   }
 };
@@ -381,17 +381,17 @@ const updateCompletionRateBySubjectByEmployee = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       data.user.password = '';
       log.out('OK_SUBJECT_UPDATE-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   } else {
-    res.status(400).send('Subject or user does not exist!');
+    return res.status(400).send('Subject or user does not exist!');
   }
 };
 
@@ -403,13 +403,13 @@ const getSubjectsAssignedByUserId = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(subjects)
     });
-    res.json(subjects);
+    return res.json(subjects);
   } catch (error) {
     log.error('ERR_SUBJECT_GET-SUBJECTS-BY-USER-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting subjects');
+    return res.status(400).send('Error getting subjects');
   }
 };
 
@@ -421,13 +421,13 @@ const getUsersAssignedBySubjectId = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(users)
     });
-    res.json(users);
+    return res.json(users);
   } catch (error) {
     log.error('ERR_SUBJECT_GET-USERS-BY-SUBJECT-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting users');
+    return res.status(400).send('Error getting users');
   }
 };
 

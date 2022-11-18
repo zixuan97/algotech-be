@@ -84,14 +84,14 @@ const addShopifyOrders = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   } catch (error) {
     log.error('ERR_SHOPIFY-ADD-ORDERS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -154,10 +154,10 @@ const createOrderWebhook = async (req, res, next) => {
         req: { body: req.body, params: req.params },
         res: { message: 'order received' }
       });
-      res.json({ message: 'order received' });
+      return res.json({ message: 'order received' });
       pusherUtil.sendPusherMsg(salesOrderData);
     } else {
-      res.json({ message: 'order already exists' });
+      return res.json({ message: 'order already exists' });
     }
   } catch (error) {
     log.error('ERR_SHOPIFY_ADD-ORDER-WEBHOOK', {
@@ -165,7 +165,7 @@ const createOrderWebhook = async (req, res, next) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 

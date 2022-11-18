@@ -15,7 +15,7 @@ const createStep = async (req, res) => {
     currentOrders.push(s.topicOrder);
   }
   if (currentOrders.includes(topicOrder)) {
-    res.status(400).send('Topic order already exists!');
+    return res.status(400).send('Topic order already exists!');
   } else {
     const { subjectId } = await topicModel.getTopicById({ id: topicId });
     const currUserId = req.user.userId;
@@ -41,13 +41,13 @@ const createStep = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.json(Error.http(error));
+      return res.json(Error.http(error));
     } else {
       log.out('OK_STEP_CREATE-STEP', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -69,13 +69,13 @@ const getAllStepsByTopicId = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_STEP_GET-ALL-STEPS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -92,13 +92,13 @@ const getStep = async (req, res) => {
     for (let u of step.topic.subject.usersAssigned) {
       u.user.password = '';
     }
-    res.json(step);
+    return res.json(step);
   } catch (error) {
     log.error('ERR_STEP_GET-STEP-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting step');
+    return res.status(400).send('Error getting step');
   }
 };
 
@@ -114,7 +114,7 @@ const updateStep = async (req, res) => {
     topicOrder
   });
   if (currentOrders.includes(topicOrder) && currStepByOrder.id !== id) {
-    res.status(400).send('Topic order already exists!');
+    return res.status(400).send('Topic order already exists!');
   } else {
     const { subjectId } = await topicModel.getTopicById({ id: topicId });
     const currUserId = req.user.userId;
@@ -142,13 +142,13 @@ const updateStep = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_STEP_UPDATE-STEP', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -169,13 +169,13 @@ const deleteStep = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_STEP_DELETE-STEP', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted step with id:${id}` }
     });
-    res.json({ message: `Deleted step with id:${id}` });
+    return res.json({ message: `Deleted step with id:${id}` });
   }
 };
 
@@ -205,7 +205,7 @@ const updateOrderBasedOnStepsArray = async (req, res) => {
     toAddToResData.push(newStep);
   }
   if (toAddToResData.includes(0)) {
-    res.status(400).send('Error adding new step (duplicate topic order)!');
+    return res.status(400).send('Error adding new step (duplicate topic order)!');
   } else {
     for (let n of toAddToResData) {
       data.push(n);
@@ -226,13 +226,13 @@ const updateOrderBasedOnStepsArray = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_STEP_UPDATE-ORDER-STEP', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };

@@ -24,7 +24,7 @@ const createDiscountCode = async (req, res) => {
       err: { message: 'Discount code already exists' },
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Discount code already exists' });
+    return res.status(400).json({ message: 'Discount code already exists' });
   } else {
     const { error } = await common.awaitWrap(
       discountCodeModel.createDiscountCode({
@@ -43,13 +43,13 @@ const createDiscountCode = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_DISCOUNTCODE_CREATE-DISCOUNTCODE', {
         req: { body: req.body, params: req.params },
         res: { message: 'Discount code created' }
       });
-      res.json({ message: 'Discount code created' });
+      return res.json({ message: 'Discount code created' });
     }
   }
 };
@@ -65,13 +65,13 @@ const getAllDiscountCodes = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_DISCOUNTCODE_GET-ALL-DISCOUNTCODE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -86,13 +86,13 @@ const getDiscountCodeById = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(discountCode)
     });
-    res.json(discountCode);
+    return res.json(discountCode);
   } catch (error) {
     log.error('ERR_DISCOUNTCODE_GET-DISCOUNTCODE-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting discount code by id');
+    return res.status(400).send('Error getting discount code by id');
   }
 };
 
@@ -107,13 +107,13 @@ const getDiscountCode = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(code)
     });
-    res.json(code);
+    return res.json(code);
   } catch (error) {
     log.error('ERR_DISCOUNTCODE_GET-DISCOUNTCODE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting discount code');
+    return res.status(400).send('Error getting discount code');
   }
 };
 
@@ -148,7 +148,7 @@ const applyDiscountCode = async (req, res) => {
             discountAmount: code.amount
           })
         });
-        res.json({
+        return res.json({
           transactionAmount,
           discountType: code.type,
           discountAmount: code.amount
@@ -161,13 +161,13 @@ const applyDiscountCode = async (req, res) => {
           req: { body: req.body, params: req.params },
           res: { message: 'Invalid Email!' }
         });
-        res.status(400).json({ message: 'Invalid Email!' });
+        return res.status(400).json({ message: 'Invalid Email!' });
       } else if (!isValid) {
         log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
           req: { body: req.body, params: req.params },
           res: { message: 'Promo code has expired!' }
         });
-        res.status(400).json({ message: 'Promo code has expired!' });
+        return res.status(400).json({ message: 'Promo code has expired!' });
       } else if (amount < code.minOrderAmount) {
         log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
           req: { body: req.body, params: req.params },
@@ -181,21 +181,21 @@ const applyDiscountCode = async (req, res) => {
           req: { body: req.body, params: req.params },
           res: { message: 'Invalid promo code!' }
         });
-        res.status(400).json({ message: 'Invalid promo code!' });
+        return res.status(400).json({ message: 'Invalid promo code!' });
       }
     } else {
       log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
         req: { body: req.body, params: req.params },
         res: { message: 'Invalid promo code!' }
       });
-      res.status(400).json({ message: 'Invalid promo code!' });
+      return res.status(400).json({ message: 'Invalid promo code!' });
     }
   } catch (error) {
     log.error('ERR_DISCOUNTCODE_APPLY-DISCOUNTCODE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error applying discount code');
+    return res.status(400).send('Error applying discount code');
   }
 };
 
@@ -220,13 +220,13 @@ const updateDiscountCode = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_DISCOUNTCODE_UPDATE-DISCOUNTCODE', {
       req: { body: req.body, params: req.params },
       res: { message: `Updated discount code with id:${id}` }
     });
-    res.json({ message: `Updated discount code with id:${id}` });
+    return res.json({ message: `Updated discount code with id:${id}` });
   }
 };
 
@@ -241,13 +241,13 @@ const deleteDiscountCode = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_DISCOUNTCODE_DELETE-DISCOUNTCODE', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted discount code with id:${id}` }
     });
-    res.json({ message: `Deleted discount code with id:${id}` });
+    return res.json({ message: `Deleted discount code with id:${id}` });
   }
 };
 

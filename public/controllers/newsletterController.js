@@ -31,13 +31,13 @@ const createNewsletter = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_CUSTOMER_CREATE-NEWSLETTER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -50,13 +50,13 @@ const getAllNewsletters = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_CUSTOMER_GET-ALL-NEWSLETTERS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -68,13 +68,13 @@ const getNewsletter = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(newsletter)
     });
-    res.json(newsletter);
+    return res.json(newsletter);
   } catch (error) {
     log.error('ERR_CUSTOMER_GET-NEWSLETTER-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting newsletter');
+    return res.status(400).send('Error getting newsletter');
   }
 };
 
@@ -97,13 +97,13 @@ const updateNewsletter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_NEWSLETTER_UPDATE_NEWSLETTER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -118,13 +118,13 @@ const deleteNewsletter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_NEWSLETTER_DELETE_NEWSLETTER', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted newsletter with id:${id}` }
     });
-    res.json({ message: `Deleted newsletter with id:${id}` });
+    return res.json({ message: `Deleted newsletter with id:${id}` });
   }
 };
 
@@ -153,7 +153,7 @@ const sendNewsLetter = async (req, res) => {
       newsletter.emailBody
     )
   });
-  res.json(response);
+  return res.json(response);
 };
 
 const sendNewsLetterToRecommendedCustomers = async (req, res) => {
@@ -172,7 +172,7 @@ const sendNewsLetterToRecommendedCustomers = async (req, res) => {
       });
     })
   );
-  res.json({ message: 'Email sent to customers' });
+  return res.json({ message: 'Email sent to customers' });
 };
 
 const scheduleNewsLetter = async (req, res) => {
@@ -202,14 +202,14 @@ const scheduleNewsLetter = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Newsletter scheduled for ${sentDate}` }
     });
-    res.json({ message: `Newsletter scheduled for ${sentDate}` });
+    return res.json({ message: `Newsletter scheduled for ${sentDate}` });
   } catch (error) {
     log.error('ERR_NEWSLETTER_SCHEDULE-NEWSLETTER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -226,14 +226,14 @@ const getAllScheduledNewsletters = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: scheduledNewsletters
     });
-    res.json(scheduledNewsletters);
+    return res.json(scheduledNewsletters);
   } catch (error) {
     log.error('ERR_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTERS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -251,14 +251,14 @@ const getAllScheduledNewslettersByJobStatus = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: scheduledNewsletters
     });
-    res.json(scheduledNewsletters);
+    return res.json(scheduledNewsletters);
   } catch (error) {
     log.error('ERR_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTERS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -272,14 +272,14 @@ const getScheduledNewsletterById = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: scheduledNewsletter
     });
-    res.json(scheduledNewsletter);
+    return res.json(scheduledNewsletter);
   } catch (error) {
     log.error('ERR_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTER-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -295,14 +295,14 @@ const getScheduledNewsletterByNewsletterId = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: scheduledNewsletters
     });
-    res.json(scheduledNewsletters);
+    return res.json(scheduledNewsletters);
   } catch (error) {
     log.error('ERR_NEWSLETTER_GET-ALL-SCHEDULED-NEWSLETTER-BY-NEWSLETTER-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -336,14 +336,14 @@ const updateScheduledNewsLetter = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Newsletter scheduled for ${sentDate}` }
     });
-    res.json({ message: `Newsletter updated and scheduled for ${sentDate}` });
+    return res.json({ message: `Newsletter updated and scheduled for ${sentDate}` });
   } catch (error) {
     log.error('ERR_NEWSLETTER_UPDATED-SCHEDULED-NEWSLETTER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -359,14 +359,14 @@ const cancelScheduledNewsletter = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Scheduled Newsletter cancelled ` }
     });
-    res.json({ message: `Scheduled Newsletter cancelled ` });
+    return res.json({ message: `Scheduled Newsletter cancelled ` });
   } catch (error) {
     log.error('ERR_NEWSLETTER_CANCEL-SCHEDULED-NEWSLETTER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -375,14 +375,14 @@ const getAllScheduledJobs = async (req, res) => {
     const scheduledJobs = await getScheduledNewsLetters();
     log.out('OK_NEWSLETTER_GET-SCHEDULED-JOBS', scheduledJobs);
 
-    res.json('ok');
+    return res.json('ok');
   } catch (error) {
     log.error('ERR_NEWSLETTER_GET-SCHEDULED-JOBS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
