@@ -34,13 +34,13 @@ const createProductCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_PRODUCTCAT_CREATE-PRODUCTCAT', {
       req: { body: req.body, params: req.params },
       res: { message: 'Product catalogue created' }
     });
-    res.json({ message: 'Product catalogue created' });
+    return res.json({ message: 'Product catalogue created' });
   }
 };
 
@@ -55,7 +55,7 @@ const getAllProductCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     await Promise.all(
       data.map(async (prodCatalogue) => {
@@ -76,7 +76,7 @@ const getAllProductCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -99,10 +99,10 @@ const getProductCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(prodCatalogue)
     });
-    res.json(prodCatalogue);
+    return res.json(prodCatalogue);
   } catch (error) {
     log.error('ERR_PRODUCTCAT_GET-PRODUCTCAT', error.message);
-    res.status(400).send('Error getting product catalogue');
+    return res.status(400).send('Error getting product catalogue');
   }
 };
 
@@ -147,13 +147,13 @@ const updateProductCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_PRODUCTCAT_UPDATE_PRODUCTCAT', {
       req: { body: req.body, params: req.params },
       res: { message: `Updated product category with id:${id}` }
     });
-    res.json({ message: `Updated product catalogue with id:${id}` });
+    return res.json({ message: `Updated product catalogue with id:${id}` });
   }
 };
 
@@ -171,7 +171,7 @@ const deleteProductCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     const { error: deleteS3Error } = await common.awaitWrap(
       deleteS3({
@@ -189,7 +189,7 @@ const deleteProductCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted product category with id:${id}` }
     });
-    res.json({ message: `Deleted product category with id:${id}` });
+    return res.json({ message: `Deleted product category with id:${id}` });
   }
 };
 
