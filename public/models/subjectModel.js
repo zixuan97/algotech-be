@@ -367,6 +367,22 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
     },
     include: {
       subject: true,
+      subject: {
+        include: {
+          topics: true,
+          topics: {
+            include: {
+              steps: true
+            }
+          },
+          quizzes: true,
+          quizzes: {
+            include: {
+              questions: true
+            }
+          }
+        }
+      },
       user: true,
       completedTopics: true,
       completedQuizzes: true
@@ -494,6 +510,21 @@ const getAverageCompletionRateOfSubject = async (req) => {
   return total / size;
 };
 
+const updateLastAttemptedTimeInSubjectRecord = async (req) => {
+  const { subjectId, userId } = req;
+  await prisma.EmployeeSubjectRecord.update({
+    where: {
+      subjectId_userId: {
+        subjectId: Number(subjectId),
+        userId: Number(userId)
+      }
+    },
+    data: {
+      lastAttemptedAt: new Date(Date.now())
+    }
+  });
+};
+
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
 exports.getSubjectById = getSubjectById;
@@ -510,3 +541,5 @@ exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
 exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;
 exports.getNumberOfTopicsAndQuizInSubject = getNumberOfTopicsAndQuizInSubject;
 exports.getAverageCompletionRateOfSubject = getAverageCompletionRateOfSubject;
+exports.updateLastAttemptedTimeInSubjectRecord =
+  updateLastAttemptedTimeInSubjectRecord;

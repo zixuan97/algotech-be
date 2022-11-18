@@ -219,6 +219,15 @@ const createEmployeeQuizQuestionRecord = async (req, res) => {
       userId: currUserId
     })
   );
+  if (quizQuestions.length > 0) {
+    const { quiz } = await quizQuestionModel.getQuizQuestionById({
+      id: quizQuestions[0].questionId
+    });
+    await subjectModel.updateLastAttemptedTimeInSubjectRecord({
+      subjectId: quiz.subjectId,
+      userId: currUserId
+    });
+  }
   if (error) {
     log.error('ERR_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       err: error.message,
@@ -244,6 +253,15 @@ const updateEmployeeQuizQuestionRecord = async (req, res) => {
       userId: currUserId
     })
   );
+  if (quizQuestions.length > 0) {
+    const { quiz } = await quizQuestionModel.getQuizQuestionById({
+      id: quizQuestions[0].questionId
+    });
+    await subjectModel.updateLastAttemptedTimeInSubjectRecord({
+      subjectId: quiz.subjectId,
+      userId: currUserId
+    });
+  }
   if (error) {
     log.error('ERR_QUIZQUESTION_UPDATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       err: error.message,

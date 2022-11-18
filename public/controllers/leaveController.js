@@ -91,6 +91,28 @@ const getLeaveQuota = async (req, res) => {
   }
 };
 
+const getAllTiers = async (req, res) => {
+  const { data, error } = await common.awaitWrap(leaveModel.getLeaveQuota({}));
+  const tiers = [];
+  for (let d of data) {
+    tiers.push(d.tier);
+  }
+  if (error) {
+    log.error('ERR_LEAVE_GET-LEAVE-QUOTA', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_GET-LEAVE-QUOTA', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(tiers)
+    });
+    res.json(tiers);
+  }
+};
+
 const getLeaveQuotaById = async (req, res) => {
   const { id } = req.params;
   const { data, error } = await common.awaitWrap(
@@ -745,6 +767,7 @@ const getNumberOfEmployeesInTier = async (req, res) => {
 exports.createLeaveApplication = createLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
 exports.getLeaveQuota = getLeaveQuota;
+exports.getAllTiers = getAllTiers;
 exports.getLeaveQuotaById = getLeaveQuotaById;
 exports.updateLeaveQuota = updateLeaveQuota;
 exports.deleteLeaveQuotaById = deleteLeaveQuotaById;

@@ -285,6 +285,13 @@ const markQuizAsCompletedByUser = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     quizModel.markQuizAsCompletedForUser({ quizId, userId: currUserId })
   );
+  const quiz = await quizModel.getQuizById({
+    id: quizId
+  });
+  await subjectModel.updateLastAttemptedTimeInSubjectRecord({
+    subjectId: quiz.subjectId,
+    userId: currUserId
+  });
   data.user.password = '';
   if (error) {
     log.error('ERR_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
