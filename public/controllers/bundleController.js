@@ -16,7 +16,7 @@ const createBundle = async (req, res) => {
       err: { message: 'Bundle name already exists' },
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Bundle name already exists' });
+    return res.status(400).json({ message: 'Bundle name already exists' });
   } else {
     const { error } = await common.awaitWrap(
       bundleModel.createBundle({
@@ -32,13 +32,13 @@ const createBundle = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_BUNDLE_CREATE-BUNDLE', {
         req: { body: req.body, params: req.params },
         res: { message: 'Bundle created' }
       });
-      res.json({ message: 'Bundle created' });
+      return res.json({ message: 'Bundle created' });
     }
   }
 };
@@ -52,13 +52,13 @@ const getAllBundles = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_BUNDLE_GET-ALL-BUNDLES', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -70,13 +70,13 @@ const getBundleById = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bundle)
     });
-    res.json(bundle);
+    return res.json(bundle);
   } catch (error) {
     log.error('ERR_BUNDLE_GET-BUNDLE', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting bundle by Id');
+    return res.status(400).send('Error getting bundle by Id');
   }
 };
 
@@ -87,7 +87,7 @@ const findBundlesWithNoBundleCat = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bundles)
     });
-    res.json(bundles);
+    return res.json(bundles);
   } catch (error) {
     log.error('ERR_BUNDLE_GET-BUNDLE-NO-BUNDLE-CATALOG', {
       err: error.message,
@@ -107,13 +107,13 @@ const getBundleByName = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bundle)
     });
-    res.json(bundle);
+    return res.json(bundle);
   } catch (error) {
     log.error('ERR_BUNDLE_GET-BUNDLE-BY-NAME', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting bundle by name');
+    return res.status(400).send('Error getting bundle by name');
   }
 };
 
@@ -128,7 +128,7 @@ const updateBundle = async (req, res) => {
       err: 'Bundle name already exists',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Bundle name already exists' });
+    return res.status(400).json({ message: 'Bundle name already exists' });
   } else {
     const { error } = await common.awaitWrap(
       bundleModel.updateBundle({
@@ -144,13 +144,13 @@ const updateBundle = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_BUNDLE_UPDATE-BUNDLE', {
         req: { body: req.body, params: req.params },
         res: { message: `Updated bundle with id:${id}` }
       });
-      res.json({ message: `Updated bundle with id:${id}` });
+      return res.json({ message: `Updated bundle with id:${id}` });
     }
   }
 };
@@ -164,13 +164,13 @@ const deleteBundle = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_BUNDLE_DELETE-BUNDLE', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted bundle with id:${id}` }
     });
-    res.json({ message: `Deleted bundle with id:${id}` });
+    return res.json({ message: `Deleted bundle with id:${id}` });
   }
 };
 

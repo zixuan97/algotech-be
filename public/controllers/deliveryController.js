@@ -53,7 +53,7 @@ const createManualDeliveryOrder = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     const result = {
       id: data.id,
@@ -79,7 +79,7 @@ const createManualDeliveryOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   }
 };
 
@@ -139,7 +139,7 @@ const createShippitDeliveryOrder = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     await salesOrderModel.updateSalesOrderStatus({
       id: salesOrder.id,
@@ -189,14 +189,14 @@ const createShippitDeliveryOrder = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(result)
       });
-      res.json(result);
+      return res.json(result);
     } catch (error) {
       log.error('ERR_DELIVERYORDER_CREATE-DO', {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     }
   }
 };
@@ -259,7 +259,7 @@ const createLalamoveDeliveryOrder = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     await salesOrderModel.updateSalesOrderStatus({
       id: salesOrder.id,
@@ -285,10 +285,10 @@ const createLalamoveDeliveryOrder = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     } catch (error) {
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     }
   }
 };
@@ -308,13 +308,13 @@ const getAllDeliveryOrders = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-ALL-DO', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -330,13 +330,13 @@ const getAllManualDeliveryOrders = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-ALL-MANUAL-DO', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -382,13 +382,13 @@ const getDeliveryOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-DO-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting delivery order');
+    return res.status(400).send('Error getting delivery order');
   }
 };
 
@@ -410,13 +410,13 @@ const getDeliveryOrderByTrackingNumber = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-DO-BY-TRACKING-NUMBER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting delivery order by tracking number');
+    return res.status(400).send('Error getting delivery order by tracking number');
   }
 };
 
@@ -436,13 +436,13 @@ const getLalamoveOrderByDeliveryOrderId = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-LALAMOVE-DO-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting lalamove order by delivery order Id');
+    return res.status(400).send('Error getting lalamove order by delivery order Id');
   }
 };
 
@@ -461,13 +461,13 @@ const getDeliveryOrderBySalesOrderId = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     log.error('ERR_DELIVERY_GET-DO-BY-SO-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting delivery order by sales order Id');
+    return res.status(400).send('Error getting delivery order by sales order Id');
   }
 };
 
@@ -512,13 +512,13 @@ const findDeliveriesWithTimeAndTypeFilter = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY-DELIVERIES-TIME-TYPE-FILTER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   }
 };
 
@@ -565,7 +565,7 @@ const updateDeliveryOrder = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     data.salesOrder = salesOrder;
     data.assignedUser = assignedUser;
@@ -573,7 +573,7 @@ const updateDeliveryOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -587,13 +587,13 @@ const deleteDeliveryOrder = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_DELETE-DO', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted DeliveryOrder with id:${id}` }
     });
-    res.json({ message: `Deleted DeliveryOrder with id:${id}` });
+    return res.json({ message: `Deleted DeliveryOrder with id:${id}` });
   }
 };
 
@@ -618,7 +618,7 @@ const cancelManualDeliveryOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Cancelled Manual DeliveryOrder with id:${id}` }
     });
-    res.json({
+    return res.json({
       message: `Cancelled Manual DeliveryOrder with id:${id}`
     });
   } catch (error) {
@@ -626,7 +626,7 @@ const cancelManualDeliveryOrder = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   }
 };
 
@@ -658,7 +658,7 @@ const cancelShippitOrder = async (req, res) => {
         message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}`
       }
     });
-    res.json({
+    return res.json({
       message: `Cancelled Shippit DeliveryOrder with tracking number:${trackingNumber}`
     });
   } catch (error) {
@@ -666,7 +666,7 @@ const cancelShippitOrder = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error cancelling shippit order');
+    return res.status(400).send('Error cancelling shippit order');
   }
 };
 
@@ -678,13 +678,13 @@ const trackShippitOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(shippitOrder)
     });
-    res.json(shippitOrder);
+    return res.json(shippitOrder);
   } catch (error) {
     log.error('ERR_DELIVERY_TRACK-SHIPPIT-DO', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error tracking shippit order');
+    return res.status(400).send('Error tracking shippit order');
   }
 };
 
@@ -696,13 +696,13 @@ const getLastestTrackingInfoOfOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(shippitOrder.track[0])
     });
-    res.json(shippitOrder.track[0]);
+    return res.json(shippitOrder.track[0]);
   } catch (error) {
     log.error('ERR_DELIVERY_GET_LATEST_INFO', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting latest tracking info of order');
+    return res.status(400).send('Error getting latest tracking info of order');
   }
 };
 
@@ -732,7 +732,7 @@ const confirmShippitOrder = async (req, res) => {
         message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}`
       }
     });
-    res.json({
+    return res.json({
       message: `Confirmed Shippit DeliveryOrder with tracking number:${trackingNumber}`
     });
   } catch (error) {
@@ -740,7 +740,7 @@ const confirmShippitOrder = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   }
 };
 
@@ -754,13 +754,13 @@ const getShippitOrderLabel = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-SHIPPIT-ORDER-LABEL', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -791,14 +791,14 @@ const bookShippitDelivery = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(deliveryBooking)
     });
-    res.json(deliveryBooking);
+    return res.json(deliveryBooking);
   } catch (error) {
     log.error('ERR_DELIVERYORDER_BOOK-SHIPPIT-DELIVERY', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -997,13 +997,13 @@ const getAssignedManualDeliveriesByDateByUser = async (req, res) => {
         req: { body: req.body, params: req.params }
       }
     );
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-ALL-ASSIGNED-MANUAL-DELIVERIES-BY-DATE-BY-USER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -1023,13 +1023,13 @@ const getUnassignedManualDeliveriesByDate = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-ALL-UNASSIGNED-MANUAL-DELIVERIES-BY-DATE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -1043,7 +1043,7 @@ const getCurrentLocationLatLong = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: response.data.results[0]
       });
-      res.json(response.data.results[0]);
+      return res.json(response.data.results[0]);
     })
     .catch((error) => {
       log.error('ERR_DELIVERY_GET-CURRENT-LOCATION-LAT-LONG', {
@@ -1051,7 +1051,7 @@ const getCurrentLocationLatLong = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     });
 };
 
@@ -1074,13 +1074,13 @@ const getShippitOrdersByDate = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-ALL-SHIPPIT-DELIVERIES-BY-DATE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -1185,13 +1185,13 @@ const getLalamoveOrderByLalamoveOrderId = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('ERR_DELIVERY_GET-LALAMOVE-ORDER-BY-ORDER-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -1219,7 +1219,7 @@ const cancelLalamoveOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Cancelled Lalalove DeliveryOrder with id:${id}` }
     });
-    res.json({
+    return res.json({
       message: `Cancelled Lalalove DeliveryOrder with id:${id}`
     });
   } catch (error) {
@@ -1227,7 +1227,7 @@ const cancelLalamoveOrder = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error cancelling Lalamove order');
+    return res.status(400).send('Error cancelling Lalamove order');
   }
 };
 
@@ -1241,13 +1241,13 @@ const getDriverDetails = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error retrieving driver details');
+    return res.status(400).send('Error retrieving driver details');
   } else {
     log.out('OK_DELIVERY_GET-LALAMOVE-DRIVER-DETAILS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -1273,13 +1273,13 @@ const getLalamoveOrdersByDate = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_DELIVERY_GET-ALL-LALAMOVE-DELIVERIES-BY-DATE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -1293,13 +1293,13 @@ const getLalamoveStatusLink = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error retrieving status of order');
+    return res.status(400).send('Error retrieving status of order');
   } else {
     log.out('OK_DELIVERY_GET-LALAMOVE-STATUS-LINK', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data.shareLink);
+    return res.json(data.shareLink);
   }
 };
 
@@ -1403,7 +1403,7 @@ const routePlanningForAssignedOrders = async (req, res) => {
             }
           }
         }
-        res.json(response.data.solution.routes[0].activities);
+        return res.json(response.data.solution.routes[0].activities);
       })
       .catch((err) => {
         console.log(err);
