@@ -100,6 +100,13 @@ const getBestSellerWithTimeFilter = async (req) => {
   return bestSeller;
 };
 
+const getTotalValueOfOrdersWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const totalValue =
+    await prisma.$queryRaw`select SUM("amount")as amount from "public"."SalesOrder" where "createdTime">=${time_from} and "createdTime"<=${time_to} `;
+  return totalValue;
+};
+
 const getOrdersByPlatformWithTimeFilter = async (req) => {
   const { time_from, time_to } = req;
   const bestSeller =
@@ -184,6 +191,33 @@ const findSalesOrderByOrderId = async (req) => {
     }
   });
   return salesOrder;
+};
+
+const getAllSalesOrderItemsWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const salesOrderItems = await prisma.salesOrderItem.findMany({
+    where: {
+      createdTime: {
+        lte: time_to, //last date
+        gte: time_from //first date
+      }
+    }
+  });
+  return salesOrderItems;
+};
+
+const getSalesOfProductOverTimeWithTimeFilter = async (req) => {
+  const { time_from, time_to, productName } = req;
+  const products =
+    await prisma.$queryRaw`select COALESCE(count("productName"),0) as total , d.dt as createdDate from (select dt::date FROM generate_series(${time_from},${time_to},'1d')dt)d  left join  "public"."SalesOrderItem" c  on DATE(c."createdTime") = d.dt and c."productName"=${productName} group by d.dt order by d.dt`;
+  return products;
+};
+
+const getBestSellerSalesOrderItemWithTimeFilter = async (req) => {
+  const { time_from, time_to } = req;
+  const bestSeller =
+    await prisma.$queryRaw`select COUNT("productName")as total, "productName" as productName from "public"."SalesOrderItem" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by "productName"`;
+  return bestSeller;
 };
 
 const updateSalesOrderStatus = async (req) => {
@@ -274,3 +308,11 @@ exports.getBestSellerWithTimeFilter = getBestSellerWithTimeFilter;
 exports.getOrdersByPlatformWithTimeFilter = getOrdersByPlatformWithTimeFilter;
 exports.findSalesOrderByCustomerEmail = findSalesOrderByCustomerEmail;
 exports.getOrdersByMonthForCustomer = getOrdersByMonthForCustomer;
+exports.getBestSellerSalesOrderItemWithTimeFilter =
+  getBestSellerSalesOrderItemWithTimeFilter;
+exports.getSalesOfProductOverTimeWithTimeFilter =
+  getSalesOfProductOverTimeWithTimeFilter;
+exports.getAllSalesOrderItemsWithTimeFilter =
+  getAllSalesOrderItemsWithTimeFilter;
+exports.getTotalValueOfOrdersWithTimeFilter =
+  getTotalValueOfOrdersWithTimeFilter;
