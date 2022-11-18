@@ -206,6 +206,10 @@ const createEmployeeQuizQuestionRecord = async (req) => {
         isCorrect: correctAnswer === q.userAnswer,
         attemptedAt: new Date(Date.now()),
         quizId
+      },
+      include: {
+        question: true,
+        user: true
       }
     });
     if (correctAnswer === q.userAnswer) totalCorrect++;
@@ -215,13 +219,14 @@ const createEmployeeQuizQuestionRecord = async (req) => {
     quizId: overallQuizId
   });
   const results = (totalCorrect / qns.length) * 100;
-  const finalRes = {
-    numQnsCorrect: totalCorrect,
-    totalQns: qns.length,
-    results: results
-  };
-  finalRes.quizQuestions = res;
-  return finalRes;
+  const quiz = await quizModel.getQuizById({ id: overallQuizId });
+  if (results >= quiz.passingScore) {
+    await quizModel.markQuizAsCompletedForUser({
+      quizId: quiz.id,
+      userId
+    });
+  }
+  return res;
 };
 
 const updateEmployeeQuizQuestionRecord = async (req) => {

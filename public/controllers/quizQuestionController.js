@@ -213,13 +213,15 @@ const updateOrderBasedOnQuestionsArray = async (req, res) => {
 const createEmployeeQuizQuestionRecord = async (req, res) => {
   const { quizQuestions } = req.body;
   const currUserId = req.user.userId;
-  const { data, error } = await common.awaitWrap(
-    quizQuestionModel.createEmployeeQuizQuestionRecord({
-      quizQuestions,
-      userId: currUserId
-    })
-  );
-  if (quizQuestions.length > 0) {
+  if (quizQuestions.length === 0) {
+    return res.status(400).send('You cannot submit an empty attempt!');
+  } else {
+    const { data, error } = await common.awaitWrap(
+      quizQuestionModel.createEmployeeQuizQuestionRecord({
+        quizQuestions,
+        userId: currUserId
+      })
+    );
     const { quiz } = await quizQuestionModel.getQuizQuestionById({
       id: quizQuestions[0].questionId
     });
@@ -227,20 +229,23 @@ const createEmployeeQuizQuestionRecord = async (req, res) => {
       subjectId: quiz.subjectId,
       userId: currUserId
     });
-  }
-  if (error) {
-    log.error('ERR_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    return res.status(e.code).json(e.message);
-  } else {
-    log.out('OK_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    return res.json(data);
+    for (let d of data) {
+      d.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      return res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      return res.json(data);
+    }
   }
 };
 
