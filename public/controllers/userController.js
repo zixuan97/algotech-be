@@ -16,7 +16,7 @@ const createUser = async (req, res) => {
       err: 'User already exist',
       req: { body: req.body, params: req.params }
     });
-   return res.status(400).json({ message: 'User already exists' });
+    return res.status(400).json({ message: 'User already exists' });
   } else {
     const password = await common.awaitWrap(userModel.generatePassword());
     const content =
@@ -188,7 +188,7 @@ const auth = async (req, res) => {
             err: err.message,
             req: { body: req.body, params: req.params }
           });
-        return res.status(400).send('Error authenticating');
+          return res.status(400).send('Error authenticating');
         }
         log.out('OK_AUTH_LOGIN', {
           req: { body: req.body, params: req.params },
@@ -381,7 +381,9 @@ const sendForgetEmailPassword = async (req, res) => {
         err: 'Failed to send email as user is not registered',
         req: { body: req.body, params: req.params }
       });
-      return res.status(400).send('Failed to send email as user is not registered');
+      return res
+        .status(400)
+        .send('Failed to send email as user is not registered');
     }
   } catch (error) {
     log.error('ERR_USER_SEND', {
@@ -439,30 +441,6 @@ const verifyPassword = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     return res.status(400).send('Error verifying password');
-  }
-};
-
-const changePassword = async (req, res) => {
-  const updatedUser = req.body;
-  try {
-    const user = await userModel.changePassword({ updatedUser });
-    log.out('OK_USER_CHANGE-PW', {
-      req: { body: req.body, params: req.params },
-      res: {
-        message: 'Password changed',
-        payload: user
-      }
-    });
-    return res.json({
-      message: 'Password changed',
-      payload: user
-    });
-  } catch (error) {
-    log.error('ERR_USER_CHANGE-PW', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    return res.status(400).send('Error changing password');
   }
 };
 
@@ -592,7 +570,7 @@ const getAllPendingB2BUsers = async (req, res) => {
 
 const getAllNonB2BUsers = async (req, res) => {
   try {
-    const users = await userModel.getUsers({});
+    const users = await userModel.getUsers();
     const filteredUsers = users.filter(
       (u) => u.id != req.user.userId && u.role !== UserRole.B2B
     );
@@ -1006,7 +984,6 @@ exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
 exports.sendForgetEmailPassword = sendForgetEmailPassword;
 exports.verifyPassword = verifyPassword;
-exports.changePassword = changePassword;
 exports.createB2BUser = createB2BUser;
 exports.approveB2BUser = approveB2BUser;
 exports.rejectB2BUser = rejectB2BUser;
