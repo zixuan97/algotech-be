@@ -442,30 +442,6 @@ const verifyPassword = async (req, res) => {
   }
 };
 
-const changePassword = async (req, res) => {
-  const updatedUser = req.body;
-  try {
-    const user = await userModel.changePassword({ updatedUser });
-    log.out('OK_USER_CHANGE-PW', {
-      req: { body: req.body, params: req.params },
-      res: {
-        message: 'Password changed',
-        payload: user
-      }
-    });
-    res.json({
-      message: 'Password changed',
-      payload: user
-    });
-  } catch (error) {
-    log.error('ERR_USER_CHANGE-PW', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    res.status(400).send('Error changing password');
-  }
-};
-
 const approveB2BUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -592,7 +568,7 @@ const getAllPendingB2BUsers = async (req, res) => {
 
 const getAllNonB2BUsers = async (req, res) => {
   try {
-    const users = await userModel.getUsers({});
+    const users = await userModel.getUsers();
     const filteredUsers = users.filter(
       (u) => u.id != req.user.userId && u.role !== UserRole.B2B
     );
@@ -1006,7 +982,6 @@ exports.disableUser = disableUser;
 exports.changeUserRole = changeUserRole;
 exports.sendForgetEmailPassword = sendForgetEmailPassword;
 exports.verifyPassword = verifyPassword;
-exports.changePassword = changePassword;
 exports.createB2BUser = createB2BUser;
 exports.approveB2BUser = approveB2BUser;
 exports.rejectB2BUser = rejectB2BUser;
