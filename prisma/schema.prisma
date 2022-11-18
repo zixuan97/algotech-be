@@ -379,9 +379,10 @@ model EmployeeSubjectRecord {
   subjectId        Int
   userId           Int
   completionRate   Float
-  id               Int     @id @default(autoincrement())
-  subject          Subject @relation(fields: [subjectId], references: [id])
-  user             User    @relation(fields: [userId], references: [id])
+  lastAttemptedAt  DateTime  @default(now())
+  id               Int       @id @default(autoincrement())
+  subject          Subject   @relation(fields: [subjectId], references: [id])
+  user             User      @relation(fields: [userId], references: [id])
   completedQuizzes Quiz[]
   completedTopics  Topic[]
 

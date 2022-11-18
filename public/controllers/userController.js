@@ -10,7 +10,6 @@ const { UserStatus, UserRole } = require('@prisma/client');
 
 const createUser = async (req, res) => {
   const { firstName, lastName, email, role, isVerified, tier } = req.body;
-
   const user = await userModel.findUserByEmail({ email });
   if (user) {
     log.error('ERR_USER_CREATE-USER', {
@@ -905,8 +904,11 @@ const updateEmployee = async (req, res) => {
 
 const setCEO = async (req, res) => {
   const { ceoId } = req.params;
+  const prevCeo = await userModel.getCEO({});
   const employees = await userModel.getEmployees({});
-  const subordinates = employees.filter((e) => e.managerId === null);
+  const subordinates = employees.filter(
+    (e) => e.managerId === null || e.managerId === Number(prevCeo.id)
+  );
   await userModel.setCEOMangerIdToOwnId({
     id: Number(ceoId)
   });
