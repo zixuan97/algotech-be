@@ -209,14 +209,14 @@ const getAllSalesOrderItemsWithTimeFilter = async (req) => {
 const getSalesOfProductOverTimeWithTimeFilter = async (req) => {
   const { time_from, time_to, productName } = req;
   const products =
-    await prisma.$queryRaw`select COALESCE(count("productName"),0) as total , d.dt as createdDate from (select dt::date FROM generate_series(${time_from},${time_to},'1d')dt)d  left join  "public"."SalesOrderItem" c  on DATE(c."createdTime") = d.dt and c."productName"=${productName} group by d.dt order by d.dt`;
+    await prisma.$queryRaw`select COALESCE(SUM("quantity"),0) as quantity , d.dt as createdDate from (select dt::date FROM generate_series(${time_from},${time_to},'1d')dt)d  left join  "public"."SalesOrderItem" c  on DATE(c."createdTime") = d.dt and c."productName"=${productName} group by d.dt order by d.dt`;
   return products;
 };
 
 const getBestSellerSalesOrderItemWithTimeFilter = async (req) => {
   const { time_from, time_to } = req;
   const bestSeller =
-    await prisma.$queryRaw`select COUNT("productName")as total, "productName" as productName from "public"."SalesOrderItem" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by "productName"`;
+    await prisma.$queryRaw`select SUM("quantity")as quantity, "productName" as productName from "public"."SalesOrderItem" where "createdTime">=${time_from} and "createdTime"<=${time_to} group by "productName"`;
   return bestSeller;
 };
 

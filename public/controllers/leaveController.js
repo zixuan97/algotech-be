@@ -14,7 +14,6 @@ const createLeaveApplication = async (req, res) => {
     startDate,
     endDate
   });
-  console.log(numDays);
   if (numDays > leaveTypeBalance) {
     log.out('ERR_LEAVE_CREATE-LEAVE', {
       err: `Employee does not have enough leave balance for ${leaveType}`,
@@ -464,7 +463,6 @@ const updateLeaveApplication = async (req, res) => {
     startDate,
     endDate
   });
-  console.log(numDays);
   if (numDays > leaveTypeBalance) {
     log.out('ERR_LEAVE_UPDATE-LEAVE', {
       err: `Employee does not have enough leave balance for ${leaveType}`,
