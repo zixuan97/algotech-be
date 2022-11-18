@@ -31,13 +31,13 @@ const createBundleCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_BUNDLECAT_CREATE-BUNDLECAT', {
       req: { body: req.body, params: req.params },
       res: { message: 'Bundle catalogue created' }
     });
-    res.json({ message: 'Bundle catalogue created' });
+    return res.json({ message: 'Bundle catalogue created' });
   }
 };
 
@@ -51,7 +51,7 @@ const getAllBundleCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     await Promise.all(
       data.map(async (bundleCatalogue) => {
@@ -71,7 +71,7 @@ const getAllBundleCatalogue = async (req, res) => {
         });
       })
     );
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -95,13 +95,13 @@ const getBundleCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bundleCatalogue)
     });
-    res.json(bundleCatalogue);
+    return res.json(bundleCatalogue);
   } catch (error) {
     log.error('ERR_BUNDLECAT_GET-BUNDLECAT', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting bundle catalogue');
+    return res.status(400).send('Error getting bundle catalogue');
   }
 };
 
@@ -146,13 +146,13 @@ const updateBundleCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_BUNDLECAT_UPDATE_BUNDLECAT', {
       req: { body: req.body, params: req.params },
       res: { message: `Updated bundle catalogue with id:${id}` }
     });
-    res.json({ message: `Updated bundle catalogue with id:${id}` });
+    return res.json({ message: `Updated bundle catalogue with id:${id}` });
   }
 };
 
@@ -170,7 +170,7 @@ const deleteBundleCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     const { error: deleteS3Error } = await common.awaitWrap(
       deleteS3({
@@ -188,7 +188,7 @@ const deleteBundleCatalogue = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted bundle catalogue with id:${id}` }
     });
-    res.json({ message: `Deleted bundle catalogue with id:${id}` });
+    return res.json({ message: `Deleted bundle catalogue with id:${id}` });
   }
 };
 

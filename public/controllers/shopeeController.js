@@ -16,13 +16,13 @@ const createKey = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SHOPEE_CREATE-KEY', {
       req: { body: req.body, params: req.params },
       res: { message: `Created key with key:${key}` }
     });
-    res.json({ message: `Created key with key:${key}` });
+    return res.json({ message: `Created key with key:${key}` });
   }
 };
 
@@ -36,7 +36,7 @@ const refreshToken = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SHOPEE_GET-REFRESH-KEY');
     const response = await shopeeApi.refreshToken({
@@ -55,14 +55,14 @@ const refreshToken = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: { message: 'Updated Shopee Keys' }
       });
-      res.json({ message: 'Updated Shopee Keys' });
+      return res.json({ message: 'Updated Shopee Keys' });
     } catch (err) {
       log.error('ERR_SHOPEE_UPDATE-REFRESH-KEY', {
         err: err.message,
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(err);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     }
   }
 };
@@ -152,14 +152,14 @@ const addShopeeOrders = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: { message: 'Sales Orders for Shopee created' }
     });
-    res.json({ message: 'Sales Orders for Shopee created' });
+    return res.json({ message: 'Sales Orders for Shopee created' });
   } catch (error) {
     log.error('ERR_SHOPEE-ADD-ORDERS', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -174,7 +174,7 @@ const getShopPerformance = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     try {
       const response = await shopeeApi.getShopPerformance({
@@ -191,14 +191,14 @@ const getShopPerformance = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(sellerPerformance)
       });
-      res.json(sellerPerformance);
+      return res.json(sellerPerformance);
     } catch (err) {
       log.error('ERR_SHOPEE_GET-SHOP-PERFORMANCE', {
         err: err.message,
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(err);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     }
   }
 };
@@ -214,7 +214,7 @@ const downloadShippingDocument = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     try {
       const order = '220921CRN7HCJW';
@@ -230,14 +230,14 @@ const downloadShippingDocument = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(response)
       });
-      res.json(response);
+      return res.json(response);
     } catch (err) {
       log.error('ERR_SHOPEE_DOWNLOAD-SHIPPING-DOCUMENT', {
         err: err.message,
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(err);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     }
   }
 };

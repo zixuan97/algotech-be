@@ -22,9 +22,9 @@ const createQuiz = async (req, res) => {
     currTitles.push(q.title);
   }
   if (currentOrders.includes(subjectOrder)) {
-    res.status(400).send('Subject order already exists!');
+    return res.status(400).send('Subject order already exists!');
   } else if (currTitles.includes(title)) {
-    res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
+    return res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
   } else {
     const currUserId = req.user.userId;
     await subjectModel.updateSubject({
@@ -51,13 +51,13 @@ const createQuiz = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.json(Error.http(error));
+      return res.json(Error.http(error));
     } else {
       log.out('OK_QUIZ_CREATE-QUIZ', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -79,13 +79,13 @@ const getAllQuizzesBySubjectId = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_QUIZ_GET-ALL-QUIZZES', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -102,13 +102,13 @@ const getQuiz = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(quiz)
     });
-    res.json(quiz);
+    return res.json(quiz);
   } catch (error) {
     log.error('ERR_QUIZ_GET-QUIZ-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting quiz');
+    return res.status(400).send('Error getting quiz');
   }
 };
 
@@ -139,9 +139,9 @@ const updateQuiz = async (req, res) => {
     title
   });
   if (currentOrders.includes(subjectOrder) && currQuizByOrder.id !== id) {
-    res.status(400).send('Subject order already exists!');
+    return res.status(400).send('Subject order already exists!');
   } else if (currTitles.includes(title) && currQuizByTitle.id !== id) {
-    res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
+    return res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
   } else {
     const currUserId = req.user.userId;
     await subjectModel.updateSubject({
@@ -171,13 +171,13 @@ const updateQuiz = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_QUIZ_UPDATE-QUIZ', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -198,7 +198,7 @@ const addQuizQuestionsToQuiz = async (req, res) => {
     }
   }
   if (questionsToAdd.length === 0) {
-    res.status(400).send('All quiz orders already exists!');
+    return res.status(400).send('All quiz orders already exists!');
   } else {
     const { subjectId } = await quizModel.getQuizById({ id });
     const currUserId = req.user.userId;
@@ -223,13 +223,13 @@ const addQuizQuestionsToQuiz = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -249,13 +249,13 @@ const deleteQuiz = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_QUIZ_DELETE-QUIZ', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted quiz with id:${id}` }
     });
-    res.json({ message: `Deleted quiz with id:${id}` });
+    return res.json({ message: `Deleted quiz with id:${id}` });
   }
 };
 
@@ -269,13 +269,13 @@ const updateOrderBasedOnQuizArray = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_STEP_UPDATE-ORDER-QUIZ', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -285,6 +285,13 @@ const markQuizAsCompletedByUser = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     quizModel.markQuizAsCompletedForUser({ quizId, userId: currUserId })
   );
+  const quiz = await quizModel.getQuizById({
+    id: quizId
+  });
+  await subjectModel.updateLastAttemptedTimeInSubjectRecord({
+    subjectId: quiz.subjectId,
+    userId: currUserId
+  });
   data.user.password = '';
   if (error) {
     log.error('ERR_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
@@ -292,13 +299,13 @@ const markQuizAsCompletedByUser = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -314,13 +321,13 @@ const getQuizResults = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_STEP_GET-QUIZ-RESULTS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 

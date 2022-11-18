@@ -19,7 +19,7 @@ router.post(
 );
 router.get(
   '/completionrate/:subjectId/:userId',
-  subjectController.getCompletionRateBySubjectByEmployee
+  subjectController.getSubjectRecordBySubjectByEmployee
 );
 router.get(
   '/records/all',

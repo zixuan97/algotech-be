@@ -1,5 +1,5 @@
 const { prisma } = require('./index.js');
-const { AnswerType } = require('@prisma/client');
+const quizModel = require('./quizModel.js');
 
 const createQuizQuestion = async (req) => {
   const { quizOrder, question, type, options, correctAnswer, quizId } = req;

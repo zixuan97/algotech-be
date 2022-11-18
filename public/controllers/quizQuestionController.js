@@ -16,7 +16,7 @@ const createQuizQuestion = async (req, res) => {
     currentOrders.push(q.quizOrder);
   }
   if (currentOrders.includes(quizOrder)) {
-    res.status(400).send('Quiz order already exists!');
+    return res.status(400).send('Quiz order already exists!');
   } else {
     const { subjectId } = await quizModel.getQuizById({ id: quizId });
     const currUserId = req.user.userId;
@@ -44,13 +44,13 @@ const createQuizQuestion = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      res.json(Error.http(error));
+      return res.json(Error.http(error));
     } else {
       log.out('OK_QUIZQUESTION_CREATE-QUIZQUESTION', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -72,13 +72,13 @@ const getAllQuizQuestionsByQuizId = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(Error.http(error));
+    return res.json(Error.http(error));
   } else {
     log.out('OK_QUIZQUESTION_GET-ALL-QUIZQUESTIONS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -95,13 +95,13 @@ const getQuizQuestion = async (req, res) => {
     for (let u of quizQuestion.quiz.subject.usersAssigned) {
       u.user.password = '';
     }
-    res.json(quizQuestion);
+    return res.json(quizQuestion);
   } catch (error) {
     log.error('ERR_QUIZQUESTION_GET-QUIZQUESTION-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting quizQuestion');
+    return res.status(400).send('Error getting quizQuestion');
   }
 };
 
@@ -121,7 +121,7 @@ const updateQuizQuestion = async (req, res) => {
       quizOrder
     });
   if (currentOrders.includes(quizOrder) && currQuizQuestionByOrder.id !== id) {
-    res.status(400).send('Quiz order already exists!');
+    return res.status(400).send('Quiz order already exists!');
   } else {
     const { subjectId } = await quizModel.getQuizById({ id: quizId });
     const currUserId = req.user.userId;
@@ -151,13 +151,13 @@ const updateQuizQuestion = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_QUIZQUESTION_UPDATE-QUIZQUESTION', {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(data)
       });
-      res.json(data);
+      return res.json(data);
     }
   }
 };
@@ -180,13 +180,13 @@ const deleteQuizQuestion = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_QUIZQUESTION_DELETE-QUIZQUESTION', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted quizQuestion with id:${id}` }
     });
-    res.json({ message: `Deleted quizQuestion with id:${id}` });
+    return res.json({ message: `Deleted quizQuestion with id:${id}` });
   }
 };
 
@@ -200,13 +200,13 @@ const updateOrderBasedOnQuestionsArray = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_QUIZQUESTION_UPDATE-ORDER-QUIZ-QUESTION', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -219,19 +219,28 @@ const createEmployeeQuizQuestionRecord = async (req, res) => {
       userId: currUserId
     })
   );
+  if (quizQuestions.length > 0) {
+    const { quiz } = await quizQuestionModel.getQuizQuestionById({
+      id: quizQuestions[0].questionId
+    });
+    await subjectModel.updateLastAttemptedTimeInSubjectRecord({
+      subjectId: quiz.subjectId,
+      userId: currUserId
+    });
+  }
   if (error) {
     log.error('ERR_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_QUIZQUESTION_CREATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -244,19 +253,28 @@ const updateEmployeeQuizQuestionRecord = async (req, res) => {
       userId: currUserId
     })
   );
+  if (quizQuestions.length > 0) {
+    const { quiz } = await quizQuestionModel.getQuizQuestionById({
+      id: quizQuestions[0].questionId
+    });
+    await subjectModel.updateLastAttemptedTimeInSubjectRecord({
+      subjectId: quiz.subjectId,
+      userId: currUserId
+    });
+  }
   if (error) {
     log.error('ERR_QUIZQUESTION_UPDATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_QUIZQUESTION_UPDATE-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -274,13 +292,13 @@ const getEmployeeQuizQuestionRecords = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_QUIZQUESTION_GET-EMPLOYEE-QUIZ-QUESTION-RECORD', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 

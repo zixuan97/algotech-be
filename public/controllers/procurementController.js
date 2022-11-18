@@ -44,7 +44,7 @@ const createProcurementOrder = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     await sendProcurementEmail({
       orderFormatted,
@@ -70,7 +70,7 @@ const createProcurementOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   }
 };
 
@@ -103,7 +103,7 @@ const updateProcurementOrder = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     let result = {};
     const supplier = await supplierModel.findSupplierById({ id: supplierId });
@@ -143,7 +143,7 @@ const updateProcurementOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   }
 };
 
@@ -158,7 +158,7 @@ const getAllProcurementOrders = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     let dataRes = [];
     for (let d of data) {
@@ -202,7 +202,7 @@ const getAllProcurementOrders = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(dataRes)
     });
-    res.json(dataRes);
+    return res.json(dataRes);
   }
 };
 
@@ -260,13 +260,13 @@ const getProcurementOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(result)
     });
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     log.error('ERR_PROCUREMENTORDER_GET-PO-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting procurement order');
+    return res.status(400).send('Error getting procurement order');
   }
 };
 

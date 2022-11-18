@@ -11,13 +11,13 @@ const createLocation = async (req, res) => {
   if (data) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
     
-    res.status(400).json({ message: 'Location name already exists' });
+    return res.status(400).json({ message: 'Location name already exists' });
   } else if (duplicateLocationNameError) {
     log.error('ERR_LOCATION_CREATE-LOCATION', {
       err: duplicateLocationNameError.message,
       req: { body: req.body, params: req.params }
     });
-    res.json(
+    return res.json(
       { message: 'Unable to find location name' },
       duplicateLocationNameError.message
     );
@@ -35,13 +35,13 @@ const createLocation = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_LOCATION_CREATE-LOCATION', {
         req: { body: req.body, params: req.params },
         res: { message: 'location created' }
       });
-      res.json({ message: 'location created' });
+      return res.json({ message: 'location created' });
     }
   }
 };
@@ -57,13 +57,13 @@ const getAllLocations = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_GET-ALL-LOCATIONS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -75,13 +75,13 @@ const getLocation = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(location)
     });
-    res.json(location);
+    return res.json(location);
   } catch (error) {
     log.error('ERR_LOCATION_GET-LOCATION-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting location');
+    return res.status(400).send('Error getting location');
   }
 };
 
@@ -93,13 +93,13 @@ const getLocationByName = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(location)
     });
-    res.json(location);
+    return res.json(location);
   } catch (error) {
     log.error('ERR_LOCATION_GET-LOCATION-BY-NAME', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting location by name');
+    return res.status(400).send('Error getting location by name');
   }
 };
 
@@ -110,10 +110,10 @@ const updateLocation = async (req, res) => {
   );
   if (data && data.id != id) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
-    res.status(400).json({ message: 'Location name already exists' });
+    return res.status(400).json({ message: 'Location name already exists' });
   } else if (duplicateLocationNameError) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
-    res.json(
+    return res.json(
       { message: 'Unable to find location name' },
       duplicateLocationNameError.message
     );
@@ -127,13 +127,13 @@ const updateLocation = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_LOCATION_UPDATE-LOCATION', {
         req: { body: req.body, params: req.params },
         res: { message: `Updated location with id:${id}` }
       });
-      res.json({ message: `Updated location with id:${id}` });
+      return res.json({ message: `Updated location with id:${id}` });
     }
   }
 };
@@ -145,10 +145,10 @@ const updateLocationWithoutProducts = async (req, res) => {
   );
   if (data && data.id != id) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
-    res.status(400).json({ message: 'Location name already exists' });
+    return res.status(400).json({ message: 'Location name already exists' });
   } else if (duplicateLocationNameError) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
-    res.json(
+    return res.json(
       { message: 'Unable to find location name' },
       duplicateLocationNameError.message
     );
@@ -162,13 +162,13 @@ const updateLocationWithoutProducts = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_LOCATION_UPDATE-LOCATION', {
         req: { body: req.body, params: req.params },
         res: { message: `Updated location with id:${id}` }
       });
-      res.json({ message: `Updated location with id:${id}` });
+      return res.json({ message: `Updated location with id:${id}` });
     }
   }
 };
@@ -184,13 +184,13 @@ const addProductsToLocation = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_ADD-PRODUCTS', {
       req: { body: req.body, params: req.params },
       res: { message: `Updated location with id:${id}` }
     });
-    res.json({ message: `Updated location with id:${id}` });
+    return res.json({ message: `Updated location with id:${id}` });
   }
 };
 
@@ -205,13 +205,13 @@ const deleteLocation = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LOCATION_DELETE_LOCATION', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted location with id:${id}` }
     });
-    res.json({ message: `Deleted location with id:${id}` });
+    return res.json({ message: `Deleted location with id:${id}` });
   }
 };
 
