@@ -98,9 +98,92 @@ const getAllSalesOrdersWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
   log.out('OK_SALESORDER_GET-ALL-SO-TIMEFILTER', {
+    req: { body: req.body, params: req.params },
+    res: JSON.stringify(data)
+  });
+  res.json(data);
+};
+
+const getAverageNumberofSalesOrdersWithTimeFilter = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getAllSalesOrdersWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+
+  if (error) {
+    log.error('ERR_SALESORDER_GET-AVERAGE-NUM-SO-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    return res.status(e.code).json(e.message);
+  }
+
+  var d1 = new Date(time_from);
+  var d2 = new Date(time_to);
+  const diffInDays = (d2 - d1) / (1000 * 3600 * 24);
+  const avgNumOfOrders = data.length / diffInDays;
+  log.out('OK_SALESORDER_GET-AVERAGE-NUM-SO-TIMEFILTER', {
+    req: { body: req.body, params: req.params },
+    res: JSON.stringify(avgNumOfOrders)
+  });
+
+  res.json(avgNumOfOrders);
+};
+
+const getAverageValueofSalesOrdersWithTimeFilter = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getTotalValueOfOrdersWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+
+  if (error) {
+    log.error('ERR_SALESORDER_GET-AVERAGE-VALUE-SO-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    return res.status(e.code).json(e.message);
+  }
+
+  var d1 = new Date(time_from);
+  var d2 = new Date(time_to);
+  const diffInDays = (d2 - d1) / (1000 * 3600 * 24);
+  const avgValueOfOrders = data[0].amount / diffInDays;
+  log.out('OK_SALESORDER_GET-AVERAGE-NUM-VALUE-TIMEFILTER', {
+    req: { body: req.body, params: req.params },
+    res: JSON.stringify(avgValueOfOrders)
+  });
+  res.json(avgValueOfOrders);
+};
+
+const getAllSalesOrderItemsWithTimeFilter = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getAllSalesOrderItemsWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+
+  if (error) {
+    log.error('ERR_SALESORDER_GET-ALL-SOI-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  }
+  log.out('OK_SALESORDER_GET-ALL-SOI-TIMEFILTER', {
     req: { body: req.body, params: req.params },
     res: JSON.stringify(data)
   });
@@ -237,6 +320,81 @@ const getOrdersByPlatformWithTimeFilter = async (req, res) => {
     res.status(e.code).json(e.message);
   } else {
     log.out('OK_SALESORDER_GET-ORDERS-BY-PLATFORM-TIMEFILTER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    });
+    res.json(
+      JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    );
+  }
+};
+
+const getSalesOfProductOverTimeWithTimeFilter = async (req, res) => {
+  const { time_from, time_to, productName } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getSalesOfProductOverTimeWithTimeFilter({
+      productName,
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+
+  if (error) {
+    log.error('ERR_SALESORDER_GET-SALES-OF-PRODUCT-OVER-TIME-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SALESORDER_GET-SALES-OF-PRODUCT-OVER-TIME-TIMEFILTER', {
+      req: { body: req.body, params: req.params },
+      res: JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    });
+    res.json(
+      JSON.parse(
+        JSON.stringify(
+          data,
+          (key, value) => (typeof value === 'bigint' ? Number(value) : value) // return everything else unchanged
+        )
+      )
+    );
+  }
+};
+
+const getBestSellerSalesOrderItemWithTimeFilter = async (req, res) => {
+  const { time_from, time_to } = req.body;
+  const { data, error } = await common.awaitWrap(
+    salesOrderModel.getBestSellerSalesOrderItemWithTimeFilter({
+      time_from: new Date(time_from),
+      time_to: new Date(time_to)
+    })
+  );
+
+  if (error) {
+    log.error('ERR_SALESORDER_GET-BESTSELLER-PRODUCT-TIMEFILTER', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_SALESORDER_GET-BESTSELLER-PRODUCT-TIMEFILTER', {
       req: { body: req.body, params: req.params },
       res: JSON.parse(
         JSON.stringify(
@@ -400,3 +558,13 @@ exports.updateSalesOrder = updateSalesOrder;
 exports.updateSalesOrderStatus = updateSalesOrderStatus;
 exports.getOrdersByPlatformWithTimeFilter = getOrdersByPlatformWithTimeFilter;
 exports.generateExcel = generateExcel;
+exports.getBestSellerSalesOrderItemWithTimeFilter =
+  getBestSellerSalesOrderItemWithTimeFilter;
+exports.getSalesOfProductOverTimeWithTimeFilter =
+  getSalesOfProductOverTimeWithTimeFilter;
+exports.getAllSalesOrderItemsWithTimeFilter =
+  getAllSalesOrderItemsWithTimeFilter;
+exports.getAverageNumberofSalesOrdersWithTimeFilter =
+  getAverageNumberofSalesOrdersWithTimeFilter;
+exports.getAverageValueofSalesOrdersWithTimeFilter =
+  getAverageValueofSalesOrdersWithTimeFilter;

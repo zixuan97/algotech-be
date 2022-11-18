@@ -7,8 +7,20 @@ router.post(
   salesOrderController.getAllSalesOrdersWithTimeFilter
 );
 router.post(
+  '/timefilter/products',
+  salesOrderController.getAllSalesOrderItemsWithTimeFilter
+);
+router.post(
   '/timefilterbyday/orders',
   salesOrderController.getSalesOrdersByDayWithTimeFilter
+);
+router.post(
+  '/timefilterbyday/average/orders',
+  salesOrderController.getAverageNumberofSalesOrdersWithTimeFilter
+);
+router.post(
+  '/timefilterbyday/average/value/orders',
+  salesOrderController.getAverageValueofSalesOrdersWithTimeFilter
 );
 router.post(
   '/timefilterbyday/revenue',
@@ -19,8 +31,16 @@ router.post(
   salesOrderController.getBestSellerWithTimeFilter
 );
 router.post(
+  '/timefilterbyday/items/bestseller',
+  salesOrderController.getBestSellerSalesOrderItemWithTimeFilter
+);
+router.post(
   '/timefilterbyday/ordersbyplatform',
   salesOrderController.getOrdersByPlatformWithTimeFilter
+);
+router.post(
+  '/timefilterbyday/products',
+  salesOrderController.getSalesOfProductOverTimeWithTimeFilter
 );
 router.post('/', salesOrderController.createSalesOrder);
 router.post('/excel', salesOrderController.generateExcel);
