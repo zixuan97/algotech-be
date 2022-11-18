@@ -1,6 +1,8 @@
 const { LeaveStatus, LeaveType } = require('@prisma/client');
 const { prisma } = require('./index.js');
 const userModel = require('./userModel');
+const axios = require('axios');
+const { log } = require('../helpers/logger');
 
 const createLeaveApplication = async (req) => {
   const { startDate, endDate, leaveType, description, employeeId } = req;
@@ -330,47 +332,116 @@ const getLeaveTypeBalanceByEmployeeId = async (req) => {
   }
 };
 
-const updateLeaveTypeBalanceByEmployeeId = async (req) => {
-  const { employeeId, leaveType, isIncrement } = req;
-  let {
-    annualBalance,
-    childcareBalance,
-    compassionateBalance,
-    parentalBalance,
-    sickBalance,
-    unpaidBalance
-  } = await getLeaveRecordByEmployeeId({ employeeId });
-  switch (leaveType) {
-    case LeaveType.ANNUAL:
-      isIncrement ? annualBalance++ : annualBalance--;
-      break;
-    case LeaveType.CHILDCARE:
-      isIncrement ? childcareBalance++ : childcareBalance--;
-      break;
-    case LeaveType.COMPASSIONATE:
-      isIncrement ? compassionateBalance++ : compassionateBalance--;
-      break;
-    case LeaveType.PARENTAL:
-      isIncrement ? parentalBalance++ : parentalBalance--;
-      break;
-    case LeaveType.SICK:
-      isIncrement ? sickBalance++ : sickBalance--;
-      break;
-    case LeaveType.UNPAID:
-      isIncrement ? unpaidBalance++ : unpaidBalance--;
-      break;
-    default:
-      break;
-  }
-  await updateLeaveRecordByEmployeeId({
+const increaseLeaveTypeBalanceByEmployeeIdByLeaveType = async (req) => {
+  const { leaveId, employeeId, leaveType } = req;
+  const leaveTypeBalance = await getLeaveTypeBalanceByEmployeeId({
     employeeId,
-    annualBalance,
-    childcareBalance,
-    compassionateBalance,
-    parentalBalance,
-    sickBalance,
-    unpaidBalance
+    leaveType
   });
+  const leave = await getLeaveApplicationById({ id: leaveId });
+  const numDays = await calcuateNumOfBusinessDays({
+    startDate: leave.startDate,
+    endDate: leave.endDate
+  });
+  if (numDays > leaveTypeBalance) {
+    return null;
+  } else {
+    let {
+      annualBalance,
+      childcareBalance,
+      compassionateBalance,
+      parentalBalance,
+      sickBalance,
+      unpaidBalance
+    } = await getLeaveRecordByEmployeeId({ employeeId });
+    switch (leaveType) {
+      case LeaveType.ANNUAL:
+        annualBalance += numDays;
+        break;
+      case LeaveType.CHILDCARE:
+        childcareBalance += numDays;
+        break;
+      case LeaveType.COMPASSIONATE:
+        compassionateBalance += numDays;
+        break;
+      case LeaveType.PARENTAL:
+        parentalBalance += numDays;
+        break;
+      case LeaveType.SICK:
+        sickBalance += numDays;
+        break;
+      case LeaveType.UNPAID:
+        unpaidBalance += numDays;
+        break;
+      default:
+        break;
+    }
+    await updateLeaveRecordByEmployeeId({
+      employeeId,
+      annualBalance,
+      childcareBalance,
+      compassionateBalance,
+      parentalBalance,
+      sickBalance,
+      unpaidBalance
+    });
+  }
+};
+
+const decreaseLeaveTypeBalanceByEmployeeIdByLeaveType = async (req) => {
+  const { leaveId, employeeId, leaveType } = req;
+  const leaveTypeBalance = await getLeaveTypeBalanceByEmployeeId({
+    employeeId,
+    leaveType
+  });
+  const leave = await getLeaveApplicationById({ id: leaveId });
+  const numDays = await calcuateNumOfBusinessDays({
+    startDate: leave.startDate,
+    endDate: leave.endDate
+  });
+  if (numDays > leaveTypeBalance) {
+    return null;
+  } else {
+    let {
+      annualBalance,
+      childcareBalance,
+      compassionateBalance,
+      parentalBalance,
+      sickBalance,
+      unpaidBalance
+    } = await getLeaveRecordByEmployeeId({ employeeId });
+    switch (leaveType) {
+      case LeaveType.ANNUAL:
+        annualBalance -= numDays;
+        break;
+      case LeaveType.CHILDCARE:
+        childcareBalance -= numDays;
+        break;
+      case LeaveType.COMPASSIONATE:
+        compassionateBalance -= numDays;
+        break;
+      case LeaveType.PARENTAL:
+        parentalBalance -= numDays;
+        break;
+      case LeaveType.SICK:
+        sickBalance -= numDays;
+        break;
+      case LeaveType.UNPAID:
+        unpaidBalance -= numDays;
+        break;
+      default:
+        break;
+    }
+    await updateLeaveRecordByEmployeeId({
+      employeeId,
+      annualBalance,
+      childcareBalance,
+      compassionateBalance,
+      parentalBalance,
+      sickBalance,
+      unpaidBalance
+    });
+  }
 };
 
 const updateTierByEmployeeId = async (req) => {
@@ -522,6 +593,41 @@ const updateEmployeesToNewTierForDeletedTier = async (req) => {
   }
 };
 
+const calcuateNumOfBusinessDays = async (req) => {
+  const { startDate, endDate } = req;
+  const year = startDate.substring(0, 4);
+  const allPHs = await getAllPHByYear({ year });
+  let phDates = [];
+  for (let ph of allPHs) {
+    phDates.push(new Date(ph.Date).toISOString());
+  }
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  let count = 0;
+  const curDate = new Date(start.getTime());
+  while (curDate <= end) {
+    const dayOfWeek = curDate.getDay();
+    if (
+      dayOfWeek !== 0 &&
+      dayOfWeek !== 6 &&
+      !phDates.includes(curDate.toISOString())
+    )
+      count++;
+    curDate.setDate(curDate.getDate() + 1);
+  }
+  return count;
+};
+
+const getAllPHByYear = async (req) => {
+  const { year } = req;
+  const url = `https://notes.rjchow.com/singapore_public_holidays/api/${year}/data.json`;
+  return await axios.get(url).then((res) => {
+    const response = res.data;
+    log.out(`OK_ORDER_GET-ALL-PH-IN-${year}`);
+    return response;
+  });
+};
+
 exports.createLeaveApplication = createLeaveApplication;
 exports.getAllLeaveApplications = getAllLeaveApplications;
 exports.getAllPendingLeaveApplications = getAllPendingLeaveApplications;
@@ -544,9 +650,13 @@ exports.getLeaveRecordByEmployeeId = getLeaveRecordByEmployeeId;
 exports.getAllEmployeeLeaveRecords = getAllEmployeeLeaveRecords;
 exports.updateLeaveRecordByEmployeeId = updateLeaveRecordByEmployeeId;
 exports.getLeaveTypeBalanceByEmployeeId = getLeaveTypeBalanceByEmployeeId;
-exports.updateLeaveTypeBalanceByEmployeeId = updateLeaveTypeBalanceByEmployeeId;
+exports.increaseLeaveTypeBalanceByEmployeeIdByLeaveType =
+  increaseLeaveTypeBalanceByEmployeeIdByLeaveType;
+exports.decreaseLeaveTypeBalanceByEmployeeIdByLeaveType =
+  decreaseLeaveTypeBalanceByEmployeeIdByLeaveType;
 exports.updateTierByEmployeeId = updateTierByEmployeeId;
 exports.getAllEmployeesByTier = getAllEmployeesByTier;
 exports.updateEmployeeLeaveQuota = updateEmployeeLeaveQuota;
 exports.updateEmployeesToNewTierForDeletedTier =
   updateEmployeesToNewTierForDeletedTier;
+exports.calcuateNumOfBusinessDays = calcuateNumOfBusinessDays;

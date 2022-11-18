@@ -10,12 +10,19 @@ const createLeaveApplication = async (req, res) => {
     employeeId,
     leaveType
   });
-  if (leaveTypeBalance === 0) {
+  const numDays = await leaveModel.calcuateNumOfBusinessDays({
+    startDate,
+    endDate
+  });
+  console.log(numDays);
+  if (numDays > leaveTypeBalance) {
     log.out('ERR_LEAVE_CREATE-LEAVE', {
-      err: `Employee does not have any leave balance for ${leaveType}`,
+      err: `Employee does not have enough leave balance for ${leaveType}`,
       req: { body: req.body, params: req.params }
     });
-    return res.status(400).json(`You do not have any more ${leaveType} leave balance`);
+    return res
+      .status(400)
+      .json(`You do not have enough ${leaveType} leave balance`);
   } else {
     const { data, error } = await common.awaitWrap(
       leaveModel.createLeaveApplication({
@@ -447,32 +454,52 @@ const getLeaveApplication = async (req, res) => {
 };
 
 const updateLeaveApplication = async (req, res) => {
-  const { id, startDate, endDate, leaveType, status, description } = req.body;
-  const { data, error } = await common.awaitWrap(
-    leaveModel.updateLeaveApplication({
-      id,
-      startDate,
-      endDate,
-      leaveType,
-      status,
-      description
-    })
-  );
-  data.employee.password = '';
-  if (data.vettedBy !== null) data.vettedBy.password = '';
-  if (error) {
-    log.error('ERR_LEAVE_UPDATE-LEAVE', {
-      err: error.message,
+  const { id, startDate, endDate, leaveType, status, description, employeeId } =
+    req.body;
+  const leaveTypeBalance = await leaveModel.getLeaveTypeBalanceByEmployeeId({
+    employeeId,
+    leaveType
+  });
+  const numDays = await leaveModel.calcuateNumOfBusinessDays({
+    startDate,
+    endDate
+  });
+  console.log(numDays);
+  if (numDays > leaveTypeBalance) {
+    log.out('ERR_LEAVE_UPDATE-LEAVE', {
+      err: `Employee does not have enough leave balance for ${leaveType}`,
       req: { body: req.body, params: req.params }
     });
-    const e = Error.http(error);
-    return res.status(e.code).json(e.message);
+    return res
+      .status(400)
+      .json(`You do not have enough ${leaveType} leave balance`);
   } else {
-    log.out('OK_LEAVE_UPDATE-LEAVE', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    return res.json(data);
+    const { data, error } = await common.awaitWrap(
+      leaveModel.updateLeaveApplication({
+        id,
+        startDate,
+        endDate,
+        leaveType,
+        status,
+        description
+      })
+    );
+    data.employee.password = '';
+    if (data.vettedBy !== null) data.vettedBy.password = '';
+    if (error) {
+      log.error('ERR_LEAVE_UPDATE-LEAVE', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      return res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_LEAVE_UPDATE-LEAVE', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      return res.json(data);
+    }
   }
 };
 
@@ -544,7 +571,7 @@ const approveLeaveApplication = async (req, res) => {
     return res.status(400).json('You cannot approve your own application');
   } else if (leaveTypeBalance === 0) {
     log.out('ERR_LEAVE_APPROVE-LEAVE', {
-      err: `Employee does not have any leave balance for ${leaveType}`,
+      err: `Employee does not have any leave balance for ${leaveType} leave`,
       req: { body: req.body, params: req.params }
     });
     res
@@ -568,11 +595,19 @@ const approveLeaveApplication = async (req, res) => {
       return res.status(e.code).json(e.message);
     } else {
       try {
-        await leaveModel.updateLeaveTypeBalanceByEmployeeId({
-          leaveType,
-          employeeId,
-          isIncrement: false
-        });
+        const newBalance =
+          await leaveModel.decreaseLeaveTypeBalanceByEmployeeIdByLeaveType({
+            leaveId: id,
+            leaveType,
+            employeeId
+          });
+        if (newBalance === null) {
+          return res
+            .status(400)
+            .json(
+              `Employee does not have enough leave balance for ${leaveType}`
+            );
+        }
         log.out('OK_LEAVE_APPROVE-LEAVE', {
           req: { body: req.body, params: req.params },
           res: JSON.stringify(data)
@@ -630,10 +665,10 @@ const rejectLeaveApplication = async (req, res) => {
     } else {
       try {
         if (status === LeaveStatus.APPROVED) {
-          await leaveModel.updateLeaveTypeBalanceByEmployeeId({
+          await leaveModel.increaseLeaveTypeBalanceByEmployeeIdByLeaveType({
+            leaveId: id,
             leaveType,
-            employeeId,
-            isIncrement: true
+            employeeId
           });
         }
         log.out('OK_LEAVE_REJECT-LEAVE', {
