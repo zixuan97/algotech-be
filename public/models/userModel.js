@@ -350,7 +350,7 @@ const getJobRoleByName = async (req) => {
 };
 
 const getAllJobRoles = async (req) => {
-  const jobroles = await prisma.JobRole.findMany({
+  const jobroles = await prisma.jobRole.findMany({
     include: {
       usersInJobRole: true
     }

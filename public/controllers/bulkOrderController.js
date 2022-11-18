@@ -275,7 +275,7 @@ const massUpdateSalesOrderStatus = async (req, res) => {
     });
 
     if (orderStatus === 'PREPARED') {
-      if (bulkOrder.payeeContactNo !== null) {
+      if (bulkOrder.payeeContactNo) {
         sns.sendOTP({
           number: bulkOrder.payeeContactNo,
           message: `Your order: ${bulkOrder.orderId} is being prepared and delivery is on the way to you soon!`
@@ -370,7 +370,9 @@ const generateExcel = async (req, res) => {
     .then((blob) => {
       const timeElapsed = Date.now();
       const today = new Date(timeElapsed);
+
       res.type(blob.type);
+
       blob.arrayBuffer().then((buf) => {
         res.setHeader(
           'Content-disposition',

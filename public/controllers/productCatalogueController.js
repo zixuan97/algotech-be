@@ -18,8 +18,6 @@ const createProductCatalogue = async (req, res) => {
         err: uploadS3Error.message,
         req: { body: req.body, params: req.params }
       });
-      const e = Error.http(uploadS3Error);
-      res.status(e.code).json(e.message);
     }
   }
   log.out('OK_PRODUCTCAT_UPLOAD-S3');
@@ -51,21 +49,6 @@ const getAllProductCatalogue = async (req, res) => {
     productCatalogueModel.getAllProdCatalogue({})
   );
 
-  await Promise.all(
-    data.map(async (prodCatalogue) => {
-      const { data: productImg, error: getS3Error } = await common.awaitWrap(
-        getS3({
-          key: `productCatalogueImages/${prodCatalogue.product.sku}-img`
-        })
-      );
-
-      if (getS3Error) {
-        log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
-      }
-      prodCatalogue.image = productImg;
-    })
-  );
-
   if (error) {
     log.error('ERR_PRODUCTCAT_GET-ALL-PRODUCTCAT', {
       err: error.message,
@@ -74,6 +57,21 @@ const getAllProductCatalogue = async (req, res) => {
     const e = Error.http(error);
     res.status(e.code).json(e.message);
   } else {
+    await Promise.all(
+      data.map(async (prodCatalogue) => {
+        const { data: productImg, error: getS3Error } = await common.awaitWrap(
+          getS3({
+            key: `productCatalogueImages/${prodCatalogue.product.sku}-img`
+          })
+        );
+
+        if (getS3Error) {
+          log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
+        }
+        prodCatalogue.image = productImg;
+      })
+    );
+
     log.out('OK_PRODUCTCAT_GET-ALL-PRODUCTCAT', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
@@ -93,7 +91,6 @@ const getProductCatalogue = async (req, res) => {
         key: `productCatalogueImages/${prodCatalogue.product.sku}-img`
       })
     );
-
     if (getS3Error) {
       log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
     }
@@ -111,7 +108,6 @@ const getProductCatalogue = async (req, res) => {
 
 const updateProductCatalogue = async (req, res) => {
   const { id, price, image, product, description } = req.body;
-
   if (image) {
     const { error: uploadS3Error } = await common.awaitWrap(
       uploadS3({

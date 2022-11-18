@@ -35,6 +35,7 @@ const createUser = async (req, res) => {
       });
     } catch (error) {
       res.status(400).send('Error sending email');
+      return;
     }
     const { data, error } = await common.awaitWrap(
       userModel.createUser({
@@ -48,21 +49,6 @@ const createUser = async (req, res) => {
       })
     );
 
-    if (tier !== undefined) {
-      try {
-        await leaveModel.createLeaveRecordByEmployeeId({
-          employeeId: data.id
-        });
-      } catch (error) {
-        log.error('ERR_USER_CREATE-USER', {
-          err: error.message,
-          req: { body: req.body, params: req.params }
-        });
-        const e = Error.http(error);
-        return res.status(e.code).json(e.message);
-      }
-    }
-
     if (error) {
       log.error('ERR_USER_CREATE-USER', {
         err: error.message,
@@ -71,6 +57,20 @@ const createUser = async (req, res) => {
       const e = Error.http(error);
       res.status(e.code).json(e.message);
     } else {
+      if (tier !== undefined) {
+        try {
+          await leaveModel.createLeaveRecordByEmployeeId({
+            employeeId: data.id
+          });
+        } catch (error) {
+          log.error('ERR_USER_CREATE-USER', {
+            err: error.message,
+            req: { body: req.body, params: req.params }
+          });
+          const e = Error.http(error);
+          return res.status(e.code).json(e.message);
+        }
+      }
       log.out('OK_USER_CREATE-USER', {
         req: { body: req.body, params: req.params },
         res: { message: 'User created' }

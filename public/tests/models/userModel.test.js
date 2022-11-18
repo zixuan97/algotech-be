@@ -64,7 +64,6 @@ test('create user model', async () => {
   });
   await expect(userModel.createUser(user)).resolves.toEqual({ user });
 
-
   const encryptedPassword = await bcrypt.hash('password', 10);
   const userAdmin = {
     firstName: 'Zi Kun',
@@ -78,7 +77,6 @@ test('create user model', async () => {
   };
 
   await expect(userModel.createUser(userAdmin)).resolves.toEqual({ user });
-
 });
 
 test('create user model not b2b', async () => {
@@ -180,7 +178,6 @@ test('change user role', async () => {
   await expect(
     userModel.changeUserRole({ id: 1, action: 'nani' })
   ).resolves.toEqual(user);
-
 });
 
 test('generate user password', async () => {
@@ -239,12 +236,20 @@ test('Get employees', async () => {
   await expect(userModel.getEmployees()).resolves.toEqual([]);
 });
 
+test('Get employees for org chart', async () => {
+  await expect(userModel.getEmployeesForOrgChart()).resolves.toEqual([]);
+});
+
 test('Create job role', async () => {
   prisma.jobRole.create.mockImplementation(async () => {
     return jobRole;
   });
   await expect(
-    userModel.createJobRole({ jobRole: 'Assistant Director' })
+    userModel.createJobRole({
+      jobRole: 'Assistant Director',
+      usersInJobRole: [{ id: 1 }],
+      description: ''
+    })
   ).resolves.toEqual(jobRole);
 });
 
@@ -253,7 +258,12 @@ test('Edit job role', async () => {
     return jobRole;
   });
   await expect(
-    userModel.editJobRole({ jobRole: 'Director', id: 1 })
+    userModel.editJobRole({
+      jobRole: 'Director',
+      id: 1,
+      usersInJobRole: [{ id: 1 }],
+      description: ''
+    })
   ).resolves.toEqual(jobRole);
 });
 
@@ -262,6 +272,13 @@ test('Get job role', async () => {
     return jobRole;
   });
   await expect(userModel.getJobRole({ id: 1 })).resolves.toEqual(jobRole);
+});
+
+test('Get all job roles', async () => {
+  prisma.jobRole.findMany.mockImplementation(async () => {
+    return [];
+  });
+  await expect(userModel.getAllJobRoles()).resolves.toEqual([]);
 });
 
 test('Get job role by name', async () => {
