@@ -16,7 +16,7 @@ const refreshToken = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LAZADA_GET-REFRESH-KEY');
     const response = await lazadaApi.refreshToken({
@@ -36,14 +36,14 @@ const refreshToken = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: { message: 'Updated Lazada Keys' }
       });
-      res.json({ message: 'Updated Lazada Keys' });
+      return res.json({ message: 'Updated Lazada Keys' });
     } catch (err) {
       log.error('ERR_LAZADA_UPDATE-LAZADA-KEY', {
         err: err.message,
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(err);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     }
   }
 };
@@ -59,7 +59,7 @@ const addLazadaOrders = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_LAZADA_GET-ACCESS-KEY');
     const orderList = await lazadaApi.getOrderList({
@@ -119,14 +119,14 @@ const addLazadaOrders = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: { message: 'Sales Orders for Lazada created' }
       });
-      res.json({ message: 'Sales Orders for Lazada created' });
+      return res.json({ message: 'Sales Orders for Lazada created' });
     } catch (error) {
       log.error('ERR_LAZADA_ADD-ORDERS', {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     }
   }
 };
@@ -142,7 +142,7 @@ const getSellerPerformance = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_LAZADA_GET-ACCESS-KEY');
       const response = await lazadaApi.getSellerPerformance({
@@ -157,7 +157,7 @@ const getSellerPerformance = async (req, res) => {
         req: { body: req.body, params: req.params },
         res: JSON.stringify(sellerPerformance)
       });
-      res.json(sellerPerformance);
+      return res.json(sellerPerformance);
     }
   } catch (error) {
     log.error('ERR_LAZADA_GET-SELLER-PERFORMANCE', {
@@ -165,7 +165,7 @@ const getSellerPerformance = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 

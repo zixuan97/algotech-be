@@ -23,7 +23,7 @@ const createCustomer = async (req, res) => {
   );
   if (data) {
     log.error('ERR_CUSTOMER_CREATE-CUSTOMER');
-    res.status(400).json({ message: 'Customer email already exists' });
+    return res.status(400).json({ message: 'Customer email already exists' });
   } else if (duplicateCustomerEmailError) {
     log.error('ERR_CUSTOMER_CREATE-CUSTOMER');
     res
@@ -49,10 +49,10 @@ const createCustomer = async (req, res) => {
     if (error) {
       log.error('ERR_CUSTOMER_CREATE-CUSTOMER', error.message);
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_CUSTOMER_CREATE-CUSTOMER');
-      res.json({ message: 'Customer created' });
+      return res.json({ message: 'Customer created' });
     }
   }
 };
@@ -65,10 +65,10 @@ const getAllCustomers = async (req, res) => {
   if (error) {
     log.error('ERR_CUSTOMER_GET-ALL-CUSTOMERS', error.message);
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_CUSTOMER_GET-ALL-CUSTOMERS');
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -105,10 +105,10 @@ const getCustomerById = async (req, res) => {
     customer.bulkOrders = bulkOrders;
 
     log.out('OK_CUSTOMER_GET-CUSTOMER-BY-ID');
-    res.json(customer);
+    return res.json(customer);
   } catch (error) {
     log.error('ERR_CUSTOMER_GET-CUSTOMER', error.message);
-    res.status(400).json({ message: 'Error getting customer' });
+    return res.status(400).json({ message: 'Error getting customer' });
   }
 };
 
@@ -145,10 +145,10 @@ const getCustomerByEmail = async (req, res) => {
     customer.salesOrders = salesOrders;
     customer.bulkOrders = bulkOrders;
     log.out('OK_CUSTOMER_GET-CUSTOMER-BY-ID');
-    res.json(customer);
+    return res.json(customer);
   } catch (error) {
     log.error('ERR_CUSTOMER_GET-CUSTOMER', error.message);
-    res.status(400).json({ message: 'Error getting customer' });
+    return res.status(400).json({ message: 'Error getting customer' });
   }
 };
 
@@ -172,7 +172,7 @@ const updateCustomer = async (req, res) => {
   );
   if (data && data.id != id) {
     log.error('ERR_CUSTOMER_UPDATE-CUSTOMER');
-    res.status(400).json({ message: 'Customer email already exists' });
+    return res.status(400).json({ message: 'Customer email already exists' });
   } else if (duplicateCustomerEmailError) {
     log.error('ERR_CUSTOMER_UPDATE-CUSTOMER');
     res
@@ -201,10 +201,10 @@ const updateCustomer = async (req, res) => {
     if (error) {
       log.error('ERR_CUSTOMER_UPDATE_CUSTOMER', error.message);
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_CUSTOMER_UPDATE_CUSTOMER');
-      res.json({ message: `Updated customer with id:${id}` });
+      return res.json({ message: `Updated customer with id:${id}` });
     }
   }
 };
@@ -218,10 +218,10 @@ const deleteCustomer = async (req, res) => {
   if (error) {
     log.error('ERR_CUSTOMER_DELETE_CUSTOMER', error.message);
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_CUSTOMER_DELETE_CUSTOMER');
-    res.json({ message: `Deleted customer with id:${id}` });
+    return res.json({ message: `Deleted customer with id:${id}` });
   }
 };
 
@@ -271,14 +271,14 @@ const findCustomerByFilter = async (req, res) => {
     //   req: { body: req.body, params: req.params },
     //   res: customers
     // });
-    res.json({ customers });
+    return res.json({ customers });
   } catch (error) {
     log.error('ERR_CUSTOMERS_FIND-CUSTOMERS-BY-FILTER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 

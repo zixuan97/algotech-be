@@ -14,13 +14,13 @@ const createBrand = async (req, res) => {
       err: { message: 'brand name already exist' },
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Brand name already exists' });
+    return res.status(400).json({ message: 'Brand name already exists' });
   } else if (duplicateBrandNameError) {
     log.error('ERR_BRAND_CREATE-BRAND', {
       err: duplicateBrandNameError.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Unable to find brand name' });
+    return res.status(400).json({ message: 'Unable to find brand name' });
   } else {
     const { error } = await common.awaitWrap(
       brandModel.createBrand({
@@ -33,13 +33,13 @@ const createBrand = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_BRAND_CREATE-BRAND', {
         req: { body: req.body, params: req.params },
         res: { message: 'brand created' }
       });
-      res.json({ message: 'brand created' });
+      return res.json({ message: 'brand created' });
     }
   }
 };
@@ -53,13 +53,13 @@ const getAllBrands = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_BRAND_GET-ALL-BRANDS', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -71,13 +71,13 @@ const getBrand = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(brand)
     });
-    res.json(brand);
+    return res.json(brand);
   } catch (error) {
     log.error('ERR_BRAND_GET-BRAND-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting brand');
+    return res.status(400).send('Error getting brand');
   }
 };
 
@@ -89,13 +89,13 @@ const getBrandByName = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(brand)
     });
-    res.json(brand);
+    return res.json(brand);
   } catch (error) {
     log.error('ERR_BRAND_GET-BRAND-BY-NAME', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).send('Error getting brand by name');
+    return res.status(400).send('Error getting brand by name');
   }
 };
 
@@ -109,13 +109,13 @@ const updateBrand = async (req, res) => {
       err: 'ERR_BRAND_UPDATE-BRAND',
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Brand name already exists' });
+    return res.status(400).json({ message: 'Brand name already exists' });
   } else if (duplicateBrandNameError) {
     log.error('ERR_BRAND_UPDATE-BRAND', {
       err: duplicateBrandNameError.message,
       req: { body: req.body, params: req.params }
     });
-    res.status(400).json({ message: 'Unable to find brand name' });
+    return res.status(400).json({ message: 'Unable to find brand name' });
   } else {
     const { error } = await common.awaitWrap(
       brandModel.updateBrands({ id, name })
@@ -126,13 +126,13 @@ const updateBrand = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       log.out('OK_BRAND_UPDATE_BRAND', {
         req: { body: req.body, params: req.params },
         res: { message: `Updated brand with id:${id}` }
       });
-      res.json({ message: `Updated brand with id:${id}` });
+      return res.json({ message: `Updated brand with id:${id}` });
     }
   }
 };
@@ -148,7 +148,7 @@ const deleteBrand = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(getAllProductsError);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     log.out('OK_BRAND_GET-ALL-PRODUCTS');
 
@@ -165,7 +165,7 @@ const deleteBrand = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(deleteProductsError);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     } else {
       const { error } = await common.awaitWrap(brandModel.deleteBrand({ id }));
       if (error) {
@@ -174,13 +174,13 @@ const deleteBrand = async (req, res) => {
           req: { body: req.body, params: req.params }
         });
         const e = Error.http(error);
-        res.status(e.code).json(e.message);
+        return res.status(e.code).json(e.message);
       } else {
         log.out('OK_BRAND_DELETE_BRAND', {
           req: { body: req.body, params: req.params },
           res: { message: `Deleted brand with id:${id}` }
         });
-        res.json({ message: `Deleted brand with id:${id}` });
+        return res.json({ message: `Deleted brand with id:${id}` });
       }
     }
   }

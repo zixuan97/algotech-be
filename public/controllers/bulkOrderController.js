@@ -80,7 +80,7 @@ const createBulkOrder = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   } else {
     try {
       log.out('OK_BULKORDER_CREATE-BO', {
@@ -104,7 +104,7 @@ const createBulkOrder = async (req, res) => {
           req: { body: req.body, params: req.params },
           res: { paymentUrl: sessionURL, bulkOrder: JSON.stringify(data) }
         });
-        res.json({ paymentUrl: sessionURL, bulkOrder: data });
+        return res.json({ paymentUrl: sessionURL, bulkOrder: data });
       } else {
         const sessionURL = await paymentModel.payByStripePaynow({
           amount,
@@ -116,7 +116,7 @@ const createBulkOrder = async (req, res) => {
           req: { body: req.body, params: req.params },
           res: { paymentUrl: sessionURL, bulkOrder: JSON.stringify(data) }
         });
-        res.json({ paymentUrl: sessionURL, bulkOrder: data });
+        return res.json({ paymentUrl: sessionURL, bulkOrder: data });
       }
     } catch (error) {
       log.error('ERR_BULKORDER_CREATE-PAYMENT', {
@@ -124,7 +124,7 @@ const createBulkOrder = async (req, res) => {
         req: { body: req.body, params: req.params }
       });
       const e = Error.http(error);
-      res.status(e.code).json(e.message);
+      return res.status(e.code).json(e.message);
     }
   }
 };
@@ -146,7 +146,7 @@ const getAllBulkOrders = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
     });
-    res.json(data);
+    return res.json(data);
   }
 };
 
@@ -158,14 +158,14 @@ const findBulkOrderById = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bulkOrder)
     });
-    res.json(bulkOrder);
+    return res.json(bulkOrder);
   } catch (error) {
     log.error('ERR_BULKORDER_GET-BULKORDER-BY-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -177,14 +177,14 @@ const findBulkOrderByOrderId = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bulkOrder)
     });
-    res.json(bulkOrder);
+    return res.json(bulkOrder);
   } catch (error) {
     log.error('ERR_BULKORDER_GET-BULKORDER-BY-ORDER-ID', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -196,14 +196,14 @@ const findBulkOrderByEmail = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bulkOrder)
     });
-    res.json(bulkOrder);
+    return res.json(bulkOrder);
   } catch (error) {
     log.error('ERR_BULKORDER_GET-BULKORDER-BY-EMAIL', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -218,14 +218,14 @@ const getAllBulkOrdersWithTimeFilter = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bulkOrders)
     });
-    res.json(bulkOrders);
+    return res.json(bulkOrders);
   } catch (error) {
     log.error('ERR_BULKORDER_GET-BULKORDER-BY-TIMEFILTER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -240,14 +240,14 @@ const updateBulkOrderStatus = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: `Successfully updated bulk order with id: ${id}`
     });
-    res.json({ message: `Successfully updated bulk order with id: ${id}` });
+    return res.json({ message: `Successfully updated bulk order with id: ${id}` });
   } catch (error) {
     log.error('ERR_BULKORDER_GET-BULKORDER-BY-TIMEFILTER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+     return res.status(e.code).json(e.message);
   }
 };
 
@@ -286,7 +286,7 @@ const massUpdateSalesOrderStatus = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: `Successfully sent sms for sales order status update`
     });
-    res.json({
+    return res.json({
       message: `Successfully updated sales order status with bulk order id: ${id}`
     });
   } catch (error) {
@@ -295,7 +295,7 @@ const massUpdateSalesOrderStatus = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
@@ -350,14 +350,14 @@ const updateBulkOrder = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bulkOrder)
     });
-    res.json(bulkOrder);
+    return res.json(bulkOrder);
   } catch (error) {
     log.error('ERR_BULKORDER_UPDATE-BULKORDER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-    res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 
