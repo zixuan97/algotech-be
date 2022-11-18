@@ -263,6 +263,13 @@ const markTopicAsCompletedByUser = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     topicModel.markTopicAsCompletedForUser({ topicId, userId: currUserId })
   );
+  const topic = await topicModel.getTopicById({
+    id: topicId
+  });
+  await subjectModel.updateLastAttemptedTimeInSubjectRecord({
+    subjectId: topic.subjectId,
+    userId: currUserId
+  });
   data.user.password = '';
   if (error) {
     log.error('ERR_STEP_UPDATE-MARK-TOPIC-AS-COMPLETED', {

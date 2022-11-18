@@ -5,6 +5,7 @@ const { verifyToken } = require('../middleware/auth');
 router.post('/', leaveController.createLeaveApplication);
 router.post('/quota', leaveController.createLeaveQuota);
 router.get('/allquota', leaveController.getLeaveQuota);
+router.get('/alltiers', leaveController.getAllTiers);
 router.get('/quota/:id', leaveController.getLeaveQuotaById);
 router.put('/quota', leaveController.updateLeaveQuota);
 router.delete('/quota/:id', leaveController.deleteLeaveQuotaById);

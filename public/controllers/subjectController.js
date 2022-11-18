@@ -304,7 +304,7 @@ const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
   }
 };
 
-const getCompletionRateBySubjectByEmployee = async (req, res) => {
+const getSubjectRecordBySubjectByEmployee = async (req, res) => {
   const { subjectId, userId } = req.params;
   const { data, error } = await common.awaitWrap(
     subjectModel.getSubjectRecordBySubjectAndUser({
@@ -441,8 +441,8 @@ exports.unassignUsersToSubject = unassignUsersToSubject;
 exports.getAllTopicsAndQuizzesBySubjectId = getAllTopicsAndQuizzesBySubjectId;
 exports.updateCompletionRateBySubjectByEmployee =
   updateCompletionRateBySubjectByEmployee;
-exports.getCompletionRateBySubjectByEmployee =
-  getCompletionRateBySubjectByEmployee;
+exports.getSubjectRecordBySubjectByEmployee =
+  getSubjectRecordBySubjectByEmployee;
 exports.getSubjectRecordsOfUser = getSubjectRecordsOfUser;
 exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
 exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;
