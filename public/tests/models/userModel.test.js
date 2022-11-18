@@ -323,3 +323,26 @@ test('Unassign subordinates to manager', async () => {
     userModel.unassignSubordinatesToManager({ id: 1, users: [{ user }] })
   ).resolves.toEqual(user);
 });
+
+test('Set CEO Manager to own id', async () => {
+  prisma.user.update.mockImplementation(async () => {
+    return user;
+  });
+  await expect(userModel.setCEOMangerIdToOwnId({ id: 1 })).resolves.toEqual(
+    user
+  );
+});
+
+test('get ceo', async () => {
+  prisma.user.findMany.mockImplementation(async () => {
+    return [user];
+  });
+  await expect(userModel.getCEO()).resolves.toEqual(user);
+});
+
+test('get ceo, no ceo', async () => {
+  prisma.user.findMany.mockImplementation(async () => {
+    return [];
+  });
+  await expect(userModel.getCEO()).resolves.toEqual(null);
+});
