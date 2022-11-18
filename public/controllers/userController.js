@@ -941,16 +941,16 @@ const changeCEO = async (req, res) => {
     (e) => e.managerId === null || e.managerId === Number(prevCeo.id)
   );
   try {
-    await userModel.unassignSubordinatesToManager({
-      id: Number(prevCeo.id),
-      users: subordinates
+    // await userModel.unassignSubordinatesToManager({
+    //   id: Number(prevCeo.id),
+    //   users: subordinates
+    // });
+    await userModel.setCEOMangerIdToOwnId({
+      id: Number(ceoId)
     });
     const ceo = await userModel.assignSubordinatesToManager({
       id: Number(ceoId),
       users: subordinates
-    });
-    await userModel.setCEOMangerIdToOwnId({
-      id: Number(ceoId)
     });
     ceo.password = '';
     ceo.manager = ceoId;
