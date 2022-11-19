@@ -4,6 +4,7 @@ const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const { ContentStatus } = require('@prisma/client');
 
 const createQuizQuestion = async (req, res) => {
   const { quizOrder, question, type, options, correctAnswer, quizId } =
@@ -165,10 +166,10 @@ const updateQuizQuestion = async (req, res) => {
 const deleteQuizQuestion = async (req, res) => {
   const { id } = req.params;
   const { quizId } = await quizQuestionModel.getQuizQuestionById({ id });
-  const { subjectId } = await quizModel.getQuizById({ id: quizId });
+  const quiz = await quizModel.getQuizById({ id: quizId });
   const currUserId = req.user.userId;
   await subjectModel.updateSubject({
-    id: subjectId,
+    id: quiz.subjectId,
     lastUpdatedById: currUserId
   });
   const { error } = await common.awaitWrap(
@@ -182,6 +183,12 @@ const deleteQuizQuestion = async (req, res) => {
     const e = Error.http(error);
     return res.status(e.code).json(e.message);
   } else {
+    if (quiz.questions.length === 1) {
+      await quizModel.updateQuiz({
+        id: quiz.id,
+        status: ContentStatus.DRAFT
+      });
+    }
     log.out('OK_QUIZQUESTION_DELETE-QUIZQUESTION', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted quizQuestion with id:${id}` }
