@@ -660,3 +660,4 @@ exports.updateEmployeeLeaveQuota = updateEmployeeLeaveQuota;
 exports.updateEmployeesToNewTierForDeletedTier =
   updateEmployeesToNewTierForDeletedTier;
 exports.calcuateNumOfBusinessDays = calcuateNumOfBusinessDays;
+exports.getAllPHByYear = getAllPHByYear;

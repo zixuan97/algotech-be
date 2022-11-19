@@ -797,6 +797,29 @@ const getNumberOfEmployeesInTier = async (req, res) => {
   }
 };
 
+const getPublicHolidaysInAYear = async (req, res) => {
+  const { year } = req.params;
+  const { data, error } = await common.awaitWrap(
+    leaveModel.getAllPHByYear({
+      year
+    })
+  );
+  if (error) {
+    log.error('ERR_LEAVE_GET-PH-BY-YEAR', {
+      err: error.message,
+      req: { body: req.body, params: req.params }
+    });
+    const e = Error.http(error);
+    return res.status(e.code).json(e.message);
+  } else {
+    log.out('OK_LEAVE_GET-PH-BY-YEAR', {
+      req: { body: req.body, params: req.params },
+      res: JSON.stringify(data)
+    });
+    return res.status(200).json(data);
+  }
+};
+
 exports.createLeaveApplication = createLeaveApplication;
 exports.createLeaveQuota = createLeaveQuota;
 exports.getLeaveQuota = getLeaveQuota;
@@ -825,3 +848,4 @@ exports.updateTierByEmployeeId = updateTierByEmployeeId;
 exports.updateEmployeesToNewTierForDeletedTier =
   updateEmployeesToNewTierForDeletedTier;
 exports.getNumberOfEmployeesInTier = getNumberOfEmployeesInTier;
+exports.getPublicHolidaysInAYear = getPublicHolidaysInAYear;

@@ -227,8 +227,6 @@ const deleteSubject = async (req) => {
 
 const connectOrCreateEmployeeSubjectRecord = async (req) => {
   const { subjectId, userId, completionRate } = req;
-  console.log('s', subjectId);
-  console.log('u', userId);
   const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.upsert({
     where: {
       subjectId_userId: {

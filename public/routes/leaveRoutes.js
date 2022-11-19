@@ -36,5 +36,6 @@ router.post(
 );
 router.get('/size/tier/:tier', leaveController.getNumberOfEmployeesInTier);
 router.get('/records/all', leaveController.getAllEmployeeLeaveRecords);
+router.get('/ph/:year', leaveController.getPublicHolidaysInAYear);
 
 module.exports = router;
