@@ -53,55 +53,55 @@ const createStep = async (req, res) => {
   }
 };
 
-const getAllStepsByTopicId = async (req, res) => {
-  const { topicId } = req.params;
-  const { data, error } = await common.awaitWrap(
-    stepModel.getAllStepsByTopicId({ topicId })
-  );
-  for (let d of data) {
-    d.topic.subject.createdBy.password = '';
-    d.topic.subject.lastUpdatedBy.password = '';
-    for (let u of d.topic.subject.usersAssigned) {
-      u.user.password = '';
-    }
-  }
-  if (error) {
-    log.error('ERR_STEP_GET-ALL-STEPS', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    return res.json(Error.http(error));
-  } else {
-    log.out('OK_STEP_GET-ALL-STEPS', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    return res.json(data);
-  }
-};
+// const getAllStepsByTopicId = async (req, res) => {
+//   const { topicId } = req.params;
+//   const { data, error } = await common.awaitWrap(
+//     stepModel.getAllStepsByTopicId({ topicId })
+//   );
+//   for (let d of data) {
+//     d.topic.subject.createdBy.password = '';
+//     d.topic.subject.lastUpdatedBy.password = '';
+//     for (let u of d.topic.subject.usersAssigned) {
+//       u.user.password = '';
+//     }
+//   }
+//   if (error) {
+//     log.error('ERR_STEP_GET-ALL-STEPS', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     return res.json(Error.http(error));
+//   } else {
+//     log.out('OK_STEP_GET-ALL-STEPS', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     return res.json(data);
+//   }
+// };
 
-const getStep = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const step = await stepModel.getStepById({ id });
-    log.out('OK_STEP_GET-STEP-BY-ID', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(step)
-    });
-    step.topic.subject.createdBy.password = '';
-    step.topic.subject.lastUpdatedBy.password = '';
-    for (let u of step.topic.subject.usersAssigned) {
-      u.user.password = '';
-    }
-    return res.json(step);
-  } catch (error) {
-    log.error('ERR_STEP_GET-STEP-BY-ID', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    return res.status(400).send('Error getting step');
-  }
-};
+// const getStep = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const step = await stepModel.getStepById({ id });
+//     log.out('OK_STEP_GET-STEP-BY-ID', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(step)
+//     });
+//     step.topic.subject.createdBy.password = '';
+//     step.topic.subject.lastUpdatedBy.password = '';
+//     for (let u of step.topic.subject.usersAssigned) {
+//       u.user.password = '';
+//     }
+//     return res.json(step);
+//   } catch (error) {
+//     log.error('ERR_STEP_GET-STEP-BY-ID', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     return res.status(400).send('Error getting step');
+//   }
+// };
 
 const updateStep = async (req, res) => {
   const { id, topicOrder, title, content, topicId } = req.body;
@@ -247,8 +247,8 @@ const updateOrderBasedOnStepsArray = async (req, res) => {
 };
 
 exports.createStep = createStep;
-exports.getAllStepsByTopicId = getAllStepsByTopicId;
-exports.getStep = getStep;
+// exports.getAllStepsByTopicId = getAllStepsByTopicId;
+// exports.getStep = getStep;
 exports.updateStep = updateStep;
 exports.deleteStep = deleteStep;
 exports.updateOrderBasedOnStepsArray = updateOrderBasedOnStepsArray;

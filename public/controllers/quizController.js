@@ -65,32 +65,32 @@ const createQuiz = async (req, res) => {
   }
 };
 
-const getAllQuizzesBySubjectId = async (req, res) => {
-  const { subjectId } = req.params;
-  const { data, error } = await common.awaitWrap(
-    quizModel.getAllQuizzesBySubjectId({ subjectId })
-  );
-  for (let d of data) {
-    d.subject.createdBy.password = '';
-    d.subject.lastUpdatedBy.password = '';
-    for (let u of d.subject.usersAssigned) {
-      u.user.password = '';
-    }
-  }
-  if (error) {
-    log.error('ERR_QUIZ_GET-ALL-QUIZZES', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    return res.json(Error.http(error));
-  } else {
-    log.out('OK_QUIZ_GET-ALL-QUIZZES', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    return res.json(data);
-  }
-};
+// const getAllQuizzesBySubjectId = async (req, res) => {
+//   const { subjectId } = req.params;
+//   const { data, error } = await common.awaitWrap(
+//     quizModel.getAllQuizzesBySubjectId({ subjectId })
+//   );
+//   for (let d of data) {
+//     d.subject.createdBy.password = '';
+//     d.subject.lastUpdatedBy.password = '';
+//     for (let u of d.subject.usersAssigned) {
+//       u.user.password = '';
+//     }
+//   }
+//   if (error) {
+//     log.error('ERR_QUIZ_GET-ALL-QUIZZES', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     return res.json(Error.http(error));
+//   } else {
+//     log.out('OK_QUIZ_GET-ALL-QUIZZES', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     return res.json(data);
+//   }
+// };
 
 const getQuiz = async (req, res) => {
   try {
@@ -243,57 +243,57 @@ const updateQuiz = async (req, res) => {
   }
 };
 
-const addQuizQuestionsToQuiz = async (req, res) => {
-  const { id, questions } = req.body;
-  const currentOrders = [];
-  let questionsToAdd = [];
-  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
-    quizId: id
-  });
-  for (let q of quizQuestions) {
-    currentOrders.push(q.quizOrder);
-  }
-  for (let qn of questions) {
-    if (!currentOrders.includes(qn.quizOrder)) {
-      questionsToAdd.push(qn);
-    }
-  }
-  if (questionsToAdd.length === 0) {
-    return res.status(400).send('All quiz orders already exists!');
-  } else {
-    const { subjectId } = await quizModel.getQuizById({ id });
-    const currUserId = req.user.userId;
-    await subjectModel.updateSubject({
-      id: subjectId,
-      lastUpdatedById: currUserId
-    });
-    const { data, error } = await common.awaitWrap(
-      quizModel.addQuizQuestionsToQuiz({
-        id,
-        questions: questionsToAdd
-      })
-    );
-    data.subject.createdBy.password = '';
-    data.subject.lastUpdatedBy.password = '';
-    for (let u of data.subject.usersAssigned) {
-      u.user.password = '';
-    }
-    if (error) {
-      log.error('ERR_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
-        err: error.message,
-        req: { body: req.body, params: req.params }
-      });
-      const e = Error.http(error);
-      return res.status(e.code).json(e.message);
-    } else {
-      log.out('OK_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
-        req: { body: req.body, params: req.params },
-        res: JSON.stringify(data)
-      });
-      return res.json(data);
-    }
-  }
-};
+// const addQuizQuestionsToQuiz = async (req, res) => {
+//   const { id, questions } = req.body;
+//   const currentOrders = [];
+//   let questionsToAdd = [];
+//   const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
+//     quizId: id
+//   });
+//   for (let q of quizQuestions) {
+//     currentOrders.push(q.quizOrder);
+//   }
+//   for (let qn of questions) {
+//     if (!currentOrders.includes(qn.quizOrder)) {
+//       questionsToAdd.push(qn);
+//     }
+//   }
+//   if (questionsToAdd.length === 0) {
+//     return res.status(400).send('All quiz orders already exists!');
+//   } else {
+//     const { subjectId } = await quizModel.getQuizById({ id });
+//     const currUserId = req.user.userId;
+//     await subjectModel.updateSubject({
+//       id: subjectId,
+//       lastUpdatedById: currUserId
+//     });
+//     const { data, error } = await common.awaitWrap(
+//       quizModel.addQuizQuestionsToQuiz({
+//         id,
+//         questions: questionsToAdd
+//       })
+//     );
+//     data.subject.createdBy.password = '';
+//     data.subject.lastUpdatedBy.password = '';
+//     for (let u of data.subject.usersAssigned) {
+//       u.user.password = '';
+//     }
+//     if (error) {
+//       log.error('ERR_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
+//         err: error.message,
+//         req: { body: req.body, params: req.params }
+//       });
+//       const e = Error.http(error);
+//       return res.status(e.code).json(e.message);
+//     } else {
+//       log.out('OK_QUIZ_ADD-QUIZQUESTION-TO-QUIZ', {
+//         req: { body: req.body, params: req.params },
+//         res: JSON.stringify(data)
+//       });
+//       return res.json(data);
+//     }
+//   }
+// };
 
 const deleteQuiz = async (req, res) => {
   const { id } = req.params;
@@ -340,41 +340,41 @@ const updateOrderBasedOnQuizArray = async (req, res) => {
   }
 };
 
-const markQuizAsCompletedByUser = async (req, res) => {
-  const { quizId } = req.body;
-  const currUserId = req.user.userId;
-  const { data, error } = await common.awaitWrap(
-    quizModel.markQuizAsCompletedForUser({ quizId, userId: currUserId })
-  );
-  const quiz = await quizModel.getQuizById({
-    id: Number(quizId)
-  });
-  await subjectModel.updateLastAttemptedTimeInSubjectRecord({
-    subjectId: quiz.subjectId,
-    userId: currUserId
-  });
-  data.user.password = '';
-  if (error) {
-    log.error('ERR_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    return res.status(e.code).json(e.message);
-  } else {
-    log.out('OK_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    return res.json(data);
-  }
-};
+// const markQuizAsCompletedByUser = async (req, res) => {
+//   const { quizId } = req.body;
+//   const currUserId = req.user.userId;
+//   const { data, error } = await common.awaitWrap(
+//     quizModel.markQuizAsCompletedForUser({ quizId, userId: currUserId })
+//   );
+//   const quiz = await quizModel.getQuizById({
+//     id: Number(quizId)
+//   });
+//   await subjectModel.updateLastAttemptedTimeInSubjectRecord({
+//     subjectId: quiz.subjectId,
+//     userId: currUserId
+//   });
+//   data.user.password = '';
+//   if (error) {
+//     log.error('ERR_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     const e = Error.http(error);
+//     return res.status(e.code).json(e.message);
+//   } else {
+//     log.out('OK_STEP_UPDATE-MARK-QUIZ-AS-COMPLETED', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     return res.json(data);
+//   }
+// };
 
 exports.createQuiz = createQuiz;
-exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
+// exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuiz = getQuiz;
 exports.updateQuiz = updateQuiz;
-exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
+// exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
 exports.deleteQuiz = deleteQuiz;
 exports.updateOrderBasedOnQuizArray = updateOrderBasedOnQuizArray;
-exports.markQuizAsCompletedByUser = markQuizAsCompletedByUser;
+// exports.markQuizAsCompletedByUser = markQuizAsCompletedByUser;

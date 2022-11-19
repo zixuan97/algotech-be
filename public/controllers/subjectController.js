@@ -235,74 +235,74 @@ const unassignUsersToSubject = async (req, res) => {
   }
 };
 
-const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
-  const { id } = req.params;
-  const { data: topicData, error: topicError } = await common.awaitWrap(
-    topicModel.getAllTopicsBySubjectId({
-      subjectId: id
-    })
-  );
-  topicData.map((t) => {
-    t.steps.sort((a, b) => {
-      return a.topicOrder - b.topicOrder;
-    });
-  });
-  topicData.sort((a, b) => {
-    return a.subjectOrder - b.subjectOrder;
-  });
-  for (let t of topicData) {
-    t.subject.createdBy.password = '';
-    t.subject.lastUpdatedBy.password = '';
-    for (let u of t.subject.usersAssigned) {
-      u.user.password = '';
-    }
-  }
-  const { data: quizData, error: quizError } = await common.awaitWrap(
-    quizModel.getAllQuizzesBySubjectId({
-      subjectId: id
-    })
-  );
-  quizData.map((q) => {
-    q.questions.sort((a, b) => {
-      return a.quizOrder - b.quizOrder;
-    });
-  });
-  quizData.sort((a, b) => {
-    return a.subjectOrder - b.subjectOrder;
-  });
-  for (let q of quizData) {
-    q.subject.createdBy.password = '';
-    q.subject.lastUpdatedBy.password = '';
-    for (let u of q.subject.usersAssigned) {
-      u.user.password = '';
-    }
-  }
-  const data = {
-    topics: topicData,
-    quizzes: quizData
-  };
-  if (topicError) {
-    log.error('ERR_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
-      err: topicError.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(topicError);
-    return res.status(e.code).json(e.message);
-  } else if (quizError) {
-    log.error('ERR_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
-      err: quizError.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(quizError);
-    return res.status(e.code).json(e.message);
-  } else {
-    log.out('OK_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    return res.json(data);
-  }
-};
+// const getAllTopicsAndQuizzesBySubjectId = async (req, res) => {
+//   const { id } = req.params;
+//   const { data: topicData, error: topicError } = await common.awaitWrap(
+//     topicModel.getAllTopicsBySubjectId({
+//       subjectId: id
+//     })
+//   );
+//   topicData.map((t) => {
+//     t.steps.sort((a, b) => {
+//       return a.topicOrder - b.topicOrder;
+//     });
+//   });
+//   topicData.sort((a, b) => {
+//     return a.subjectOrder - b.subjectOrder;
+//   });
+//   for (let t of topicData) {
+//     t.subject.createdBy.password = '';
+//     t.subject.lastUpdatedBy.password = '';
+//     for (let u of t.subject.usersAssigned) {
+//       u.user.password = '';
+//     }
+//   }
+//   const { data: quizData, error: quizError } = await common.awaitWrap(
+//     quizModel.getAllQuizzesBySubjectId({
+//       subjectId: id
+//     })
+//   );
+//   quizData.map((q) => {
+//     q.questions.sort((a, b) => {
+//       return a.quizOrder - b.quizOrder;
+//     });
+//   });
+//   quizData.sort((a, b) => {
+//     return a.subjectOrder - b.subjectOrder;
+//   });
+//   for (let q of quizData) {
+//     q.subject.createdBy.password = '';
+//     q.subject.lastUpdatedBy.password = '';
+//     for (let u of q.subject.usersAssigned) {
+//       u.user.password = '';
+//     }
+//   }
+//   const data = {
+//     topics: topicData,
+//     quizzes: quizData
+//   };
+//   if (topicError) {
+//     log.error('ERR_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
+//       err: topicError.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     const e = Error.http(topicError);
+//     return res.status(e.code).json(e.message);
+//   } else if (quizError) {
+//     log.error('ERR_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
+//       err: quizError.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     const e = Error.http(quizError);
+//     return res.status(e.code).json(e.message);
+//   } else {
+//     log.out('OK_SUBJECT_GET-TOPIC-QUIZ-BY-SUBJECT', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(data)
+//     });
+//     return res.json(data);
+//   }
+// };
 
 const getSubjectRecordBySubjectByEmployee = async (req, res) => {
   const { subjectId, userId } = req.params;
@@ -363,73 +363,73 @@ const getSubjectRecordsOfUser = async (req, res) => {
   }
 };
 
-const updateCompletionRateBySubjectByEmployee = async (req, res) => {
-  const { subjectId, userId, completionRate } = req.body;
-  const subject = await subjectModel.getSubjectById({ id: subjectId });
-  const user = await userModel.getUserDetails({ id: userId });
-  if (subject && user) {
-    const { data, error } = await common.awaitWrap(
-      subjectModel.updateSubjectCompletionRateBySubjectByEmployee({
-        subjectId,
-        userId,
-        completionRate
-      })
-    );
-    if (error) {
-      log.error('ERR_SUBJECT_UPDATE-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
-        err: error.message,
-        req: { body: req.body, params: req.params }
-      });
-      const e = Error.http(error);
-      return res.status(e.code).json(e.message);
-    } else {
-      data.user.password = '';
-      log.out('OK_SUBJECT_UPDATE-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
-        req: { body: req.body, params: req.params },
-        res: JSON.stringify(data)
-      });
-      return res.json(data);
-    }
-  } else {
-    return res.status(400).send('Subject or user does not exist!');
-  }
-};
+// const updateCompletionRateBySubjectByEmployee = async (req, res) => {
+//   const { subjectId, userId, completionRate } = req.body;
+//   const subject = await subjectModel.getSubjectById({ id: subjectId });
+//   const user = await userModel.getUserDetails({ id: userId });
+//   if (subject && user) {
+//     const { data, error } = await common.awaitWrap(
+//       subjectModel.updateSubjectCompletionRateBySubjectByEmployee({
+//         subjectId,
+//         userId,
+//         completionRate
+//       })
+//     );
+//     if (error) {
+//       log.error('ERR_SUBJECT_UPDATE-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
+//         err: error.message,
+//         req: { body: req.body, params: req.params }
+//       });
+//       const e = Error.http(error);
+//       return res.status(e.code).json(e.message);
+//     } else {
+//       data.user.password = '';
+//       log.out('OK_SUBJECT_UPDATE-SUBJECT-COMPLETION-RATE-BY-EMPLOYEE', {
+//         req: { body: req.body, params: req.params },
+//         res: JSON.stringify(data)
+//       });
+//       return res.json(data);
+//     }
+//   } else {
+//     return res.status(400).send('Subject or user does not exist!');
+//   }
+// };
 
-const getSubjectsAssignedByUserId = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const subjects = await subjectModel.getSubjectsAssignedByUserId({ id });
-    log.out('OK_SUBJECT_GET-SUBJECTS-BY-USER-ID', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(subjects)
-    });
-    return res.json(subjects);
-  } catch (error) {
-    log.error('ERR_SUBJECT_GET-SUBJECTS-BY-USER-ID', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    return res.status(400).send('Error getting subjects');
-  }
-};
+// const getSubjectsAssignedByUserId = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const subjects = await subjectModel.getSubjectsAssignedByUserId({ id });
+//     log.out('OK_SUBJECT_GET-SUBJECTS-BY-USER-ID', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(subjects)
+//     });
+//     return res.json(subjects);
+//   } catch (error) {
+//     log.error('ERR_SUBJECT_GET-SUBJECTS-BY-USER-ID', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     return res.status(400).send('Error getting subjects');
+//   }
+// };
 
-const getUsersAssignedBySubjectId = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const users = await subjectModel.getUsersAssignedBySubjectId({ id });
-    log.out('OK_SUBJECT_GET-USERS-BY-SUBJECT-ID', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(users)
-    });
-    return res.json(users);
-  } catch (error) {
-    log.error('ERR_SUBJECT_GET-USERS-BY-SUBJECT-ID', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    return res.status(400).send('Error getting users');
-  }
-};
+// const getUsersAssignedBySubjectId = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const users = await subjectModel.getUsersAssignedBySubjectId({ id });
+//     log.out('OK_SUBJECT_GET-USERS-BY-SUBJECT-ID', {
+//       req: { body: req.body, params: req.params },
+//       res: JSON.stringify(users)
+//     });
+//     return res.json(users);
+//   } catch (error) {
+//     log.error('ERR_SUBJECT_GET-USERS-BY-SUBJECT-ID', {
+//       err: error.message,
+//       req: { body: req.body, params: req.params }
+//     });
+//     return res.status(400).send('Error getting users');
+//   }
+// };
 
 exports.createSubject = createSubject;
 exports.getAllSubjects = getAllSubjects;
@@ -438,11 +438,11 @@ exports.updateSubject = updateSubject;
 exports.deleteSubject = deleteSubject;
 exports.assignUsersToSubject = assignUsersToSubject;
 exports.unassignUsersToSubject = unassignUsersToSubject;
-exports.getAllTopicsAndQuizzesBySubjectId = getAllTopicsAndQuizzesBySubjectId;
-exports.updateCompletionRateBySubjectByEmployee =
-  updateCompletionRateBySubjectByEmployee;
+// exports.getAllTopicsAndQuizzesBySubjectId = getAllTopicsAndQuizzesBySubjectId;
+// exports.updateCompletionRateBySubjectByEmployee =
+//   updateCompletionRateBySubjectByEmployee;
 exports.getSubjectRecordBySubjectByEmployee =
   getSubjectRecordBySubjectByEmployee;
 exports.getSubjectRecordsOfUser = getSubjectRecordsOfUser;
-exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
-exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;
+// exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
+// exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;

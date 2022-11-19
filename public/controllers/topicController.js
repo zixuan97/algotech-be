@@ -221,57 +221,57 @@ const updateTopic = async (req, res) => {
   }
 };
 
-const addStepsToTopic = async (req, res) => {
-  const { id, steps } = req.body;
-  const currentOrders = [];
-  let stepsToAdd = [];
-  const stepsInTopic = await stepModel.getAllStepsByTopicId({
-    topicId: id
-  });
-  for (let s of stepsInTopic) {
-    currentOrders.push(s.topicOrder);
-  }
-  for (let st of steps) {
-    if (!currentOrders.includes(st.topicOrder)) {
-      stepsToAdd.push(st);
-    }
-  }
-  if (stepsToAdd.length === 0) {
-    return res.status(400).send('All topic orders already exists!');
-  } else {
-    const { subjectId } = await topicModel.getTopicById({ id });
-    const currUserId = req.user.userId;
-    await subjectModel.updateSubject({
-      id: subjectId,
-      lastUpdatedById: currUserId
-    });
-    const { data, error } = await common.awaitWrap(
-      topicModel.addStepsToTopic({
-        id,
-        steps: stepsToAdd
-      })
-    );
-    data.subject.createdBy.password = '';
-    data.subject.lastUpdatedBy.password = '';
-    for (let u of data.subject.usersAssigned) {
-      u.user.password = '';
-    }
-    if (error) {
-      log.error('ERR_TOPIC_ADD-STEPS-TO-TOPIC', {
-        err: error.message,
-        req: { body: req.body, params: req.params }
-      });
-      const e = Error.http(error);
-      return res.status(e.code).json(e.message);
-    } else {
-      log.out('OK_TOPIC_ADD-STEPS-TO-TOPIC', {
-        req: { body: req.body, params: req.params },
-        res: JSON.stringify(data)
-      });
-      return res.json(data);
-    }
-  }
-};
+// const addStepsToTopic = async (req, res) => {
+//   const { id, steps } = req.body;
+//   const currentOrders = [];
+//   let stepsToAdd = [];
+//   const stepsInTopic = await stepModel.getAllStepsByTopicId({
+//     topicId: id
+//   });
+//   for (let s of stepsInTopic) {
+//     currentOrders.push(s.topicOrder);
+//   }
+//   for (let st of steps) {
+//     if (!currentOrders.includes(st.topicOrder)) {
+//       stepsToAdd.push(st);
+//     }
+//   }
+//   if (stepsToAdd.length === 0) {
+//     return res.status(400).send('All topic orders already exists!');
+//   } else {
+//     const { subjectId } = await topicModel.getTopicById({ id });
+//     const currUserId = req.user.userId;
+//     await subjectModel.updateSubject({
+//       id: subjectId,
+//       lastUpdatedById: currUserId
+//     });
+//     const { data, error } = await common.awaitWrap(
+//       topicModel.addStepsToTopic({
+//         id,
+//         steps: stepsToAdd
+//       })
+//     );
+//     data.subject.createdBy.password = '';
+//     data.subject.lastUpdatedBy.password = '';
+//     for (let u of data.subject.usersAssigned) {
+//       u.user.password = '';
+//     }
+//     if (error) {
+//       log.error('ERR_TOPIC_ADD-STEPS-TO-TOPIC', {
+//         err: error.message,
+//         req: { body: req.body, params: req.params }
+//       });
+//       const e = Error.http(error);
+//       return res.status(e.code).json(e.message);
+//     } else {
+//       log.out('OK_TOPIC_ADD-STEPS-TO-TOPIC', {
+//         req: { body: req.body, params: req.params },
+//         res: JSON.stringify(data)
+//       });
+//       return res.json(data);
+//     }
+//   }
+// };
 
 const deleteTopic = async (req, res) => {
   const { id } = req.params;
@@ -352,7 +352,7 @@ exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopic = getTopic;
 exports.updateTopic = updateTopic;
-exports.addStepsToTopic = addStepsToTopic;
+// exports.addStepsToTopic = addStepsToTopic;
 exports.deleteTopic = deleteTopic;
 exports.updateOrderBasedOnTopicArray = updateOrderBasedOnTopicArray;
 exports.markTopicAsCompletedByUser = markTopicAsCompletedByUser;
