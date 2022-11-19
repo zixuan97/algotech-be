@@ -10,17 +10,14 @@ const createLocation = async (req, res) => {
   );
   if (data) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
-    
+
     return res.status(400).json({ message: 'Location name already exists' });
   } else if (duplicateLocationNameError) {
     log.error('ERR_LOCATION_CREATE-LOCATION', {
       err: duplicateLocationNameError.message,
       req: { body: req.body, params: req.params }
     });
-    return res.json(
-      { message: 'Unable to find location name' },
-      duplicateLocationNameError.message
-    );
+    return res.status(400).json({ message: 'Unable to find location name' });
   } else {
     const { error } = await common.awaitWrap(
       locationModel.createLocation({
@@ -113,10 +110,7 @@ const updateLocation = async (req, res) => {
     return res.status(400).json({ message: 'Location name already exists' });
   } else if (duplicateLocationNameError) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
-    return res.json(
-      { message: 'Unable to find location name' },
-      duplicateLocationNameError.message
-    );
+    return res.status(400).json({ message: 'Unable to find location name' });
   } else {
     const { error } = await common.awaitWrap(
       locationModel.updateLocations({ id, name, stockQuantity, address })
@@ -148,10 +142,7 @@ const updateLocationWithoutProducts = async (req, res) => {
     return res.status(400).json({ message: 'Location name already exists' });
   } else if (duplicateLocationNameError) {
     log.error('ERR_LOCATION_CREATE-LOCATION');
-    return res.json(
-      { message: 'Unable to find location name' },
-      duplicateLocationNameError.message
-    );
+    return res.status(400).json({ message: 'Unable to find location name' });
   } else {
     const { error } = await common.awaitWrap(
       locationModel.updateLocationsWithoutProducts({ id, name, address })
