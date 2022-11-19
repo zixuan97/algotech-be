@@ -161,6 +161,53 @@ const updateQuiz = async (req, res) => {
         id: subjectId,
         lastUpdatedById: currUserId
       });
+      // changing status from finished back to draft
+      if (
+        q.status === ContentStatus.FINISHED &&
+        status === ContentStatus.DRAFT
+      ) {
+        await quizModel.updateQuiz({
+          id,
+          status
+        });
+        const subjectRecords = await subjectModel.getSubjectRecordsBySubject({
+          subjectId
+        });
+        for (let sr of subjectRecords) {
+          let completedQuizIds = [];
+          for (let cq of sr.completedQuizzes) {
+            completedQuizIds.push(cq.id);
+          }
+          if (completedQuizIds.includes(id)) {
+            await quizModel.unmarkQuizAsCompletedForUser({
+              quizId: id,
+              userId: sr.userId
+            });
+          } else {
+            await quizModel.getUpdatedSubjectRecord({
+              subjectId,
+              userId: sr.userId
+            });
+          }
+        }
+      } else if (
+        q.status === ContentStatus.DRAFT &&
+        status === ContentStatus.FINISHED
+      ) {
+        await quizModel.updateQuiz({
+          id,
+          status
+        });
+        const subjectRecords = await subjectModel.getSubjectRecordsBySubject({
+          subjectId
+        });
+        for (let sr of subjectRecords) {
+          await quizModel.getUpdatedSubjectRecord({
+            subjectId,
+            userId: sr.userId
+          });
+        }
+      }
       const { data, error } = await common.awaitWrap(
         quizModel.updateQuiz({
           id,

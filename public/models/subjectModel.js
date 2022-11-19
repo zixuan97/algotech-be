@@ -2,6 +2,7 @@ const { prisma } = require('./index.js');
 const topicModel = require('./topicModel.js');
 const quizModel = require('./quizModel.js');
 const userModel = require('./userModel.js');
+const subjectModel = require('./subjectModel.js');
 const { ContentStatus } = require('@prisma/client');
 
 const createSubject = async (req) => {
@@ -335,6 +336,7 @@ const updateSubjectCompletionRateBySubjectByEmployee = async (req) => {
 
 const getSubjectRecordBySubjectAndUser = async (req) => {
   const { subjectId, userId } = req;
+  console.log('reacheddd');
   const record = await prisma.EmployeeSubjectRecord.findFirst({
     where: {
       AND: [
@@ -389,7 +391,26 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
   } else {
     completionRate = (totalCompleted / totalInSubject) * 100;
   }
-  const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.update({
+  let employeeSubjectRecord = await prisma.EmployeeSubjectRecord.update({
+    where: {
+      id: record.id
+    },
+    data: {
+      completionRate
+    }
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
+  employeeSubjectRecord = await prisma.EmployeeSubjectRecord.update({
     where: {
       id: record.id
     },
