@@ -112,7 +112,7 @@ const updateTopic = async (req, res) => {
     res
       .status(400)
       .send(
-        'You cannot update the status of this topic to COMPLETED as there are no steps.'
+        'You cannot update the status of this topic to FINISHED as there are no steps.'
       );
   } else {
     const currentOrders = [];

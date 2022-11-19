@@ -133,7 +133,7 @@ const updateQuiz = async (req, res) => {
     res
       .status(400)
       .send(
-        'You cannot update the status of this quiz to COMPLETED as there are no quiz questions.'
+        'You cannot update the status of this quiz to FINISHED as there are no quiz questions.'
       );
   } else {
     const quizzes = await quizModel.getAllQuizzesBySubjectId({ subjectId });

@@ -595,7 +595,7 @@ const updateEmployeesToNewTierForDeletedTier = async (req) => {
 
 const calcuateNumOfBusinessDays = async (req) => {
   const { startDate, endDate } = req;
-  const year = startDate.substring(0, 4);
+  const year = startDate.toISOString().substring(0, 4);
   const allPHs = await getAllPHByYear({ year });
   let phDates = [];
   for (let ph of allPHs) {
