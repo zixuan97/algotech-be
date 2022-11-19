@@ -43,9 +43,7 @@ test('Create brand', async () => {
     .post('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Create brand, name already exists', async () => {
@@ -61,9 +59,7 @@ test('Create brand, name already exists', async () => {
     .post('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Create brand, check if name already exists throw error', async () => {
@@ -79,9 +75,7 @@ test('Create brand, check if name already exists throw error', async () => {
     .post('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Create brand error', async () => {
@@ -98,18 +92,11 @@ test('Create brand error', async () => {
     .post('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Get all brands', async () => {
-  await supertest(app)
-    .get('/brand/all')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).get('/brand/all').set('origin', 'jest').expect(200);
 });
 
 test('Get all brands, prisma error', async () => {
@@ -117,36 +104,21 @@ test('Get all brands, prisma error', async () => {
     throw new Error();
   });
 
-  await supertest(app)
-    .get('/brand/all')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).get('/brand/all').set('origin', 'jest').expect(400);
 });
 
 test('Get one brand by id', async () => {
   brandModel.findBrandById.mockImplementation(async () => {
     return {};
   });
-  await supertest(app)
-    .get('/brand/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).get('/brand/1').set('origin', 'jest').expect(200);
 });
 
 test('Get one brand by id, prisma error', async () => {
   brandModel.findBrandById.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .get('/brand/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).get('/brand/1').set('origin', 'jest').expect(400);
 });
 
 test('Get one brand by name', async () => {
@@ -161,9 +133,7 @@ test('Get one brand by name', async () => {
     .get('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get one brand by name, prisma error', async () => {
@@ -178,9 +148,7 @@ test('Get one brand by name, prisma error', async () => {
     .get('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Update brand', async () => {
@@ -193,9 +161,7 @@ test('Update brand', async () => {
     .put('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Update brand, brand name already exists', async () => {
@@ -213,9 +179,7 @@ test('Update brand, brand name already exists', async () => {
     .put('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Update brand, brand name already exists prisma error', async () => {
@@ -230,9 +194,7 @@ test('Update brand, brand name already exists prisma error', async () => {
     .put('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Update brand, prisma error', async () => {
@@ -249,9 +211,7 @@ test('Update brand, prisma error', async () => {
     .put('/brand')
     .set('origin', 'jest')
     .send(brand)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Delete brand', async () => {
@@ -278,24 +238,14 @@ test('Delete brand', async () => {
       }
     ];
   });
-  await supertest(app)
-    .delete('/brand/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).delete('/brand/1').set('origin', 'jest').expect(200);
 });
 
 test('Delete brand, get all products by brand prisma error', async () => {
   productModel.getAllProductsByBrand.mockImplementation(async () => {
     throw new Error('prisma error');
   });
-  await supertest(app)
-    .delete('/brand/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).delete('/brand/1').set('origin', 'jest').expect(400);
 });
 
 test('Delete brand, delete product prisma error', async () => {
@@ -325,12 +275,7 @@ test('Delete brand, delete product prisma error', async () => {
   productModel.deleteProduct.mockImplementation(async () => {
     throw new Error('prisma error');
   });
-  await supertest(app)
-    .delete('/brand/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).delete('/brand/1').set('origin', 'jest').expect(400);
 });
 
 test('Delete brand, delete brand error', async () => {
@@ -360,10 +305,5 @@ test('Delete brand, delete brand error', async () => {
       }
     ];
   });
-  await supertest(app)
-    .delete('/brand/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).delete('/brand/1').set('origin', 'jest').expect(400);
 });
