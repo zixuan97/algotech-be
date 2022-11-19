@@ -370,7 +370,8 @@ const addJobRolesToUser = async (req) => {
             jobRole: j.jobRole
           },
           create: {
-            jobRole: j.jobRole
+            jobRole: j.jobRole,
+            description: j.description
           }
         }))
       }
