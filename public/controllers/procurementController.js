@@ -297,7 +297,7 @@ const generatePO = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      return res.status(error).json(error.message);
+      return res.status(400).json(error.message);
     });
 };
 
