@@ -142,6 +142,28 @@ const updateTopic = async (req, res) => {
         id: subjectId,
         lastUpdatedById: currUserId
       });
+      const currTopic = await topicModel.getTopicById({ id });
+      // changing status from finished back to draft
+      if (
+        currTopic.status === ContentStatus.FINISHED &&
+        status === ContentStatus.DRAFT
+      ) {
+        const subjectRecords = await subjectModel.getSubjectRecordsBySubject({
+          subjectId
+        });
+        for (let sr of subjectRecords) {
+          let completedTopicIds = [];
+          for (let ct of sr.completedTopics) {
+            completedTopicIds.push(ct.id);
+          }
+          if (completedTopicIds.includes(id)) {
+            await topicModel.unmarkTopicAsCompletedForUser({
+              topicId: id,
+              userId: sr.userId
+            });
+          }
+        }
+      }
       const { data, error } = await common.awaitWrap(
         topicModel.updateTopic({
           id,
