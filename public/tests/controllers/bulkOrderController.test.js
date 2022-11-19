@@ -125,24 +125,14 @@ jest.mock('../../models/paymentModel', () => {
 });
 
 test('Get all bulkOrders', async () => {
-  await supertest(app)
-    .get('/bulkOrder/all')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).get('/bulkOrder/all').set('origin', 'jest').expect(200);
 });
 
 test('Get all bulkOrders, prisma error', async () => {
   bulkOrderModel.getAllBulkOrders.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .get('/bulkOrder/all')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).get('/bulkOrder/all').set('origin', 'jest').expect(400);
 });
 
 test('Create bulkOrder', async () => {
@@ -153,9 +143,7 @@ test('Create bulkOrder', async () => {
     .post('/bulkOrder')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   const bulkOrderCC = {
     amount: 24,
@@ -174,9 +162,7 @@ test('Create bulkOrder', async () => {
     .post('/bulkOrder')
     .set('origin', 'jest')
     .send(bulkOrderCC)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Create bulkOrder, create bulk order prisma error', async () => {
@@ -188,9 +174,7 @@ test('Create bulkOrder, create bulk order prisma error', async () => {
     .post('/bulkOrder')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Create bulkOrder, payment prisma error', async () => {
@@ -204,33 +188,21 @@ test('Create bulkOrder, payment prisma error', async () => {
     .post('/bulkOrder')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Find bulkOrder by id', async () => {
   bulkOrderModel.findBulkOrderById.mockImplementation(async () => {
     return {};
   });
-  await supertest(app)
-    .get('/bulkOrder/id/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).get('/bulkOrder/id/1').set('origin', 'jest').expect(200);
 });
 
 test('Find bulkOrder by id, prisma error', async () => {
   bulkOrderModel.findBulkOrderById.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .get('/bulkOrder/id/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).get('/bulkOrder/id/1').set('origin', 'jest').expect(400);
 });
 
 test('Find bulkOrder by orderid', async () => {
@@ -252,9 +224,7 @@ test('Find bulkOrder by orderid, prisma error', async () => {
   await supertest(app)
     .get('/bulkOrder/orderId/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Find bulkOrder by email', async () => {
@@ -264,9 +234,7 @@ test('Find bulkOrder by email', async () => {
   await supertest(app)
     .get('/bulkOrder/email/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Find bulkOrder by email,prisma error', async () => {
@@ -276,9 +244,7 @@ test('Find bulkOrder by email,prisma error', async () => {
   await supertest(app)
     .get('/bulkOrder/email/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Get all bulkOrders with time filter', async () => {
@@ -290,9 +256,7 @@ test('Get all bulkOrders with time filter', async () => {
     .post('/bulkOrder/timefilter')
     .set('origin', 'jest')
     .send(body)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all bulkOrders with time filter,prisma error', async () => {
@@ -308,9 +272,7 @@ test('Get all bulkOrders with time filter,prisma error', async () => {
     .post('/bulkOrder/timefilter')
     .set('origin', 'jest')
     .send(body)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Update bulkOrder', async () => {
@@ -321,9 +283,7 @@ test('Update bulkOrder', async () => {
     .put('/bulkOrder')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Update bulkOrder, prisma error', async () => {
@@ -334,9 +294,7 @@ test('Update bulkOrder, prisma error', async () => {
     .put('/bulkOrder')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Update bulkOrder status', async () => {
@@ -347,9 +305,7 @@ test('Update bulkOrder status', async () => {
     .put('/bulkOrder/status')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Update bulkOrder status, prisma error', async () => {
@@ -360,9 +316,7 @@ test('Update bulkOrder status, prisma error', async () => {
     .put('/bulkOrder/status')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Mass Update bulkOrder status', async () => {
@@ -381,9 +335,7 @@ test('Mass Update bulkOrder status', async () => {
     .put('/bulkOrder/salesOrderStatus')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Mass Update bulkOrder status, order status not prepared,', async () => {
@@ -425,9 +377,7 @@ test('Mass Update bulkOrder status, order status not prepared,', async () => {
       payeeContactNo: '91114685',
       salesOrders: []
     })
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   await supertest(app)
     .put('/bulkOrder/salesOrderStatus')
@@ -444,9 +394,7 @@ test('Mass Update bulkOrder status, order status not prepared,', async () => {
       orderStatus: 'PREPARED',
       salesOrders: []
     })
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Mass Update bulkOrder status,prisma error', async () => {
@@ -461,9 +409,7 @@ test('Mass Update bulkOrder status,prisma error', async () => {
     .put('/bulkOrder/salesOrderStatus')
     .set('origin', 'jest')
     .send(bulkOrder)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Generate bulk order excel', async () => {
@@ -480,9 +426,7 @@ test('Generate bulk order excel', async () => {
   await supertest(app)
     .post('/bulkOrder/excel')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(400);
 });
 
 test('Generate bulk order excel, error', async () => {
@@ -492,9 +436,7 @@ test('Generate bulk order excel, error', async () => {
   await supertest(app)
     .post('/bulkOrder/excel')
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Generate bulk order summary pdf', async () => {
@@ -509,9 +451,7 @@ test('Generate bulk order summary pdf', async () => {
   await supertest(app)
     .post('/bulkOrder/pdf/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Generate bulk order summary pdf, error', async () => {
@@ -526,7 +466,5 @@ test('Generate bulk order summary pdf, error', async () => {
   await supertest(app)
     .post('/bulkOrder/pdf/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });

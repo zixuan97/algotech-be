@@ -73,9 +73,7 @@ test('Create bundle catalogue', async () => {
     .post('/bundleCatalogue')
     .set('origin', 'jest')
     .send(bundleCatalogue)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   const bundleCatalogueNoImage = {
     price: 6.0,
@@ -91,9 +89,7 @@ test('Create bundle catalogue', async () => {
     .post('/bundleCatalogue')
     .set('origin', 'jest')
     .send(bundleCatalogueNoImage)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Create bundle catalogue', async () => {
@@ -104,12 +100,10 @@ test('Create bundle catalogue', async () => {
     .post('/bundleCatalogue')
     .set('origin', 'jest')
     .send(bundleCatalogue)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
-test('Create bundle catalogue', async () => {
+test('Create bundle catalogue, error', async () => {
   bundleCatalogueModel.createBundleCatalogue.mockImplementation(async () => {
     throw new Error();
   });
@@ -118,9 +112,7 @@ test('Create bundle catalogue', async () => {
     .post('/bundleCatalogue')
     .set('origin', 'jest')
     .send(bundleCatalogue)
-    .then(() => {
-      expect(200);
-    });
+    .expect(400);
 });
 
 test('Get all bundle catalogue', async () => {
@@ -144,9 +136,7 @@ test('Get all bundle catalogue', async () => {
   await supertest(app)
     .get('/bundleCatalogue/all')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all bundle catalogue, getS3 error', async () => {
@@ -173,9 +163,7 @@ test('Get all bundle catalogue, getS3 error', async () => {
   await supertest(app)
     .get('/bundleCatalogue/all')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all bundle catalogue, get all bundle catalogue error', async () => {
@@ -185,9 +173,7 @@ test('Get all bundle catalogue, get all bundle catalogue error', async () => {
   await supertest(app)
     .get('/bundleCatalogue/all')
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Get bundle catalogue', async () => {
@@ -209,18 +195,14 @@ test('Get bundle catalogue', async () => {
   await supertest(app)
     .get('/bundleCatalogue/id/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   getS3.mockImplementation(async () => {});
 
   await supertest(app)
     .get('/bundleCatalogue/id/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get bundle catalogue,error', async () => {
@@ -230,9 +212,7 @@ test('Get bundle catalogue,error', async () => {
   await supertest(app)
     .get('/bundleCatalogue/id/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('update bundle catalogue', async () => {
@@ -279,9 +259,8 @@ test('update bundle catalogue', async () => {
     .put('/bundleCatalogue')
     .set('origin', 'jest')
     .send(bundleCatalogueUpdated)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
+
   // uploads3 no error
   uploadS3.mockImplementation(async () => {});
 
@@ -289,9 +268,7 @@ test('update bundle catalogue', async () => {
     .put('/bundleCatalogue')
     .set('origin', 'jest')
     .send(bundleCatalogueUpdated)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   // no img
   const bundleCatalogueUpdatedNoImg = {
@@ -334,9 +311,7 @@ test('update bundle catalogue', async () => {
     .put('/bundleCatalogue')
     .set('origin', 'jest')
     .send(bundleCatalogueUpdatedNoImg)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('update bundle catalogue, delete s3 error, update bundle catalogue error', async () => {
@@ -387,9 +362,7 @@ test('update bundle catalogue, delete s3 error, update bundle catalogue error', 
     .put('/bundleCatalogue')
     .set('origin', 'jest')
     .send(bundleCatalogueUpdatedNoImg)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Delete bundle catalogue', async () => {
@@ -401,9 +374,7 @@ test('Delete bundle catalogue', async () => {
   await supertest(app)
     .delete('/bundleCatalogue/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Delete bundle catalogue,deleteS3 error', async () => {
@@ -416,9 +387,7 @@ test('Delete bundle catalogue,deleteS3 error', async () => {
   await supertest(app)
     .delete('/bundleCatalogue/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Delete bundle catalogue, model error', async () => {
@@ -435,7 +404,5 @@ test('Delete bundle catalogue, model error', async () => {
   await supertest(app)
     .delete('/bundleCatalogue/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });

@@ -41,7 +41,20 @@ jest.mock('../../models/userModel', () => {
     changeUserRole: jest.fn().mockImplementation(async () => {}),
     updateB2BUserStatus: jest.fn().mockImplementation(async () => {}),
     changePassword: jest.fn().mockImplementation(async () => {}),
-    verifyPassword: jest.fn().mockImplementation(async () => {})
+    verifyPassword: jest.fn().mockImplementation(async () => {}),
+    getEmployeesForOrgChart: jest.fn().mockImplementation(async () => {}),
+    getEmployees: jest.fn().mockImplementation(async () => {}),
+    createJobRole: jest.fn().mockImplementation(async () => {}),
+    editJobRole: jest.fn().mockImplementation(async () => {}),
+    getJobRole: jest.fn().mockImplementation(async () => {}),
+    getJobRoleByName: jest.fn().mockImplementation(async () => {}),
+    getAllJobRoles: jest.fn().mockImplementation(async () => {}),
+    addJobRolesToUser: jest.fn().mockImplementation(async () => {}),
+    deleteJobRole: jest.fn().mockImplementation(async () => {}),
+    assignSubordinatesToManager: jest.fn().mockImplementation(async () => {}),
+    unassignSubordinatesToManager: jest.fn().mockImplementation(async () => {}),
+    setCEOMangerIdToOwnId: jest.fn().mockImplementation(async () => {}),
+    getCEO: jest.fn().mockImplementation(async () => {})
   };
 });
 
@@ -56,6 +69,43 @@ jest.mock('../../helpers/email', () => {
     sendEmail: jest.fn().mockImplementation(async () => {})
   };
 });
+
+let jobRole = {
+  jobRole: 'SWE',
+  description: 'testing',
+  usersInJobRole: [
+    {
+      id: 2,
+      firstName: 'Wee Kek',
+      lastName: 'Tan',
+      email: 'tanwk@comp.nus.edu.sg',
+      password: '',
+      role: 'ADMIN',
+      status: 'ACTIVE',
+      isVerified: true,
+      company: null,
+      contactNo: null,
+      tier: 'Tier 2',
+      managerId: null,
+      jobRoles: []
+    },
+    {
+      id: 1,
+      firstName: 'Wee Kek',
+      lastName: 'Tan',
+      email: 'tanwk@comp.nus.edu.sg',
+      password: '',
+      role: 'ADMIN',
+      status: 'ACTIVE',
+      isVerified: true,
+      company: null,
+      contactNo: null,
+      tier: 'Tier 2',
+      managerId: null,
+      jobRoles: []
+    }
+  ]
+};
 
 let user = {
   id: 1,
@@ -75,9 +125,7 @@ test('Create user', async () => {
     .post('/user')
     .set('origin', 'jest')
     .send(user)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   //tier undefined
   const userNoTier = {
@@ -91,9 +139,7 @@ test('Create user', async () => {
     .post('/user')
     .set('origin', 'jest')
     .send(userNoTier)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Create user, user already exist', async () => {
@@ -108,9 +154,7 @@ test('Create user, user already exist', async () => {
     .post('/user')
     .set('origin', 'jest')
     .send(user)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Create user, send email error', async () => {
@@ -126,9 +170,7 @@ test('Create user, send email error', async () => {
     .post('/user')
     .set('origin', 'jest')
     .send(user)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Create user, model error', async () => {
@@ -145,9 +187,7 @@ test('Create user, model error', async () => {
     .post('/user')
     .set('origin', 'jest')
     .send(user)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Create user, model error', async () => {
@@ -162,9 +202,7 @@ test('Create user, model error', async () => {
     .post('/user')
     .set('origin', 'jest')
     .send(user)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Create B2B user', async () => {
@@ -180,9 +218,7 @@ test('Create B2B user', async () => {
     .post('/user/b2b')
     .set('origin', 'jest')
     .send(b2bUser)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Create B2B user, user email exists', async () => {
@@ -203,9 +239,7 @@ test('Create B2B user, user email exists', async () => {
     .post('/user/b2b')
     .set('origin', 'jest')
     .send(b2bUser)
-    .then(() => {
-      expect(200);
-    });
+    .expect(400);
 });
 
 test('Create B2B user, model error', async () => {
@@ -227,9 +261,7 @@ test('Create B2B user, model error', async () => {
     .post('/user/b2b')
     .set('origin', 'jest')
     .send(b2bUser)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Get one user', async () => {
@@ -240,9 +272,7 @@ test('Get one user', async () => {
     .get('/user')
     .set('origin', 'jest')
     .set('x-access-token', 'test')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get one user,find user error', async () => {
@@ -257,30 +287,18 @@ test('Get one user,find user error', async () => {
     .get('/user')
     .set('origin', 'jest')
     .set('x-access-token', 'test')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Get user details', async () => {
-  await supertest(app)
-    .get('/user/details/2')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).get('/user/details/2').set('origin', 'jest').expect(200);
 });
 
 test('Get user details, get user details error', async () => {
   userModel.getUserDetails.mockImplementation(() => {
     throw new Error();
   });
-  await supertest(app)
-    .get('/user/details/2')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).get('/user/details/2').set('origin', 'jest').expect(400);
 });
 
 test('Auth user', async () => {
@@ -296,9 +314,7 @@ test('Auth user', async () => {
     .post('/user/auth')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(400);
 });
 
 test('Auth user, user disabled/rejected/pending', async () => {
@@ -315,9 +331,7 @@ test('Auth user, user disabled/rejected/pending', async () => {
     .post('/user/auth')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 
   user.status = 'REJECTED';
   userModel.findUserByEmail.mockImplementation(async () => {
@@ -327,9 +341,7 @@ test('Auth user, user disabled/rejected/pending', async () => {
     .post('/user/auth')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 
   user.status = 'PENDING';
   userModel.findUserByEmail.mockImplementation(async () => {
@@ -339,9 +351,7 @@ test('Auth user, user disabled/rejected/pending', async () => {
     .post('/user/auth')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 
   user.status = 'ACTIVE';
   user.password = encryptedPassword;
@@ -353,9 +363,7 @@ test('Auth user, user disabled/rejected/pending', async () => {
     .post('/user/auth')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all users', async () => {
@@ -369,9 +377,7 @@ test('Get all users', async () => {
     .get('/user/all')
     .set('origin', 'jest')
     .set('x-access-token', 'test')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all users, model error', async () => {
@@ -385,30 +391,18 @@ test('Get all users, model error', async () => {
     .get('/user/all')
     .set('origin', 'jest')
     .set('x-access-token', 'test')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Delete user', async () => {
-  await supertest(app)
-    .delete('/user/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).delete('/user/1').set('origin', 'jest').expect(200);
 });
 
 test('Delete user, model error', async () => {
   userModel.deleteUserById.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .delete('/user/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).delete('/user/1').set('origin', 'jest').expect(400);
 });
 
 test('Edit user', async () => {
@@ -423,9 +417,7 @@ test('Edit user', async () => {
     .put('/user')
     .set('origin', 'jest')
     .send(editedUser)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   //user email alr exists
   userModel.findUserByEmail.mockImplementation(async () => {
@@ -435,9 +427,7 @@ test('Edit user', async () => {
     .put('/user')
     .set('origin', 'jest')
     .send(editedUser)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Edit user, model error', async () => {
@@ -457,60 +447,36 @@ test('Edit user, model error', async () => {
     .put('/user')
     .set('origin', 'jest')
     .send(editedUser)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Enable user', async () => {
-  await supertest(app)
-    .put('/user/enable/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).put('/user/enable/1').set('origin', 'jest').expect(200);
 });
 
 test('Enable user,model error', async () => {
   userModel.enableUser.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .put('/user/enable/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).put('/user/enable/1').set('origin', 'jest').expect(400);
 });
 
 test('Disable user', async () => {
-  await supertest(app)
-    .put('/user/disable/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).put('/user/disable/1').set('origin', 'jest').expect(200);
 });
 
 test('Disable user, model error', async () => {
   userModel.disableUser.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .put('/user/disable/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).put('/user/disable/1').set('origin', 'jest').expect(400);
 });
 
 test('Change user role', async () => {
   await supertest(app)
     .put('/user/role/1/intern')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Change user role, model error', async () => {
@@ -520,9 +486,7 @@ test('Change user role, model error', async () => {
   await supertest(app)
     .put('/user/role/1/intern')
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Send forget email password', async () => {
@@ -537,9 +501,7 @@ test('Send forget email password', async () => {
     .post('/user/forgetpw')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Send forget email password, nul; user', async () => {
@@ -552,9 +514,7 @@ test('Send forget email password, nul; user', async () => {
     .post('/user/forgetpw')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Send forget email password error', async () => {
@@ -573,9 +533,7 @@ test('Send forget email password error', async () => {
     .post('/user/forgetpw')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Update password (same password)', async () => {
@@ -589,9 +547,7 @@ test('Update password (same password)', async () => {
     .post('/user/updatepw')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(400);
 });
 
 test('Update password (diff password)', async () => {
@@ -608,9 +564,7 @@ test('Update password (diff password)', async () => {
     .post('/user/updatepw')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Update password ', async () => {
@@ -630,9 +584,7 @@ test('Update password ', async () => {
     .post('/user/updatepw')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Update password ,verify password error', async () => {
@@ -652,9 +604,7 @@ test('Update password ,verify password error', async () => {
     .post('/user/updatepw')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Update password (user does not exist)', async () => {
@@ -672,9 +622,7 @@ test('Update password (user does not exist)', async () => {
     .post('/user/updatepw')
     .send(body)
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(400);
 });
 
 test('Approve b2b user', async () => {
@@ -687,23 +635,13 @@ test('Approve b2b user', async () => {
   userModel.editUser.mockImplementation(async () => {});
   userModel.changePassword.mockImplementation(async () => {});
   emailHelper.sendEmail.mockImplementation(async () => {});
-  await supertest(app)
-    .put('/user/approve/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).put('/user/approve/1').set('origin', 'jest').expect(200);
 
   // send email error
   emailHelper.sendEmail.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .put('/user/approve/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).put('/user/approve/1').set('origin', 'jest').expect(200);
 });
 
 test('Approve b2b user, model error', async () => {
@@ -715,12 +653,7 @@ test('Approve b2b user, model error', async () => {
   });
   userModel.editUser.mockImplementation(async () => {});
   userModel.changePassword.mockImplementation(async () => {});
-  await supertest(app)
-    .put('/user/approve/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(400);
-    });
+  await supertest(app).put('/user/approve/1').set('origin', 'jest').expect(400);
 });
 
 test('Reject b2b user', async () => {
@@ -733,43 +666,24 @@ test('Reject b2b user', async () => {
   userModel.editUser.mockImplementation(async () => {});
   userModel.changePassword.mockImplementation(async () => {});
   emailHelper.sendEmail.mockImplementation(async () => {});
-  await supertest(app)
-    .put('/user/reject/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).put('/user/reject/1').set('origin', 'jest').expect(400);
+
   //send email error
   emailHelper.sendEmail.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .put('/user/reject/1')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).put('/user/reject/1').set('origin', 'jest').expect(400);
 });
 
 test('Get all B2B users', async () => {
-  await supertest(app)
-    .get('/user/b2b/all')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).get('/user/b2b/all').set('origin', 'jest').expect(200);
 });
 
 test('Get all B2B users,model error', async () => {
   userModel.getB2BUsers.mockImplementation(async () => {
     throw new Error();
   });
-  await supertest(app)
-    .get('/user/b2b/all')
-    .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+  await supertest(app).get('/user/b2b/all').set('origin', 'jest').expect(400);
 });
 
 test('Get all pending B2B users', async () => {
@@ -779,9 +693,7 @@ test('Get all pending B2B users', async () => {
   await supertest(app)
     .get('/user/b2b/pending')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 test('Get all pending B2B users, model error', async () => {
   userModel.getB2BUsers.mockImplementation(async () => {
@@ -790,9 +702,7 @@ test('Get all pending B2B users, model error', async () => {
   await supertest(app)
     .get('/user/b2b/pending')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(400);
 });
 test('Get all non B2B users', async () => {
   const verify = jest.spyOn(jwt, 'verify');
@@ -815,9 +725,7 @@ test('Get all non B2B users', async () => {
     .get('/user/nonb2b/all')
     .set('origin', 'jest')
     .set('x-access-token', 'test')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all non B2B users', async () => {
@@ -831,9 +739,7 @@ test('Get all non B2B users', async () => {
     .get('/user/nonb2b/all')
     .set('origin', 'jest')
     .set('x-access-token', 'test')
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Get number of pending users', async () => {
@@ -853,9 +759,7 @@ test('Get number of pending users', async () => {
   await supertest(app)
     .get('/user/pending/count')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all employees', async () => {
@@ -874,8 +778,666 @@ test('Get all employees', async () => {
   });
   await supertest(app)
     .get('/user/employee/all')
+    .set('x-access-token', 'test')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(400);
+
+  //with subordinates
+  userModel.getEmployees.mockImplementation(async () => {
+    return [
+      {
+        id: 1,
+        firstName: 'Meryl',
+        lastName: 'Seow',
+        email: 'merylseoww+3@gmail.com',
+        role: 'INTERN',
+        tier: 'Tier 5',
+        password: 'password',
+        manager: 'test',
+        subordinates: [{ id: 1 }]
+      }
+    ];
+  });
+  await supertest(app)
+    .get('/user/employee/all')
+    .set('x-access-token', 'test')
+    .set('origin', 'jest')
+    .expect(200);
+});
+
+test('Get job role by name', async () => {
+  userModel.getJobRoleByName.mockImplementation(async () => {
+    return {
+      id: 3,
+      jobRole: 'engineer',
+      usersInJobRole: [
+        {
+          id: 4,
+          firstName: 'Wee Kek',
+          lastName: 'Tan',
+          email: 'tanwk+user@comp.nus.edu.sg',
+          password: '',
+          role: 'FULLTIME',
+          status: 'ACTIVE',
+          isVerified: true,
+          company: null,
+          contactNo: null,
+          tier: 'Tier 2',
+          managerId: 3
+        },
+        {
+          id: 1,
+          firstName: 'Destinee',
+          lastName: 'Ow',
+          email: 'destineeow32@gmail.com',
+          password: '',
+          role: 'ADMIN',
+          status: 'ACTIVE',
+          isVerified: true,
+          company: null,
+          contactNo: null,
+          tier: 'Manager',
+          managerId: 1
+        }
+      ]
+    };
+  });
+  await supertest(app)
+    .get('/user/jobrole/name/engineer')
+    .set('origin', 'jest')
+    .expect(200);
+});
+
+test('Get job role by name, error', async () => {
+  userModel.getJobRoleByName.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app)
+    .get('/user/jobrole/name/engineer')
+    .set('origin', 'jest')
+    .expect(400);
+});
+
+test('Create Job role', async () => {
+  userModel.getJobRoleByName.mockImplementation(async () => {});
+  userModel.createJobRole.mockImplementation(async () => {
+    return jobRole;
+  });
+  await supertest(app)
+    .post('/user/jobrole')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(200);
+});
+
+test('Create Job role, error', async () => {
+  userModel.getJobRoleByName.mockImplementation(async () => {});
+  userModel.createJobRole.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app)
+    .post('/user/jobrole')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(400);
+});
+
+test('Create Job role, role exists', async () => {
+  userModel.getJobRoleByName.mockImplementation(async () => {
+    return [
+      {
+        id: 3,
+        jobRole: 'engineer',
+        usersInJobRole: [
+          {
+            id: 4,
+            firstName: 'Wee Kek',
+            lastName: 'Tan',
+            email: 'tanwk+user@comp.nus.edu.sg',
+            password: '',
+            role: 'FULLTIME',
+            status: 'ACTIVE',
+            isVerified: true,
+            company: null,
+            contactNo: null,
+            tier: 'Tier 2',
+            managerId: 3
+          },
+          {
+            id: 1,
+            firstName: 'Destinee',
+            lastName: 'Ow',
+            email: 'destineeow32@gmail.com',
+            password: '',
+            role: 'ADMIN',
+            status: 'ACTIVE',
+            isVerified: true,
+            company: null,
+            contactNo: null,
+            tier: 'Manager',
+            managerId: 1
+          }
+        ]
+      }
+    ];
+  });
+  await supertest(app)
+    .post('/user/jobrole')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(400);
+});
+
+test('Edit Job role', async () => {
+  userModel.getJobRoleByName.mockImplementation(async () => {});
+  userModel.editJobRole.mockImplementation(async () => {
+    return jobRole;
+  });
+  await supertest(app)
+    .put('/user/jobrole')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(200);
+});
+
+test('Edit Job role, error', async () => {
+  userModel.getJobRoleByName.mockImplementation(async () => {});
+  userModel.editJobRole.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app)
+    .put('/user/jobrole')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(400);
+});
+
+test('Edit Job role, role exists', async () => {
+  userModel.getJobRoleByName.mockImplementation(async () => {
+    jobRole.id = 2;
+    return jobRole;
+  });
+  userModel.editJobRole.mockImplementation(async () => {
+    return jobRole;
+  });
+  jobRole.id = 1;
+  await supertest(app)
+    .put('/user/jobrole')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(400);
+});
+
+test('Add job roles to user', async () => {
+  userModel.addJobRolesToUser.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'INTERN',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+  await supertest(app)
+    .post('/user/jobroles')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(200);
+});
+
+test('Add job roles to user,error', async () => {
+  userModel.addJobRolesToUser.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app)
+    .post('/user/jobroles')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(400);
+});
+
+test('Delete job role', async () => {
+  userModel.deleteJobRole.mockImplementation(async () => {});
+  await supertest(app)
+    .delete('/user/jobrole/1')
+    .set('origin', 'jest')
+    .expect(200);
+});
+
+test('Delete job role,error', async () => {
+  userModel.deleteJobRole.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app)
+    .delete('/user/jobrole/1')
+    .set('origin', 'jest')
+    .expect(400);
+});
+
+test('Get job role by id', async () => {
+  userModel.getJobRole.mockImplementation(async () => {
+    return jobRole;
+  });
+  await supertest(app).get('/user/jobrole/1').set('origin', 'jest').expect(200);
+});
+
+test('Get job role by id,error', async () => {
+  userModel.getJobRole.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app).get('/user/jobrole/1').set('origin', 'jest').expect(400);
+});
+
+test('Get all job roles', async () => {
+  userModel.getAllJobRoles.mockImplementation(async () => {
+    return [jobRole];
+  });
+  await supertest(app)
+    .get('/user/jobroles/all')
+    .set('origin', 'jest')
+    .expect(200);
+});
+
+test('Get all job roles,error', async () => {
+  userModel.getAllJobRoles.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app)
+    .get('/user/jobroles/all')
+    .set('origin', 'jest')
+    .send(jobRole)
+    .expect(400);
+});
+
+test('Assign subordinates to manager', async () => {
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'INTERN',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+
+  const body = { id: 1, users: [user] };
+  await supertest(app)
+    .post('/user/assign/subordinates')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+
+  //manager == null
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'INTERN',
+      tier: 'Tier 5',
+      password: 'password',
+      subordinates: [{ id: 1 }],
+      manager: null
+    };
+  });
+
+  await supertest(app)
+    .post('/user/assign/subordinates')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+});
+
+test('Assign subordinates to manager,error', async () => {
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    throw new Error();
+  });
+  const body = { id: 1, users: [user] };
+  await supertest(app)
+    .post('/user/assign/subordinates')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(400);
+});
+
+test('Unassign subordinates to manager', async () => {
+  userModel.unassignSubordinatesToManager.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'INTERN',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+
+  const body = { id: 1, users: [user] };
+  await supertest(app)
+    .post('/user/unassign/subordinates')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+
+  //manager == null
+  userModel.unassignSubordinatesToManager.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'INTERN',
+      tier: 'Tier 5',
+      password: 'password',
+      subordinates: [{ id: 1 }],
+      manager: null
+    };
+  });
+
+  await supertest(app)
+    .post('/user/unassign/subordinates')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+});
+
+test('Unassign subordinates to manager,error', async () => {
+  userModel.unassignSubordinatesToManager.mockImplementation(async () => {
+    throw new Error();
+  });
+  const body = { id: 1, users: [user] };
+  await supertest(app)
+    .post('/user/unassign/subordinates')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(400);
+});
+
+test('Update employee', async () => {
+  userModel.findUserById.mockImplementation(async () => {
+    return user;
+  });
+  userModel.addJobRolesToUser.mockImplementation(async () => {
+    return user;
+  });
+
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    return user;
+  });
+  const body = { id: 1, jobRoles: [jobRole], managerId: 1 };
+  await supertest(app)
+    .put('/user/employee')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+
+  //employeeToUpdate === null
+  userModel.findUserById.mockImplementation(async () => {});
+  await supertest(app)
+    .put('/user/employee')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+
+  // null user
+  userModel.addJobRolesToUser.mockImplementation(async () => {});
+  await supertest(app)
+    .put('/user/employee')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+});
+
+test('Update employee,error', async () => {
+  userModel.findUserById.mockImplementation(async () => {
+    return user;
+  });
+  userModel.addJobRolesToUser.mockImplementation(async () => {
+    throw new Error();
+  });
+
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    return user;
+  });
+  const body = { id: 1, jobRoles: [jobRole], managerId: 1 };
+  await supertest(app)
+    .put('/user/employee')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(400);
+});
+
+test('Update employee, has manager id', async () => {
+  userModel.findUserById.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'INTERN',
+      tier: 'Tier 5',
+      password: 'password',
+      subordinates: [{ id: 1 }],
+      managerId: 1
+    };
+  });
+  userModel.unassignSubordinatesToManager.mockImplementation(async () => {});
+  userModel.addJobRolesToUser.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'INTERN',
+      tier: 'Tier 5',
+      password: 'password',
+      subordinates: [{ id: 1 }],
+      managerId: 1
+    };
+  });
+  let body = { id: 1, jobRoles: [jobRole] };
+  await supertest(app)
+    .put('/user/employee')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+
+  //employee.managerId is null
+  userModel.findUserById.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'INTERN',
+      tier: 'Tier 5',
+      password: 'password',
+      subordinates: [{ id: 1 }]
+    };
+  });
+  await supertest(app)
+    .put('/user/employee')
+    .set('origin', 'jest')
+    .send(body)
+    .expect(200);
+});
+
+test('Set ceo', async () => {
+  userModel.getCEO.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'CEO',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+
+  userModel.getEmployees.mockImplementation(async () => {
+    return [user];
+  });
+
+  userModel.setCEOMangerIdToOwnId.mockImplementation(async () => {});
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Testing',
+      lastName: 'nani',
+      email: 'merylseoww+3@gmail.com',
+      role: 'CEO',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }, { id: 2 }]
+    };
+  });
+
+  await supertest(app).post('/user/ceo/1').set('origin', 'jest').expect(200);
+});
+
+test('Set ceo, error', async () => {
+  userModel.getCEO.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'CEO',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+
+  userModel.getEmployees.mockImplementation(async () => {
+    return [user];
+  });
+
+  userModel.setCEOMangerIdToOwnId.mockImplementation(async () => {});
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    throw new Error();
+  });
+
+  await supertest(app).post('/user/ceo/1').set('origin', 'jest').expect(400);
+});
+
+test('get ceo', async () => {
+  userModel.getCEO.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'CEO',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+
+  await supertest(app).get('/user/ceo').set('origin', 'jest').expect(200);
+});
+
+test('get ceo,error', async () => {
+  userModel.getCEO.mockImplementation(async () => {
+    return null;
+  });
+
+  await supertest(app).get('/user/ceo').set('origin', 'jest').expect(400);
+});
+
+test('change ceo', async () => {
+  userModel.getCEO.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'CEO',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+
+  userModel.getEmployees.mockImplementation(async () => {
+    return [user];
+  });
+
+  userModel.setCEOMangerIdToOwnId.mockImplementation(async () => {});
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'CEO',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+
+  await supertest(app)
+    .post('/user/changeceo/1')
+    .set('origin', 'jest')
+    .expect(200);
+  //prev ceo null
+  userModel.getCEO.mockImplementation(async () => {
+    return null;
+  });
+  await supertest(app)
+    .post('/user/changeceo/1')
+    .set('origin', 'jest')
+    .expect(200);
+});
+
+test('change ceo,error', async () => {
+  userModel.getCEO.mockImplementation(async () => {
+    return {
+      id: 1,
+      firstName: 'Meryl',
+      lastName: 'Seow',
+      email: 'merylseoww+3@gmail.com',
+      role: 'CEO',
+      tier: 'Tier 5',
+      password: 'password',
+      manager: 'test',
+      subordinates: [{ id: 1 }]
+    };
+  });
+
+  userModel.getEmployees.mockImplementation(async () => {
+    return [user];
+  });
+
+  userModel.setCEOMangerIdToOwnId.mockImplementation(async () => {});
+  userModel.assignSubordinatesToManager.mockImplementation(async () => {
+    throw new Error();
+  });
+
+  await supertest(app)
+    .post('/user/changeceo/1')
+    .set('origin', 'jest')
+    .expect(400);
 });
