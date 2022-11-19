@@ -358,27 +358,27 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
     subjectId
   });
   let totalInSubject = 0;
-  let completedTopicsId = [];
-  for (let r of record.completedTopics) {
-    completedTopicsId.push(r.id);
-  }
+  // let completedTopicsId = [];
+  // for (let r of record.completedTopics) {
+  //   completedTopicsId.push(r.id);
+  // }
   for (let t of topics) {
-    if (completedTopicsId.includes(t.id)) {
-      totalInSubject++;
-    } else {
-      if (t.status === ContentStatus.FINISHED) totalInSubject++;
-    }
+    // if (completedTopicsId.includes(t.id)) {
+    //   totalInSubject++;
+    // } else {
+    if (t.status === ContentStatus.FINISHED) totalInSubject++;
+    // }
   }
-  let completedQuizzesId = [];
-  for (let r of record.completedQuizzes) {
-    completedQuizzesId.push(r.id);
-  }
+  // let completedQuizzesId = [];
+  // for (let r of record.completedQuizzes) {
+  //   completedQuizzesId.push(r.id);
+  // }
   for (let q of quizzes) {
-    if (completedQuizzesId.includes(q.id)) {
-      totalInSubject++;
-    } else {
-      if (q.status === ContentStatus.FINISHED) totalInSubject++;
-    }
+    // if (completedQuizzesId.includes(q.id)) {
+    //   totalInSubject++;
+    // } else {
+    if (q.status === ContentStatus.FINISHED) totalInSubject++;
+    // }
   }
   console.log('totalInSubject', totalInSubject);
   const totalCompleted =
@@ -427,6 +427,22 @@ const getSubjectRecordsByUser = async (req) => {
   const employeeSubjectRecords = await prisma.EmployeeSubjectRecord.findMany({
     where: {
       userId: Number(userId)
+    },
+    include: {
+      subject: true,
+      user: true,
+      completedQuizzes: true,
+      completedTopics: true
+    }
+  });
+  return employeeSubjectRecords;
+};
+
+const getSubjectRecordsBySubject = async (req) => {
+  const { subjectId } = req;
+  const employeeSubjectRecords = await prisma.EmployeeSubjectRecord.findMany({
+    where: {
+      subjectId: Number(subjectId)
     },
     include: {
       subject: true,
@@ -568,6 +584,7 @@ exports.updateSubjectCompletionRateBySubjectByEmployee =
   updateSubjectCompletionRateBySubjectByEmployee;
 exports.getSubjectRecordBySubjectAndUser = getSubjectRecordBySubjectAndUser;
 exports.getSubjectRecordsByUser = getSubjectRecordsByUser;
+exports.getSubjectRecordsBySubject = getSubjectRecordsBySubject;
 exports.getSubjectsAssignedByUserId = getSubjectsAssignedByUserId;
 exports.getUsersAssignedBySubjectId = getUsersAssignedBySubjectId;
 exports.getNumberOfTopicsAndQuizInSubject = getNumberOfTopicsAndQuizInSubject;

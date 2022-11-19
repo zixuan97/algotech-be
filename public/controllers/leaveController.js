@@ -1,4 +1,5 @@
 const leaveModel = require('../models/leaveModel');
+const userModel = require('../models/userModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
@@ -147,6 +148,7 @@ const updateLeaveQuota = async (req, res) => {
   if (curr && curr.id !== id) {
     return res.status(400).send('Tier name already exists');
   } else {
+    const currQuotaById = await leaveModel.getLeaveQuotaById({ id });
     const { data, error } = await common.awaitWrap(
       leaveModel.updateLeaveQuota({
         id,
@@ -159,17 +161,43 @@ const updateLeaveQuota = async (req, res) => {
         unpaid
       })
     );
-    const employeesWithTier = await leaveModel.getAllEmployeesByTier({ tier });
-    for (let e of employeesWithTier) {
-      await leaveModel.updateEmployeeLeaveQuota({
-        employeeId: e.id,
-        annualQuota: annual,
-        childcareQuota: childcare,
-        compassionateQuota: compassionate,
-        parentalQuota: parental,
-        sickQuota: sick,
-        unpaidQuota: unpaid
+    if (currQuotaById.tier !== tier) {
+      // change name of tier
+      const employeesWithTier = await leaveModel.getAllEmployeesByTier({
+        tier: currQuotaById.tier
       });
+      for (let e of employeesWithTier) {
+        await leaveModel.updateEmployeeLeaveQuota({
+          employeeId: e.id,
+          tier,
+          annualQuota: annual,
+          childcareQuota: childcare,
+          compassionateQuota: compassionate,
+          parentalQuota: parental,
+          sickQuota: sick,
+          unpaidQuota: unpaid
+        });
+        const updatedUser = {
+          ...e,
+          tier
+        };
+        await userModel.editUser({ updatedUser });
+      }
+    } else {
+      const employeesWithTier = await leaveModel.getAllEmployeesByTier({
+        tier
+      });
+      for (let e of employeesWithTier) {
+        await leaveModel.updateEmployeeLeaveQuota({
+          employeeId: e.id,
+          annualQuota: annual,
+          childcareQuota: childcare,
+          compassionateQuota: compassionate,
+          parentalQuota: parental,
+          sickQuota: sick,
+          unpaidQuota: unpaid
+        });
+      }
     }
     if (error) {
       log.error('ERR_LEAVE_UPDATE-LEAVE-QUOTA', {
