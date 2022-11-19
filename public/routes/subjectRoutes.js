@@ -13,10 +13,10 @@ router.post(
   verifyToken,
   subjectController.unassignUsersToSubject
 );
-router.post(
-  '/topicquiz/:id',
-  subjectController.getAllTopicsAndQuizzesBySubjectId
-);
+// router.post(
+//   '/topicquiz/:id',
+//   subjectController.getAllTopicsAndQuizzesBySubjectId
+// );
 router.get(
   '/completionrate/:subjectId/:userId',
   subjectController.getSubjectRecordBySubjectByEmployee
@@ -26,11 +26,11 @@ router.get(
   verifyToken,
   subjectController.getSubjectRecordsOfUser
 );
-router.post(
-  '/completionrate',
-  subjectController.updateCompletionRateBySubjectByEmployee
-);
-router.get('/all/subjects/:id', subjectController.getSubjectsAssignedByUserId);
-router.get('/all/users/:id', subjectController.getUsersAssignedBySubjectId);
+// router.post(
+//   '/completionrate',
+//   subjectController.updateCompletionRateBySubjectByEmployee
+// );
+// router.get('/all/subjects/:id', subjectController.getSubjectsAssignedByUserId);
+// router.get('/all/users/:id', subjectController.getUsersAssignedBySubjectId);
 
 module.exports = router;

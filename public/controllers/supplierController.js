@@ -27,9 +27,9 @@ const createSupplier = async (req, res) => {
         err: error.message,
         req: { body: req.body, params: req.params }
       });
-      return res.json(Error.http(error));
+      return res.status(400).json(Error.http(error));
     } else {
-      if (supplierProduct !== []) {
+      if (supplierProduct.length !== 0) {
         supplierProduct.map(async (p) => {
           await supplierModel.connectOrCreateSupplierProduct({
             supplierId: data.id,
@@ -56,7 +56,7 @@ const getAllSuppliers = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    return res.json(Error.http(error));
+    return res.status(400).json(Error.http(error));
   } else {
     let finalRes = [];
     for (let d of data) {
@@ -94,7 +94,7 @@ const getSupplier = async (req, res) => {
     const { id } = req.params;
     const supplier = await supplierModel.findSupplierById({ id });
     let result = {};
-    if (supplier !== null) {
+    if (supplier) {
       let data = [];
       const supplierProduct = supplier.supplierProduct;
       for (let sp of supplierProduct) {
@@ -115,7 +115,7 @@ const getSupplier = async (req, res) => {
       });
       return res.json(result);
     } else {
-      return res.json(null);
+      return res.status(400).json(null);
     }
   } catch (error) {
     log.error('ERR_SUPPLIER_GET-SUPPLIER-BY-ID', {
@@ -123,24 +123,6 @@ const getSupplier = async (req, res) => {
       req: { body: req.body, params: req.params }
     });
     return res.status(400).send('Error getting supplier');
-  }
-};
-
-const getSupplierByName = async (req, res) => {
-  try {
-    const { name } = req.body;
-    const supplier = await supplierModel.findSupplierByName({ name });
-    log.out('OK_SUPPLIER_GET-SUPPLIER-BY-NAME', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(supplier)
-    });
-    return res.json(supplier);
-  } catch (error) {
-    log.error('ERR_SUPPLIER_GET-SUPPLIER-BY-NAME', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    return res.status(400).send('Error getting supplier by name');
   }
 };
 
@@ -174,15 +156,14 @@ const updateSupplier = async (req, res) => {
 
 const deleteSupplier = async (req, res) => {
   const { id } = req.params;
-  const { data, getAllProductsFromSupplierError } = await common.awaitWrap(
-    supplierModel.findProductsFromSupplier({ id })
-  );
+  const { data, error: getAllProductsFromSupplierError } =
+    await common.awaitWrap(supplierModel.findProductsFromSupplier({ id }));
   if (getAllProductsFromSupplierError) {
     log.error('ERR_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER', {
       err: getAllProductsFromSupplierError.message,
       req: { body: req.body, params: req.params }
     });
-    const e = Error.http(error);
+    const e = Error.http(getAllProductsFromSupplierError);
     return res.status(e.code).json(e.message);
   } else {
     log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER');
@@ -344,7 +325,6 @@ exports.getAllSuppliers = getAllSuppliers;
 exports.updateSupplier = updateSupplier;
 exports.deleteSupplier = deleteSupplier;
 exports.getSupplier = getSupplier;
-exports.getSupplierByName = getSupplierByName;
 exports.addProductToSupplier = addProductToSupplier;
 exports.getAllSupplierProducts = getAllSupplierProducts;
 exports.getAllProductsBySupplier = getAllProductsBySupplier;
