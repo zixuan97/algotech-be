@@ -349,6 +349,74 @@ const markQuizAsCompletedForUser = async (req) => {
   return record;
 };
 
+const unmarkQuizAsCompletedForUser = async (req) => {
+  const { quizId, userId } = req;
+  const quiz = await prisma.quiz.findUnique({
+    where: { id: Number(quizId) },
+    include: {
+      questions: true
+    }
+  });
+  let record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: quiz.subjectId,
+    userId
+  });
+  for (var i = record.completedQuizzes.length - 1; i >= 0; i--) {
+    if (record.completedQuizzes[i].id === quiz.id) {
+      record.completedQuizzes.splice(i, 1);
+    }
+  }
+  await prisma.EmployeeSubjectRecord.update({
+    where: {
+      id: record.id
+    },
+    data: {
+      completedQuizzes: {
+        set: [],
+        connect: record.completedQuizzes.map((q) => ({
+          id: q.id
+        }))
+      }
+    }
+  });
+  record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: quiz.subjectId,
+    userId
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: quiz.subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(quiz.subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
+  return record;
+};
+
+const getUpdatedSubjectRecord = async (req) => {
+  const { subjectId, userId } = req;
+  let record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: Number(subjectId),
+    userId
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: Number(subjectId)
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
+  return record;
+};
+
 exports.createQuiz = createQuiz;
 exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuizById = getQuizById;
@@ -359,3 +427,5 @@ exports.updateOrderOfQuizArray = updateOrderOfQuizArray;
 exports.getQuizByOrderAndSubjectId = getQuizByOrderAndSubjectId;
 exports.getQuizByTitleAndSubjectId = getQuizByTitleAndSubjectId;
 exports.markQuizAsCompletedForUser = markQuizAsCompletedForUser;
+exports.unmarkQuizAsCompletedForUser = unmarkQuizAsCompletedForUser;
+exports.getUpdatedSubjectRecord = getUpdatedSubjectRecord;

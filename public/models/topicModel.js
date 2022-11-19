@@ -338,13 +338,10 @@ const unmarkTopicAsCompletedForUser = async (req) => {
     userId
   });
   for (var i = record.completedTopics.length - 1; i >= 0; i--) {
-    console.log('record[i]', record.completedTopics[i]);
-    console.log('topic', topic);
     if (record.completedTopics[i].id === topic.id) {
       record.completedTopics.splice(i, 1);
     }
   }
-  console.log('finalRecords', record.completedTopics);
   await prisma.EmployeeSubjectRecord.update({
     where: {
       id: record.id
@@ -376,6 +373,26 @@ const unmarkTopicAsCompletedForUser = async (req) => {
   return record;
 };
 
+const getUpdatedSubjectRecord = async (req) => {
+  const { subjectId, userId } = req;
+  let record = await subjectModel.getSubjectRecordBySubjectAndUser({
+    subjectId: Number(subjectId),
+    userId
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: Number(subjectId)
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
+  return record;
+};
+
 exports.createTopic = createTopic;
 exports.getAllTopicsBySubjectId = getAllTopicsBySubjectId;
 exports.getTopicById = getTopicById;
@@ -387,3 +404,4 @@ exports.getTopicByOrderAndSubjectId = getTopicByOrderAndSubjectId;
 exports.getTopicByTitleAndSubjectId = getTopicByTitleAndSubjectId;
 exports.markTopicAsCompletedForUser = markTopicAsCompletedForUser;
 exports.unmarkTopicAsCompletedForUser = unmarkTopicAsCompletedForUser;
+exports.getUpdatedSubjectRecord = getUpdatedSubjectRecord;

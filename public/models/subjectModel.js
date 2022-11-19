@@ -2,6 +2,7 @@ const { prisma } = require('./index.js');
 const topicModel = require('./topicModel.js');
 const quizModel = require('./quizModel.js');
 const userModel = require('./userModel.js');
+const subjectModel = require('./subjectModel.js');
 const { ContentStatus } = require('@prisma/client');
 
 const createSubject = async (req) => {
@@ -358,29 +359,12 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
     subjectId
   });
   let totalInSubject = 0;
-  // let completedTopicsId = [];
-  // for (let r of record.completedTopics) {
-  //   completedTopicsId.push(r.id);
-  // }
   for (let t of topics) {
-    // if (completedTopicsId.includes(t.id)) {
-    //   totalInSubject++;
-    // } else {
     if (t.status === ContentStatus.FINISHED) totalInSubject++;
-    // }
   }
-  // let completedQuizzesId = [];
-  // for (let r of record.completedQuizzes) {
-  //   completedQuizzesId.push(r.id);
-  // }
   for (let q of quizzes) {
-    // if (completedQuizzesId.includes(q.id)) {
-    //   totalInSubject++;
-    // } else {
     if (q.status === ContentStatus.FINISHED) totalInSubject++;
-    // }
   }
-  console.log('totalInSubject', totalInSubject);
   const totalCompleted =
     record.completedTopics.length + record.completedQuizzes.length;
   let completionRate;
@@ -389,7 +373,26 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
   } else {
     completionRate = (totalCompleted / totalInSubject) * 100;
   }
-  const employeeSubjectRecord = await prisma.EmployeeSubjectRecord.update({
+  let employeeSubjectRecord = await prisma.EmployeeSubjectRecord.update({
+    where: {
+      id: record.id
+    },
+    data: {
+      completionRate
+    }
+  });
+  const average = await subjectModel.getAverageCompletionRateOfSubject({
+    id: subjectId
+  });
+  await prisma.subject.update({
+    where: {
+      id: Number(subjectId)
+    },
+    data: {
+      completionRate: average
+    }
+  });
+  employeeSubjectRecord = await prisma.EmployeeSubjectRecord.update({
     where: {
       id: record.id
     },
