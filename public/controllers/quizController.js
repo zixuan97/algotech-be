@@ -4,6 +4,7 @@ const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const { ContentStatus } = require('@prisma/client');
 
 const createQuiz = async (req, res) => {
   const {
@@ -127,61 +128,70 @@ const updateQuiz = async (req, res) => {
   } = req.body;
   const currentOrders = [];
   const currTitles = [];
-  const quizzes = await quizModel.getAllQuizzesBySubjectId({ subjectId });
-  for (let q of quizzes) {
-    currentOrders.push(q.subjectOrder);
-    currTitles.push(q.title);
-  }
-  const currQuizByOrder = await quizModel.getQuizByOrderAndSubjectId({
-    subjectId,
-    subjectOrder
-  });
-  const currQuizByTitle = await quizModel.getQuizByTitleAndSubjectId({
-    subjectId,
-    title
-  });
-  if (currentOrders.includes(subjectOrder) && currQuizByOrder.id !== id) {
-    return res.status(400).send('Subject order already exists!');
-  } else if (currTitles.includes(title) && currQuizByTitle.id !== id) {
-    return res
+  const q = await quizModel.getQuizById({ id });
+  if (status === ContentStatus.FINISHED && q.questions.length === 0) {
+    res
       .status(400)
-      .send(`Title already exists for subject ID ${subjectId}!`);
+      .send(
+        'You cannot update the status of this quiz to COMPLETED as there are no quiz questions.'
+      );
   } else {
-    const currUserId = req.user.userId;
-    await subjectModel.updateSubject({
-      id: subjectId,
-      lastUpdatedById: currUserId
-    });
-    const { data, error } = await common.awaitWrap(
-      quizModel.updateQuiz({
-        id,
-        subjectOrder,
-        title,
-        description,
-        passingScore,
-        status,
-        completionRate,
-        subjectId
-      })
-    );
-    data.subject.createdBy.password = '';
-    data.subject.lastUpdatedBy.password = '';
-    for (let u of data.subject.usersAssigned) {
-      u.user.password = '';
+    const quizzes = await quizModel.getAllQuizzesBySubjectId({ subjectId });
+    for (let q of quizzes) {
+      currentOrders.push(q.subjectOrder);
+      currTitles.push(q.title);
     }
-    if (error) {
-      log.error('ERR_QUIZ_UPDATE-QUIZ', {
-        err: error.message,
-        req: { body: req.body, params: req.params }
-      });
-      const e = Error.http(error);
-      return res.status(e.code).json(e.message);
+    const currQuizByOrder = await quizModel.getQuizByOrderAndSubjectId({
+      subjectId,
+      subjectOrder
+    });
+    const currQuizByTitle = await quizModel.getQuizByTitleAndSubjectId({
+      subjectId,
+      title
+    });
+    if (currentOrders.includes(subjectOrder) && currQuizByOrder.id !== id) {
+      return res.status(400).send('Subject order already exists!');
+    } else if (currTitles.includes(title) && currQuizByTitle.id !== id) {
+      return res
+        .status(400)
+        .send(`Title already exists for subject ID ${subjectId}!`);
     } else {
-      log.out('OK_QUIZ_UPDATE-QUIZ', {
-        req: { body: req.body, params: req.params },
-        res: JSON.stringify(data)
+      const currUserId = req.user.userId;
+      await subjectModel.updateSubject({
+        id: subjectId,
+        lastUpdatedById: currUserId
       });
-      return res.json(data);
+      const { data, error } = await common.awaitWrap(
+        quizModel.updateQuiz({
+          id,
+          subjectOrder,
+          title,
+          description,
+          passingScore,
+          status,
+          completionRate,
+          subjectId
+        })
+      );
+      data.subject.createdBy.password = '';
+      data.subject.lastUpdatedBy.password = '';
+      for (let u of data.subject.usersAssigned) {
+        u.user.password = '';
+      }
+      if (error) {
+        log.error('ERR_QUIZ_UPDATE-QUIZ', {
+          err: error.message,
+          req: { body: req.body, params: req.params }
+        });
+        const e = Error.http(error);
+        return res.status(e.code).json(e.message);
+      } else {
+        log.out('OK_QUIZ_UPDATE-QUIZ', {
+          req: { body: req.body, params: req.params },
+          res: JSON.stringify(data)
+        });
+        return res.json(data);
+      }
     }
   }
 };
@@ -290,7 +300,7 @@ const markQuizAsCompletedByUser = async (req, res) => {
     quizModel.markQuizAsCompletedForUser({ quizId, userId: currUserId })
   );
   const quiz = await quizModel.getQuizById({
-    id: quizId
+    id: Number(quizId)
   });
   await subjectModel.updateLastAttemptedTimeInSubjectRecord({
     subjectId: quiz.subjectId,

@@ -4,6 +4,7 @@ const subjectModel = require('../models/subjectModel');
 const common = require('@kelchy/common');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
+const { ContentStatus } = require('@prisma/client');
 
 const createStep = async (req, res) => {
   const { topicOrder, title, content, topicId } = req.body;
@@ -156,10 +157,10 @@ const updateStep = async (req, res) => {
 const deleteStep = async (req, res) => {
   const { id } = req.params;
   const { topicId } = await stepModel.getStepById({ id });
-  const { subjectId } = await topicModel.getTopicById({ id: topicId });
+  const topic = await topicModel.getTopicById({ id: topicId });
   const currUserId = req.user.userId;
   await subjectModel.updateSubject({
-    id: subjectId,
+    id: topic.subjectId,
     lastUpdatedById: currUserId
   });
   const { error } = await common.awaitWrap(stepModel.deleteStep({ id }));
@@ -171,6 +172,12 @@ const deleteStep = async (req, res) => {
     const e = Error.http(error);
     return res.status(e.code).json(e.message);
   } else {
+    if (topic.steps.length === 1) {
+      await topicModel.updateTopic({
+        id: topic.id,
+        status: ContentStatus.DRAFT
+      });
+    }
     log.out('OK_STEP_DELETE-STEP', {
       req: { body: req.body, params: req.params },
       res: { message: `Deleted step with id:${id}` }
@@ -205,7 +212,9 @@ const updateOrderBasedOnStepsArray = async (req, res) => {
     toAddToResData.push(newStep);
   }
   if (toAddToResData.includes(0)) {
-    return res.status(400).send('Error adding new step (duplicate topic order)!');
+    return res
+      .status(400)
+      .send('Error adding new step (duplicate topic order)!');
   } else {
     for (let n of toAddToResData) {
       data.push(n);
