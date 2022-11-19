@@ -336,7 +336,6 @@ const updateSubjectCompletionRateBySubjectByEmployee = async (req) => {
 
 const getSubjectRecordBySubjectAndUser = async (req) => {
   const { subjectId, userId } = req;
-  console.log('reacheddd');
   const record = await prisma.EmployeeSubjectRecord.findFirst({
     where: {
       AND: [
@@ -360,29 +359,12 @@ const getSubjectRecordBySubjectAndUser = async (req) => {
     subjectId
   });
   let totalInSubject = 0;
-  // let completedTopicsId = [];
-  // for (let r of record.completedTopics) {
-  //   completedTopicsId.push(r.id);
-  // }
   for (let t of topics) {
-    // if (completedTopicsId.includes(t.id)) {
-    //   totalInSubject++;
-    // } else {
     if (t.status === ContentStatus.FINISHED) totalInSubject++;
-    // }
   }
-  // let completedQuizzesId = [];
-  // for (let r of record.completedQuizzes) {
-  //   completedQuizzesId.push(r.id);
-  // }
   for (let q of quizzes) {
-    // if (completedQuizzesId.includes(q.id)) {
-    //   totalInSubject++;
-    // } else {
     if (q.status === ContentStatus.FINISHED) totalInSubject++;
-    // }
   }
-  console.log('totalInSubject', totalInSubject);
   const totalCompleted =
     record.completedTopics.length + record.completedQuizzes.length;
   let completionRate;
