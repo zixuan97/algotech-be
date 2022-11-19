@@ -26,6 +26,7 @@ const createBulkOrder = async (req, res) => {
     payeeContactNo,
     payeeCompany
   } = req.body;
+
   const orderId = new Date().getTime().toString();
   await customerModel.connectOrCreateCustomer({
     firstName: payeeName,
@@ -240,14 +241,16 @@ const updateBulkOrderStatus = async (req, res) => {
       req: { body: req.body, params: req.params },
       res: `Successfully updated bulk order with id: ${id}`
     });
-    return res.json({ message: `Successfully updated bulk order with id: ${id}` });
+    return res.json({
+      message: `Successfully updated bulk order with id: ${id}`
+    });
   } catch (error) {
     log.error('ERR_BULKORDER_GET-BULKORDER-BY-TIMEFILTER', {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
     const e = Error.http(error);
-     return res.status(e.code).json(e.message);
+    return res.status(e.code).json(e.message);
   }
 };
 

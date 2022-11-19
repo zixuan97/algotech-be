@@ -35,7 +35,6 @@ const createUser = async (req, res) => {
       });
     } catch (error) {
       return res.status(400).send('Error sending email');
-      return;
     }
     const { data, error } = await common.awaitWrap(
       userModel.createUser({
@@ -603,7 +602,7 @@ const getAllEmployees = async (req, res) => {
     const users = await userModel.getEmployees({});
     for (let u of users) {
       u.password = '';
-      if (u.manager !== null) u.manager.password = '';
+      if (u.manager) u.manager.password = '';
       for (let s of u.subordinates) {
         s.password = '';
       }
@@ -655,7 +654,7 @@ const createJobRole = async (req, res) => {
 const editJobRole = async (req, res) => {
   const { id, jobRole, description, usersInJobRole } = req.body;
   const j = await userModel.getJobRoleByName({ jobRole });
-  if (j !== null && id !== j.id) {
+  if (j && id !== j?.id) {
     return res.status(400).send('Job role already exists!');
   } else {
     try {
@@ -792,11 +791,7 @@ const assignSubordinatesToManager = async (req, res) => {
       users
     })
   );
-  data.password = '';
-  if (data.manager !== null) data.manager.password = '';
-  for (let u of data.subordinates) {
-    u.password = '';
-  }
+
   if (error) {
     log.error('ERR_SUBJECT_ASSIGN-SUBORDINATES-TO-MANAGER', {
       err: error.message,
@@ -805,6 +800,11 @@ const assignSubordinatesToManager = async (req, res) => {
     const e = Error.http(error);
     return res.status(e.code).json(e.message);
   } else {
+    data.password = '';
+    if (data.manager) data.manager.password = '';
+    for (let u of data.subordinates) {
+      u.password = '';
+    }
     log.out('OK_SUBJECT_ASSIGN-SUBORDINATES-TO-MANAGER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
@@ -821,11 +821,7 @@ const unassignSubordinatesToManager = async (req, res) => {
       users
     })
   );
-  data.password = '';
-  if (data.manager !== null) data.manager.password = '';
-  for (let u of data.subordinates) {
-    u.password = '';
-  }
+
   if (error) {
     log.error('ERR_SUBJECT_UNASSIGN-SUBORDINATES-TO-MANAGER', {
       err: error.message,
@@ -834,6 +830,11 @@ const unassignSubordinatesToManager = async (req, res) => {
     const e = Error.http(error);
     return res.status(e.code).json(e.message);
   } else {
+    data.password = '';
+    if (data.manager) data.manager.password = '';
+    for (let u of data.subordinates) {
+      u.password = '';
+    }
     log.out('OK_SUBJECT_UNASSIGN-SUBORDINATES-TO-MANAGER', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
@@ -845,25 +846,23 @@ const unassignSubordinatesToManager = async (req, res) => {
 const updateEmployee = async (req, res) => {
   const { id, jobRoles, managerId } = req.body;
   const employeeToUpdate = await userModel.findUserById({ id });
-  if (employeeToUpdate !== null && employeeToUpdate.managerId !== managerId) {
-    if (managerId !== null) {
+  if (employeeToUpdate && employeeToUpdate.managerId !== managerId) {
+    if (managerId) {
       await userModel.assignSubordinatesToManager({
         id: managerId,
         users: [employeeToUpdate]
       });
     } else {
-      if (employeeToUpdate.managerId !== null) {
-        await userModel.unassignSubordinatesToManager({
-          id: employeeToUpdate.managerId,
-          users: [employeeToUpdate]
-        });
-      }
+      await userModel.unassignSubordinatesToManager({
+        id: employeeToUpdate.managerId,
+        users: [employeeToUpdate]
+      });
     }
   }
   const { data, error } = await common.awaitWrap(
     userModel.addJobRolesToUser({ userId: id, jobRoles })
   );
-  if (data !== null) data.password = '';
+
   if (error) {
     log.error('ERR_SUBJECT_UPDATE-EMPLOYEE', {
       err: error.message,
@@ -872,6 +871,7 @@ const updateEmployee = async (req, res) => {
     const e = Error.http(error);
     return res.status(e.code).json(e.message);
   } else {
+    if (data) data.password = '';
     log.out('OK_SUBJECT_UPDATE-EMPLOYEE', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(data)
@@ -918,7 +918,7 @@ const setCEO = async (req, res) => {
 const getCEO = async (req, res) => {
   const ceo = await userModel.getCEO({});
   if (ceo === null) {
-    return res.json(null);
+    return res.status(400).json(null);
   } else {
     ceo.password = '';
     ceo.manager = null;

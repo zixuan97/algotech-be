@@ -59,10 +59,7 @@ test('Create product catalogue', async () => {
     .post('/productCatalogue')
     .set('origin', 'jest')
     .send(productCatalogue)
-    .expect(200)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   // no img
   const productCatalogueNoImg = {
@@ -87,10 +84,7 @@ test('Create product catalogue', async () => {
     .post('/productCatalogue')
     .set('origin', 'jest')
     .send(productCatalogueNoImg)
-    .expect(200)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Create product catalogue, upload S3 error', async () => {
@@ -101,9 +95,7 @@ test('Create product catalogue, upload S3 error', async () => {
     .post('/productCatalogue')
     .set('origin', 'jest')
     .send(productCatalogue)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Create product catalogue, create product catalogue error', async () => {
@@ -115,9 +107,7 @@ test('Create product catalogue, create product catalogue error', async () => {
     .post('/productCatalogue')
     .set('origin', 'jest')
     .send(productCatalogue)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Get all product catalogue', async () => {
@@ -127,9 +117,7 @@ test('Get all product catalogue', async () => {
   await supertest(app)
     .get('/productCatalogue/all')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all product catalogue, getS3 error', async () => {
@@ -142,9 +130,7 @@ test('Get all product catalogue, getS3 error', async () => {
   await supertest(app)
     .get('/productCatalogue/all')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get all product catalogue, get all product catalogue error', async () => {
@@ -155,9 +141,7 @@ test('Get all product catalogue, get all product catalogue error', async () => {
     .get('/productCatalogue/all')
     .set('origin', 'jest')
     .send(productCatalogue)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Get product catalogue', async () => {
@@ -168,18 +152,14 @@ test('Get product catalogue', async () => {
   await supertest(app)
     .get('/productCatalogue/id/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   getS3.mockImplementation(async () => {});
 
   await supertest(app)
     .get('/productCatalogue/id/1')
     .set('origin', 'jest')
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Get product catalogue,error', async () => {
@@ -190,9 +170,7 @@ test('Get product catalogue,error', async () => {
     .get('/productCatalogue/id/1')
     .set('origin', 'jest')
     .send(productCatalogue)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('update product catalogue', async () => {
@@ -225,9 +203,8 @@ test('update product catalogue', async () => {
         }
       }
     })
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
+
   // uploads3 no error
   uploadS3.mockImplementation(async () => {});
 
@@ -253,9 +230,7 @@ test('update product catalogue', async () => {
         }
       }
     })
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 
   // no img
   const productCatalogueNoImg = {
@@ -281,9 +256,7 @@ test('update product catalogue', async () => {
     .put('/productCatalogue')
     .set('origin', 'jest')
     .send(productCatalogueNoImg)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('update product catalogue, delete s3 error, update product catalogue error', async () => {
@@ -317,9 +290,7 @@ test('update product catalogue, delete s3 error, update product catalogue error'
     .put('/productCatalogue')
     .set('origin', 'jest')
     .send(productCatalogueNoImg)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });
 
 test('Delete product catalogue', async () => {
@@ -332,9 +303,7 @@ test('Delete product catalogue', async () => {
     .delete('/productCatalogue/1')
     .set('origin', 'jest')
     .send(productCatalogue)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Delete product catalogue,deleteS3 error', async () => {
@@ -348,9 +317,7 @@ test('Delete product catalogue,deleteS3 error', async () => {
     .delete('/productCatalogue/1')
     .set('origin', 'jest')
     .send(productCatalogue)
-    .then(() => {
-      expect(200);
-    });
+    .expect(200);
 });
 
 test('Delete product catalogue, model error', async () => {
@@ -368,7 +335,5 @@ test('Delete product catalogue, model error', async () => {
     .delete('/productCatalogue/1')
     .set('origin', 'jest')
     .send(productCatalogue)
-    .then(() => {
-      expect(400);
-    });
+    .expect(400);
 });

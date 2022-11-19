@@ -267,9 +267,9 @@ const getAllEmployeeLeaveRecords = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     leaveModel.getAllEmployeeLeaveRecords({})
   );
-  // for (let d of data) {
-  //   d.employee.password = '';
-  // }
+  for (let d of data) {
+    d.employee.password = '';
+  }
   if (error) {
     log.error('ERR_LEAVE_GET-ALL-EMPLOYEE-LEAVE-RECORDS', {
       err: error.message,
