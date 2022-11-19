@@ -340,8 +340,8 @@ const increaseLeaveTypeBalanceByEmployeeIdByLeaveType = async (req) => {
   });
   const leave = await getLeaveApplicationById({ id: leaveId });
   const numDays = await calcuateNumOfBusinessDays({
-    startDate: leave.startDate,
-    endDate: leave.endDate
+    startDate: leave.startDate.toISOString(),
+    endDate: leave.endDate.toISOString()
   });
   if (numDays > leaveTypeBalance) {
     return null;
@@ -396,8 +396,8 @@ const decreaseLeaveTypeBalanceByEmployeeIdByLeaveType = async (req) => {
   });
   const leave = await getLeaveApplicationById({ id: leaveId });
   const numDays = await calcuateNumOfBusinessDays({
-    startDate: leave.startDate,
-    endDate: leave.endDate
+    startDate: leave.startDate.toISOString(),
+    endDate: leave.endDate.toISOString()
   });
   if (numDays > leaveTypeBalance) {
     return null;
@@ -595,7 +595,7 @@ const updateEmployeesToNewTierForDeletedTier = async (req) => {
 
 const calcuateNumOfBusinessDays = async (req) => {
   const { startDate, endDate } = req;
-  const year = startDate.toISOString().substring(0, 4);
+  const year = startDate.substring(0, 4);
   const allPHs = await getAllPHByYear({ year });
   let phDates = [];
   for (let ph of allPHs) {
