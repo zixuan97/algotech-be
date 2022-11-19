@@ -3,7 +3,7 @@ const { prisma } = require('./index.js');
 const createScheduledNewsLetter = async (req) => {
   const { newsletterId, customerEmails, sentDate, jobId } = req;
 
-  await prisma.scheduledNewsletter.create({
+  return await prisma.scheduledNewsletter.create({
     data: {
       newsletterId,
       customerEmails,
@@ -81,7 +81,7 @@ const updateScheduledNewsLetterStatus = async (req) => {
 
 const deleteScheduledNewsletter = async (req) => {
   const { id } = req;
-  await prisma.scheduledNewsletter.delete({
+  return await prisma.scheduledNewsletter.delete({
     where: {
       id: Number(id)
     }

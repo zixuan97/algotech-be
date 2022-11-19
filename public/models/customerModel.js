@@ -14,7 +14,7 @@ const createCustomer = async (req) => {
     daysSinceLastPurchase
   } = req;
 
-  await prisma.customer.create({
+  return await prisma.customer.create({
     data: {
       firstName,
       lastName,
@@ -50,7 +50,7 @@ const connectOrCreateCustomer = async (req) => {
     daysSinceLastPurchase
   } = req;
 
-  await prisma.customer.upsert({
+  return await prisma.customer.upsert({
     where: {
       email
     },
@@ -94,7 +94,8 @@ const updateCustomer = async (req) => {
     totalSpent,
     ordersCount,
     acceptsMarketing,
-    daysSinceLastPurchase
+    daysSinceLastPurchase,
+    lastOrderDate
   } = req;
 
   const customer = await prisma.customer.update({
@@ -119,7 +120,7 @@ const updateCustomer = async (req) => {
 
 const deleteCustomer = async (req) => {
   const { id } = req;
-  await prisma.customer.delete({
+  return await prisma.customer.delete({
     where: {
       id: Number(id)
     }

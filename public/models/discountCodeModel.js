@@ -11,7 +11,7 @@ const createDiscountCode = async (req) => {
     minOrderAmount
   } = req;
 
-  await prisma.discountCode.create({
+  return await prisma.discountCode.create({
     data: {
       discountCode,
       amount,
@@ -47,7 +47,7 @@ const updateDiscountCode = async (req) => {
 
 const deleteDiscountCode = async (req) => {
   const { id } = req;
-  await prisma.discountCode.delete({
+  return await prisma.discountCode.delete({
     where: {
       id: Number(id)
     }

@@ -3,7 +3,7 @@ const { prisma } = require('./index.js');
 const createBundle = async (req) => {
   const { name, description, bundleProduct } = req;
 
-  await prisma.bundle.create({
+  return await prisma.bundle.create({
     data: {
       name,
       description,
@@ -133,7 +133,7 @@ const deleteBundle = async (req) => {
       }
     }
   });
-  await prisma.bundle.delete({
+  return await prisma.bundle.delete({
     where: {
       id: Number(id)
     }
