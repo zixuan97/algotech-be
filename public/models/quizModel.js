@@ -350,38 +350,6 @@ const markQuizAsCompletedForUser = async (req) => {
   return record;
 };
 
-const getQuizResults = async (req) => {
-  const { userAnswers, userId } = req;
-  let res = [];
-  let totalCorrect = 0;
-  for (let a of userAnswers) {
-    const { correctAnswer, quizId } =
-      await quizQuestionModel.getQuizQuestionById({
-        id: a.questionId
-      });
-    const qn = await prisma.EmployeeQuizQuestionRecord.create({
-      data: {
-        questionId: a.questionId,
-        userId,
-        userAnswer: a.userAnswer,
-        isCorrect: correctAnswer === a.userAnswer,
-        attemptedAt: new Date(Date.now()),
-        quizId
-      }
-    });
-    if (correctAnswer === a.userAnswer) totalCorrect++;
-    res.push(qn);
-  }
-  const results = (totalCorrect / userAnswers.length) * 100;
-  const finalRes = {
-    numQnsCorrect: totalCorrect,
-    totalQns: userAnswers.length,
-    results: results
-  };
-  finalRes.quizQuestions = res;
-  return finalRes;
-};
-
 exports.createQuiz = createQuiz;
 exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuizById = getQuizById;
@@ -392,4 +360,3 @@ exports.updateOrderOfQuizArray = updateOrderOfQuizArray;
 exports.getQuizByOrderAndSubjectId = getQuizByOrderAndSubjectId;
 exports.getQuizByTitleAndSubjectId = getQuizByTitleAndSubjectId;
 exports.markQuizAsCompletedForUser = markQuizAsCompletedForUser;
-exports.getQuizResults = getQuizResults;

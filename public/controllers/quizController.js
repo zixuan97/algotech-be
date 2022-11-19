@@ -24,7 +24,9 @@ const createQuiz = async (req, res) => {
   if (currentOrders.includes(subjectOrder)) {
     return res.status(400).send('Subject order already exists!');
   } else if (currTitles.includes(title)) {
-    return res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
+    return res
+      .status(400)
+      .send(`Title already exists for subject ID ${subjectId}!`);
   } else {
     const currUserId = req.user.userId;
     await subjectModel.updateSubject({
@@ -141,7 +143,9 @@ const updateQuiz = async (req, res) => {
   if (currentOrders.includes(subjectOrder) && currQuizByOrder.id !== id) {
     return res.status(400).send('Subject order already exists!');
   } else if (currTitles.includes(title) && currQuizByTitle.id !== id) {
-    return res.status(400).send(`Title already exists for subject ID ${subjectId}!`);
+    return res
+      .status(400)
+      .send(`Title already exists for subject ID ${subjectId}!`);
   } else {
     const currUserId = req.user.userId;
     await subjectModel.updateSubject({
@@ -309,28 +313,6 @@ const markQuizAsCompletedByUser = async (req, res) => {
   }
 };
 
-const getQuizResults = async (req, res) => {
-  const userAnswers = req.body;
-  const currUserId = req.user.userId;
-  const { data, error } = await common.awaitWrap(
-    quizModel.getQuizResults({ userAnswers, userId: currUserId })
-  );
-  if (error) {
-    log.error('ERR_STEP_GET-QUIZ-RESULTS', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
-    });
-    const e = Error.http(error);
-    return res.status(e.code).json(e.message);
-  } else {
-    log.out('OK_STEP_GET-QUIZ-RESULTS', {
-      req: { body: req.body, params: req.params },
-      res: JSON.stringify(data)
-    });
-    return res.json(data);
-  }
-};
-
 exports.createQuiz = createQuiz;
 exports.getAllQuizzesBySubjectId = getAllQuizzesBySubjectId;
 exports.getQuiz = getQuiz;
@@ -339,4 +321,3 @@ exports.addQuizQuestionsToQuiz = addQuizQuestionsToQuiz;
 exports.deleteQuiz = deleteQuiz;
 exports.updateOrderBasedOnQuizArray = updateOrderBasedOnQuizArray;
 exports.markQuizAsCompletedByUser = markQuizAsCompletedByUser;
-exports.getQuizResults = getQuizResults;
