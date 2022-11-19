@@ -169,7 +169,7 @@ const deleteSupplier = async (req, res) => {
     log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-FROM-SUPPLIER');
   }
   const { error: deleteProductsError } = await common.awaitWrap(
-    Promise.allSettled(
+    Promise.all(
       data.map(async (p) => {
         await supplierModel.deleteProductBySupplier({
           supplierId: id,
@@ -183,7 +183,7 @@ const deleteSupplier = async (req, res) => {
       err: deleteProductsError.message,
       req: { body: req.body, params: req.params }
     });
-    const e = Error.http(error);
+    const e = Error.http(deleteProductsError);
     return res.status(e.code).json(e.message);
   }
   const { error } = await common.awaitWrap(
@@ -209,12 +209,15 @@ const addProductToSupplier = async (req, res) => {
   const { supplierId, productId, rate } = req.body;
   const supplier = supplierModel.findSupplierById({ id: supplierId });
   const product = productModel.findProductById({ id: productId });
+
   if (!supplier || !product) {
     log.error('ERR_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', {
       err: 'Supplier or product does not exist.',
       req: { body: req.body, params: req.params }
     });
-    return res.json({ message: 'Supplier or product does not exist.' });
+    return res
+      .status(400)
+      .json({ message: 'Supplier or product does not exist.' });
   }
   const { data, error } = await common.awaitWrap(
     supplierModel.connectOrCreateSupplierProduct({
@@ -228,7 +231,7 @@ const addProductToSupplier = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    return res.json(Error.http(error));
+    return res.status(400).json(Error.http(error));
   } else {
     log.out('OK_SUPPLIER_ADD-PRODUCT-TO-SUPPLIER', {
       req: { body: req.body, params: req.params },
@@ -247,7 +250,7 @@ const getAllSupplierProducts = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    return res.json(Error.http(error));
+    return res.status(400).json(Error.http(error));
   } else {
     log.out('OK_SUPPLIER_GET-ALL-SUPPLIER=PRODUCTS', {
       req: { body: req.body, params: req.params },
@@ -267,7 +270,7 @@ const getAllProductsBySupplier = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    return res.json(Error.http(error));
+    return res.status(400).json(Error.http(error));
   } else {
     log.out('OK_SUPPLIER_GET-ALL-PRODUCTS-BY-SUPPLIER', {
       req: { body: req.body, params: req.params },
@@ -287,7 +290,7 @@ const deleteProductBySupplier = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    return res.json(Error.http(error));
+    return res.status(400).json(Error.http(error));
   } else {
     log.out('OK_SUPPLIER_DELETE-PRODUCT-BY-SUPPLIER', {
       req: { body: req.body, params: req.params },
@@ -310,7 +313,7 @@ const getAllCurrencies = async (req, res) => {
       err: error.message,
       req: { body: req.body, params: req.params }
     });
-    return res.json(Error.http(error));
+    return res.status(400).json(Error.http(error));
   } else {
     log.out('OK_SUPPLIER_GET-ALL-CURRENCIES', {
       req: { body: req.body, params: req.params },

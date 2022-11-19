@@ -1,6 +1,7 @@
 const app = require('../../../index');
 const supertest = require('supertest');
 const supplierModel = require('../../models/supplierModel');
+const productModel = require('../../models/productModel');
 
 // mock logger to remove test logs
 jest.mock('../../helpers/logger', () => {
@@ -30,6 +31,42 @@ jest.mock('../../models/supplierModel', () => {
     getAllCurrencies: jest.fn().mockImplementation(async () => {})
   };
 });
+
+jest.mock('../../models/productModel', () => {
+  return {
+    findProductById: jest.fn().mockImplementation(async () => {})
+  };
+});
+
+const product = {
+  id: 1,
+  sku: 'SKU123',
+  name: 'Nasi Lemak Popcorn',
+  image: null,
+  qtyThreshold: 20,
+  brandId: 1,
+  stockQuantity: [
+    {
+      productId: 1,
+      location: {
+        id: 1,
+        name: 'Punggol Warehouse',
+        address: 'Blk 303B Punggol Central #05-792'
+      },
+      quantity: 20
+    }
+  ],
+  brand: {
+    id: 1,
+    name: 'The Kettle Gourmet'
+  },
+  categories: [
+    {
+      id: 1,
+      name: 'Asian Favourites'
+    }
+  ]
+};
 
 const supplier = {
   id: 1,
@@ -246,7 +283,48 @@ test('Delete supplier,find products error', async () => {
   });
   supplierModel.deleteSupplier.mockImplementation(async () => {});
 
-  await supertest(app).delete('/supplier/1').set('origin', 'jest').expect(200);
+  await supertest(app).delete('/supplier/1').set('origin', 'jest').expect(400);
+});
+
+test('Delete supplier, delete product by supplier error', async () => {
+  supplierModel.findProductsFromSupplier.mockImplementation(async () => {
+    return Promise.resolve([
+      {
+        id: 1,
+        sku: 'SKU123',
+        name: 'Nasi Lemak Popcorn',
+        image: null,
+        qtyThreshold: 20,
+        brandId: 1,
+        stockQuantity: [
+          {
+            productId: 1,
+            location: {
+              id: 1,
+              name: 'Punggol Warehouse',
+              address: 'Blk 303B Punggol Central #05-792'
+            },
+            quantity: 20
+          }
+        ],
+        brand: {
+          id: 1,
+          name: 'The Kettle Gourmet'
+        },
+        categories: [
+          {
+            id: 1,
+            name: 'Asian Favourites'
+          }
+        ]
+      }
+    ]);
+  });
+  supplierModel.deleteSupplier.mockImplementation(async () => {});
+  supplierModel.deleteProductBySupplier.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app).delete('/supplier/1').set('origin', 'jest').expect(400);
 });
 
 test('Update supplier', async () => {
@@ -259,26 +337,6 @@ test('Update supplier', async () => {
     .expect(200);
 });
 
-test('Update supplier, supplier exists', async () => {
-  const supplierUpdated = {
-    id: 1,
-    email: 'tanwk@comp.nus.edu.sg',
-    name: 'Wee Kek',
-    address: 'Blk 117 Ang Mo Kio Ave 4 #08-467',
-    currency: 'SGD - Singapore Dollar',
-    supplierProduct: []
-  };
-  supplierModel.findSupplierByEmail.mockImplementation(async () => {
-    return supplierUpdated;
-  });
-  supplier.id = 2;
-  await supertest(app)
-    .put('/supplier')
-    .set('origin', 'jest')
-    .send(supplier)
-    .expect(400);
-});
-
 test('Update supplier,error', async () => {
   supplierModel.findSupplierByEmail.mockImplementation(async () => {});
   supplierModel.updateSupplier.mockImplementation(async () => {
@@ -288,5 +346,136 @@ test('Update supplier,error', async () => {
     .put('/supplier')
     .set('origin', 'jest')
     .send(supplier)
+    .expect(400);
+});
+
+test('Add product to supplier', async () => {
+  supplierModel.findSupplierById.mockImplementation(async () => {
+    return supplier;
+  });
+  productModel.findProductById.mockImplementation(async () => {
+    return product;
+  });
+  await supertest(app)
+    .post('/supplier/addProduct')
+    .set('origin', 'jest')
+    .send({ supplierId: 1, productId: 1, rate: 2.0 })
+    .expect(200);
+});
+
+test('Add product to supplier, no product found error', async () => {
+  supplierModel.findSupplierById.mockImplementation(async () => {
+    return supplier;
+  });
+  productModel.findProductById.mockImplementation(() => {
+    return null;
+  });
+  await supertest(app)
+    .post('/supplier/addProduct')
+    .set('origin', 'jest')
+    .send({ supplierId: 1, productId: 1, rate: 2.0 })
+    .expect(400);
+});
+
+test('Add product to supplier', async () => {
+  supplierModel.findSupplierById.mockImplementation(async () => {
+    return supplier;
+  });
+  productModel.findProductById.mockImplementation(async () => {
+    return product;
+  });
+
+  supplierModel.connectOrCreateSupplierProduct.mockImplementation(async () => {
+    throw new Error();
+  });
+  await supertest(app)
+    .post('/supplier/addProduct')
+    .set('origin', 'jest')
+    .send({ supplierId: 1, productId: 1, rate: 2.0 })
+    .expect(400);
+});
+
+test('get all supplier products', async () => {
+  supplierModel.getAllSupplierProducts.mockImplementation(async () => {
+    return [];
+  });
+
+  await supertest(app)
+    .get('/supplier/products/all')
+    .set('origin', 'jest')
+    .expect(200);
+});
+
+test('get all supplier products', async () => {
+  supplierModel.getAllSupplierProducts.mockImplementation(async () => {
+    throw new Error();
+  });
+
+  await supertest(app)
+    .get('/supplier/products/all')
+    .set('origin', 'jest')
+    .expect(400);
+});
+
+test('get all products by supplier', async () => {
+  supplierModel.findProductsFromSupplier.mockImplementation(async () => {
+    return [];
+  });
+
+  await supertest(app)
+    .get('/supplier/products/1')
+    .set('origin', 'jest')
+    .expect(200);
+});
+
+test('get all products by supplier', async () => {
+  supplierModel.findProductsFromSupplier.mockImplementation(async () => {
+    throw new Error();
+  });
+
+  await supertest(app)
+    .get('/supplier/products/1')
+    .set('origin', 'jest')
+    .expect(400);
+});
+
+test('delete product by supplier', async () => {
+  supplierModel.deleteProductBySupplier.mockImplementation(async () => {});
+
+  await supertest(app)
+    .delete('/supplier/1/1')
+    .set('origin', 'jest')
+    .expect(200);
+});
+
+test('delete product by supplier,error', async () => {
+  supplierModel.deleteProductBySupplier.mockImplementation(async () => {
+    throw new Error();
+  });
+
+  await supertest(app)
+    .delete('/supplier/1/1')
+    .set('origin', 'jest')
+    .expect(400);
+});
+
+test('get all currencies', async () => {
+  supplierModel.getAllCurrencies.mockImplementation(async () => {
+    return [];
+  });
+
+  await supertest(app)
+    .get('/supplier/currencies/all')
+    .set('origin', 'jest')
+    .expect(200);
+});
+test('get all currencies,error', async () => {
+  supplierModel.getAllCurrencies.mockImplementation(async () => {
+    throw new Error();
+  });
+
+  await supertest(app)
+    .get('/supplier/currencies/all')
+    .set('origin', 'jest')
     .expect(400);
 });
