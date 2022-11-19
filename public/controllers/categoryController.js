@@ -97,7 +97,7 @@ const updateCategory = async (req, res) => {
   const category = await categoryModel.findCategoryByName({ name });
   if (category && category.id != id) {
     log.error('ERR_USER_UPDATE-CATEGORY', {
-      err: "Category already exists",
+      err: 'Category already exists',
       req: { body: req.body, params: req.params }
     });
     return res.status(400).json({ message: 'Category already exists' });
