@@ -1,7 +1,8 @@
 const SDKClient = require('@lalamove/lalamove-js');
 const { prisma } = require('../models/index');
 const deliveryModel = require('../models/deliveryModel');
-
+const salesOrderModel = require('../models/salesOrderModel');
+const { OrderStatus } = require('@prisma/client');
 const sdkClient = new SDKClient.ClientModule(
   new SDKClient.Config(
     process.env.LALAMOVE_API_KEY,
@@ -119,6 +120,12 @@ const fetchLatestStatusFromLalamoveAndAddToStatus = async (req) => {
     orderId
   });
   const latestStatus = lalamoveOrder.status;
+  if (latestStatus === 'REJECTED') {
+    await salesOrderModel.updateSalesOrderStatus({
+      id: deliveryOrder.salesOrderId,
+      orderStatus: OrderStatus.PREPARED
+    });
+  }
   // const deliveryStatus = await prisma.DeliveryStatus.findMany({
   //   where: {
   //     deliveryOrderId: deliveryOrder.id,
