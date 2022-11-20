@@ -455,6 +455,30 @@ async function main() {
     }
   });
 
+  await prisma.LeaveQuota.create({
+    data: {
+      tier: 'CEO',
+      annual: 30,
+      childcare: 30,
+      compassionate: 30,
+      parental: 30,
+      sick: 30,
+      unpaid: 30
+    }
+  });
+
+  await prisma.User.create({
+    data: {
+      firstName: 'Zac',
+      lastName: 'Lim',
+      email: 'zac.tkg@gmail.com',
+      password: encryptedPassword,
+      role: 'FULLTIME',
+      isVerified: false,
+      tier: 'CEO'
+    }
+  });
+
   await prisma.User.create({
     data: {
       firstName: 'Destinee',
@@ -463,9 +487,15 @@ async function main() {
       password: encryptedPassword,
       role: 'ADMIN',
       isVerified: true,
-      tier: 'Tier 3'
+      tier: 'Tier 3',
+      manager: {
+        connect: {
+          id: 1
+        }
+      }
     }
   });
+
   await prisma.User.create({
     data: {
       firstName: 'Wee Kek',
@@ -474,7 +504,12 @@ async function main() {
       password: encryptedPassword,
       role: 'ADMIN',
       isVerified: false,
-      tier: 'Tier 2'
+      tier: 'Tier 2',
+      manager: {
+        connect: {
+          id: 1
+        }
+      }
     }
   });
 
@@ -486,19 +521,12 @@ async function main() {
       password: encryptedPassword,
       role: 'ADMIN',
       isVerified: true,
-      tier: 'Tier 1'
-    }
-  });
-
-  await prisma.User.create({
-    data: {
-      firstName: 'Wee Kek',
-      lastName: 'Tan',
-      email: 'tanwk+user@comp.nus.edu.sg',
-      password: encryptedPassword,
-      role: 'FULLTIME',
-      isVerified: false,
-      tier: 'Tier 2'
+      tier: 'Tier 1',
+      manager: {
+        connect: {
+          id: 2
+        }
+      }
     }
   });
 
@@ -509,8 +537,7 @@ async function main() {
       email: 'meleenoob971+b2b@gmail.com',
       password: encryptedPassword,
       role: 'B2B',
-      isVerified: false,
-      tier: 'Tier 3'
+      isVerified: false
     }
   });
 
@@ -535,6 +562,297 @@ async function main() {
       endDate: '2022-12-10T00:00:00.000Z',
       customerEmails: [],
       type: 'PERCENTAGE'
+    }
+  });
+
+  await prisma.jobRole.create({
+    data: {
+      jobRole: 'Software Engineer',
+      description: 'The ones who engineer softwares',
+      usersInJobRole: {
+        connect: [
+          {
+            id: 3
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.jobRole.create({
+    data: {
+      jobRole: 'Project Manager',
+      description: 'The ones who manage projects',
+      usersInJobRole: {
+        connect: [
+          {
+            id: 3
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.jobRole.create({
+    data: {
+      jobRole: 'Popcorn Master',
+      description: 'The ones who master popcorns',
+      usersInJobRole: {
+        connect: [
+          {
+            id: 4
+          }
+        ]
+      }
+    }
+  });
+
+  await prisma.leaveApplication.create({
+    data: {
+      startDate: '2022-10-24T00:00:00.000Z',
+      endDate: '2022-10-25T00:00:00.000Z',
+      applicationDate: new Date(Date.now()),
+      lastUpdated: new Date(Date.now()),
+      leaveType: 'ANNUAL',
+      status: 'PENDING',
+      description: 'Taking leave for fun',
+      employee: {
+        connect: {
+          id: 3
+        }
+      }
+    }
+  });
+
+  await prisma.leaveApplication.create({
+    data: {
+      startDate: '2022-11-01T00:00:00.000Z',
+      endDate: '2022-11-02T00:00:00.000Z',
+      applicationDate: new Date(Date.now()),
+      lastUpdated: new Date(Date.now()),
+      leaveType: 'UNPAID',
+      status: 'PENDING',
+      description: 'I deserve a break',
+      employee: {
+        connect: {
+          id: 3
+        }
+      }
+    }
+  });
+
+  await prisma.leaveApplication.create({
+    data: {
+      startDate: '2022-11-10T00:00:00.000Z',
+      endDate: '2022-11-11T00:00:00.000Z',
+      applicationDate: new Date(Date.now()),
+      lastUpdated: new Date(Date.now()),
+      leaveType: 'UNPAID',
+      status: 'PENDING',
+      description: 'I am sick',
+      employee: {
+        connect: {
+          id: 3
+        }
+      }
+    }
+  });
+
+  await prisma.subject.create({
+    data: {
+      title: "TKG's Privacy Policy",
+      description: 'A one stop guide to all the policies you need to know.',
+      isPublished: false,
+      type: 'POLICY',
+      createdAt: new Date(Date.now()),
+      createdBy: {
+        connect: {
+          id: 3
+        }
+      },
+      lastUpdatedAt: new Date(Date.now()),
+      lastUpdatedBy: {
+        connect: {
+          id: 3
+        }
+      }
+    }
+  });
+
+  await prisma.subject.create({
+    data: {
+      title: "TKG's Popcorn Guide",
+      description:
+        'Familiarise yourself with all our popcorn flavours and be a popcorn master!',
+      isPublished: false,
+      type: 'COMPANY',
+      createdAt: new Date(Date.now()),
+      createdBy: {
+        connect: {
+          id: 3
+        }
+      },
+      lastUpdatedAt: new Date(Date.now()),
+      lastUpdatedBy: {
+        connect: {
+          id: 3
+        }
+      }
+    }
+  });
+
+  await prisma.subject.create({
+    data: {
+      title: 'Onboarding Process with TKG',
+      description: 'Here is what you need to get started.',
+      isPublished: false,
+      type: 'PROCESS',
+      createdAt: new Date(Date.now()),
+      createdBy: {
+        connect: {
+          id: 3
+        }
+      },
+      lastUpdatedAt: new Date(Date.now()),
+      lastUpdatedBy: {
+        connect: {
+          id: 3
+        }
+      }
+    }
+  });
+
+  await prisma.topic.create({
+    data: {
+      subjectOrder: 1,
+      title: 'Personal Data Protection Act (PDPA)',
+      subject: {
+        connect: {
+          id: 1
+        }
+      }
+    }
+  });
+
+  await prisma.topic.create({
+    data: {
+      subjectOrder: 2,
+      title: 'How do we abide by PDPA?',
+      subject: {
+        connect: {
+          id: 1
+        }
+      }
+    }
+  });
+
+  await prisma.topic.create({
+    data: {
+      subjectOrder: 1,
+      title: 'Our Popcorn Flavours',
+      subject: {
+        connect: {
+          id: 2
+        }
+      }
+    }
+  });
+
+  await prisma.topic.create({
+    data: {
+      subjectOrder: 1,
+      title: 'Steps to Onboarding',
+      subject: {
+        connect: {
+          id: 3
+        }
+      }
+    }
+  });
+
+  await prisma.quiz.create({
+    data: {
+      subjectOrder: 3,
+      title: 'PDPA Rules',
+      description: 'How well do you know PDPA?',
+      passingScore: 50.0,
+      completionRate: 0,
+      subject: {
+        connect: {
+          id: 1
+        }
+      }
+    }
+  });
+
+  await prisma.quiz.create({
+    data: {
+      subjectOrder: 2,
+      title: 'Popcorn flavours',
+      description: 'How well do you know your popcorn flavours?',
+      passingScore: 70.0,
+      completionRate: 0,
+      subject: {
+        connect: {
+          id: 2
+        }
+      }
+    }
+  });
+
+  await prisma.step.create({
+    data: {
+      topicOrder: 1,
+      title: 'PDPA Article 1',
+      content: 'Customer data is utmost importance',
+      topic: {
+        connect: {
+          id: 1
+        }
+      }
+    }
+  });
+
+  await prisma.step.create({
+    data: {
+      topicOrder: 2,
+      title: 'PDPA Article 2',
+      content: 'Customer data is utmost importance',
+      topic: {
+        connect: {
+          id: 1
+        }
+      }
+    }
+  });
+
+  await prisma.quizQuestion.create({
+    data: {
+      quizOrder: 1,
+      question: 'Question 1',
+      type: 'MCQ',
+      options: ['A', 'B', 'C', 'D'],
+      correctAnswer: 0,
+      quiz: {
+        connect: {
+          id: 1
+        }
+      }
+    }
+  });
+
+  await prisma.quizQuestion.create({
+    data: {
+      quizOrder: 2,
+      question: 'Question 2',
+      type: 'TRUEFALSE',
+      options: ['True', 'False'],
+      correctAnswer: 0,
+      quiz: {
+        connect: {
+          id: 1
+        }
+      }
     }
   });
 }

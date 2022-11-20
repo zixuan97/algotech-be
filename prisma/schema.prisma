@@ -571,6 +571,7 @@ enum AnswerType {
 
 enum ContentStatus {
   DRAFT
+  PENDING
   FINISHED
 }
 
