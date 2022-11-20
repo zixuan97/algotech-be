@@ -1,7 +1,6 @@
 const SDKClient = require('@lalamove/lalamove-js');
 const { prisma } = require('../models/index');
 const deliveryModel = require('../models/deliveryModel');
-const common = require('@kelchy/common');
 
 const sdkClient = new SDKClient.ClientModule(
   new SDKClient.Config(
