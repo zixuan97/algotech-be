@@ -1,8 +1,11 @@
 -- CreateEnum
+CREATE TYPE "DiscountCodeType" AS ENUM ('PERCENTAGE', 'FLAT_AMOUNT');
+
+-- CreateEnum
 CREATE TYPE "BulkOrderStatus" AS ENUM ('PAYMENT_PENDING', 'PAYMENT_SUCCESS', 'PAYMENT_FAILED', 'FULFILLED', 'CANCELLED');
 
 -- CreateEnum
-CREATE TYPE "PaymentMode" AS ENUM ('CREDIT_CARD', 'BANK_TRANSFER', 'PAYNOW');
+CREATE TYPE "PaymentMode" AS ENUM ('CREDIT_CARD', 'PAYNOW');
 
 -- CreateEnum
 CREATE TYPE "JobStatus" AS ENUM ('SENT', 'CANCELLED', 'SCHEDULED');
@@ -29,7 +32,7 @@ CREATE TYPE "FulfilmentStatus" AS ENUM ('CREATED', 'ARRIVED', 'COMPLETED');
 CREATE TYPE "DeliveryMode" AS ENUM ('STANDARD', 'EXPRESS', 'PRIORITY');
 
 -- CreateEnum
-CREATE TYPE "ShippingType" AS ENUM ('MANUAL', 'SHIPPIT', 'GRAB', 'LALAMOVE');
+CREATE TYPE "ShippingType" AS ENUM ('MANUAL', 'SHIPPIT', 'LALAMOVE');
 
 -- CreateEnum
 CREATE TYPE "LeaveType" AS ENUM ('ANNUAL', 'CHILDCARE', 'COMPASSIONATE', 'PARENTAL', 'SICK', 'UNPAID');
@@ -38,10 +41,10 @@ CREATE TYPE "LeaveType" AS ENUM ('ANNUAL', 'CHILDCARE', 'COMPASSIONATE', 'PARENT
 CREATE TYPE "LeaveStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
 
 -- CreateEnum
-CREATE TYPE "AnswerType" AS ENUM ('MCQ', 'WRITTEN');
+CREATE TYPE "AnswerType" AS ENUM ('MCQ', 'TRUEFALSE');
 
 -- CreateEnum
-CREATE TYPE "ContentStatus" AS ENUM ('DRAFT', 'PENDING', 'FINISHED');
+CREATE TYPE "ContentStatus" AS ENUM ('DRAFT', 'FINISHED');
 
 -- CreateEnum
 CREATE TYPE "SubjectType" AS ENUM ('COMPANY', 'POLICY', 'PROCESS');
@@ -58,7 +61,8 @@ CREATE TABLE "User" (
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "company" TEXT,
     "contactNo" TEXT,
-    "tier" INTEGER,
+    "tier" TEXT,
+    "managerId" INTEGER,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -159,6 +163,7 @@ CREATE TABLE "ProcurementOrder" (
     "supplierEmail" TEXT NOT NULL,
     "supplierName" TEXT NOT NULL,
     "warehouseName" TEXT NOT NULL,
+    "currency" TEXT NOT NULL,
 
     CONSTRAINT "ProcurementOrder_pkey" PRIMARY KEY ("id")
 );
@@ -181,6 +186,7 @@ CREATE TABLE "Supplier" (
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "address" TEXT NOT NULL,
+    "currency" TEXT NOT NULL,
 
     CONSTRAINT "Supplier_pkey" PRIMARY KEY ("id")
 );
@@ -249,6 +255,8 @@ CREATE TABLE "BulkOrder" (
     "orderId" TEXT NOT NULL,
     "payeeContactNo" TEXT NOT NULL,
     "payeeCompany" TEXT,
+    "discountCode" TEXT,
+    "transactionAmount" DOUBLE PRECISION NOT NULL,
 
     CONSTRAINT "BulkOrder_pkey" PRIMARY KEY ("id")
 );
@@ -368,24 +376,27 @@ CREATE TABLE "LeaveApplication" (
     "endDate" TIMESTAMP(3) NOT NULL,
     "leaveType" "LeaveType" NOT NULL,
     "status" "LeaveStatus" NOT NULL DEFAULT 'PENDING',
-    "description" TEXT NOT NULL,
-    "vettedBy" TEXT,
+    "description" TEXT,
     "commentsByVetter" TEXT,
     "lastUpdated" TIMESTAMP(3) NOT NULL,
     "employeeId" INTEGER NOT NULL,
+    "vettedById" INTEGER,
 
     CONSTRAINT "LeaveApplication_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "LeaveQuota" (
-    "tier" INTEGER NOT NULL,
+    "tier" TEXT NOT NULL,
     "annual" INTEGER NOT NULL,
     "childcare" INTEGER NOT NULL,
     "compassionate" INTEGER NOT NULL,
     "parental" INTEGER NOT NULL,
     "sick" INTEGER NOT NULL,
-    "unpaid" INTEGER NOT NULL
+    "unpaid" INTEGER NOT NULL,
+    "id" SERIAL NOT NULL,
+
+    CONSTRAINT "LeaveQuota_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -403,7 +414,10 @@ CREATE TABLE "EmployeeLeaveRecord" (
     "parentalBalance" INTEGER NOT NULL,
     "sickBalance" INTEGER NOT NULL,
     "unpaidBalance" INTEGER NOT NULL,
-    "lastUpdated" TIMESTAMP(3) NOT NULL
+    "lastUpdated" TIMESTAMP(3) NOT NULL,
+    "id" SERIAL NOT NULL,
+
+    CONSTRAINT "EmployeeLeaveRecord_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -421,11 +435,22 @@ CREATE TABLE "Step" (
 CREATE TABLE "Topic" (
     "id" SERIAL NOT NULL,
     "subjectOrder" INTEGER NOT NULL,
-    "name" TEXT NOT NULL,
     "status" "ContentStatus" NOT NULL DEFAULT 'DRAFT',
     "subjectId" INTEGER NOT NULL,
+    "title" TEXT NOT NULL,
 
     CONSTRAINT "Topic_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "EmployeeSubjectRecord" (
+    "subjectId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "completionRate" DOUBLE PRECISION NOT NULL,
+    "id" SERIAL NOT NULL,
+    "lastAttemptedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "EmployeeSubjectRecord_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -434,8 +459,12 @@ CREATE TABLE "Subject" (
     "description" TEXT NOT NULL,
     "isPublished" BOOLEAN NOT NULL,
     "completionRate" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "lastUpdated" TIMESTAMP(3) NOT NULL,
     "type" "SubjectType" NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "createdById" INTEGER NOT NULL,
+    "lastUpdatedAt" TIMESTAMP(3) NOT NULL,
+    "lastUpdatedById" INTEGER NOT NULL,
+    "title" TEXT NOT NULL,
 
     CONSTRAINT "Subject_pkey" PRIMARY KEY ("id")
 );
@@ -461,16 +490,62 @@ CREATE TABLE "QuizQuestion" (
     "question" TEXT NOT NULL,
     "type" "AnswerType" NOT NULL,
     "options" TEXT[],
-    "writtenAnswer" TEXT,
-    "minWordCount" INTEGER,
-    "correctAnswer" TEXT NOT NULL,
     "quizId" INTEGER NOT NULL,
+    "correctAnswer" INTEGER NOT NULL,
 
     CONSTRAINT "QuizQuestion_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "_SubjectToUser" (
+CREATE TABLE "EmployeeQuizQuestionRecord" (
+    "id" SERIAL NOT NULL,
+    "questionId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "quizId" INTEGER NOT NULL,
+    "userAnswer" INTEGER NOT NULL,
+    "isCorrect" BOOLEAN NOT NULL,
+    "attemptedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "EmployeeQuizQuestionRecord_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "DiscountCode" (
+    "id" SERIAL NOT NULL,
+    "discountCode" TEXT NOT NULL,
+    "amount" INTEGER NOT NULL,
+    "startDate" TIMESTAMP(3) NOT NULL,
+    "endDate" TIMESTAMP(3),
+    "customerEmails" TEXT[],
+    "type" "DiscountCodeType" NOT NULL,
+    "minOrderAmount" DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT "DiscountCode_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "JobRole" (
+    "id" SERIAL NOT NULL,
+    "jobRole" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+
+    CONSTRAINT "JobRole_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_EmployeeSubjectRecordToQuiz" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_EmployeeSubjectRecordToTopic" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_JobRoleToUser" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
 );
@@ -530,10 +605,40 @@ CREATE UNIQUE INDEX "LeaveQuota_tier_key" ON "LeaveQuota"("tier");
 CREATE UNIQUE INDEX "EmployeeLeaveRecord_employeeId_key" ON "EmployeeLeaveRecord"("employeeId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_SubjectToUser_AB_unique" ON "_SubjectToUser"("A", "B");
+CREATE UNIQUE INDEX "EmployeeSubjectRecord_subjectId_userId_key" ON "EmployeeSubjectRecord"("subjectId", "userId");
 
 -- CreateIndex
-CREATE INDEX "_SubjectToUser_B_index" ON "_SubjectToUser"("B");
+CREATE UNIQUE INDEX "Subject_title_key" ON "Subject"("title");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "EmployeeQuizQuestionRecord_questionId_userId_key" ON "EmployeeQuizQuestionRecord"("questionId", "userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DiscountCode_discountCode_key" ON "DiscountCode"("discountCode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "JobRole_jobRole_key" ON "JobRole"("jobRole");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_EmployeeSubjectRecordToQuiz_AB_unique" ON "_EmployeeSubjectRecordToQuiz"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_EmployeeSubjectRecordToQuiz_B_index" ON "_EmployeeSubjectRecordToQuiz"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_EmployeeSubjectRecordToTopic_AB_unique" ON "_EmployeeSubjectRecordToTopic"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_EmployeeSubjectRecordToTopic_B_index" ON "_EmployeeSubjectRecordToTopic"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_JobRoleToUser_AB_unique" ON "_JobRoleToUser"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_JobRoleToUser_B_index" ON "_JobRoleToUser"("B");
+
+-- AddForeignKey
+ALTER TABLE "User" ADD CONSTRAINT "User_managerId_fkey" FOREIGN KEY ("managerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ProductCategory" ADD CONSTRAINT "ProductCategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -596,6 +701,9 @@ ALTER TABLE "ScheduledNewsletter" ADD CONSTRAINT "ScheduledNewsletter_newsletter
 ALTER TABLE "LeaveApplication" ADD CONSTRAINT "LeaveApplication_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "LeaveApplication" ADD CONSTRAINT "LeaveApplication_vettedById_fkey" FOREIGN KEY ("vettedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "EmployeeLeaveRecord" ADD CONSTRAINT "EmployeeLeaveRecord_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -605,13 +713,43 @@ ALTER TABLE "Step" ADD CONSTRAINT "Step_topicId_fkey" FOREIGN KEY ("topicId") RE
 ALTER TABLE "Topic" ADD CONSTRAINT "Topic_subjectId_fkey" FOREIGN KEY ("subjectId") REFERENCES "Subject"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "EmployeeSubjectRecord" ADD CONSTRAINT "EmployeeSubjectRecord_subjectId_fkey" FOREIGN KEY ("subjectId") REFERENCES "Subject"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EmployeeSubjectRecord" ADD CONSTRAINT "EmployeeSubjectRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subject" ADD CONSTRAINT "Subject_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subject" ADD CONSTRAINT "Subject_lastUpdatedById_fkey" FOREIGN KEY ("lastUpdatedById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Quiz" ADD CONSTRAINT "Quiz_subjectId_fkey" FOREIGN KEY ("subjectId") REFERENCES "Subject"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "QuizQuestion" ADD CONSTRAINT "QuizQuestion_quizId_fkey" FOREIGN KEY ("quizId") REFERENCES "Quiz"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_SubjectToUser" ADD CONSTRAINT "_SubjectToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Subject"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "EmployeeQuizQuestionRecord" ADD CONSTRAINT "EmployeeQuizQuestionRecord_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "QuizQuestion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_SubjectToUser" ADD CONSTRAINT "_SubjectToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "EmployeeQuizQuestionRecord" ADD CONSTRAINT "EmployeeQuizQuestionRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_EmployeeSubjectRecordToQuiz" ADD CONSTRAINT "_EmployeeSubjectRecordToQuiz_A_fkey" FOREIGN KEY ("A") REFERENCES "EmployeeSubjectRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_EmployeeSubjectRecordToQuiz" ADD CONSTRAINT "_EmployeeSubjectRecordToQuiz_B_fkey" FOREIGN KEY ("B") REFERENCES "Quiz"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_EmployeeSubjectRecordToTopic" ADD CONSTRAINT "_EmployeeSubjectRecordToTopic_A_fkey" FOREIGN KEY ("A") REFERENCES "EmployeeSubjectRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_EmployeeSubjectRecordToTopic" ADD CONSTRAINT "_EmployeeSubjectRecordToTopic_B_fkey" FOREIGN KEY ("B") REFERENCES "Topic"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_JobRoleToUser" ADD CONSTRAINT "_JobRoleToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "JobRole"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_JobRoleToUser" ADD CONSTRAINT "_JobRoleToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
