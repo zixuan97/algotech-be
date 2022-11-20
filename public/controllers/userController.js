@@ -184,23 +184,18 @@ const auth = async (req, res) => {
       (err, token) => {
         if (err) {
           log.error('ERR_AUTH_LOGIN', {
-            err: err.message,
-            req: { body: req.body, params: req.params }
+            err: err.message
           });
           return res.status(400).send('Error authenticating');
         }
-        log.out('OK_AUTH_LOGIN', {
-          req: { body: req.body, params: req.params },
-          res: JSON.stringify(token)
-        });
+        log.out('OK_AUTH_LOGIN');
         user.token = token;
         return res.json({ token });
       }
     );
   } else {
     log.error('ERR_AUTH_LOGIN', {
-      err: 'Invalid Credentials',
-      req: { body: req.body, params: req.params }
+      err: 'Invalid Credentials'
     });
     return res.status(400).send('Invalid Credentials');
   }
@@ -398,8 +393,7 @@ const verifyPassword = async (req, res) => {
     const { userEmail, currentPassword, newPassword } = req.body;
     if (currentPassword === newPassword) {
       log.error('ERR_USER_VERIFY-PW', {
-        err: 'Old and new password cannot be the same',
-        req: { body: req.body, params: req.params }
+        err: 'Old and new password cannot be the same'
       });
       res
         .status(400)
@@ -414,30 +408,26 @@ const verifyPassword = async (req, res) => {
           newPassword
         });
         if (is_equal) {
-          log.out('OK_USER_SVERIFY-PW', {
-            req: { body: req.body, params: req.params },
+          log.out('OK_USER_VERIFY-PW', {
             res: { message: 'Password verified' }
           });
           return res.status(200).json({ message: 'Password verified' });
         } else {
           log.error('ERR_USER_VERIFY-PW', {
-            err: 'Passwords do not match',
-            req: { body: req.body, params: req.params }
+            err: 'Passwords do not match'
           });
           return res.status(400).json({ message: 'Passwords do not match' });
         }
       } else {
         log.error('ERR_USER_VERIFY-PW', {
-          err: 'User does not exist',
-          req: { body: req.body, params: req.params }
+          err: 'User does not exist'
         });
         return res.status(400).json({ message: 'User does not exist' });
       }
     }
   } catch (error) {
     log.error('ERR_USER_VERIFY-PW', {
-      err: error.message,
-      req: { body: req.body, params: req.params }
+      err: error.message
     });
     return res.status(400).send('Error verifying password');
   }

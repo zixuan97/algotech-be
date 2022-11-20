@@ -106,62 +106,62 @@ const createQuizQuestion = async (req, res) => {
 //   }
 // };
 
-// const updateQuizQuestion = async (req, res) => {
-//   const { id, quizOrder, question, type, options, correctAnswer, quizId } =
-//     req.body;
-//   const currentOrders = [];
-//   const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
-//     quizId
-//   });
-//   for (let q of quizQuestions) {
-//     currentOrders.push(q.quizOrder);
-//   }
-//   const currQuizQuestionByOrder =
-//     await quizQuestionModel.getQuizQuestionByOrderAndQuizId({
-//       quizId,
-//       quizOrder
-//     });
-//   if (currentOrders.includes(quizOrder) && currQuizQuestionByOrder.id !== id) {
-//     return res.status(400).send('Quiz order already exists!');
-//   } else {
-//     const { subjectId } = await quizModel.getQuizById({ id: quizId });
-//     const currUserId = req.user.userId;
-//     await subjectModel.updateSubject({
-//       id: subjectId,
-//       lastUpdatedById: currUserId
-//     });
-//     const { data, error } = await common.awaitWrap(
-//       quizQuestionModel.updateQuizQuestion({
-//         id,
-//         quizOrder,
-//         question,
-//         type,
-//         options,
-//         correctAnswer,
-//         quizId
-//       })
-//     );
-//     data.quiz.subject.createdBy.password = '';
-//     data.quiz.subject.lastUpdatedBy.password = '';
-//     for (let u of data.quiz.subject.usersAssigned) {
-//       u.user.password = '';
-//     }
-//     if (error) {
-//       log.error('ERR_QUIZQUESTION_UPDATE-QUIZQUESTION', {
-//         err: error.message,
-//         req: { body: req.body, params: req.params }
-//       });
-//       const e = Error.http(error);
-//       return res.status(e.code).json(e.message);
-//     } else {
-//       log.out('OK_QUIZQUESTION_UPDATE-QUIZQUESTION', {
-//         req: { body: req.body, params: req.params },
-//         res: JSON.stringify(data)
-//       });
-//       return res.json(data);
-//     }
-//   }
-// };
+const updateQuizQuestion = async (req, res) => {
+  const { id, quizOrder, question, type, options, correctAnswer, quizId } =
+    req.body;
+  const currentOrders = [];
+  const quizQuestions = await quizQuestionModel.getAllQuizQuestionsByQuizId({
+    quizId
+  });
+  for (let q of quizQuestions) {
+    currentOrders.push(q.quizOrder);
+  }
+  const currQuizQuestionByOrder =
+    await quizQuestionModel.getQuizQuestionByOrderAndQuizId({
+      quizId,
+      quizOrder
+    });
+  if (currentOrders.includes(quizOrder) && currQuizQuestionByOrder.id !== id) {
+    return res.status(400).send('Quiz order already exists!');
+  } else {
+    const { subjectId } = await quizModel.getQuizById({ id: quizId });
+    const currUserId = req.user.userId;
+    await subjectModel.updateSubject({
+      id: subjectId,
+      lastUpdatedById: currUserId
+    });
+    const { data, error } = await common.awaitWrap(
+      quizQuestionModel.updateQuizQuestion({
+        id,
+        quizOrder,
+        question,
+        type,
+        options,
+        correctAnswer,
+        quizId
+      })
+    );
+    data.quiz.subject.createdBy.password = '';
+    data.quiz.subject.lastUpdatedBy.password = '';
+    for (let u of data.quiz.subject.usersAssigned) {
+      u.user.password = '';
+    }
+    if (error) {
+      log.error('ERR_QUIZQUESTION_UPDATE-QUIZQUESTION', {
+        err: error.message,
+        req: { body: req.body, params: req.params }
+      });
+      const e = Error.http(error);
+      return res.status(e.code).json(e.message);
+    } else {
+      log.out('OK_QUIZQUESTION_UPDATE-QUIZQUESTION', {
+        req: { body: req.body, params: req.params },
+        res: JSON.stringify(data)
+      });
+      return res.json(data);
+    }
+  }
+};
 
 const deleteQuizQuestion = async (req, res) => {
   const { id } = req.params;
@@ -317,7 +317,7 @@ const updateEmployeeQuizQuestionRecord = async (req, res) => {
 exports.createQuizQuestion = createQuizQuestion;
 // exports.getAllQuizQuestionsByQuizId = getAllQuizQuestionsByQuizId;
 // exports.getQuizQuestion = getQuizQuestion;
-// exports.updateQuizQuestion = updateQuizQuestion;
+exports.updateQuizQuestion = updateQuizQuestion;
 exports.deleteQuizQuestion = deleteQuizQuestion;
 exports.updateOrderBasedOnQuestionsArray = updateOrderBasedOnQuestionsArray;
 exports.createEmployeeQuizQuestionRecord = createEmployeeQuizQuestionRecord;

@@ -19,6 +19,32 @@ const verifyToken = (req, res, next) => {
   return next();
 };
 
+const verifyStaff = (req, res, next) => {
+  const corsWhitelist = [
+    'http://localhost:3000',
+    'https://algotech-fe.vercel.app',
+    'https://algotech-fe-prod.vercel.app',
+    'https://algotech-hrm.vercel.app',
+    'https://algotech-hrm-prod.vercel.app',
+    'jest'
+  ];
+
+  if (
+    corsWhitelist.includes(req.headers.origin) |
+    (req.hostname == 'localhost')
+    // | (req.hostname == 'algotech-be.vercel.app'))
+  ) {
+    if ((req.user.role === 'B2B') | (req.user.role === 'CUSTOMER')) {
+      log.error('ERR_AUTH_ROLE-VERIFICATION', 'user is not allowed');
+      return res.status(401).send('Invalid ROLE');
+    } else {
+      return next();
+    }
+  } else {
+    return res.status(401).send({ message: 'Unauthorized' });
+  }
+};
+
 const verifyAdmin = (req, res, next) => {
   if (req.user.role != 'ADMIN') {
     log.error('ERR_AUTH_ROLE-VERIFICATION', 'user is not allowed');

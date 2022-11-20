@@ -45,6 +45,14 @@ const updateNewsletter = async (req) => {
 
 const deleteNewsletter = async (req) => {
   const { id } = req;
+  await prisma.newsletter.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      scheduledNewsletter: { deleteMany: {} }
+    }
+  });
   return await prisma.newsletter.delete({
     where: {
       id: Number(id)
