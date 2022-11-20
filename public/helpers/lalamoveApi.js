@@ -1,6 +1,7 @@
 const SDKClient = require('@lalamove/lalamove-js');
 const { prisma } = require('../models/index');
 const deliveryModel = require('../models/deliveryModel');
+const common = require('@kelchy/common');
 
 const sdkClient = new SDKClient.ClientModule(
   new SDKClient.Config(
@@ -129,21 +130,25 @@ const fetchLatestStatusFromLalamoveAndAddToStatus = async (req) => {
   //   deliveryStatus[0] === undefined ||
   //   deliveryStatus[0].status === 'ASSIGNING_DRIVER'
   // ) {
-  await prisma.DeliveryStatus.create({
-    data: {
-      status: latestStatus,
-      statusOwner: '',
-      date: new Date(Date.now()).toLocaleDateString(),
-      timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
-        timeZone: 'Asia/Singapore'
-      }),
-      deliveryOrder: {
-        connect: {
-          id: deliveryOrder.id
+  try {
+    await prisma.DeliveryStatus.create({
+      data: {
+        status: latestStatus,
+        statusOwner: '',
+        date: new Date(Date.now()).toLocaleDateString(),
+        timestamp: new Date(Date.now()).toLocaleTimeString('en-SG', {
+          timeZone: 'Asia/Singapore'
+        }),
+        deliveryOrder: {
+          connect: {
+            id: deliveryOrder.id
+          }
         }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.log('Crashed...');
+  }
   //}
 };
 
