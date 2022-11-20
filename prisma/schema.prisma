@@ -8,29 +8,29 @@ datasource db {
 }
 
 model User {
-  id                  Int                     @id @default(autoincrement())
+  id                  Int                          @id @default(autoincrement())
   firstName           String
   lastName            String
-  email               String                  @unique
+  email               String                       @unique
   password            String
-  role                UserRole                @default(ADMIN)
-  status              UserStatus              @default(ACTIVE)
-  isVerified          Boolean                 @default(false)
+  role                UserRole                     @default(ADMIN)
+  status              UserStatus                   @default(ACTIVE)
+  isVerified          Boolean                      @default(false)
   company             String?
   contactNo           String?
   tier                String?
   managerId           Int?
-  manager             User?                   @relation("managedBy", fields: [managerId], references: [id])
+  manager             User?                        @relation("managedBy", fields: [managerId], references: [id])
   deliveryOrders      DeliveryOrder[]
   leaveRecord         EmployeeLeaveRecord?
-  assignedSubjects    EmployeeSubjectRecord[]
-  leaveApplications   LeaveApplication[]      @relation("appliedBy")
-  vettedLeaves        LeaveApplication[]      @relation("vettedBy")
-  createdSubjects     Subject[]               @relation("createdBy")
-  lastUpdatedSubjects Subject[]               @relation("lastUpdatedBy")
-  subordinates        User[]                  @relation("managedBy")
-  jobRoles            JobRole[]
   questionRecords     EmployeeQuizQuestionRecord[]
+  assignedSubjects    EmployeeSubjectRecord[]
+  leaveApplications   LeaveApplication[]           @relation("appliedBy")
+  vettedLeaves        LeaveApplication[]           @relation("vettedBy")
+  createdSubjects     Subject[]                    @relation("createdBy")
+  lastUpdatedSubjects Subject[]                    @relation("lastUpdatedBy")
+  subordinates        User[]                       @relation("managedBy")
+  jobRoles            JobRole[]
 }
 
 model Category {
@@ -379,10 +379,10 @@ model EmployeeSubjectRecord {
   subjectId        Int
   userId           Int
   completionRate   Float
-  lastAttemptedAt  DateTime  @default(now())
-  id               Int       @id @default(autoincrement())
-  subject          Subject   @relation(fields: [subjectId], references: [id])
-  user             User      @relation(fields: [userId], references: [id])
+  id               Int      @id @default(autoincrement())
+  lastAttemptedAt  DateTime @default(now())
+  subject          Subject  @relation(fields: [subjectId], references: [id])
+  user             User     @relation(fields: [userId], references: [id])
   completedQuizzes Quiz[]
   completedTopics  Topic[]
 
@@ -422,28 +422,28 @@ model Quiz {
 }
 
 model QuizQuestion {
-  id                Int        @id @default(autoincrement())
-  quizOrder         Int
-  question          String
-  type              AnswerType
-  options           String[]
-  correctAnswer     Int
-  quizId            Int
-  quiz              Quiz       @relation(fields: [quizId], references: [id])
-  questionRecords   EmployeeQuizQuestionRecord[]
+  id              Int                          @id @default(autoincrement())
+  quizOrder       Int
+  question        String
+  type            AnswerType
+  options         String[]
+  quizId          Int
+  correctAnswer   Int
+  quiz            Quiz                         @relation(fields: [quizId], references: [id])
+  questionRecords EmployeeQuizQuestionRecord[]
 }
 
 model EmployeeQuizQuestionRecord {
-  id            Int            @id @default(autoincrement())
-  questionId    Int
-  question      QuizQuestion   @relation(fields: [questionId], references: [id])
-  userId        Int
-  user          User           @relation(fields: [userId], references: [id])
-  quizId        Int
-  userAnswer    Int
-  isCorrect     Boolean
-  attemptedAt   DateTime
-  
+  id          Int          @id @default(autoincrement())
+  questionId  Int
+  userId      Int
+  quizId      Int
+  userAnswer  Int
+  isCorrect   Boolean
+  attemptedAt DateTime
+  question    QuizQuestion @relation(fields: [questionId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+
   @@unique([questionId, userId])
 }
 
@@ -571,7 +571,6 @@ enum AnswerType {
 
 enum ContentStatus {
   DRAFT
-  PENDING
   FINISHED
 }
 
