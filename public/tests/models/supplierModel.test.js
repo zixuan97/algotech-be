@@ -95,7 +95,7 @@ test('find supplier by email', async () => {
     return supplier;
   });
   await expect(
-    supplierModel.findSupplierByEmail({ email: 'exleolee@gmail.com' })
+    supplierModel.findSupplierByEmail({ email: 'zac@thekettlegourmet.com' })
   ).resolves.toEqual(supplier);
 });
 

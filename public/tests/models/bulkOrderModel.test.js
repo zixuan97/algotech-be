@@ -16,7 +16,7 @@ const bulkOrder = {
   transactionAmount: 20,
   paymentMode: 'PAYNOW',
   payeeName: 'Lee Leonard',
-  payeeEmail: 'exleolee@gmail.com',
+  payeeEmail: 'zac@thekettlegourmet.com',
   payeeRemarks: 'hi',
   bulkOrderStatus: 'PAYMENT_PENDING',
   payeeContactNo: '91114685',
@@ -98,7 +98,7 @@ test('get all bulk orders with time filter', async () => {
 test('get bulk orders by month for customer', async () => {
   await expect(
     bulkOrderModel.getBulkOrdersByMonthForCustomer({
-      payeeEmail: 'exleolee@gmail.com'
+      payeeEmail: 'zac@thekettlegourmet.com'
     })
   ).resolves.toEqual([]);
 });
@@ -160,7 +160,9 @@ test('find bulk order by id', async () => {
 
 test('find bulk order by customer email', async () => {
   await expect(
-    bulkOrderModel.findBulkOrderByEmail({ payeeEmail: 'exleolee@gmail.com' })
+    bulkOrderModel.findBulkOrderByEmail({
+      payeeEmail: 'zac@thekettlegourmet.com'
+    })
   ).resolves.toEqual([]);
 });
 
