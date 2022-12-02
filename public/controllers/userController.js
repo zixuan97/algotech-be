@@ -34,6 +34,7 @@ const createUser = async (req, res) => {
         content
       });
     } catch (error) {
+      console.log(error);
       return res.status(400).send('Error sending email');
     }
     const { data, error } = await common.awaitWrap(

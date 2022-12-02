@@ -16,7 +16,7 @@ const discountCode = {
   amount: 10,
   startDate: '2022-09-10T00:00:00.000Z',
   endDate: '2022-12-10T00:00:00.000Z',
-  customerEmails: ['exleolee@gmail.com'],
+  customerEmails: ['zac@thekettlegourmet.com'],
   type: 'FLAT_AMOUNT',
   minOrderAmount: 20
 };

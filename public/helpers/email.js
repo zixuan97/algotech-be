@@ -5,7 +5,7 @@ const fs = require('fs');
 const SES_CONFIG = {
   accessKeyId: process.env.ACCESS_KEY_ID,
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
-  region: 'us-east-1'
+  region: 'ap-southeast-1'
 };
 
 const AWS_SES = new AWS.SES(SES_CONFIG);
@@ -16,7 +16,7 @@ const sendEmailWithAttachment = async (req) => {
     contentType: 'multipart/mixed',
     body: []
   });
-  mailContent.header('From', 'Auto-generated-email <exleolee@gmail.com>');
+  mailContent.header('From', 'Auto-generated-email <zac@thekettlegourmet.com>');
   mailContent.header('To', recipientEmail);
   mailContent.header('Subject', subject);
   var plainEntity = mimemessage.factory({
@@ -48,7 +48,7 @@ const sendEmailWithAttachment = async (req) => {
 const sendEmail = (req) => {
   const { recipientEmail, subject, content } = req;
   const params = {
-    Source: 'Auto-generated-email <exleolee@gmail.com>',
+    Source: 'Auto-generated-email <zac@thekettlegourmet.com>',
     Destination: {
       ToAddresses: [recipientEmail]
     },
