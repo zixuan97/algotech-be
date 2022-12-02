@@ -1,7 +1,7 @@
-// const stripe = require('stripe')(process.env.STRIPE_API_KEY);
-const stripe = require('stripe')(
-  'sk_test_51LrBGjKgwBBPqmgaFEzCgBqD8OPqvLAeMq3UJsFmJrPQS3T2KJvPnBx007jiANN2Yn1sc37eqJ6OQUYb6XefpogS004C11Kb1r'
-);
+const stripe = require('stripe')(process.env.STRIPE_API_KEY);
+// const stripe = require('stripe')(
+//   'sk_test_51LrBGjKgwBBPqmgaFEzCgBqD8OPqvLAeMq3UJsFmJrPQS3T2KJvPnBx007jiANN2Yn1sc37eqJ6OQUYb6XefpogS004C11Kb1r'
+// );
 const payByStripeCreditCard = async (req) => {
   const domain =
     process.env.NODE_ENV === 'production'

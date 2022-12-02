@@ -5,10 +5,10 @@ const discountCodeModel = require('../models/discountCodeModel');
 const { format } = require('date-fns');
 const Error = require('../helpers/error');
 const { log } = require('../helpers/logger');
-// const stripe = require('stripe')(process.env.STRIPE_API_KEY); //live
-const stripe = require('stripe')(
-  'sk_test_51LrBGjKgwBBPqmgaFEzCgBqD8OPqvLAeMq3UJsFmJrPQS3T2KJvPnBx007jiANN2Yn1sc37eqJ6OQUYb6XefpogS004C11Kb1r'
-);
+const stripe = require('stripe')(process.env.STRIPE_API_KEY); //live
+// const stripe = require('stripe')(
+//   'sk_test_51LrBGjKgwBBPqmgaFEzCgBqD8OPqvLAeMq3UJsFmJrPQS3T2KJvPnBx007jiANN2Yn1sc37eqJ6OQUYb6XefpogS004C11Kb1r'
+// );
 const emailHelper = require('../helpers/email');
 const { generateBulkOrderPDF } = require('../helpers/pdf');
 
