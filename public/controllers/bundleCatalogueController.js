@@ -7,14 +7,32 @@ const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
 const createBundleCatalogue = async (req, res) => {
   const { price, bundle, image, description } = req.body;
 
-  if (image) {
+  // if (image) {
+  //   try {
+  //     await uploadS3({
+  //       key: `bundleCatalogueImages/${bundle.name}-img`,
+  //       payload: image
+  //     });
+  //   } catch (uploadS3Error) {
+  //     log.error('ERR_BUNDLECAT_UPLOAD-S3', uploadS3Error.message);
+  //   }
+  // }
+
+  const file = req.files;
+  if (file) {
+    const fileJSON = JSON.parse(JSON.stringify(file));
+    const payload = Buffer.from(Object.values(fileJSON)[0].data.data, 'utf-8');
     try {
       await uploadS3({
-        key: `bundleCatalogueImages/${bundle.name}-img`,
-        payload: image
+        key: `BUNDLECatalogueImages/${bundle.name}-img`,
+        payload: payload
       });
+      return res.json({ message: 'Bundle catalogue image uploaded' });
     } catch (uploadS3Error) {
-      log.error('ERR_BUNDLECAT_UPLOAD-S3', uploadS3Error.message);
+      log.error('ERR_BUNDLECAT_UPLOAD-S3', {
+        err: uploadS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
     }
   }
   log.out('OK_BUNDLE_UPLOAD-S3');
@@ -41,6 +59,29 @@ const createBundleCatalogue = async (req, res) => {
   }
 };
 
+const uploadImg = async (req, res) => {
+  const file = req.files;
+
+  if (file) {
+    const fileJSON = JSON.parse(JSON.stringify(file));
+    const fileName = Object.keys(fileJSON)[0];
+    const payload = Buffer.from(Object.values(fileJSON)[0].data.data, 'utf-8');
+    try {
+      await uploadS3({
+        key: `bundleCatalogueImages/${fileName}-img`,
+        payload: payload
+      });
+      return res.json({ message: 'bundle catalogue image uploaded' });
+    } catch (uploadS3Error) {
+      log.error('ERR_PRODUCTCAT_UPLOAD-S3', {
+        err: uploadS3Error.message,
+        req: { body: req.body, params: req.params }
+      });
+    }
+  } else {
+    return res.json({ message: 'No image uploaded' });
+  }
+};
 const getAllBundleCatalogue = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     bundleCatalogueModel.getAllBundleCatalogue({})
@@ -55,16 +96,18 @@ const getAllBundleCatalogue = async (req, res) => {
   } else {
     await Promise.all(
       data.map(async (bundleCatalogue) => {
-        const { data: productImg, error: getS3Error } = await common.awaitWrap(
-          getS3({
-            key: `bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`
-          })
-        );
+        // const { data: productImg, error: getS3Error } = await common.awaitWrap(
+        //   getS3({
+        //     key: `bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`
+        //   })
+        // );
 
-        if (getS3Error) {
-          log.error('ERR_BUNDLECAT_GET-S3', getS3Error.message);
-        }
-        bundleCatalogue.image = productImg;
+        // if (getS3Error) {
+        //   log.error('ERR_BUNDLECAT_GET-S3', getS3Error.message);
+        // }
+
+        // bundleCatalogue.image = productImg;
+        bundleCatalogue.image = `https://thekettlegourmet.s3.ap-southeast-1.amazonaws.com/bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`;
         log.out('OK_BUNDLECAT_GET-ALL-BUNDLECAT', {
           req: { body: req.body, params: req.params },
           res: JSON.stringify(data)
@@ -81,16 +124,17 @@ const getBundleCatalogue = async (req, res) => {
     const bundleCatalogue = await bundleCatalogueModel.findBundleCatalogueById({
       id
     });
-    const { data: productImg, error: getS3Error } = await common.awaitWrap(
-      getS3({
-        key: `bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`
-      })
-    );
+    // const { data: productImg, error: getS3Error } = await common.awaitWrap(
+    //   getS3({
+    //     key: `bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`
+    //   })
+    // );
 
-    if (getS3Error) {
-      log.error('ERR_BUNDLECAT_GET-S3', getS3Error.message);
-    }
-    bundleCatalogue.image = productImg;
+    // if (getS3Error) {
+    //   log.error('ERR_BUNDLECAT_GET-S3', getS3Error.message);
+    // }
+    // bundleCatalogue.image = productImg;
+    bundleCatalogue.image = `https://thekettlegourmet.s3.ap-southeast-1.amazonaws.com/bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`;
     log.out('OK_BUNDLECAT_GET-BUNDLECAT-BY-ID', {
       req: { body: req.body, params: req.params },
       res: JSON.stringify(bundleCatalogue)
@@ -108,20 +152,36 @@ const getBundleCatalogue = async (req, res) => {
 const updateBundleCatalogue = async (req, res) => {
   const { id, price, image, bundle, description } = req.body;
 
-  if (image) {
-    const { error: uploadS3Error } = await common.awaitWrap(
-      uploadS3({
+  // if (image) {
+  //   const { error: uploadS3Error } = await common.awaitWrap(
+  //     uploadS3({
+  //       key: `bundleCatalogueImages/${bundle.name}-img`,
+  //       payload: image
+  //     })
+  //   );
+  //   if (uploadS3Error) {
+  //     log.error('ERR_BUNDLECAT_UPLOAD-S3', {
+  //       err: uploadS3Error.message,
+  //       req: { body: req.body, params: req.params }
+  //     });
+  //   }
+  //   log.out('OK_BUNDLECAT_UPLOAD-S3');
+  const file = req.files;
+  if (file) {
+    const fileJSON = JSON.parse(JSON.stringify(file));
+    const payload = Buffer.from(Object.values(fileJSON)[0].data.data, 'utf-8');
+    try {
+      await uploadS3({
         key: `bundleCatalogueImages/${bundle.name}-img`,
-        payload: image
-      })
-    );
-    if (uploadS3Error) {
+        payload: payload
+      });
+      return res.json({ message: 'Bundle catalogue image uploaded' });
+    } catch (uploadS3Error) {
       log.error('ERR_BUNDLECAT_UPLOAD-S3', {
         err: uploadS3Error.message,
         req: { body: req.body, params: req.params }
       });
     }
-    log.out('OK_BUNDLECAT_UPLOAD-S3');
   } else {
     const { error: deleteS3Error } = await common.awaitWrap(
       deleteS3({
@@ -197,3 +257,4 @@ exports.getBundleCatalogue = getBundleCatalogue;
 exports.updateBundleCatalogue = updateBundleCatalogue;
 exports.deleteBundleCatalogue = deleteBundleCatalogue;
 exports.getAllBundleCatalogue = getAllBundleCatalogue;
+exports.uploadImg = uploadImg;

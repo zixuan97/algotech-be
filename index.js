@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const { verifyToken, whiteListInternal } = require('./public/middleware/auth');
+var fileupload = require('express-fileupload');
 
 const corsWhitelist = [
   'http://localhost:3000',
@@ -27,7 +28,7 @@ app.use(
     credentials: true
   })
 );
-
+app.use(fileupload());
 app.use(cookieParser());
 app.use(express.static('public'));
 
