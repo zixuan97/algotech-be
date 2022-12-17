@@ -2,7 +2,6 @@ const router = require('express').Router();
 const bundleCatalogueController = require('../controllers/bundleCatalogueController');
 
 router.post('/', bundleCatalogueController.createBundleCatalogue);
-router.post('/img', bundleCatalogueController.uploadImg);
 router.get('/all', bundleCatalogueController.getAllBundleCatalogue);
 router.get('/id/:id', bundleCatalogueController.getBundleCatalogue);
 router.put('/', bundleCatalogueController.updateBundleCatalogue);

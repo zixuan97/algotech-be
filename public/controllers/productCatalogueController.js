@@ -61,30 +61,6 @@ const createProductCatalogue = async (req, res) => {
   }
 };
 
-const uploadImg = async (req, res) => {
-  const { price, product, description } = req.body;
-  const file = req.files;
-  if (file) {
-    const fileJSON = JSON.parse(JSON.stringify(file));
-    const fileName = Object.keys(fileJSON)[0];
-    const payload = Buffer.from(Object.values(fileJSON)[0].data.data, 'utf-8');
-    try {
-      await uploadS3({
-        key: `productCatalogueImages/${fileName}-img`,
-        payload: payload
-      });
-      return res.json({ message: 'Product catalogue image uploaded' });
-    } catch (uploadS3Error) {
-      log.error('ERR_PRODUCTCAT_UPLOAD-S3', {
-        err: uploadS3Error.message,
-        req: { body: req.body, params: req.params }
-      });
-    }
-  } else {
-    return res.json({ message: 'No image uploaded' });
-  }
-};
-
 const getAllProductCatalogue = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     productCatalogueModel.getAllProdCatalogue({})
@@ -110,7 +86,8 @@ const getAllProductCatalogue = async (req, res) => {
         //   log.error('ERR_PRODUCT_GET-S3', getS3Error.message);
         // }
         // prodCatalogue.image = productImg;
-        prodCatalogue.image = `https://thekettlegourmet.s3.ap-southeast-1.amazonaws.com/productCatalogueImages/${prodCatalogue.product.sku}-img`;
+        var replaced = prodCatalogue.product.sku.replace(/ /g, '+');
+        prodCatalogue.image = `https://thekettlegourmet.s3.ap-southeast-1.amazonaws.com/productCatalogueImages/${replaced}-img`;
       })
     );
 
@@ -260,4 +237,3 @@ exports.getAllProductCatalogue = getAllProductCatalogue;
 exports.updateProductCatalogue = updateProductCatalogue;
 exports.deleteProductCatalogue = deleteProductCatalogue;
 exports.getProductCatalogue = getProductCatalogue;
-exports.uploadImg = uploadImg;
