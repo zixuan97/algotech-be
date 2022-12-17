@@ -5,8 +5,9 @@ const { log } = require('../helpers/logger');
 const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
 
 const createProductCatalogue = async (req, res) => {
-  const { price, product, description } = req.body;
-
+  let { price, product, description } = req.body;
+  price = JSON.parse(price);
+  product = JSON.parse(product);
   // if (image) {
   //   try {
   //     await uploadS3({
@@ -29,7 +30,6 @@ const createProductCatalogue = async (req, res) => {
         key: `productCatalogueImages/${product.sku}-img`,
         payload: payload
       });
-      return res.json({ message: 'Product catalogue image uploaded' });
     } catch (uploadS3Error) {
       log.error('ERR_PRODUCTCAT_UPLOAD-S3', {
         err: uploadS3Error.message,
@@ -151,7 +151,10 @@ const getProductCatalogue = async (req, res) => {
 };
 
 const updateProductCatalogue = async (req, res) => {
-  const { id, price, image, product, description } = req.body;
+  let { id, price, image, product, description } = req.body;
+  id = JSON.parse(id);
+  price = JSON.parse(price);
+  product = JSON.parse(product);
   // if (image) {
   //   const { error: uploadS3Error } = await common.awaitWrap(
   //     uploadS3({
@@ -176,7 +179,6 @@ const updateProductCatalogue = async (req, res) => {
         key: `productCatalogueImages/${product.sku}-img`,
         payload: payload
       });
-      return res.json({ message: 'Product catalogue image uploaded' });
     } catch (uploadS3Error) {
       log.error('ERR_PRODUCTCAT_UPLOAD-S3', {
         err: uploadS3Error.message,

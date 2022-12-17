@@ -6,7 +6,8 @@ const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
 
 const createBundleCatalogue = async (req, res) => {
   const { price, bundle, image, description } = req.body;
-
+  price = JSON.parse(price);
+  bundle = JSON.parse(bundle);
   // if (image) {
   //   try {
   //     await uploadS3({
@@ -151,7 +152,9 @@ const getBundleCatalogue = async (req, res) => {
 
 const updateBundleCatalogue = async (req, res) => {
   const { id, price, image, bundle, description } = req.body;
-
+  id = JSON.parse(id);
+  price = JSON.parse(price);
+  bundle = JSON.parse(bundle);
   // if (image) {
   //   const { error: uploadS3Error } = await common.awaitWrap(
   //     uploadS3({
@@ -175,7 +178,6 @@ const updateBundleCatalogue = async (req, res) => {
         key: `bundleCatalogueImages/${bundle.name}-img`,
         payload: payload
       });
-      return res.json({ message: 'Bundle catalogue image uploaded' });
     } catch (uploadS3Error) {
       log.error('ERR_BUNDLECAT_UPLOAD-S3', {
         err: uploadS3Error.message,
