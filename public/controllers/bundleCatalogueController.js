@@ -5,7 +5,7 @@ const { log } = require('../helpers/logger');
 const { uploadS3, getS3, deleteS3 } = require('../helpers/s3');
 
 const createBundleCatalogue = async (req, res) => {
-  const { price, bundle, image, description } = req.body;
+  let { price, bundle, image, description } = req.body;
   price = JSON.parse(price);
   bundle = JSON.parse(bundle);
   // if (image) {
@@ -25,10 +25,9 @@ const createBundleCatalogue = async (req, res) => {
     const payload = Buffer.from(Object.values(fileJSON)[0].data.data, 'utf-8');
     try {
       await uploadS3({
-        key: `BUNDLECatalogueImages/${bundle.name}-img`,
+        key: `bundleCatalogueImages/${bundle.name}-img`,
         payload: payload
       });
-      return res.json({ message: 'Bundle catalogue image uploaded' });
     } catch (uploadS3Error) {
       log.error('ERR_BUNDLECAT_UPLOAD-S3', {
         err: uploadS3Error.message,
@@ -60,29 +59,6 @@ const createBundleCatalogue = async (req, res) => {
   }
 };
 
-const uploadImg = async (req, res) => {
-  const file = req.files;
-
-  if (file) {
-    const fileJSON = JSON.parse(JSON.stringify(file));
-    const fileName = Object.keys(fileJSON)[0];
-    const payload = Buffer.from(Object.values(fileJSON)[0].data.data, 'utf-8');
-    try {
-      await uploadS3({
-        key: `bundleCatalogueImages/${fileName}-img`,
-        payload: payload
-      });
-      return res.json({ message: 'bundle catalogue image uploaded' });
-    } catch (uploadS3Error) {
-      log.error('ERR_PRODUCTCAT_UPLOAD-S3', {
-        err: uploadS3Error.message,
-        req: { body: req.body, params: req.params }
-      });
-    }
-  } else {
-    return res.json({ message: 'No image uploaded' });
-  }
-};
 const getAllBundleCatalogue = async (req, res) => {
   const { data, error } = await common.awaitWrap(
     bundleCatalogueModel.getAllBundleCatalogue({})
@@ -108,7 +84,8 @@ const getAllBundleCatalogue = async (req, res) => {
         // }
 
         // bundleCatalogue.image = productImg;
-        bundleCatalogue.image = `https://thekettlegourmet.s3.ap-southeast-1.amazonaws.com/bundleCatalogueImages/${bundleCatalogue.bundle.name}-img`;
+        var replaced = bundleCatalogue.bundle.name.replace(/ /g, '+');
+        bundleCatalogue.image = `https://thekettlegourmet.s3.ap-southeast-1.amazonaws.com/bundleCatalogueImages/${replaced}-img`;
         log.out('OK_BUNDLECAT_GET-ALL-BUNDLECAT', {
           req: { body: req.body, params: req.params },
           res: JSON.stringify(data)
@@ -151,7 +128,7 @@ const getBundleCatalogue = async (req, res) => {
 };
 
 const updateBundleCatalogue = async (req, res) => {
-  const { id, price, image, bundle, description } = req.body;
+  let { id, price, image, bundle, description } = req.body;
   id = JSON.parse(id);
   price = JSON.parse(price);
   bundle = JSON.parse(bundle);
@@ -259,4 +236,3 @@ exports.getBundleCatalogue = getBundleCatalogue;
 exports.updateBundleCatalogue = updateBundleCatalogue;
 exports.deleteBundleCatalogue = deleteBundleCatalogue;
 exports.getAllBundleCatalogue = getAllBundleCatalogue;
-exports.uploadImg = uploadImg;
